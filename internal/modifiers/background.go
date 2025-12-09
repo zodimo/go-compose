@@ -11,12 +11,12 @@ import (
 	"gioui.org/op/paint"
 )
 
-type Background struct {
+type background struct {
 	color color.Color
 	shape graphics.Shape
 }
 
-func CompareBackground(a, b Background) bool {
+func CompareBackground(a, b background) bool {
 	return a.color == b.color && a.shape == b.shape
 }
 
@@ -26,14 +26,14 @@ var _ ChainNode = (*BackgroundNode)(nil)
 
 type BackgroundNode struct {
 	ChainNode
-	background Background
+	background background
 }
 
 var _ Element = (*backgroundElement)(nil)
 
 // Hold the behavior
 type backgroundElement struct {
-	background Background
+	background background
 }
 
 // Create creates a new Chain Node instance

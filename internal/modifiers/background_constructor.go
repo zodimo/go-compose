@@ -18,7 +18,7 @@ func DefaultBackgroundOptions() BackgroundOptions {
 
 type BackgroundOption func(options *BackgroundOptions)
 
-func BackgroundColor(color color.Color, options ...BackgroundOption) Modifier {
+func Background(color color.Color, options ...BackgroundOption) Modifier {
 
 	opt := DefaultBackgroundOptions()
 	for _, option := range options {
@@ -27,7 +27,7 @@ func BackgroundColor(color color.Color, options ...BackgroundOption) Modifier {
 	return modifier.NewInspectableModifier(
 		modifier.NewModifier(
 			&backgroundElement{
-				background: Background{
+				background: background{
 					color: color,
 					shape: opt.Shape,
 				},
