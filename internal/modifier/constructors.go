@@ -37,3 +37,9 @@ func NewInspectableModifier(m Modifier, inspectorInfo *InspectorInfo) Inspectabl
 		inspectorInfo: inspectorInfo,
 	}
 }
+
+func NewModifier(element Element) Modifier {
+	return &modifier{
+		element: element,
+	}
+}
