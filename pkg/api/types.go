@@ -2,6 +2,7 @@ package api
 
 import (
 	node "go-compose-dev/internal/Node"
+	"go-compose-dev/internal/layoutnode"
 	"go-compose-dev/internal/modifier"
 	"go-compose-dev/internal/state"
 	idApi "go-compose-dev/pkg/compose-identifier/api"
@@ -26,6 +27,8 @@ type Composer interface {
 
 	// -- id management
 	GenerateID() Identifier
+
+	layoutnode.TreeBuilderComposer
 
 	state.StatefulComposer
 }

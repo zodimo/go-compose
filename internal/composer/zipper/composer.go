@@ -30,6 +30,5 @@ type Composable func(Composer) Composer
 
 type Composer interface {
 	api.Composer
-	TreeBuilderComposer
 	WithComposable(composable Composable) Composer
 }

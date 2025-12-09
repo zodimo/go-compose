@@ -26,11 +26,11 @@ func (c *composer) StartBlock(key string) TreeBuilderComposer {
 
 	newNode := layoutnode.NewLayoutNode(c.GenerateID(), key, EmptyMemo)
 
-	// Special case: first group replaces EmptyNode, does not parent it
-	if c.focus.IsEmpty() && len(c.path) == 0 {
+	if c.focus == nil {
 		c.focus = newNode
 		return c
 	}
+
 	c.path = append(c.path, pathItem{
 		parent: c.focus,
 		before: c.focus.LayoutNodeChildren(),

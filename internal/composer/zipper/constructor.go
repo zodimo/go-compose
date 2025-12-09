@@ -1,13 +1,19 @@
 package zipper
 
-// func NewComposer(state PersistentState) Composer {
+import (
+	idModels "go-compose-dev/pkg/compose-identifier/models"
+)
 
-// 	KeyManager.ResetKeyCounter()
+func NewComposer(state PersistentState) Composer {
 
-// 	return &composer{
-// 		focus: EmptyNode,
-// 		path:  []pathItem{},
-// 		memo:  EmptyMemo,
-// 		state: state,
-// 	}
-// }
+	idManager := idModels.GeOrCreateIdentityManager("composer")
+	idManager.ResetKeyCounter()
+
+	return &composer{
+		focus:     nil,
+		path:      []pathItem{},
+		memo:      EmptyMemo,
+		state:     state,
+		idManager: idManager,
+	}
+}
