@@ -63,9 +63,9 @@ func (pe paddingElement) Create() Node {
 				// how should the tree now be updated when attached
 				// tree nde is the layout tree
 
-				no := n.(layoutnode.NodeCoordinator)
+				no := n.(layoutnode.LayoutModifierNode)
 				// we can now work with the layoutNode
-				no.LayoutModifier(func(gtx layoutnode.LayoutContext, widget layoutnode.LayoutWidget) layoutnode.LayoutDimensions {
+				no.AttachLayoutModifier(func(gtx layoutnode.LayoutContext, widget layoutnode.LayoutWidget) layoutnode.LayoutDimensions {
 
 					// Default is LTR
 					left := unit.Dp(pe.padding.Start)

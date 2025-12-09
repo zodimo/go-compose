@@ -15,8 +15,20 @@ type LayoutNode interface {
 	IsEmpty() bool
 }
 
+type WidgetReceiver func(widget LayoutWidget)
+
+type LayoutModifierNode interface {
+	LayoutNode
+	AttachLayoutModifier(attach func(gtx LayoutContext, widget LayoutWidget) LayoutDimensions)
+}
+
+type DrawModifierNode interface {
+	LayoutNode
+	AttachDrawModifier(attach func(gtx LayoutContext, widget LayoutWidget))
+}
+
 type NodeCoordinator interface {
 	LayoutNode
-	LayoutModifier(attach func(gtx LayoutContext, widget LayoutWidget) LayoutDimensions)
-	DrawModifier(attach func(gtx LayoutContext) DrawOp)
+	AttachLayoutModifier(attach func(gtx LayoutContext, widget LayoutWidget) LayoutDimensions)
+	DrawModifier(attach func(gtx LayoutContext, widget LayoutWidget))
 }

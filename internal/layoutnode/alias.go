@@ -9,6 +9,7 @@ import (
 )
 
 type TreeNode = node.TreeNode
+type ChainNode = node.ChainNode
 
 type LayoutContext = layout.Context
 type LayoutDimensions = layout.Dimensions

@@ -49,12 +49,17 @@ func (n *layoutNode) WithSlotsAssoc(k string, v any) LayoutNode {
 	return n
 }
 
-func NewLayoutNode(id NodeID, key string, slotStore immap.ImmutableMap[any]) LayoutNode {
-	return &layoutNode{
-		id:       id,
-		key:      key,
-		children: []LayoutNode{},
-		modifier: EmptyModifier,
-		slots:    slotStore,
-	}
+var _ NodeCoordinator = (*nodeCoordinator)(nil)
+
+type nodeCoordinator struct {
+	layoutNode
+	layoutModifierNodeChain ChainNode
+	drawModifierNodeChain   ChainNode
+}
+
+func (nc *nodeCoordinator) AttachLayoutModifier(attach func(gtx LayoutContext, widget LayoutWidget) LayoutDimensions) {
+
+}
+func (nc *nodeCoordinator) DrawModifier(attach func(gtx LayoutContext, widget LayoutWidget)) {
+
 }

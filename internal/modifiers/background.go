@@ -44,15 +44,15 @@ func (be backgroundElement) Create() Node {
 			node.NewNodeID(),
 			node.NodeKindDraw,
 			node.DrawPhase,
+			//OnAttach
 			func(n TreeNode) {
 				// how should the tree now be updated when attached
 				// tree nde is the layout tree
 
-				no := n.(layoutnode.NodeCoordinator)
+				no := n.(layoutnode.DrawModifierNode)
 				// we can now work with the layoutNode
-				no.LayoutModifier(func(gtx layoutnode.LayoutContext, widget layoutnode.LayoutWidget) layoutnode.LayoutDimensions {
-
-					return layout.Background{}.Layout(gtx,
+				no.AttachDrawModifier(func(gtx layoutnode.LayoutContext, widget layoutnode.LayoutWidget) {
+					layout.Background{}.Layout(gtx,
 						func(gtx layout.Context) layout.Dimensions {
 							// shape
 							// color
