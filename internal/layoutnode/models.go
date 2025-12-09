@@ -49,11 +49,12 @@ func (n *layoutNode) WithSlotsAssoc(k string, v any) LayoutNode {
 	return n
 }
 
-func NewLayoutNode(id NodeID, key string) LayoutNode {
+func NewLayoutNode(id NodeID, key string, slotStore immap.ImmutableMap[any]) LayoutNode {
 	return &layoutNode{
 		id:       id,
 		key:      key,
 		children: []LayoutNode{},
 		modifier: EmptyModifier,
+		slots:    slotStore,
 	}
 }

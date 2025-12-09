@@ -24,7 +24,7 @@ type composer struct {
 // Tree Builder operations
 func (c *composer) StartBlock(key string) TreeBuilderComposer {
 
-	newNode := layoutnode.NewLayoutNode(c.GenerateID(), key)
+	newNode := layoutnode.NewLayoutNode(c.GenerateID(), key, EmptyMemo)
 
 	// Special case: first group replaces EmptyNode, does not parent it
 	if c.focus.IsEmpty() && len(c.path) == 0 {
