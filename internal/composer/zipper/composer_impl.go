@@ -24,7 +24,7 @@ type composer struct {
 // Tree Builder operations
 func (c *composer) StartBlock(key string) Composer {
 
-	newNode := layoutnode.NewLayoutNode(c.GenerateID(), key, EmptyMemo)
+	newNode := layoutnode.NewLayoutNode(c.GenerateID(), key, EmptyElementMemo)
 
 	if c.focus == nil {
 		c.focus = newNode
@@ -53,7 +53,7 @@ func (c *composer) Build() LayoutNode {
 	return c.focus
 }
 
-func (c *composer) EmotSlot(k string, v any) Composer {
+func (c *composer) EmotSlot(k string, v Element) Composer {
 	c.focus = c.focus.WithSlotsAssoc(k, v)
 	return c
 } // slot is a property on the layoutNode
@@ -122,4 +122,8 @@ func (c *composer) State(key string, initial func() any) MutableValue {
 
 func (c *composer) WithComposable(composable Composable) Composer {
 	return composable(c)
+}
+
+func (c *composer) SetWidgetConstructor(constructor layoutnode.LayoutNodeWidgetConstructor) {
+	c.focus.SetWidgetConstructor(constructor)
 }

@@ -11,10 +11,13 @@ import (
 )
 
 type LayoutNode = layoutnode.LayoutNode
-type Memo = state.Memo
+type Memo = state.MemoTyped[any]
+type ElementMemo = state.MemoTyped[Element]
+
 type PersistentState = state.PersistentState
 
-var EmptyMemo = state.EmptyMemo
+var EmptyMemo = state.EmptyMemo[any]()
+var EmptyElementMemo = state.EmptyMemo[Element]()
 
 type IdentityManager = *idModels.IdentityManager
 
@@ -22,6 +25,7 @@ type IdentityManager = *idModels.IdentityManager
 type Identifier = idApi.Identifier // Public API of the composer
 type NodePath = node.NodePath
 type Modifier = modifier.Modifier
+type Element = modifier.Element
 type MutableValue = state.MutableValue
 type RootNode = node.TreeNode
 

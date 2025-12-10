@@ -1,65 +1,82 @@
 package layoutnode
 
-import "go-compose-dev/internal/immap"
+import (
+	"go-compose-dev/internal/modifier"
 
-var _ LayoutNode = (*layoutNode)(nil)
-
-type layoutNode struct {
-	id       NodeID
-	key      string
-	slots    immap.ImmutableMap[any]
-	children []LayoutNode
-	modifier Modifier
-}
-
-// Node
-func (ln *layoutNode) GetID() NodeID {
-	return ln.id
-}
-
-// TreeNode
-func (ln *layoutNode) Children() []TreeNode {
-	treeNodeChildren := []TreeNode{}
-	for _, child := range ln.children {
-		treeNodeChildren = append(treeNodeChildren, child)
-	}
-	return treeNodeChildren
-}
-
-func (ln *layoutNode) LayoutNodeChildren() []LayoutNode {
-	return ln.children
-}
-
-//LayoutNode
-
-func (ln *layoutNode) IsEmpty() bool {
-	return len(ln.children) == 0
-}
-func (ln *layoutNode) Modifier(apply func(modifier Modifier) Modifier) {
-	ln.modifier = apply(ln.modifier)
-}
-
-func (ln *layoutNode) WithChildren(children []LayoutNode) LayoutNode {
-	ln.children = children
-	return ln
-}
-
-func (n *layoutNode) WithSlotsAssoc(k string, v any) LayoutNode {
-	n.slots = n.slots.Assoc(k, v)
-	return n
-}
+	"gioui.org/op"
+)
 
 var _ NodeCoordinator = (*nodeCoordinator)(nil)
 
 type nodeCoordinator struct {
-	layoutNode
-	layoutModifierNodeChain ChainNode
-	drawModifierNodeChain   ChainNode
+	LayoutNode
+	layoutCallChain  LayoutWidget
+	drawCallChain    LayoutWidget
+	pointerCallChain LayoutWidget
+	elementStore     ElementStore
 }
 
-func (nc *nodeCoordinator) AttachLayoutModifier(attach func(gtx LayoutContext, widget LayoutWidget) LayoutDimensions) {
+func (nc *nodeCoordinator) Expand() {
+	modifierChain := nc.LayoutNode.UnwrapModifier().AsChain()
+	*nc = *modifier.Fold(modifierChain, nc, func(nc *nodeCoordinator, mod Modifier) *nodeCoordinator {
+		if inspectable, ok := mod.(InspectableModifier); ok {
+			mod = inspectable.Unwrap()
+		}
+		modifierElement := mod.(ModifierElement)
+
+		modifierNode := modifierElement.Create()
+		modifierChainNode := modifierNode.(ChainNode)
+		modifierChainNode.Attach(nc)
+
+		return nc
+	})
 
 }
-func (nc *nodeCoordinator) DrawModifier(attach func(gtx LayoutContext, widget LayoutWidget)) {
+
+func (nc *nodeCoordinator) AttachLayoutModifier(attach func(gtx LayoutContext, widget LayoutWidget) LayoutWidget) {
+
+	nc.layoutCallChain = nc.layoutCallChain.Map(func(in LayoutWidget) LayoutWidget {
+		return NewLayoutWidget(func(gtx LayoutContext) LayoutDimensions {
+			return attach(gtx, in).Layout(gtx)
+		})
+	})
+}
+func (nc *nodeCoordinator) AttachDrawModifier(attach func(gtx LayoutContext, widget LayoutWidget) LayoutWidget) {
+	nc.drawCallChain = nc.drawCallChain.Map(func(in LayoutWidget) LayoutWidget {
+		return NewLayoutWidget(func(gtx LayoutContext) LayoutDimensions {
+			return attach(gtx, in).Layout(gtx)
+		})
+	})
+}
+func (nc *nodeCoordinator) AttachPointerModifier(attach func(gtx LayoutContext, widget LayoutWidget) LayoutWidget) {
+	nc.pointerCallChain = nc.pointerCallChain.Map(func(in LayoutWidget) LayoutWidget {
+		return NewLayoutWidget(func(gtx LayoutContext) LayoutDimensions {
+			return attach(gtx, in).Layout(gtx)
+		})
+	})
+}
+
+func (nc *nodeCoordinator) LayoutPhase(gtx LayoutContext) {
+	defer op.Record(gtx.Ops).Stop()
+	nc.LayoutSelf(gtx)
+}
+
+func (nc *nodeCoordinator) PointerPhase(gtx LayoutContext) {
+	defer op.Record(gtx.Ops).Stop()
+	nc.pointerCallChain.Layout(gtx)
+}
+
+func (nc *nodeCoordinator) DrawPhase(gtx LayoutContext) {
+	nc.drawCallChain.Layout(gtx)
+}
+
+func (nc *nodeCoordinator) Elements() ElementStore {
+	return nc.elementStore
+}
+
+func (nc *nodeCoordinator) LayoutSelf(gtx LayoutContext) LayoutDimensions {
+	return nc.layoutCallChain.Layout(gtx)
 
 }
+
+type LayoutContextReceiver = func(gtx LayoutContext)

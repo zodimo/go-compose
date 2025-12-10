@@ -30,6 +30,7 @@ type Composer interface {
 	GenerateID() Identifier
 
 	TreeBuilderComposer
+	GioLayoutNodeAwareComposer
 
 	state.StatefulComposer
 
@@ -48,4 +49,8 @@ type TreeBuilderComposer interface {
 	StartBlock(id string) Composer
 	EndBlock() Composer
 	Build() LayoutNode
+}
+
+type GioLayoutNodeAwareComposer interface {
+	SetWidgetConstructor(constructor layoutnode.LayoutNodeWidgetConstructor)
 }

@@ -9,6 +9,9 @@ import (
 // DebugLayoutNode returns a formatted string representation of the layout node and its children
 // for debugging purposes.
 func DebugLayoutNode(node LayoutNode) string {
+	if coordinator, ok := node.(*nodeCoordinator); ok {
+		node = coordinator.LayoutNode
+	}
 	layoutNode := node.(*layoutNode)
 	var sb strings.Builder
 	layoutNode.debugString(&sb, 0)
