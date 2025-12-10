@@ -1,7 +1,6 @@
 package runtime
 
 import (
-	"fmt"
 	"go-compose-dev/internal/layoutnode"
 	"image"
 
@@ -18,11 +17,7 @@ func (r *runtime) Run(gtx LayoutContext, node LayoutNode) op.CallOp {
 	gtx.Constraints.Min = image.Point{X: 0, Y: 0}
 	nodeCoordinator := layoutnode.NewNodeCoordinator(node)
 
-	fmt.Println(layoutnode.DebugLayoutNode(nodeCoordinator))
-	nodeCoordinator.Expand()
-	fmt.Println(layoutnode.DebugLayoutNode(nodeCoordinator))
-
-	nodeCoordinator.LayoutPhase(gtx)
+	nodeCoordinator.Layout(gtx)
 	nodeCoordinator.PointerPhase(gtx)
-	return nodeCoordinator.DrawPhase(gtx)
+	return nodeCoordinator.Draw(gtx)
 }

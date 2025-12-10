@@ -3,15 +3,14 @@ package size
 const NotSet = -1
 
 type SizeData struct {
-	Width    int
-	Height   int
-	Required bool
-}
+	Width  int
+	Height int
 
-func DefaultSize() SizeData {
-	return SizeData{
-		Width:    NotSet,
-		Height:   NotSet,
-		Required: false,
-	}
+	FillMaxWidth  bool
+	FillMaxHeight bool
+	FillMax       bool
+
+	WrapContent bool
+
+	Required bool
 }

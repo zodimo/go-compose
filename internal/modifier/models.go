@@ -1,6 +1,10 @@
 package modifier
 
-import "go-compose-dev/internal/immap"
+import (
+	"go-compose-dev/internal/immap"
+
+	"github.com/zodimo/go-maybe"
+)
 
 type InspectorInfo struct {
 	Name       string
@@ -84,4 +88,18 @@ var _ ElementStore = (*elementStore)(nil)
 
 type elementStore struct {
 	store immap.ImmutableMap[Element]
+}
+
+func (es elementStore) SetElement(key string, element Element) ElementStore {
+	return elementStore{
+		store: es.store.Assoc(key, element),
+	}
+}
+
+func (es elementStore) GetElement(key string) maybe.Maybe[Element] {
+	element, ok := es.store.Find(key)
+	if !ok {
+		return maybe.None[Element]()
+	}
+	return maybe.Some(element)
 }

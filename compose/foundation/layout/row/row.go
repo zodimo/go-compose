@@ -2,6 +2,7 @@ package row
 
 import (
 	"go-compose-dev/internal/layoutnode"
+	"go-compose-dev/internal/modifiers/weight"
 
 	"gioui.org/layout"
 )
@@ -25,39 +26,39 @@ func Row(content Composable, options ...RowOption) Composable {
 			return modifier.Then(opts.Modifier)
 		})
 		c.WithComposable(content)
-		c.SetWidgetConstructor(rowWidgetConstructor())
+		c.SetWidgetConstructor(rowWidgetConstructor(opts))
 
 		return c.EndBlock()
 	}
 }
 
-func rowWidgetConstructor() layoutnode.LayoutNodeWidgetConstructor {
+func rowWidgetConstructor(options RowOptions) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-
 			flexedChildren := []layout.FlexChild{}
 			for _, child := range node.Children() {
 
 				childLayoutNode := child.(layoutnode.NodeCoordinator)
 
-				// elementStore := childLayoutNode.Elements()
+				elementStore := childLayoutNode.Elements()
 
-				var weight float32 = -1 // get child weight
-				if weight == -1 {
+				maybeWeightElement := elementStore.GetElement(weight.WeightElementKey)
+				if maybeWeightElement.IsNone() {
 					flexedChildren = append(flexedChildren, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						return childLayoutNode.LayoutSelf(gtx)
+						return childLayoutNode.Layout(gtx)
 					}))
 				} else {
-					flexedChildren = append(flexedChildren, layout.Flexed(weight, func(gtx layout.Context) layout.Dimensions {
-						return childLayoutNode.LayoutSelf(gtx)
+					weightElement := maybeWeightElement.UnwrapUnsafe().(weight.WeightElement)
+					flexedChildren = append(flexedChildren, layout.Flexed(weightElement.WeightData().Weight, func(gtx layout.Context) layout.Dimensions {
+						return childLayoutNode.Layout(gtx)
 					}))
 				}
 			}
 
 			return layout.Flex{
-				Axis: layout.Horizontal,
-				// Spacing:   constructorArgs.Options.Spacing,
-				// Alignment: constructorArgs.Options.Alignment,
+				Axis:      layout.Horizontal,
+				Spacing:   options.Spacing,
+				Alignment: options.Alignment,
 			}.Layout(gtx, flexedChildren...)
 		}
 	})

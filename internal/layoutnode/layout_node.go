@@ -21,29 +21,36 @@ type LayoutNode interface {
 
 	GetWidget() GioLayoutWidget
 
-	GetDrawWidget() DrawWidget
-
 	SetWidgetConstructor(constructor LayoutNodeWidgetConstructor)
+	GetWidgetConstructor() LayoutNodeWidgetConstructor
 
 	IsEmpty() bool
 
 	SetLayoutResult(LayoutResult)
 	GetLayoutResult() maybe.Maybe[LayoutResult]
+
+	Layout(gtx LayoutContext) LayoutDimensions
+	Draw(gtx LayoutContext) DrawOp
 }
 
 type LayoutModifierNode interface {
 	LayoutNode
-	AttachLayoutModifier(attach func(gtx LayoutContext, widget LayoutWidget) LayoutWidget)
+	AttachLayoutModifier(attach func(widget LayoutWidget) LayoutWidget)
 }
 
 type DrawModifierNode interface {
 	LayoutNode
-	AttachDrawModifier(attach func() DrawWidget)
+	AttachDrawModifier(attach func(widget LayoutWidget) LayoutWidget)
 }
 
 type PointerModifierNode interface {
 	LayoutNode
-	AttachPointerModifier(attach func(gtx LayoutContext, widget LayoutWidget) LayoutWidget)
+	AttachPointerModifier(attach func(widget LayoutWidget) LayoutWidget)
+}
+
+type ParentDataModifierNode interface {
+	LayoutNode
+	AttachParentDataModifier(attach func(elements ElementStore) ElementStore)
 }
 
 // Wrapper to allow for inner node expansion
@@ -52,14 +59,11 @@ type NodeCoordinator interface {
 	DrawModifierNode
 	LayoutModifierNode
 	PointerModifierNode
+	ParentDataModifierNode
 
-	LayoutPhase(gtx LayoutContext)
 	PointerPhase(gtx LayoutContext)
-	DrawPhase(gtx LayoutContext) DrawOp
 
-	LayoutSelf(gtx LayoutContext) LayoutDimensions
-
-	Elements() ElementStore // ECS style properties
+	Elements() ElementStore
 
 	Expand()
 }

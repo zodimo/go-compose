@@ -5,7 +5,6 @@ import (
 	"go-compose-dev/internal/layoutnode"
 
 	"gioui.org/layout"
-	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 )
@@ -29,13 +28,10 @@ func NewBackGroundNode(background BackgroundData) ChainNode {
 
 				no := n.(layoutnode.DrawModifierNode)
 				// we can now work with the layoutNode
-				no.AttachDrawModifier(func() layoutnode.DrawWidget {
+				no.AttachDrawModifier(func(widget LayoutWidget) layoutnode.LayoutWidget {
 
-					return layoutnode.NewDrawWidget(func(gtx layoutnode.LayoutContext, node layoutnode.LayoutNode) layoutnode.DrawOp {
-						macro := op.Record(gtx.Ops)
-						layoutResult := node.GetLayoutResult().UnwrapUnsafe()
-
-						layout.Background{}.Layout(gtx,
+					return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+						return layout.Background{}.Layout(gtx,
 							func(gtx layout.Context) layout.Dimensions {
 								// shape
 								// color
@@ -47,12 +43,9 @@ func NewBackGroundNode(background BackgroundData) ChainNode {
 
 							},
 							func(gtx layout.Context) layout.Dimensions {
-								layoutResult.DrawOp.Add(gtx.Ops)
-								return layoutResult.Dimensions
+								return widget.Layout(gtx)
 							},
 						)
-
-						return macro.Stop()
 					})
 				})
 

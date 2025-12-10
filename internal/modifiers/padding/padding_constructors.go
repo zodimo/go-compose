@@ -2,10 +2,6 @@ package padding
 
 import "go-compose-dev/internal/modifier"
 
-func PaddingAll(value int) Modifier {
-	return EmptyModifier
-}
-
 type PaddingOptions struct {
 	RtlAware bool
 }
@@ -47,4 +43,8 @@ func Padding(start, top, end, bottom int, options ...PaddingOption) Modifier {
 			},
 		),
 	)
+}
+
+func PaddingAll(value int, options ...PaddingOption) Modifier {
+	return Padding(value, value, value, value, options...)
 }

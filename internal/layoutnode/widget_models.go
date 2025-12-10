@@ -1,6 +1,8 @@
 package layoutnode
 
-import "gioui.org/op"
+import (
+	"gioui.org/op"
+)
 
 type LayoutWidget interface {
 	Map(mapFun func(LayoutWidget) LayoutWidget) LayoutWidget
@@ -16,35 +18,13 @@ func (lw layoutWidget) IsEmpty() bool {
 }
 func (lw layoutWidget) Layout(gtx LayoutContext) LayoutDimensions {
 	if lw.IsEmpty() {
-		// log that we using the identity widget
-		return IdentityLayoutWidget.Layout(gtx)
+		panic("layoutWidget is empty")
 	}
 	return lw.innerWidget(gtx)
 }
 
 // This is how the Modifier chain is applied
 func (lw layoutWidget) Map(mapFun func(LayoutWidget) LayoutWidget) LayoutWidget {
-	return mapFun(lw)
-}
-
-type DrawFunc = func(gtx LayoutContext, node LayoutNode) DrawOp
-type DrawWidget interface {
-	Map(mapFun func(DrawWidget) DrawWidget) DrawWidget
-	Draw(gtx LayoutContext, node LayoutNode) DrawOp
-}
-
-var _ DrawWidget = (*drawWidget)(nil)
-
-type drawWidget struct {
-	drawFunc DrawFunc
-}
-
-func (dw drawWidget) Draw(gtx LayoutContext, node LayoutNode) DrawOp {
-	return dw.drawFunc(gtx, node)
-}
-
-// This is how the Modifier chain is applied
-func (lw drawWidget) Map(mapFun func(DrawWidget) DrawWidget) DrawWidget {
 	return mapFun(lw)
 }
 

@@ -24,6 +24,5 @@ type PointerModifierNode = layoutnode.PointerModifierNode
 
 type LayoutContext = layoutnode.LayoutContext
 type LayoutWidget = layoutnode.LayoutWidget
-type DrawWidget = layoutnode.DrawWidget
 
 var ToNRGBA = helpers.ToNRGBA

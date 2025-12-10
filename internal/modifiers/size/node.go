@@ -17,7 +17,7 @@ type SizeNode struct {
 	size SizeData
 }
 
-func NewSizeNode(size SizeData) ChainNode {
+func NewSizeNode(sizeData SizeData) ChainNode {
 	return SizeNode{
 		ChainNode: node.NewChainNode(
 			node.NewNodeID(),
@@ -30,30 +30,17 @@ func NewSizeNode(size SizeData) ChainNode {
 
 				no := n.(layoutnode.LayoutModifierNode)
 				// we can now work with the layoutNode
-				no.AttachLayoutModifier(func(gtx layoutnode.LayoutContext, widget layoutnode.LayoutWidget) layoutnode.LayoutWidget {
+				no.AttachLayoutModifier(func(widget layoutnode.LayoutWidget) layoutnode.LayoutWidget {
 					return layoutnode.NewLayoutWidget(
 						func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-							constraints := gtx.Constraints
-							if size.Required {
-								constraints.Min.X = size.Width
-								constraints.Min.Y = size.Height
-								constraints.Max.X = size.Width
-								constraints.Max.Y = size.Height
-
-							} else {
-								//clamp
-								constraints.Min.X = Clamp(size.Width, gtx.Constraints.Min.X, gtx.Constraints.Max.X)
-								constraints.Min.Y = Clamp(size.Height, gtx.Constraints.Min.Y, gtx.Constraints.Max.Y)
-								constraints.Max.X = Clamp(size.Width, gtx.Constraints.Min.X, gtx.Constraints.Max.X)
-								constraints.Max.Y = Clamp(size.Height, gtx.Constraints.Min.Y, gtx.Constraints.Max.Y)
-							}
-							gtx.Constraints = constraints
+							size := GetSizeConstraintsAndSizeData(gtx.Constraints, sizeData)
+							// if size.
+							childConstraints := gtx.Constraints
+							childConstraints = ApplySizeDataToConstraints(childConstraints, sizeData)
+							gtx.Constraints = childConstraints
 							widget.Layout(gtx)
 							return layout.Dimensions{
-								Size: image.Point{
-									X: size.Width,
-									Y: size.Height,
-								},
+								Size: size,
 							}
 						},
 					)
@@ -61,6 +48,82 @@ func NewSizeNode(size SizeData) ChainNode {
 
 			},
 		),
-		size: size,
+		size: sizeData,
 	}
+}
+
+func GetSizeConstraintsAndSizeData(constraints layout.Constraints, sizeData SizeData) image.Point {
+	size := image.Point{
+		X: constraints.Min.X,
+		Y: constraints.Min.Y,
+	}
+
+	if sizeData.Width != NotSet {
+		if sizeData.Required {
+			size.X = sizeData.Width
+		} else {
+			size.X = Clamp(sizeData.Width, constraints.Min.X, constraints.Max.X)
+		}
+	}
+	if sizeData.Height != NotSet {
+		if sizeData.Required {
+			size.Y = sizeData.Height
+		} else {
+			size.Y = Clamp(sizeData.Height, constraints.Min.Y, constraints.Max.Y)
+		}
+	}
+
+	if sizeData.FillMaxWidth {
+		size.X = constraints.Max.X
+	}
+	if sizeData.FillMaxHeight {
+		size.Y = constraints.Max.Y
+	}
+
+	if sizeData.FillMax {
+		size.X = constraints.Max.X
+		size.Y = constraints.Max.Y
+	}
+	return size
+
+}
+
+func ApplySizeDataToConstraints(constraints layout.Constraints, sizeData SizeData) layout.Constraints {
+
+	// fmt.Printf("ApplySizeOptionsToConstraints: constraints before: %v\n", constraints)
+	// fmt.Printf("ApplySizeOptionsToConstraints: opts: %s\n", opts)
+
+	if sizeData.Width != NotSet {
+		if sizeData.Required {
+			constraints.Min.X = sizeData.Width
+			constraints.Max.X = sizeData.Width
+		} else {
+			constraints.Min.X = Clamp(sizeData.Width, constraints.Min.X, constraints.Max.X)
+			constraints.Max.X = Clamp(sizeData.Width, constraints.Min.X, constraints.Max.X)
+		}
+
+	}
+	if sizeData.Height != NotSet {
+		if sizeData.Required {
+			constraints.Min.Y = sizeData.Height
+			constraints.Max.Y = sizeData.Height
+		} else {
+			constraints.Min.Y = Clamp(sizeData.Height, constraints.Min.Y, constraints.Max.Y)
+			constraints.Max.Y = Clamp(sizeData.Height, constraints.Min.Y, constraints.Max.Y)
+		}
+
+	}
+
+	if sizeData.FillMaxWidth {
+		constraints.Min.X = constraints.Max.X
+	}
+	if sizeData.FillMaxHeight {
+		constraints.Min.Y = constraints.Max.Y
+	}
+
+	if sizeData.FillMax {
+		constraints.Min.X = constraints.Max.X
+		constraints.Min.Y = constraints.Max.Y
+	}
+	return constraints
 }

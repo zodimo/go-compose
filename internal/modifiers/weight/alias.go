@@ -1,4 +1,4 @@
-package size
+package weight
 
 import (
 	node "go-compose-dev/internal/Node"

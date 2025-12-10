@@ -13,20 +13,23 @@ func NewLayoutNode(id NodeID, key string, slotStore immap.ImmutableMap[Element])
 		children:     []LayoutNode{},
 		modifier:     EmptyModifier,
 		slots:        slotStore,
-		innerWidget:  IdentityGioLayoutWidget,
 		layoutResult: maybe.None[LayoutResult](),
 	}
 }
 
 func NewNodeCoordinator(node LayoutNode) NodeCoordinator {
 
-	return &nodeCoordinator{
-		LayoutNode:       node,
-		layoutCallChain:  NewLayoutWidget(node.GetWidget()),
-		pointerCallChain: NewLayoutWidget(node.GetWidget()),
-		drawCallChain:    node.GetDrawWidget(),
-		elementStore:     EmptyElementStore,
+	outNode := &nodeCoordinator{
+		LayoutNode:      node,
+		elementStore:    EmptyElementStore,
+		wrappedChildren: []TreeNode{},
 	}
+	widget := outNode.GetWidget()
+
+	outNode.layoutCallChain = NewLayoutWidget(widget)
+	outNode.pointerCallChain = NewLayoutWidget(widget)
+	outNode.WrapChildren()
+	return outNode
 }
 
 var IdentityGioLayoutWidget = func(gtx LayoutContext) LayoutDimensions {
@@ -41,18 +44,6 @@ func NewLayoutWidget(innerWidget GioLayoutWidget) LayoutWidget {
 		innerWidget: innerWidget,
 	}
 }
-
-func NewDrawWidget(drawFunc DrawFunc) DrawWidget {
-	return drawWidget{
-		drawFunc: drawFunc,
-	}
-}
-
-// func NewPointerWidget(innerWidget LayoutContextReceiver) PointerWidget {
-// 	return pointerWidget{
-// 		innerWidget: innerWidget,
-// 	}
-// }
 
 var _ LayoutNodeWidgetConstructor = (*layoutNodeWidgetConstructor)(nil)
 

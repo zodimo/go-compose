@@ -14,7 +14,6 @@ type layoutNode struct {
 	slots                  immap.ImmutableMap[Element] // carry the elements
 	children               []LayoutNode
 	modifier               Modifier
-	innerWidget            GioLayoutWidget
 	innerWidgetConstructor LayoutNodeWidgetConstructor
 	layoutResult           maybe.Maybe[LayoutResult]
 }
@@ -61,14 +60,15 @@ func (n *layoutNode) WithSlotsAssoc(k string, v Element) LayoutNode {
 }
 
 func (n *layoutNode) GetWidget() GioLayoutWidget {
-	if n.innerWidget == nil {
-		n.innerWidget = n.innerWidgetConstructor.Make(n)
-	}
-	return n.innerWidget
+	panic("LayoutNode GetWidget should not be called")
 }
 
 func (n *layoutNode) SetWidgetConstructor(constructor LayoutNodeWidgetConstructor) {
 	n.innerWidgetConstructor = constructor
+}
+
+func (n *layoutNode) GetWidgetConstructor() LayoutNodeWidgetConstructor {
+	return n.innerWidgetConstructor
 }
 
 func (n *layoutNode) SetLayoutResult(result LayoutResult) {
@@ -79,11 +79,13 @@ func (n *layoutNode) GetLayoutResult() maybe.Maybe[LayoutResult] {
 	return n.layoutResult
 }
 
-func (n *layoutNode) GetDrawWidget() DrawWidget {
-	return NewDrawWidget(func(gtx LayoutContext, node LayoutNode) DrawOp {
-		layoutResult := node.GetLayoutResult().UnwrapUnsafe()
-		return layoutResult.DrawOp
-	})
+func (n *layoutNode) Layout(gtx LayoutContext) LayoutDimensions {
+	panic("layout directly on layoutnode not allowed")
+}
+
+func (n *layoutNode) Draw(gtx LayoutContext) DrawOp {
+	panic("Draw directly on layoutnode not allowed")
+
 }
 
 //////////////////
