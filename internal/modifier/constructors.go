@@ -1,7 +1,10 @@
 package modifier
 
+import "go-compose-dev/internal/immap"
+
 // EmptyModifier is the empty modifier that does nothing.
 var EmptyModifier Modifier = &emptyModifier{}
+var EmptyElementStore ElementStore = NewElementStore()
 
 func NewElement(
 	createFunc func() Node,
@@ -41,5 +44,11 @@ func NewInspectableModifier(m Modifier, inspectorInfo *InspectorInfo) Inspectabl
 func NewModifier(element Element) Modifier {
 	return &modifier{
 		element: element,
+	}
+}
+
+func NewElementStore() ElementStore {
+	return elementStore{
+		store: immap.EmptyImmutableMap[Element](),
 	}
 }

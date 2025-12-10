@@ -82,9 +82,13 @@ func (c chain) FoldOut(initial interface{}, operation func(interface{}, Modifier
 	return initial
 }
 
+func (c chain) AsChain() ModifierChain {
+	return c
+}
+
 // Constructor
 func NewChain(head Modifier, tail ModifierChain) ModifierChain {
-	return &chain{
+	return chain{
 		head: head,
 		tail: tail,
 	}

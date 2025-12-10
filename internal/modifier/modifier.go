@@ -41,11 +41,13 @@ type ModifierElementChain interface {
 type Modifier interface {
 	// Then chains this modifier with another
 	Then(other Modifier) Modifier
+	AsChain() ModifierChain
 }
 
 type InspectableModifier interface {
 	Modifier
 	InspectorInfo() *InspectorInfo
+	Unwrap() Modifier
 }
 
 type ModifierElement interface {

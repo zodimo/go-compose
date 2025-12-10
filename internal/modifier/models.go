@@ -1,5 +1,7 @@
 package modifier
 
+import "go-compose-dev/internal/immap"
+
 type InspectorInfo struct {
 	Name       string
 	Properties map[string]any
@@ -20,6 +22,10 @@ func (e emptyModifier) Then(other Modifier) Modifier {
 	return other
 }
 
+func (me emptyModifier) AsChain() ModifierChain {
+	return NewChain(me, nil)
+}
+
 var _ ModifierElement = (*modifier)(nil)
 
 type modifier struct {
@@ -35,6 +41,10 @@ func (me modifier) Then(other Modifier) Modifier {
 	}
 	otherChain := NewChain(other, nil)
 	return NewChain(me, otherChain)
+}
+
+func (me modifier) AsChain() ModifierChain {
+	return NewChain(me, nil)
 }
 
 //Element Interface
@@ -62,6 +72,16 @@ type inspectableModifier struct {
 	inspectorInfo *InspectorInfo
 }
 
-func (im *inspectableModifier) InspectorInfo() *InspectorInfo {
+func (im inspectableModifier) InspectorInfo() *InspectorInfo {
 	return im.inspectorInfo
+}
+
+func (im inspectableModifier) Unwrap() Modifier {
+	return im.Modifier
+}
+
+var _ ElementStore = (*elementStore)(nil)
+
+type elementStore struct {
+	store immap.ImmutableMap[Element]
 }
