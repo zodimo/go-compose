@@ -2,7 +2,10 @@ module go-compose-dev
 
 go 1.24.3
 
-require gioui.org v0.9.0
+require (
+	gioui.org v0.9.0
+	github.com/zodimo/go-maybe v0.1.3
+)
 
 require (
 	gioui.org/shader v1.0.8 // indirect
