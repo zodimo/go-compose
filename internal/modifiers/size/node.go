@@ -3,6 +3,9 @@ package size
 import (
 	node "go-compose-dev/internal/Node"
 	"go-compose-dev/internal/layoutnode"
+	"image"
+
+	"gioui.org/layout"
 )
 
 var _ ChainNode = (*SizeNode)(nil)
@@ -45,7 +48,13 @@ func NewSizeNode(size SizeData) ChainNode {
 								constraints.Max.Y = Clamp(size.Height, gtx.Constraints.Min.Y, gtx.Constraints.Max.Y)
 							}
 							gtx.Constraints = constraints
-							return widget.Layout(gtx)
+							widget.Layout(gtx)
+							return layout.Dimensions{
+								Size: image.Point{
+									X: size.Width,
+									Y: size.Height,
+								},
+							}
 						},
 					)
 				})
