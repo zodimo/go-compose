@@ -34,7 +34,7 @@ func Button(onClick func(), label string, options ...ButtonOption) Composable {
 		c.Modifier(func(modifier Modifier) Modifier {
 			return modifier.Then(opts.Modifier)
 		})
-		c.SetWidgetConstructor(textWidgetConstructor(opts, constructorArgs))
+		c.SetWidgetConstructor(buttonWidgetConstructor(opts, constructorArgs))
 
 		return c.EndBlock()
 	}
@@ -50,7 +50,7 @@ type ButtonConstructorArgs struct {
 	LabelContent string
 }
 
-func textWidgetConstructor(options ButtonOptions, constructorArgs ButtonConstructorArgs) layoutnode.LayoutNodeWidgetConstructor {
+func buttonWidgetConstructor(options ButtonOptions, constructorArgs ButtonConstructorArgs) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 
