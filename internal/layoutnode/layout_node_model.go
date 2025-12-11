@@ -60,6 +60,14 @@ func (n *layoutNode) WithSlotsAssoc(k string, v any) LayoutNode {
 	return n
 }
 
+func (n *layoutNode) FindSlot(key string) maybe.Maybe[any] {
+	slot, ok := n.slots.Find(key)
+	if !ok {
+		return maybe.None[any]()
+	}
+	return maybe.Some(slot)
+}
+
 func (c *layoutNode) GenerateID() Identifier {
 	return c.idManager.GenerateID()
 }

@@ -59,7 +59,7 @@ func (c *composer) Build() LayoutNode {
 	return c.focus
 }
 
-func (c *composer) EmotSlot(k string, v Element) Composer {
+func (c *composer) EmitSlot(k string, v any) Composer {
 	c.focus = c.focus.WithSlotsAssoc(k, v)
 	return c
 } // slot is a property on the layoutNode

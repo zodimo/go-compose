@@ -29,6 +29,8 @@ type Composer interface {
 	// -- id management
 	GenerateID() Identifier
 
+	EmitSlot(k string, v any) Composer
+
 	TreeBuilderComposer
 	GioLayoutNodeAwareComposer
 
