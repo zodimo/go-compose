@@ -35,7 +35,15 @@ func NewClipNode(element ClipElement) ChainNode {
 						dimensions := widget.Layout(gtx)
 						callOp := macro.Stop()
 						// Clip Shape here
-						stack := ClipShape(element.clipData.Shape, gtx, dimensions)
+						clipDimensions := dimensions
+						if element.clipData.ClipToBounds {
+							clipDimensions = layoutnode.LayoutDimensions{
+								Size: gtx.Constraints.Max,
+							}
+						}
+
+						stack := ClipShape(element.clipData.Shape, gtx, clipDimensions)
+
 						callOp.Add(gtx.Ops)
 						stack.Pop()
 

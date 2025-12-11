@@ -22,3 +22,24 @@ func Clip(shape Shape) Modifier {
 		),
 	)
 }
+
+func ClipToBounds() Modifier {
+
+	return modifier.NewInspectableModifier(
+		modifier.NewModifier(
+			&ClipElement{
+				clipData: ClipData{
+					Shape:        ShapeRectangle,
+					ClipToBounds: true,
+				},
+			},
+		),
+		modifier.NewInspectorInfo(
+			"clip",
+			map[string]any{
+				"shape":        ShapeRectangle,
+				"clipToBounds": true,
+			},
+		),
+	)
+}

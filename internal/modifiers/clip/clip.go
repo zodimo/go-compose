@@ -1,7 +1,8 @@
 package clip
 
 type ClipData struct {
-	Shape Shape
+	Shape        Shape
+	ClipToBounds bool
 }
 
 type ClipElement struct {
