@@ -4,6 +4,7 @@ import (
 	"go-compose-dev/compose"
 	"go-compose-dev/compose/foundation/layout/column"
 	"go-compose-dev/compose/foundation/layout/row"
+	"go-compose-dev/compose/foundation/text"
 	"go-compose-dev/internal/modifiers/background"
 	"go-compose-dev/internal/modifiers/padding"
 	"go-compose-dev/internal/modifiers/size"
@@ -39,6 +40,7 @@ func UI(c api.Composer) api.LayoutNode {
 				row.WithModifier(size.Size(500, 300)),
 				row.WithModifier(background.Background(color.NRGBA{R: 0, G: 200, B: 0, A: 200})),
 			),
+			text.Text("hello world"),
 		),
 		column.WithModifier(size.FillMax()),
 		column.WithModifier(background.Background(color.NRGBA{R: 200, G: 0, B: 0, A: 50})),
