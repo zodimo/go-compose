@@ -7,6 +7,7 @@ import (
 	"go-compose-dev/compose/foundation/layout/row"
 	"go-compose-dev/compose/foundation/material/button"
 	m3Button "go-compose-dev/compose/foundation/material3/button"
+	m3Divider "go-compose-dev/compose/foundation/material3/divider"
 	"go-compose-dev/compose/ui/graphics/shape"
 
 	"go-compose-dev/compose/foundation/text"
@@ -87,10 +88,15 @@ func UI(c api.Composer) api.LayoutNode {
 			}, "Hello M3 Outlined Button"),
 			m3Button.Filled(func() {
 				fmt.Println("M3 Filled Button clicked!")
-			}, "Hello M3 Filled Button"),
+			}, "Hello M3 Filled Button",
+				m3Button.WithModifier(padding.All(20)),
+			),
+			m3Divider.Divider(),
 			m3Button.FilledTonal(func() {
 				fmt.Println("M3 Filled Tonal Button clicked!")
-			}, "Hello M3 FilledTonal Button"),
+			}, "Hello M3 FilledTonal Button",
+				m3Button.WithModifier(padding.All(20)),
+			),
 		),
 		column.WithModifier(size.FillMax()),
 		column.WithModifier(background.Background(color.NRGBA{R: 200, G: 0, B: 0, A: 50})),
