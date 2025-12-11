@@ -12,7 +12,9 @@ import (
 	mswitch "go-compose-dev/compose/foundation/material3/switch"
 	"go-compose-dev/compose/foundation/material3/textfield"
 
+	m3text "go-compose-dev/compose/foundation/material3/text"
 	"go-compose-dev/compose/foundation/text"
+
 	"go-compose-dev/internal/modifiers/padding"
 	"go-compose-dev/pkg/api"
 )
@@ -70,6 +72,16 @@ func UI(c api.Composer) api.LayoutNode {
 
 			// Section: Inputs
 			text.Text("Inputs", text.WithTextStyleOptions(text.StyleWithTextSize(20)), text.WithModifier(padding.Vertical(10, 10))),
+
+			// Section: m3text Labels
+			text.Text("Material3 Labels", text.WithTextStyleOptions(text.StyleWithTextSize(20)), text.WithModifier(padding.Vertical(10, 10))),
+			column.Column(compose.Sequence(
+				m3text.Text("Display Large", m3text.TypestyleDisplayLarge),
+				m3text.Text("Headline Medium", m3text.TypestyleHeadlineMedium),
+				m3text.Text("Title Small", m3text.TypestyleTitleSmall),
+				m3text.Text("Body Medium", m3text.TypestyleBodyMedium),
+				m3text.Text("Label Small", m3text.TypestyleLabelSmall),
+			)),
 
 			column.Column(compose.Sequence(
 				textfield.TextField(
