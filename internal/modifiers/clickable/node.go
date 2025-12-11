@@ -28,7 +28,6 @@ func NewClickableNode(element ClickableElement) ChainNode {
 					lno := n.(layoutnode.LayoutNode)
 					key := lno.GenerateID()
 
-					fmt.Printf("Clickable Key : %s", key)
 					// path := lno.GetPath()
 
 					clickablePath := fmt.Sprintf("%d/clickable", key)
