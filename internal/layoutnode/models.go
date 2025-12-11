@@ -31,7 +31,7 @@ func (nc *nodeCoordinator) WrapChildren() {
 func (nc *nodeCoordinator) Expand() {
 
 	modifierChain := nc.LayoutNode.UnwrapModifier().AsChain()
-	*nc = *modifier.FoldOut(modifierChain, nc, func(nc *nodeCoordinator, mod Modifier) *nodeCoordinator {
+	*nc = *modifier.FoldIn(modifierChain, nc, func(nc *nodeCoordinator, mod Modifier) *nodeCoordinator {
 
 		if inspectable, ok := mod.(InspectableModifier); ok {
 			mod = inspectable.Unwrap()
