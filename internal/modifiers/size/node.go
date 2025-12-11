@@ -6,6 +6,7 @@ import (
 	"image"
 
 	"gioui.org/layout"
+	"gioui.org/op"
 )
 
 var _ ChainNode = (*SizeNode)(nil)
@@ -17,6 +18,7 @@ type SizeNode struct {
 	size SizeData
 }
 
+// NewSizeNode creates a new size node
 func NewSizeNode(sizeData SizeData) ChainNode {
 	return SizeNode{
 		ChainNode: node.NewChainNode(
@@ -33,14 +35,63 @@ func NewSizeNode(sizeData SizeData) ChainNode {
 				no.AttachLayoutModifier(func(widget layoutnode.LayoutWidget) layoutnode.LayoutWidget {
 					return layoutnode.NewLayoutWidget(
 						func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-							size := GetSizeConstraintsAndSizeData(gtx.Constraints, sizeData)
-							// if size.
-							childConstraints := gtx.Constraints
-							childConstraints = ApplySizeDataToConstraints(childConstraints, sizeData)
-							gtx.Constraints = childConstraints
-							widget.Layout(gtx)
+							// 1. Calculate constraints to pass to child.
+							childConstraints := ApplySizeDataToConstraints(gtx.Constraints, sizeData)
+
+							// 2. Measure child.
+							macro := op.Record(gtx.Ops)
+							// Create a context with modified constraints for the child
+							childGtx := gtx
+							childGtx.Constraints = childConstraints
+							childDims := widget.Layout(childGtx)
+							call := macro.Stop()
+
+							// 3. Determine my size.
+							mySize := image.Point{
+								X: childDims.Size.X,
+								Y: childDims.Size.Y,
+							}
+
+							// Handle Width overrides
+							if sizeData.Width != NotSet {
+								// Fixed width overrides child measurement
+								mySize.X = sizeData.Width
+							} else if sizeData.FillMaxWidth || sizeData.FillMax {
+								// Fill behavior uses max constraints
+								mySize.X = gtx.Constraints.Max.X
+							} else {
+								// Default/Wrap behavior: respect incoming constraints
+								// If we are wrapping, we wanted min=0 for child, but our size
+								// must still respect our parent's min constraints.
+								mySize.X = Clamp(mySize.X, gtx.Constraints.Min.X, gtx.Constraints.Max.X)
+							}
+
+							// Handle Height overrides
+							if sizeData.Height != NotSet {
+								mySize.Y = sizeData.Height
+							} else if sizeData.FillMaxHeight || sizeData.FillMax {
+								mySize.Y = gtx.Constraints.Max.Y
+							} else {
+								mySize.Y = Clamp(mySize.Y, gtx.Constraints.Min.Y, gtx.Constraints.Max.Y)
+							}
+
+							// 4. Align
+							if sizeData.Alignment != nil {
+								// Calculate offset
+								offset := sizeData.Alignment.Align(childDims.Size, mySize, layoutnode.LayoutDirectionLTR)
+
+								// Apply offset
+								// We put the offset operation before replaying the child recording
+								defer op.Offset(offset).Push(gtx.Ops).Pop()
+							}
+
+							// Add the child operations
+							call.Add(gtx.Ops)
+
 							return layout.Dimensions{
-								Size: size,
+								Size: mySize,
+								// We should probably merge baselines here if needed, but keeping simple for now
+								Baseline: childDims.Baseline,
 							}
 						},
 					)
@@ -53,6 +104,10 @@ func NewSizeNode(sizeData SizeData) ChainNode {
 }
 
 func GetSizeConstraintsAndSizeData(constraints layout.Constraints, sizeData SizeData) image.Point {
+	// This function seems to be legacy or used for strict size calculation.
+	// The logic is now embedded in NewSizeNode.
+	// We keep it for backward compatibility if used elsewhere,
+	// but purely based on constraints (ignoring child).
 	size := image.Point{
 		X: constraints.Min.X,
 		Y: constraints.Min.Y,
@@ -90,40 +145,64 @@ func GetSizeConstraintsAndSizeData(constraints layout.Constraints, sizeData Size
 
 func ApplySizeDataToConstraints(constraints layout.Constraints, sizeData SizeData) layout.Constraints {
 
-	// fmt.Printf("ApplySizeOptionsToConstraints: constraints before: %v\n", constraints)
-	// fmt.Printf("ApplySizeOptionsToConstraints: opts: %s\n", opts)
+	// Start with incoming constraints
+	c := constraints
 
+	// Apply Fixed Width/Height Logic to Min/Max
 	if sizeData.Width != NotSet {
 		if sizeData.Required {
-			constraints.Min.X = sizeData.Width
-			constraints.Max.X = sizeData.Width
+			c.Min.X = sizeData.Width
+			c.Max.X = sizeData.Width
 		} else {
-			constraints.Min.X = Clamp(sizeData.Width, constraints.Min.X, constraints.Max.X)
-			constraints.Max.X = Clamp(sizeData.Width, constraints.Min.X, constraints.Max.X)
+			c.Min.X = Clamp(sizeData.Width, c.Min.X, c.Max.X)
+			c.Max.X = Clamp(sizeData.Width, c.Min.X, c.Max.X)
 		}
-
 	}
 	if sizeData.Height != NotSet {
 		if sizeData.Required {
-			constraints.Min.Y = sizeData.Height
-			constraints.Max.Y = sizeData.Height
+			c.Min.Y = sizeData.Height
+			c.Max.Y = sizeData.Height
 		} else {
-			constraints.Min.Y = Clamp(sizeData.Height, constraints.Min.Y, constraints.Max.Y)
-			constraints.Max.Y = Clamp(sizeData.Height, constraints.Min.Y, constraints.Max.Y)
+			c.Min.Y = Clamp(sizeData.Height, c.Min.Y, c.Max.Y)
+			c.Max.Y = Clamp(sizeData.Height, c.Min.Y, c.Max.Y)
 		}
-
 	}
 
+	// Fill Logic
 	if sizeData.FillMaxWidth {
-		constraints.Min.X = constraints.Max.X
+		c.Min.X = c.Max.X
 	}
 	if sizeData.FillMaxHeight {
-		constraints.Min.Y = constraints.Max.Y
+		c.Min.Y = c.Max.Y
 	}
 
 	if sizeData.FillMax {
-		constraints.Min.X = constraints.Max.X
-		constraints.Min.Y = constraints.Max.Y
+		c.Min.X = c.Max.X
+		c.Min.Y = c.Max.Y
 	}
-	return constraints
+
+	// Wrap Logic overrides Min constraints to allow shrinking
+	if sizeData.WrapWidth {
+		c.Min.X = 0
+	}
+	if sizeData.WrapHeight {
+		c.Min.Y = 0
+	}
+
+	// Unbounded Logic overrides Max constraints
+	if sizeData.Unbounded {
+		// Use a large constant for infinity
+		const Inf = 1e6
+		if sizeData.WrapWidth {
+			c.Max.X = Inf
+		}
+		if sizeData.WrapHeight {
+			c.Max.Y = Inf
+		}
+		// Or if generalized unbounded:
+		// c.Max.X = Inf
+		// c.Max.Y = Inf
+	}
+
+	return c
 }

@@ -10,7 +10,11 @@ type SizeData struct {
 	FillMaxHeight bool
 	FillMax       bool
 
-	WrapContent bool
+	// WrapContent options
+	WrapWidth  bool
+	WrapHeight bool
+	Alignment  Alignment
+	Unbounded  bool
 
 	Required bool
 }

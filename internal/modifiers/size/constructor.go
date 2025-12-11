@@ -113,22 +113,88 @@ func FillMaxHeight() Modifier {
 	)
 }
 
-func WrapContent() Modifier {
+func WrapContentSize(align ...Alignment) Modifier {
+	var a Alignment = Center
+	if len(align) > 0 {
+		a = align[0]
+	}
 
 	return modifier.NewInspectableModifier(
 		modifier.NewModifier(
 			&SizeElement{
 				size: SizeData{
-					Width:       NotSet,
-					Height:      NotSet,
-					WrapContent: true,
+					Width:      NotSet,
+					Height:     NotSet,
+					WrapWidth:  true,
+					WrapHeight: true,
+					Alignment:  a,
+					Unbounded:  false,
 				},
 			},
 		),
 		modifier.NewInspectorInfo(
-			"size",
+			"wrapContentSize",
 			map[string]any{
-				"WrapContent": true,
+				"align":     a,
+				"unbounded": false,
+			},
+		),
+	)
+}
+
+func WrapContentWidth(align ...Alignment) Modifier {
+	var a Alignment = Center
+	if len(align) > 0 {
+		a = align[0]
+	}
+
+	return modifier.NewInspectableModifier(
+		modifier.NewModifier(
+			&SizeElement{
+				size: SizeData{
+					Width:      NotSet,
+					Height:     NotSet,
+					WrapWidth:  true,
+					WrapHeight: false,
+					Alignment:  a,
+					Unbounded:  false,
+				},
+			},
+		),
+		modifier.NewInspectorInfo(
+			"wrapContentWidth",
+			map[string]any{
+				"align":     a,
+				"unbounded": false,
+			},
+		),
+	)
+}
+
+func WrapContentHeight(align ...Alignment) Modifier {
+	var a Alignment = Center
+	if len(align) > 0 {
+		a = align[0]
+	}
+
+	return modifier.NewInspectableModifier(
+		modifier.NewModifier(
+			&SizeElement{
+				size: SizeData{
+					Width:      NotSet,
+					Height:     NotSet,
+					WrapWidth:  false,
+					WrapHeight: true,
+					Alignment:  a,
+					Unbounded:  false,
+				},
+			},
+		),
+		modifier.NewInspectorInfo(
+			"wrapContentHeight",
+			map[string]any{
+				"align":     a,
+				"unbounded": false,
 			},
 		),
 	)
