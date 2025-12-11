@@ -18,11 +18,19 @@ import (
 
 func UI(c api.Composer) api.LayoutNode {
 
+	counterCell := c.State("counter", func() any { return 0 })
+
 	c = column.Column(
 		compose.Sequence(
 			row.Row(compose.Sequence(
 				column.Column(
-					compose.Sequence(),
+					compose.Sequence(
+						text.Text(fmt.Sprintf("state=%v", counterCell.Get()),
+							text.WithTextStyleOptions(
+								text.StyleWithColor(color.NRGBA{R: 255, G: 255, B: 255, A: 255}),
+							),
+						),
+					),
 					// column.WithModifier(size.Size(200, 200, size.SizeRequired())),
 					column.WithModifier(clickable.OnClick(func() {
 						fmt.Println("First Column clicked!!")
@@ -60,6 +68,7 @@ func UI(c api.Composer) api.LayoutNode {
 				text.WithModifier(background.Background(color.NRGBA{R: 200, G: 0, B: 50, A: 50})),
 			),
 			button.Button(func() {
+				counterCell.Set(counterCell.Get().(int) + 1)
 				fmt.Println("Button clicked!")
 			}, "click me"),
 		),
