@@ -53,6 +53,9 @@ func (c *composer) Build() LayoutNode {
 	for len(c.path) > 0 {
 		c.up()
 	}
+	if c.focus == nil {
+		panic("No root layout node found")
+	}
 	return c.focus
 }
 
