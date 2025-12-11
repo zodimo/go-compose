@@ -43,7 +43,6 @@ func Run(window *app.Window) error {
 			return frameEvent.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, frameEvent)
-
 			composer := compose.NewComposer(store)
 			layoutNode := UI(composer)
 

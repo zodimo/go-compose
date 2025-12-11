@@ -8,6 +8,7 @@ import (
 	"go-compose-dev/compose/foundation/material/button"
 	"go-compose-dev/compose/foundation/text"
 	"go-compose-dev/internal/modifiers/background"
+	"go-compose-dev/internal/modifiers/clickable"
 	"go-compose-dev/internal/modifiers/padding"
 	"go-compose-dev/internal/modifiers/size"
 	"go-compose-dev/internal/modifiers/weight"
@@ -23,6 +24,9 @@ func UI(c api.Composer) api.LayoutNode {
 				column.Column(
 					compose.Sequence(),
 					// column.WithModifier(size.Size(200, 200, size.SizeRequired())),
+					column.WithModifier(clickable.OnClick(func() {
+						fmt.Println("First Column clicked!!")
+					})),
 					column.WithModifier(weight.Weight(1)),
 					column.WithModifier(background.Background(color.NRGBA{R: 0, G: 0, B: 200, A: 200})),
 					column.WithModifier(padding.PaddingAll(20)),
@@ -37,6 +41,9 @@ func UI(c api.Composer) api.LayoutNode {
 					compose.Sequence(),
 					column.WithModifier(size.Size(50, 50)),
 					column.WithModifier(background.Background(color.NRGBA{R: 100, G: 0, B: 0, A: 200})),
+					column.WithModifier(clickable.OnClick(func() {
+						fmt.Println("Last Column clicked!!")
+					})),
 				),
 			),
 				row.WithModifier(size.Size(500, 300)),
