@@ -36,14 +36,17 @@ func buttonComposable(material3Button *button.Button, onClick func(), label stri
 			option(&opts)
 		}
 
-		key := c.GenerateID()
-		path := c.GetPath()
+		if opts.Button == nil {
+			key := c.GenerateID()
+			path := c.GetPath()
 
-		buttonStatePath := fmt.Sprintf("%d/%s/button", key, path)
-		buttonValue := c.State(buttonStatePath, func() any { return material3Button })
+			buttonStatePath := fmt.Sprintf("%d/%s/button", key, path)
+			buttonValue := c.State(buttonStatePath, func() any { return material3Button })
+			opts.Button = buttonValue.Get().(*button.Button)
+		}
 
 		constructorArgs := ButtonConstructorArgs{
-			buttonValue:  buttonValue,
+			Button:       opts.Button,
 			OnClick:      onClick,
 			LabelContent: label,
 		}
@@ -59,7 +62,7 @@ func buttonComposable(material3Button *button.Button, onClick func(), label stri
 }
 
 type ButtonConstructorArgs struct {
-	buttonValue  MutableValue
+	Button       *button.Button
 	OnClick      func()
 	LabelContent string
 }
@@ -68,7 +71,7 @@ func buttonWidgetConstructor(_ ButtonOptions, constructorArgs ButtonConstructorA
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 
-			button := constructorArgs.buttonValue.Get().(*button.Button)
+			button := constructorArgs.Button
 			onClick := constructorArgs.OnClick
 			if button.Clicked(gtx) {
 				onClick()
