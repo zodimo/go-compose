@@ -5,8 +5,9 @@ import (
 )
 
 type ButtonOptions struct {
-	Modifier Modifier
-	Theme    *material.Theme
+	Modifier  Modifier
+	Theme     *material.Theme
+	Clickable *GioClickable
 }
 
 type ButtonOption func(o *ButtonOptions)
@@ -20,5 +21,11 @@ func WithTheme(theme *material.Theme) ButtonOption {
 func WithModifier(modifier Modifier) ButtonOption {
 	return func(o *ButtonOptions) {
 		o.Modifier = o.Modifier.Then(modifier)
+	}
+}
+
+func WithClickable(clickable *GioClickable) ButtonOption {
+	return func(o *ButtonOptions) {
+		o.Clickable = clickable
 	}
 }

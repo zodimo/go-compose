@@ -3,7 +3,6 @@ package button
 import (
 	"fmt"
 	"go-compose-dev/internal/layoutnode"
-	"go-compose-dev/internal/state"
 
 	"gioui.org/widget"
 	"gioui.org/widget/material"
@@ -18,14 +17,17 @@ func Button(onClick func(), label string, options ...ButtonOption) Composable {
 			option(&opts)
 		}
 
-		key := c.GenerateID()
-		path := c.GetPath()
+		if opts.Clickable == nil {
+			key := c.GenerateID()
+			path := c.GetPath()
 
-		clickablePath := fmt.Sprintf("%d/%s/clickable", key, path)
-		clickable := c.State(clickablePath, func() any { return &widget.Clickable{} })
+			clickablePath := fmt.Sprintf("%d/%s/clickable", key, path)
+			clickableValue := c.State(clickablePath, func() any { return &GioClickable{} })
+			opts.Clickable = clickableValue.Get().(*widget.Clickable)
+		}
 
 		constructorArgs := ButtonConstructorArgs{
-			Clickable:    clickable,
+			Clickable:    opts.Clickable,
 			LabelContent: label,
 			OnClick:      onClick,
 		}
@@ -45,7 +47,7 @@ func GetClickablePath(c Composer) string {
 }
 
 type ButtonConstructorArgs struct {
-	Clickable    state.MutableValue
+	Clickable    *GioClickable
 	OnClick      func()
 	LabelContent string
 }
@@ -54,12 +56,12 @@ func buttonWidgetConstructor(options ButtonOptions, constructorArgs ButtonConstr
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 
-			clickable := constructorArgs.Clickable.Get().(*widget.Clickable)
+			clickable := constructorArgs.Clickable
 			if clickable.Clicked(gtx) {
 				constructorArgs.OnClick()
 			}
 
-			return material.Button(options.Theme, constructorArgs.Clickable.Get().(*widget.Clickable), constructorArgs.LabelContent).Layout(gtx)
+			return material.Button(options.Theme, constructorArgs.Clickable, constructorArgs.LabelContent).Layout(gtx)
 
 		}
 	})
