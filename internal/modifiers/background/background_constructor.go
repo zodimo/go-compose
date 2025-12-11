@@ -1,18 +1,17 @@
 package background
 
 import (
-	"go-compose-dev/compose/ui/graphics"
 	"go-compose-dev/internal/modifier"
 	"image/color"
 )
 
 type BackgroundOptions struct {
-	Shape graphics.Shape
+	Shape Shape
 }
 
 func DefaultBackgroundOptions() BackgroundOptions {
 	return BackgroundOptions{
-		Shape: graphics.ShapeRectangle,
+		Shape: ShapeRectangle,
 	}
 }
 

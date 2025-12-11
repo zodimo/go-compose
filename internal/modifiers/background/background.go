@@ -1,13 +1,12 @@
 package background
 
 import (
-	"go-compose-dev/compose/ui/graphics"
 	"image/color"
 )
 
 type BackgroundData struct {
 	Color color.Color
-	Shape graphics.Shape
+	Shape Shape
 }
 
 func CompareBackground(a, b BackgroundData) bool {

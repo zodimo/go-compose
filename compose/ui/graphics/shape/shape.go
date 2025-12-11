@@ -1,4 +1,4 @@
-package graphics
+package shape
 
 import "fmt"
 
@@ -9,15 +9,15 @@ type Shape int
 
 const (
 	ShapeRectangle Shape = iota // default
-	// ShapeCircle
+	ShapeCircle
 )
 
 func (s Shape) String() string {
 	switch s {
 	case ShapeRectangle:
 		return "ShapeRectangle"
-	// case ShapeCircle:
-	// 	return "ShapeCircle"
+	case ShapeCircle:
+		return "ShapeCircle"
 	default:
 		return fmt.Sprintf("UnknownShape(%d)", s)
 	}

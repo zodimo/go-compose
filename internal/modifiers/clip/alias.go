@@ -1,4 +1,4 @@
-package background
+package clip
 
 import (
 	"go-compose-dev/compose/ui/graphics/shape"
