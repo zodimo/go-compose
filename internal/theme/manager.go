@@ -1,6 +1,7 @@
 package theme
 
 import (
+	"image/color"
 	"sync"
 
 	"gioui.org/layout"
@@ -17,6 +18,9 @@ type ThemeManager interface {
 
 	Material3ThemeInit(gtx layout.Context) layout.Context
 	SetMaterial3Theme(gtx layout.Context, theme *token.Theme)
+	GetMaterial3Theme() *token.Theme
+
+	ThemeColor() ThemeColor
 }
 
 var _ ThemeManager = (*themeManager)(nil)
@@ -63,6 +67,19 @@ func (tm *themeManager) SetMaterial3Theme(gtx layout.Context, theme *token.Theme
 	tm.material3Theme = theme
 }
 
+func (tm *themeManager) GetMaterial3Theme() *token.Theme {
+	tm.mu.RLock()
+	defer tm.mu.RUnlock()
+	if tm.material3Theme == nil {
+		panic("material3Theme is nil")
+	}
+	return tm.material3Theme
+}
+
+func (tm *themeManager) ThemeColor() ThemeColor {
+	return newThemeColor(tm)
+}
+
 func GetThemeManager() ThemeManager {
 	return themeManagerSingleton
 }
@@ -70,4 +87,24 @@ func GetThemeManager() ThemeManager {
 func init() {
 	themeManagerSingleton = newThemeManager(defaultMaterialTheme())
 
+}
+
+type ThemeColor interface {
+	Material3(func(theme *token.Theme) color.Color) color.Color
+	Material(func(theme *material.Theme) color.Color) color.Color
+}
+
+type themeColor struct {
+	tm ThemeManager
+}
+
+func (tc *themeColor) Material3(reader func(theme *token.Theme) color.Color) color.Color {
+	return reader(tc.tm.GetMaterial3Theme())
+}
+
+func (tc *themeColor) Material(reader func(theme *material.Theme) color.Color) color.Color {
+	return reader(tc.tm.MaterialTheme())
+}
+func newThemeColor(tm ThemeManager) ThemeColor {
+	return &themeColor{tm: tm}
 }
