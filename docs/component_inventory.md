@@ -57,7 +57,7 @@ This document tracks the status of Jetpack Compose components within `go-compose
 | **Checkbox** | ✅ Implemented | `widget/checkbox` | `compose/foundation/material3/checkbox` |
 | **Chips** | ❌ Missing | - | Assist, Filter, Input, Suggestion chips. |
 | **Date Picker** | ❌ Missing | - | |
-| **Menus** | 📦 Available | `widget/overlay` | `gio-mw` likely uses overlays for Dropdown Menus. |
+| **Menus** | ✅ Implemented | `widget/overlay` | `compose/foundation/material3/menu`. Using Card for now (inline). |
 | **Radio Button** | ✅ Implemented | `widget/radio` | `compose/foundation/material3/radiobutton` |
 | **Sliders** | 📦 Available | `widget/slider` | |
 | **Switch** | ✅ Implemented | `widget/toggle` | `compose/foundation/material3/switch` |
