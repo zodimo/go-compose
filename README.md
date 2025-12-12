@@ -13,7 +13,7 @@ Comparison of official Material 3 components with their implementation status in
 | **Buttons** | 🟢 `widget/button` | 🟢 Implemented | |
 | **Buttons: Extended FAB** | 🟢 `widget/button` | 🔴 Todo | Likely a variant of Button |
 | **Buttons: FAB** | 🟢 `widget/button` | 🔴 Todo | Likely a variant of Button |
-| **Buttons: Icon button** | 🟢 `widget/button` | 🔴 Todo | Likely a variant of Button |
+| **Buttons: Icon button** | 🟢 `widget/button` | 🟢 Implemented | Likely a variant of Button |
 | **Buttons: Segmented** | 🔴 Missing | 🔴 Todo | |
 | **Cards** | 🟢 `widget/card` | 🟢 Implemented | |
 | **Carousel** | 🔴 Missing | 🔴 Todo | |
@@ -23,16 +23,16 @@ Comparison of official Material 3 components with their implementation status in
 | **Dialogs** | 🟢 `widget/dialog` | 🟢 Implemented | |
 | **Divider** | 🟢 `widget/divider` | 🟢 Implemented | |
 | **Lists** | 🔴 Missing | 🔴 Todo | Core `gio.List` exists, but M3 styles missing |
-| **Menus** |  Missing | 🔴 Todo | |
+| **Menus** | 🔴 Missing | 🟢 Implemented | |
 | **Navigation bar** | 🔴 Missing | 🔴 Todo | Bottom Navigation |
 | **Navigation drawer** | 🔴 Missing | 🟢 Implemented | Modal |
 | **Navigation rail** | 🟢 `widget/rail` | 🟢 Implemented | |
-| **Progress indicators** |  `widget/indicator` | 🔴 Todo | |
+| **Progress indicators** | 🟢 `widget/indicator` | 🟢 Implemented | |
 | **Radio button** | 🟢 `widget/radio` | 🟢 Implemented | |
 | **Search** |  `widget/search` | 🔴 Todo | |
 | **Side sheets** |  `widget/sheet` | 🔴 Todo | |
 | **Sliders** |  `widget/slider` | 🔴 Todo | |
-| **Snackbars** |  `widget/snackbar` | 🔴 Todo | |
+| **Snackbars** | 🟢 `widget/snackbar` | 🟢 Implemented | |
 | **Switch** | 🟢 `widget/toggle` | 🟢 Implemented | |
 | **Surface** | 🟢 `exp` | 🟢 Implemented | Core primitive (Shadows, Borders, Shapes) |
 | **Tabs** |  `widget/tab` | 🔴 Todo | |
