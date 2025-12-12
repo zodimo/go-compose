@@ -21,7 +21,7 @@ func main() {
 		w := new(app.Window)
 		w.Option(
 			app.Title("Dialogs Kitchen Sink"),
-			app.Size(unit.Dp(640), unit.Dp(900)),
+			app.Size(unit.Dp(1024), unit.Dp(1024)),
 		)
 
 		if err := Run(w); err != nil {
