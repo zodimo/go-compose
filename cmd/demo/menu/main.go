@@ -62,6 +62,9 @@ func Run(window *app.Window) error {
 			callOp.Add(gtx.Ops)
 			frameEvent.Frame(gtx.Ops)
 
+			// until state changes, invalidate the window
+			window.Invalidate()
+
 		}
 	}
 
