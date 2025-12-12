@@ -3,7 +3,9 @@
 Example from gio tests
 
 ```go
-import 	"gioui.org/gpu/headless"
+import 	(
+    "gioui.org/gpu/headless"
+)
 
 width := lineWidth
 height := 100
@@ -24,4 +26,16 @@ _ = png.Encode(b, cap)
 screenshotName := tc.name + ".png"
 _ = os.WriteFile(screenshotName, b.Bytes(), 0o644)
 t.Logf("wrote %q", screenshotName)
+```
+
+# Create a Recording
+```go
+
+import 	(
+    "gioui.org/op"
+)
+//gtx layout.Context
+macro := op.Record(gtx.Ops)
+// call node.Layout(gtx) or similar
+callOp := macro.Stop()
 ```
