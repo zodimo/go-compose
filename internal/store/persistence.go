@@ -55,11 +55,16 @@ func (mv *MutableValue) Set(value any) {
 }
 
 type PersistentState struct {
-	scopes map[string]MutableValueInterface
+	scopes        map[string]MutableValueInterface
+	onStateChange func()
 }
 
 func NewPersistentState(scopes map[string]MutableValueInterface) PersistentStateInterface {
 	return &PersistentState{scopes: scopes}
+}
+
+func (ps *PersistentState) SetOnStateChange(callback func()) {
+	ps.onStateChange = callback
 }
 
 func (ps *PersistentState) GetState(id string, initial func() any) MutableValueInterface {
@@ -67,9 +72,13 @@ func (ps *PersistentState) GetState(id string, initial func() any) MutableValueI
 		return v
 	}
 	ps.scopes[id] = &MutableValue{
-		cell:           initial(),
-		changeNotifier: nil,
-		compare:        reflect.DeepEqual,
+		cell: initial(),
+		changeNotifier: func(any) {
+			if ps.onStateChange != nil {
+				ps.onStateChange()
+			}
+		},
+		compare: reflect.DeepEqual,
 	}
 	return ps.scopes[id]
 }

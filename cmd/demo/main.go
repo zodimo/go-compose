@@ -39,6 +39,9 @@ func Run(window *app.Window) error {
 	var ops op.Ops
 
 	store := store.NewPersistentState(map[string]state.MutableValue{})
+	store.SetOnStateChange(func() {
+		window.Invalidate()
+	})
 	runtime := runtime.NewRuntime()
 
 	themeManager := theme.GetThemeManager()
