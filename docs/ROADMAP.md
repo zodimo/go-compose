@@ -27,7 +27,7 @@ To provide a feature-complete, idiomatic Go implementation of Jetpack Compose's 
 - [ ] **Grids**: Lazy grids.
 - [ ] **Chips**:
     - [x] Chips (Assist, Filter, Input, Suggestion) chips.
-- [ ] **Badges**: Integration with navigation items and icons.
+- [x] **Badges**: Integration with navigation items and icons.
 - [ ] **Tooltips**: Plain and rich tooltips for desktop/mouse users.
 
 ### Phase 3: Extended Inputs
