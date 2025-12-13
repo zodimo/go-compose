@@ -47,6 +47,9 @@ func (ln *layoutNode) Modifier(apply func(modifier Modifier) Modifier) {
 }
 
 func (ln *layoutNode) UnwrapModifier() Modifier {
+	if ln.modifier == nil {
+		return EmptyModifier
+	}
 	return ln.modifier
 }
 
@@ -102,6 +105,9 @@ func (n *layoutNode) SetWidgetConstructor(constructor LayoutNodeWidgetConstructo
 }
 
 func (n *layoutNode) GetWidgetConstructor() LayoutNodeWidgetConstructor {
+	if n.innerWidgetConstructor == nil {
+		panic("no layout node widget constructor set")
+	}
 	return n.innerWidgetConstructor
 }
 
