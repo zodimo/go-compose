@@ -48,7 +48,7 @@ This document tracks the status of Jetpack Compose components within `go-compose
 | **Navigation Bar** | ✅ Implemented | - | Bottom Navigation (`navigationbar`). |
 | **Navigation Drawer** | ✅ Implemented | - | - [x] Navigation Drawer (Modal) - [x] Navigation Drawer Item |
 | **Navigation Rail** | ✅ Implemented | `widget/rail` | `compose/foundation/material3/navigationrail` (Prototype Implemented) |
-| **Tabs** | 📦 Available | `widget/tab` | |
+| Tabs | 🟢 Implemented | `widget.tab` (Basic) | `compose/foundation/material3/tab` |
 
 ## Selection
 
