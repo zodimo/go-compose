@@ -28,7 +28,7 @@ To provide a feature-complete, idiomatic Go implementation of Jetpack Compose's 
 - [ ] **Chips**:
     - [x] Chips (Assist, Filter, Input, Suggestion) chips.
 - [x] **Badges**: Integration with navigation items and icons.
-- [ ] **Tooltips**: Plain and rich tooltips for desktop/mouse users.
+- [x] **Tooltips**: Plain and rich tooltips for desktop/mouse users. (Basic implementation done, known issues with buttons)
 
 ### Phase 3: Extended Inputs
 *Focus: Complex user inputs.*

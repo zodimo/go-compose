@@ -8,7 +8,7 @@ Comparison of official Material 3 components with their implementation status in
 | :--- | :--- | :--- | :--- |
 | **App bars: Bottom** | 🔴 Missing | 🟢 Implemented | |
 | **App bars: Top** | 🔴 Missing | 🟢 Implemented | |
-| **Badge** | 🟢 `widget/badge` | 🔴 Todo | |
+| **Badge** | 🟢 `widget/badge` | 🟢 Implemented | |
 | **Bottom sheets** | 🟢 `widget/sheet` | 🔴 Todo | |
 | **Buttons** | 🟢 `widget/button` | 🟢 Implemented | |
 | **Buttons: Extended FAB** | 🟢 `widget/button` | 🔴 Todo | Likely a variant of Button |
@@ -38,4 +38,4 @@ Comparison of official Material 3 components with their implementation status in
 | **Tabs** |  `widget/tab` | 🔴 Todo | |
 | **Text fields** | 🟢 `widget/input` | 🟢 Implemented | |
 | **Time pickers** | 🔴 Missing | 🔴 Todo | |
-| **Tooltips** | � `widget/tooltip` | 🔴 Todo | |
+| **Tooltips** | 🟢 `widget/tooltip` | 🟢 Implemented | |
