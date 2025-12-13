@@ -1,7 +1,6 @@
 package scaffold
 
 import (
-	"go-compose-dev/compose/foundation/layout/padding"
 	"go-compose-dev/internal/modifier"
 	"go-compose-dev/pkg/api"
 )
@@ -12,5 +11,3 @@ var EmptyModifier = modifier.EmptyModifier
 
 type Composable = api.Composable
 type Composer = api.Composer
-
-type PaddingValues = padding.PaddingValues
