@@ -34,9 +34,9 @@ To provide a feature-complete, idiomatic Go implementation of Jetpack Compose's 
 *Focus: Complex user inputs.*
 
 - [x] **Sliders**:
-    - [ ] Continuous and Discrete sliders.
+    - [x] Continuous and Discrete sliders.
     - [ ] Range sliders.
-    - [ ] Custom thumb and track support.
+    - [x] Custom thumb and track support.
 - [ ] **Pickers**:
     - [ ] Date Picker (Modal and Docked).
     - [ ] Time Picker (Dial and Input).
@@ -65,7 +65,7 @@ To provide a feature-complete, idiomatic Go implementation of Jetpack Compose's 
 | **Communication** | 🟡 Partial | Tooltips, Badges |
 | **Containment** | 🟡 Partial | Scaffold, Bottom Sheet |
 | **Navigation** | 🔴 Early | App Bars, Bottom Nav |
-| **Selection** | 🟡 Partial | Chips, Pickers, Sliders |
+| **Selection** | 🟡 Partial | Chips, Pickers |
 | **Text Inputs** | 🟢 Good | Search Bar |
 
 ## Recent Milestones (Completed)
