@@ -13,7 +13,7 @@ To provide a feature-complete, idiomatic Go implementation of Jetpack Compose's 
 
 - [x] **Scaffold**: The core layout structure for screens.
 - [ ] **App Bars**:
-    - [ ] Top App Bar (Small, CenterAligned, Medium, Large)
+    - [/] Top App Bar (Small, CenterAligned, Medium, Large)
     - [ ] Bottom App Bar
 - [ ] **Bottom Navigation**: `NavigationBar` and `NavigationBarItem`.
 - [ ] **Navigation Drawer**: Polish existing implementation and ensure full M3 compliance (standard vs modal).
