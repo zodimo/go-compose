@@ -2,6 +2,7 @@ package surface
 
 import (
 	"go-compose-dev/compose/foundation/layout/box"
+	"go-compose-dev/internal/modifier"
 	"go-compose-dev/internal/modifiers/background"
 	"go-compose-dev/internal/modifiers/border"
 	"go-compose-dev/internal/modifiers/clip"
@@ -23,11 +24,19 @@ func Surface(
 		// Apply modifiers: Clip then Background.
 		// Shadow should be behind everything.
 
-		surfaceModifier := opts.Modifier.
+		// Apply modifiers:
+		// 1. Shadow (doesn't clip, sits behind)
+		// 2. Clip (applies to everything following)
+		// 3. Background (respects clip)
+		// 4. Border (respects clip)
+		// 5. Custom Modifiers (clickable, etc. - should respect clip)
+
+		surfaceModifier := modifier.EmptyModifier.
 			Then(shadow.Simple(opts.ShadowElevation, opts.Shape)).
 			Then(clip.Clip(opts.Shape)).
 			Then(background.Background(opts.Color, func(o *background.BackgroundOptions) { o.Shape = opts.Shape })).
-			Then(border.Border(opts.BorderWidth, opts.BorderColor, opts.Shape))
+			Then(border.Border(opts.BorderWidth, opts.BorderColor, opts.Shape)).
+			Then(opts.Modifier)
 
 		// Use Box to hold content and apply modifiers
 		return box.Box(content, box.WithModifier(surfaceModifier), box.WithAlignment(opts.Alignment))(c)

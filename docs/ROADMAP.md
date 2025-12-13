@@ -61,7 +61,7 @@ To provide a feature-complete, idiomatic Go implementation of Jetpack Compose's 
 
 | Component Group | Status | Key Missing Items |
 | :--- | :--- | :--- |
-| **Actions** | 🟡 Partial | Segmented Button, Ext. FAB |
+| **Actions** | 🟡 Partial | [x] Floating Action Button (Basic implementation done), Segmented Button, Ext. FAB |
 | **Communication** | 🟡 Partial | Tooltips, Badges |
 | **Containment** | 🟡 Partial | Scaffold, Bottom Sheet |
 | **Navigation** | 🔴 Early | App Bars, Bottom Nav |
