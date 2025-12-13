@@ -6,6 +6,6 @@ import (
 
 type ColorReader = func(themeColor ThemeColor) color.Color
 
-type ThemeColorSet struct {
+type ThemeColorSetter struct {
 	ThemeColor ColorReader
 }
