@@ -11,7 +11,7 @@ To provide a feature-complete, idiomatic Go implementation of Jetpack Compose's 
 ### Phase 1: Structure & Navigation (App Shell)
 *Focus: Enabling full application layouts.*
 
-- [ ] **Scaffold**: The core layout structure for screens.
+- [x] **Scaffold**: The core layout structure for screens.
 - [ ] **App Bars**:
     - [ ] Top App Bar (Small, CenterAligned, Medium, Large)
     - [ ] Bottom App Bar
