@@ -15,8 +15,6 @@ import (
 	"git.sr.ht/~schnwalter/gio-mw/token"
 )
 
-const FloatingActionButtonNodeID = "FloatingActionButton"
-
 // FloatingActionButton is a Material 3 Floating Action Button.
 // It sits above the content and represents the primary action.
 func FloatingActionButton(
