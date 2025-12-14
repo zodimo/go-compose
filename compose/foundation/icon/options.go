@@ -7,8 +7,9 @@ import (
 )
 
 type IconOptions struct {
-	Modifier Modifier
-	Color    maybe.Maybe[ColorDescriptor]
+	Modifier  Modifier
+	Color     maybe.Maybe[ColorDescriptor]
+	LazyColor maybe.Maybe[func() ColorDescriptor]
 }
 
 type IconOption func(*IconOptions)
@@ -17,7 +18,8 @@ func DefaultIconOptions() IconOptions {
 	return IconOptions{
 		Modifier: EmptyModifier,
 		// Default Fallback is black
-		Color: maybe.None[ColorDescriptor](),
+		Color:     maybe.None[ColorDescriptor](),
+		LazyColor: maybe.None[func() ColorDescriptor](),
 	}
 }
 
@@ -36,5 +38,10 @@ func WithColor(color color.Color) IconOption {
 func WithColorDescriptor(desc ColorDescriptor) IconOption {
 	return func(o *IconOptions) {
 		o.Color = maybe.Some(desc)
+	}
+}
+func WithLazyColorDescriptor(desc func() ColorDescriptor) IconOption {
+	return func(o *IconOptions) {
+		o.LazyColor = maybe.Some(desc)
 	}
 }
