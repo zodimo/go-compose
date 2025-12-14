@@ -33,3 +33,9 @@ func Sequence(contents ...Composable) Composable {
 		return NewComposableSequence(contents).Compose(c)
 	}
 }
+
+func Id() Composable {
+	return func(c Composer) Composer {
+		return c
+	}
+}
