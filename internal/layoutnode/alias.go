@@ -5,7 +5,7 @@ import (
 	"github.com/zodimo/go-compose/internal/identity"
 	"github.com/zodimo/go-compose/internal/immap"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/internal/state"
+	"github.com/zodimo/go-compose/state"
 
 	"gioui.org/layout"
 	"gioui.org/op"

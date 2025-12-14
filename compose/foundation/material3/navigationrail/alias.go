@@ -2,8 +2,8 @@ package navigationrail
 
 import (
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/internal/state"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/state"
 	"github.com/zodimo/go-compose/theme"
 )
 

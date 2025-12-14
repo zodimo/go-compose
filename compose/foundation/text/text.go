@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/zodimo/go-compose/internal/layoutnode"
-	"github.com/zodimo/go-compose/internal/state"
+	"github.com/zodimo/go-compose/state"
 
 	"gioui.org/op"
 	"gioui.org/op/paint"

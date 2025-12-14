@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/zodimo/go-compose/internal/state"
+	"github.com/zodimo/go-compose/state"
 )
 
 type MutableValueInterface = state.MutableValue
