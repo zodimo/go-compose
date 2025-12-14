@@ -38,7 +38,8 @@ This workflow guides you through implementing a new UI component in `go-compose-
 2. **Screenshot Test**:
    - Create `cmd/demo/[component]/screenshot_test.go`.
    - Use `screenshot.TakeScreenshot` to capture the `UI()` state.
-   - Run `go test ./cmd/demo/[component]/...` to verify.
+   - Run `go test ./cmd/demo/[component]/...` to generate the screenshot.
+   - **Visual Verification**: This is for visual inspection by you (the agent), not a unit test per se. Use the resulting screenshot to verify that visual expectations are met.
 
 ## 5. Documentation & Finalization
 1. **Update Roadmap**:
