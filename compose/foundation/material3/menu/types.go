@@ -1,7 +1,7 @@
 package menu
 
 import (
-	"github.com/zodimo/go-compose/internal/theme"
+	"github.com/zodimo/go-compose/theme"
 
 	"git.sr.ht/~schnwalter/gio-mw/token"
 )

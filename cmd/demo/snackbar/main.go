@@ -13,7 +13,7 @@ import (
 	"github.com/zodimo/go-compose/compose/runtime"
 	"github.com/zodimo/go-compose/internal/state"
 	"github.com/zodimo/go-compose/internal/store"
-	"github.com/zodimo/go-compose/internal/theme"
+	"github.com/zodimo/go-compose/theme"
 )
 
 func main() {

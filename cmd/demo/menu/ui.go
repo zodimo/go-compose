@@ -11,8 +11,8 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/scaffold"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/internal/modifiers/padding"
-	"github.com/zodimo/go-compose/internal/theme"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/unit"
 	mdicons "golang.org/x/exp/shiny/materialdesign/icons"

@@ -12,7 +12,7 @@ import (
 	"github.com/zodimo/go-compose/internal/screenshot"
 	"github.com/zodimo/go-compose/internal/state"
 	"github.com/zodimo/go-compose/internal/store"
-	"github.com/zodimo/go-compose/internal/theme"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/io/system"
 	"gioui.org/layout"

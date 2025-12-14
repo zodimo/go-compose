@@ -4,7 +4,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/internal/modifiers/padding"
 	"github.com/zodimo/go-compose/internal/modifiers/size"
-	"github.com/zodimo/go-compose/internal/theme"
+	"github.com/zodimo/go-compose/theme"
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/foundation/material3/surface"

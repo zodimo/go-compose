@@ -6,7 +6,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/surface"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/modifiers/size"
-	"github.com/zodimo/go-compose/internal/theme"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/unit"
 )

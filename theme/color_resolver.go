@@ -3,7 +3,7 @@ package theme
 import (
 	"fmt"
 
-	"github.com/zodimo/go-compose/internal/theme/colorrole"
+	"github.com/zodimo/go-compose/theme/colorrole"
 )
 
 type ThemeColorReaderFunc func(theme *Theme) ThemeColor

@@ -21,8 +21,8 @@ import (
 	"github.com/zodimo/go-compose/internal/modifiers/padding"
 	"github.com/zodimo/go-compose/internal/state"
 	"github.com/zodimo/go-compose/internal/store"
-	"github.com/zodimo/go-compose/internal/theme"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/theme"
 )
 
 func main() {

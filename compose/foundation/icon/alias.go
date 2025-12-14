@@ -5,8 +5,8 @@ import (
 
 	"github.com/zodimo/go-compose/internal/color/colorhelper"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/internal/theme"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/layout"
 	// . "golang.org/x/exp/shiny/materialdesign/icons"

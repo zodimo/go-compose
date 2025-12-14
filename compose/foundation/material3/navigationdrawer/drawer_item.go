@@ -12,7 +12,7 @@ import (
 	"github.com/zodimo/go-compose/internal/modifiers/clip"
 	"github.com/zodimo/go-compose/internal/modifiers/padding"
 	"github.com/zodimo/go-compose/internal/modifiers/size"
-	"github.com/zodimo/go-compose/internal/theme"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/unit"
 	"gioui.org/widget"

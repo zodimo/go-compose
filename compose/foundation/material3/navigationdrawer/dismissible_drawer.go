@@ -11,7 +11,7 @@ import (
 	"github.com/zodimo/go-compose/internal/modifier"
 	animMod "github.com/zodimo/go-compose/internal/modifiers/animation"
 	"github.com/zodimo/go-compose/internal/modifiers/size"
-	"github.com/zodimo/go-compose/internal/theme"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/unit"
 )

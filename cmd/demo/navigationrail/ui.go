@@ -16,7 +16,7 @@ import (
 	"github.com/zodimo/go-compose/internal/modifiers/clickable"
 	"github.com/zodimo/go-compose/internal/modifiers/padding"
 	"github.com/zodimo/go-compose/internal/modifiers/size"
-	"github.com/zodimo/go-compose/internal/theme"
+	"github.com/zodimo/go-compose/theme"
 
 	"github.com/zodimo/go-compose/pkg/api"
 
