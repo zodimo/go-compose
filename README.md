@@ -1,4 +1,4 @@
-# Testbed for go-compose
+# go-compose
 
 ## Material 3 Component Inventory
 
