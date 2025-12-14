@@ -9,7 +9,6 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/button"
 	"github.com/zodimo/go-compose/compose/foundation/material3/menu"
 	"github.com/zodimo/go-compose/compose/foundation/material3/scaffold"
-	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/theme"
@@ -71,7 +70,7 @@ func UI() api.Composable {
 										return c
 									},
 									// Options
-									menu.WithModifier(modifier.EmptyModifier),
+									menu.WithModifier(api.EmptyModifier),
 									menu.WithOffset(unit.Dp(0), unit.Dp(0)),
 								)(c)
 								return c

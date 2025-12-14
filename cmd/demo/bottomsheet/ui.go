@@ -7,7 +7,6 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/button"
 	"github.com/zodimo/go-compose/compose/foundation/material3/scaffold"
 	"github.com/zodimo/go-compose/compose/foundation/material3/text"
-	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/pkg/api"
 )
@@ -34,7 +33,7 @@ func UI(c api.Composer) api.LayoutNode {
 					)(c)
 					return c
 				},
-				column.WithModifier(modifier.EmptyModifier.Then(padding.All(24))),
+				column.WithModifier(api.EmptyModifier.Then(padding.All(24))),
 			)(c)
 		},
 		// Screen Content
@@ -54,7 +53,7 @@ func UI(c api.Composer) api.LayoutNode {
 							)(c)
 							return c
 						},
-						column.WithModifier(modifier.EmptyModifier.Then(padding.All(24))),
+						column.WithModifier(api.EmptyModifier.Then(padding.All(24))),
 					)(c)
 				},
 			)(c)

@@ -12,7 +12,6 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/navigationdrawer"
 	"github.com/zodimo/go-compose/compose/foundation/material3/text"
 	ftext "github.com/zodimo/go-compose/compose/foundation/text"
-	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/modifiers/background"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -55,7 +54,7 @@ func UI() api.Composable {
 								text.Text(item, text.TypestyleBodyMedium)(c)
 								return c
 							},
-							modifier.EmptyModifier,
+							api.EmptyModifier,
 						)(c)
 					}
 					return c
@@ -146,13 +145,13 @@ func UI() api.Composable {
 					navigationdrawer.PermanentNavigationDrawer(
 						drawerContent,
 						mainContent,
-						modifier.EmptyModifier,
+						api.EmptyModifier,
 					)(c)
 				}
 				return c
 			},
 			box.WithModifier(
-				modifier.EmptyModifier.
+				api.EmptyModifier.
 					Then(size.FillMax()).
 					Then(background.Background(color.NRGBA{255, 255, 255, 255})),
 			),

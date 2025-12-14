@@ -9,14 +9,13 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/scaffold"
 	"github.com/zodimo/go-compose/compose/foundation/material3/slider"
 	m3text "github.com/zodimo/go-compose/compose/foundation/material3/text"
-	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/pkg/api"
 )
 
 type Composable = api.Composable
 type Composer = api.Composer
-type Modifier = modifier.Modifier
+type Modifier = api.Modifier
 
 func UI() Composable {
 	return func(c Composer) Composer {
