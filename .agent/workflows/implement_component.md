@@ -21,7 +21,8 @@ This workflow guides you through implementing a new UI component in `go-compose-
    - Define the main Composable function (e.g., `func MyComponent(...)`).
    - Implement logic using `gioui.org` primitives or `gio-mw` helpers.
 2. **Define Styles & Defaults**:
-   - Create `types.go` or `[component]_options.go` for options patterns.
+   - Create `[component]_options.go` defining the options struct and functional option helpers.
+   - Use the **Functional Options Pattern** for API flexibility (e.g., `WithModifier`, `WithColor`).
    - Define standard modifications via `Modifier`.
 
 ## 3. Demo Creation
