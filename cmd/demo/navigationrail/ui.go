@@ -71,7 +71,7 @@ func UI() api.Composable {
 								//Icon
 								icon.Icon(
 									item.Icon,
-									icon.WithThemeColor(func(tc theme.ThemeColor) color.Color {
+									icon.WithThemeColor(func(tc theme.ThemeColorResolver) color.Color {
 										return tc.Material3(func(t *token.Theme) color.Color {
 											if isSelected {
 												return t.Scheme.SecondaryContainer.OnColor.AsNRGBA()
@@ -158,7 +158,7 @@ func UI() api.Composable {
 										//icon
 										icon.Icon(
 											item.Icon,
-											icon.WithThemeColor(func(tc theme.ThemeColor) color.Color {
+											icon.WithThemeColor(func(tc theme.ThemeColorResolver) color.Color {
 												return tc.Material3(func(t *token.Theme) color.Color {
 													if isSelected {
 														return t.Scheme.SecondaryContainer.OnColor.AsNRGBA()

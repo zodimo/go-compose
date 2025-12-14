@@ -20,7 +20,7 @@ type ThemeManager interface {
 	SetMaterial3Theme(gtx layout.Context, theme *token.Theme)
 	GetMaterial3Theme() *token.Theme
 
-	ThemeColor() ThemeColor
+	ThemeColorResolver() ThemeColorResolver
 }
 
 var _ ThemeManager = (*themeManager)(nil)
@@ -76,7 +76,7 @@ func (tm *themeManager) GetMaterial3Theme() *token.Theme {
 	return tm.material3Theme
 }
 
-func (tm *themeManager) ThemeColor() ThemeColor {
+func (tm *themeManager) ThemeColorResolver() ThemeColorResolver {
 	return newThemeColor(tm)
 }
 
@@ -89,22 +89,22 @@ func init() {
 
 }
 
-type ThemeColor interface {
+type ThemeColorResolver interface {
 	Material3(func(theme *token.Theme) color.Color) color.Color
 	Material(func(theme *material.Theme) color.Color) color.Color
 }
 
-type themeColor struct {
+type themeColorResolver struct {
 	tm ThemeManager
 }
 
-func (tc *themeColor) Material3(reader func(theme *token.Theme) color.Color) color.Color {
+func (tc *themeColorResolver) Material3(reader func(theme *token.Theme) color.Color) color.Color {
 	return reader(tc.tm.GetMaterial3Theme())
 }
 
-func (tc *themeColor) Material(reader func(theme *material.Theme) color.Color) color.Color {
+func (tc *themeColorResolver) Material(reader func(theme *material.Theme) color.Color) color.Color {
 	return reader(tc.tm.MaterialTheme())
 }
-func newThemeColor(tm ThemeManager) ThemeColor {
-	return &themeColor{tm: tm}
+func newThemeColor(tm ThemeManager) ThemeColorResolver {
+	return &themeColorResolver{tm: tm}
 }

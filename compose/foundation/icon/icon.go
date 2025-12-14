@@ -37,7 +37,7 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte) layoutnode.Layo
 
 			if options.ThemeColor.IsSome() {
 				themeManager := theme.GetThemeManager()
-				return iconWidget(gtx, options.ThemeColor.UnwrapUnsafe().ThemeColor(themeManager.ThemeColor()))
+				return iconWidget(gtx, options.ThemeColor.UnwrapUnsafe().ThemeColor(themeManager.ThemeColorResolver()))
 			}
 
 			return iconWidget(gtx, options.Color)
