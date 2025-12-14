@@ -28,22 +28,25 @@ func SingleRowTopAppBar(
 		func(c Composer) Composer {
 
 			return row.Row(
-				func(c Composer) Composer {
-					// Navigation Icon
-					if navigationIcon != nil {
-						box.Box(
-							surface.Surface(
-								navigationIcon,
-								surface.WithContentColor(colors.NavigationIconContentColor),
-								surface.WithColor(color.NRGBA{}), // Transparent background
-							),
-							box.WithAlignment(layout.W),
-							box.WithModifier(padding_modifier.Padding(4, 0, 0, 0)), // Start(4)
-						)(c)
-					} else {
-						// Spacer if no navigation icon but we want alignment consistency?
-						// Material 3 doesn't strictly require a spacer if missing.
-					}
+				compose.Sequence(
+					func(c Composer) Composer {
+						// Navigation Icon
+						if navigationIcon != nil {
+							box.Box(
+								surface.Surface(
+									navigationIcon,
+									surface.WithContentColor(colors.NavigationIconContentColor),
+									surface.WithColor(color.NRGBA{}), // Transparent background
+								),
+								box.WithAlignment(layout.W),
+								box.WithModifier(padding_modifier.Padding(4, 0, 0, 0)), // Start(4)
+							)(c)
+						} else {
+							// Spacer if no navigation icon but we want alignment consistency?
+							// Material 3 doesn't strictly require a spacer if missing.
+						}
+						return c
+					},
 
 					// Title
 					box.Box(
@@ -60,18 +63,20 @@ func SingleRowTopAppBar(
 						box.WithModifier(weight.Weight(1)),                    // Occupy remaining space
 						box.WithAlignment(layout.W),                           // Align text to start
 						box.WithModifier(padding_modifier.Horizontal(16, 16)), // Horizontal(16, 16)
-					)(c)
-
-					// Actions
-					if len(actions) > 0 {
-						row.Row(
-							compose.Sequence(actions...),
-							row.WithAlignment(row.Middle),
-							row.WithModifier(padding_modifier.Padding(0, 0, 4, 0)), // End(4)
-						)(c)
-					}
-					return c
-				},
+					),
+					box.Box(compose.Id(), box.WithModifier(weight.Weight(1))),
+					func(c Composer) Composer {
+						// Actions
+						if len(actions) > 0 {
+							row.Row(
+								compose.Sequence(actions...),
+								row.WithAlignment(row.Middle),
+								row.WithModifier(padding_modifier.Padding(0, 0, 4, 0)), // End(4)
+							)(c)
+						}
+						return c
+					},
+				),
 				row.WithModifier(size.FillMaxWidth()),
 				row.WithModifier(size.Height(64)), // Standard Height
 				row.WithAlignment(row.Middle),     // Vertical Alignment
@@ -143,10 +148,7 @@ func CenterAlignedTopAppBar(
 								}
 
 								// Spacer to push Actions to end
-								box.Box(
-									func(c Composer) Composer { return c },
-									box.WithModifier(weight.Weight(1)),
-								)(c)
+								box.Box(compose.Id(), box.WithModifier(weight.Weight(1)))(c)
 
 								// Actions
 								if len(opts.Actions) > 0 {
