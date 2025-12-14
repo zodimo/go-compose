@@ -12,8 +12,6 @@ import (
 	"gioui.org/widget"
 )
 
-const Material3ChipNodeID = "Material3Chip"
-
 // AssistChip represents a Material 3 Assist Chip.
 // Assist chips represent smart or automated actions that can span multiple apps,
 // such as opening a calendar event from the home screen.
