@@ -164,9 +164,12 @@ func newThemeColorResolver(tm ThemeManager) ThemeColorResolver {
 	return &themeColorResolver{tm: tm}
 }
 
-func (cr *themeColorResolver) applyUpdates(updates []func(color TokenColor) TokenColor, color TokenColor) ThemeColor {
+func (cr *themeColorResolver) applyUpdates(updates []ThemeColorUpdate, color TokenColor) ThemeColor {
 	for _, update := range updates {
-		color = update(color)
+		switch update.Action() {
+		case ThemeColorUpdateActionsSetOpacity:
+			color = color.SetOpacity(GetOpacity(update))
+		}
 	}
 	return ThemeColorFromTokenColor(color)
 }
