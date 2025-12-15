@@ -2,6 +2,71 @@ package theme
 
 import "github.com/zodimo/go-compose/theme/colorrole"
 
+var (
+	Primary               = ThemeColorDescriptor{colorRole: colorrole.Primary}
+	OnPrimary             = ThemeColorDescriptor{colorRole: colorrole.OnPrimary}
+	PrimaryContainer      = ThemeColorDescriptor{colorRole: colorrole.PrimaryContainer}
+	OnPrimaryContainer    = ThemeColorDescriptor{colorRole: colorrole.OnPrimaryContainer}
+	PrimaryFixed          = ThemeColorDescriptor{colorRole: colorrole.PrimaryFixed}
+	OnPrimaryFixed        = ThemeColorDescriptor{colorRole: colorrole.OnPrimaryFixed}
+	PrimaryFixedVariant   = ThemeColorDescriptor{colorRole: colorrole.PrimaryFixedVariant}
+	OnPrimaryFixedVariant = ThemeColorDescriptor{colorRole: colorrole.OnPrimaryFixedVariant}
+
+	Secondary               = ThemeColorDescriptor{colorRole: colorrole.Secondary}
+	OnSecondary             = ThemeColorDescriptor{colorRole: colorrole.OnSecondary}
+	SecondaryContainer      = ThemeColorDescriptor{colorRole: colorrole.SecondaryContainer}
+	OnSecondaryContainer    = ThemeColorDescriptor{colorRole: colorrole.OnSecondaryContainer}
+	SecondaryFixed          = ThemeColorDescriptor{colorRole: colorrole.SecondaryFixed}
+	OnSecondaryFixed        = ThemeColorDescriptor{colorRole: colorrole.OnSecondaryFixed}
+	SecondaryFixedVariant   = ThemeColorDescriptor{colorRole: colorrole.SecondaryFixedVariant}
+	OnSecondaryFixedVariant = ThemeColorDescriptor{colorRole: colorrole.OnSecondaryFixedVariant}
+
+	Tertiary               = ThemeColorDescriptor{colorRole: colorrole.Tertiary}
+	OnTertiary             = ThemeColorDescriptor{colorRole: colorrole.OnTertiary}
+	TertiaryContainer      = ThemeColorDescriptor{colorRole: colorrole.TertiaryContainer}
+	OnTertiaryContainer    = ThemeColorDescriptor{colorRole: colorrole.OnTertiaryContainer}
+	TertiaryFixed          = ThemeColorDescriptor{colorRole: colorrole.TertiaryFixed}
+	OnTertiaryFixed        = ThemeColorDescriptor{colorRole: colorrole.OnTertiaryFixed}
+	TertiaryFixedVariant   = ThemeColorDescriptor{colorRole: colorrole.TertiaryFixedVariant}
+	OnTertiaryFixedVariant = ThemeColorDescriptor{colorRole: colorrole.OnTertiaryFixedVariant}
+
+	Surface                 = ThemeColorDescriptor{colorRole: colorrole.Surface}
+	OnSurface               = ThemeColorDescriptor{colorRole: colorrole.OnSurface}
+	SurfaceVariant          = ThemeColorDescriptor{colorRole: colorrole.SurfaceVariant}
+	OnSurfaceVariant        = ThemeColorDescriptor{colorRole: colorrole.OnSurfaceVariant}
+	SurfaceDim              = ThemeColorDescriptor{colorRole: colorrole.SurfaceDim}
+	SurfaceBright           = ThemeColorDescriptor{colorRole: colorrole.SurfaceBright}
+	SurfaceContainerLowest  = ThemeColorDescriptor{colorRole: colorrole.SurfaceContainerLowest}
+	SurfaceContainerLow     = ThemeColorDescriptor{colorRole: colorrole.SurfaceContainerLow}
+	SurfaceContainer        = ThemeColorDescriptor{colorRole: colorrole.SurfaceContainer}
+	SurfaceContainerHigh    = ThemeColorDescriptor{colorRole: colorrole.SurfaceContainerHigh}
+	SurfaceContainerHighest = ThemeColorDescriptor{colorRole: colorrole.SurfaceContainerHighest}
+
+	InverseSurface   = ThemeColorDescriptor{colorRole: colorrole.InverseSurface}
+	OnInverseSurface = ThemeColorDescriptor{colorRole: colorrole.OnInverseSurface}
+	InversePrimary   = ThemeColorDescriptor{colorRole: colorrole.InversePrimary}
+
+	Background   = ThemeColorDescriptor{colorRole: colorrole.Background}
+	OnBackground = ThemeColorDescriptor{colorRole: colorrole.OnBackground}
+
+	Outline        = ThemeColorDescriptor{colorRole: colorrole.Outline}
+	OutlineVariant = ThemeColorDescriptor{colorRole: colorrole.OutlineVariant}
+
+	Error            = ThemeColorDescriptor{colorRole: colorrole.Error}
+	OnError          = ThemeColorDescriptor{colorRole: colorrole.OnError}
+	ErrorContainer   = ThemeColorDescriptor{colorRole: colorrole.ErrorContainer}
+	OnErrorContainer = ThemeColorDescriptor{colorRole: colorrole.OnErrorContainer}
+
+	Scrim  = ThemeColorDescriptor{colorRole: colorrole.Scrim}
+	Shadow = ThemeColorDescriptor{colorRole: colorrole.Shadow}
+
+	// Basic Roles
+	BasicBg         = ThemeColorDescriptor{colorRole: colorrole.BasicBg}
+	BasicFg         = ThemeColorDescriptor{colorRole: colorrole.BasicFg}
+	BasicContrastBg = ThemeColorDescriptor{colorRole: colorrole.BasicContrastBg}
+	BasicContrastFg = ThemeColorDescriptor{colorRole: colorrole.BasicContrastFg}
+)
+
 type PrimaryColorRoleDescriptors struct {
 	Primary               ThemeColorDescriptor
 	OnPrimary             ThemeColorDescriptor
@@ -15,30 +80,14 @@ type PrimaryColorRoleDescriptors struct {
 
 func newPrimaryColorRoleDescriptors() PrimaryColorRoleDescriptors {
 	return PrimaryColorRoleDescriptors{
-		Primary: ThemeColorDescriptor{
-			colorRole: colorrole.Primary,
-		},
-		OnPrimary: ThemeColorDescriptor{
-			colorRole: colorrole.OnPrimary,
-		},
-		PrimaryContainer: ThemeColorDescriptor{
-			colorRole: colorrole.PrimaryContainer,
-		},
-		OnPrimaryContainer: ThemeColorDescriptor{
-			colorRole: colorrole.OnPrimaryContainer,
-		},
-		PrimaryFixed: ThemeColorDescriptor{
-			colorRole: colorrole.PrimaryFixed,
-		},
-		OnPrimaryFixed: ThemeColorDescriptor{
-			colorRole: colorrole.OnPrimaryFixed,
-		},
-		PrimaryFixedVariant: ThemeColorDescriptor{
-			colorRole: colorrole.PrimaryFixedVariant,
-		},
-		OnPrimaryFixedVariant: ThemeColorDescriptor{
-			colorRole: colorrole.OnPrimaryFixedVariant,
-		},
+		Primary:               Primary,
+		OnPrimary:             OnPrimary,
+		PrimaryContainer:      PrimaryContainer,
+		OnPrimaryContainer:    OnPrimaryContainer,
+		PrimaryFixed:          PrimaryFixed,
+		OnPrimaryFixed:        OnPrimaryFixed,
+		PrimaryFixedVariant:   PrimaryFixedVariant,
+		OnPrimaryFixedVariant: OnPrimaryFixedVariant,
 	}
 }
 
@@ -55,30 +104,14 @@ type SecondaryColorRoleDescriptors struct {
 
 func newSecondaryColorRoleDescriptors() SecondaryColorRoleDescriptors {
 	return SecondaryColorRoleDescriptors{
-		Secondary: ThemeColorDescriptor{
-			colorRole: colorrole.Secondary,
-		},
-		OnSecondary: ThemeColorDescriptor{
-			colorRole: colorrole.OnSecondary,
-		},
-		SecondaryContainer: ThemeColorDescriptor{
-			colorRole: colorrole.SecondaryContainer,
-		},
-		OnSecondaryContainer: ThemeColorDescriptor{
-			colorRole: colorrole.OnSecondaryContainer,
-		},
-		SecondaryFixed: ThemeColorDescriptor{
-			colorRole: colorrole.SecondaryFixed,
-		},
-		OnSecondaryFixed: ThemeColorDescriptor{
-			colorRole: colorrole.OnSecondaryFixed,
-		},
-		SecondaryFixedVariant: ThemeColorDescriptor{
-			colorRole: colorrole.SecondaryFixedVariant,
-		},
-		OnSecondaryFixedVariant: ThemeColorDescriptor{
-			colorRole: colorrole.OnSecondaryFixedVariant,
-		},
+		Secondary:               Secondary,
+		OnSecondary:             OnSecondary,
+		SecondaryContainer:      SecondaryContainer,
+		OnSecondaryContainer:    OnSecondaryContainer,
+		SecondaryFixed:          SecondaryFixed,
+		OnSecondaryFixed:        OnSecondaryFixed,
+		SecondaryFixedVariant:   SecondaryFixedVariant,
+		OnSecondaryFixedVariant: OnSecondaryFixedVariant,
 	}
 }
 
@@ -95,30 +128,14 @@ type TertiaryColorRoleDescriptors struct {
 
 func newTertiaryColorRoleDescriptors() TertiaryColorRoleDescriptors {
 	return TertiaryColorRoleDescriptors{
-		Tertiary: ThemeColorDescriptor{
-			colorRole: colorrole.Tertiary,
-		},
-		OnTertiary: ThemeColorDescriptor{
-			colorRole: colorrole.OnTertiary,
-		},
-		TertiaryContainer: ThemeColorDescriptor{
-			colorRole: colorrole.TertiaryContainer,
-		},
-		OnTertiaryContainer: ThemeColorDescriptor{
-			colorRole: colorrole.OnTertiaryContainer,
-		},
-		TertiaryFixed: ThemeColorDescriptor{
-			colorRole: colorrole.TertiaryFixed,
-		},
-		OnTertiaryFixed: ThemeColorDescriptor{
-			colorRole: colorrole.OnTertiaryFixed,
-		},
-		TertiaryFixedVariant: ThemeColorDescriptor{
-			colorRole: colorrole.TertiaryFixedVariant,
-		},
-		OnTertiaryFixedVariant: ThemeColorDescriptor{
-			colorRole: colorrole.OnTertiaryFixedVariant,
-		},
+		Tertiary:               Tertiary,
+		OnTertiary:             OnTertiary,
+		TertiaryContainer:      TertiaryContainer,
+		OnTertiaryContainer:    OnTertiaryContainer,
+		TertiaryFixed:          TertiaryFixed,
+		OnTertiaryFixed:        OnTertiaryFixed,
+		TertiaryFixedVariant:   TertiaryFixedVariant,
+		OnTertiaryFixedVariant: OnTertiaryFixedVariant,
 	}
 }
 
@@ -138,39 +155,17 @@ type SurfaceColorRoleDescriptors struct {
 
 func newSurfaceColorRoleDescriptors() SurfaceColorRoleDescriptors {
 	return SurfaceColorRoleDescriptors{
-		Surface: ThemeColorDescriptor{
-			colorRole: colorrole.Surface,
-		},
-		OnSurface: ThemeColorDescriptor{
-			colorRole: colorrole.OnSurface,
-		},
-		SurfaceVariant: ThemeColorDescriptor{
-			colorRole: colorrole.SurfaceVariant,
-		},
-		OnSurfaceVariant: ThemeColorDescriptor{
-			colorRole: colorrole.OnSurfaceVariant,
-		},
-		SurfaceDim: ThemeColorDescriptor{
-			colorRole: colorrole.SurfaceDim,
-		},
-		SurfaceBright: ThemeColorDescriptor{
-			colorRole: colorrole.SurfaceBright,
-		},
-		SurfaceContainerLowest: ThemeColorDescriptor{
-			colorRole: colorrole.SurfaceContainerLowest,
-		},
-		SurfaceContainerLow: ThemeColorDescriptor{
-			colorRole: colorrole.SurfaceContainerLow,
-		},
-		SurfaceContainer: ThemeColorDescriptor{
-			colorRole: colorrole.SurfaceContainer,
-		},
-		SurfaceContainerHigh: ThemeColorDescriptor{
-			colorRole: colorrole.SurfaceContainerHigh,
-		},
-		SurfaceContainerHighest: ThemeColorDescriptor{
-			colorRole: colorrole.SurfaceContainerHighest,
-		},
+		Surface:                 Surface,
+		OnSurface:               OnSurface,
+		SurfaceVariant:          SurfaceVariant,
+		OnSurfaceVariant:        OnSurfaceVariant,
+		SurfaceDim:              SurfaceDim,
+		SurfaceBright:           SurfaceBright,
+		SurfaceContainerLowest:  SurfaceContainerLowest,
+		SurfaceContainerLow:     SurfaceContainerLow,
+		SurfaceContainer:        SurfaceContainer,
+		SurfaceContainerHigh:    SurfaceContainerHigh,
+		SurfaceContainerHighest: SurfaceContainerHighest,
 	}
 }
 
@@ -182,15 +177,9 @@ type InverseColorRoleDescriptors struct {
 
 func newInverseColorRoleDescriptors() InverseColorRoleDescriptors {
 	return InverseColorRoleDescriptors{
-		InverseSurface: ThemeColorDescriptor{
-			colorRole: colorrole.InverseSurface,
-		},
-		OnInverseSurface: ThemeColorDescriptor{
-			colorRole: colorrole.OnInverseSurface,
-		},
-		InversePrimary: ThemeColorDescriptor{
-			colorRole: colorrole.InversePrimary,
-		},
+		InverseSurface:   InverseSurface,
+		OnInverseSurface: OnInverseSurface,
+		InversePrimary:   InversePrimary,
 	}
 }
 
@@ -201,12 +190,8 @@ type BackgroundColorRoleDescriptors struct {
 
 func newBackgroundColorRoleDescriptors() BackgroundColorRoleDescriptors {
 	return BackgroundColorRoleDescriptors{
-		Background: ThemeColorDescriptor{
-			colorRole: colorrole.Background,
-		},
-		OnBackground: ThemeColorDescriptor{
-			colorRole: colorrole.OnBackground,
-		},
+		Background:   Background,
+		OnBackground: OnBackground,
 	}
 }
 
@@ -217,12 +202,8 @@ type OutlineColorRoleDescriptors struct {
 
 func newOutlineColorRoleDescriptors() OutlineColorRoleDescriptors {
 	return OutlineColorRoleDescriptors{
-		Outline: ThemeColorDescriptor{
-			colorRole: colorrole.Outline,
-		},
-		OutlineVariant: ThemeColorDescriptor{
-			colorRole: colorrole.OutlineVariant,
-		},
+		Outline:        Outline,
+		OutlineVariant: OutlineVariant,
 	}
 }
 
@@ -235,18 +216,10 @@ type ErrorColorRoleDescriptors struct {
 
 func newErrorColorRoleDescriptors() ErrorColorRoleDescriptors {
 	return ErrorColorRoleDescriptors{
-		Error: ThemeColorDescriptor{
-			colorRole: colorrole.Error,
-		},
-		OnError: ThemeColorDescriptor{
-			colorRole: colorrole.OnError,
-		},
-		ErrorContainer: ThemeColorDescriptor{
-			colorRole: colorrole.ErrorContainer,
-		},
-		OnErrorContainer: ThemeColorDescriptor{
-			colorRole: colorrole.OnErrorContainer,
-		},
+		Error:            Error,
+		OnError:          OnError,
+		ErrorContainer:   ErrorContainer,
+		OnErrorContainer: OnErrorContainer,
 	}
 }
 
@@ -257,12 +230,8 @@ type ScrimColorRoleDescriptors struct {
 
 func newScrimColorRoleDescriptors() ScrimColorRoleDescriptors {
 	return ScrimColorRoleDescriptors{
-		Scrim: ThemeColorDescriptor{
-			colorRole: colorrole.Scrim,
-		},
-		Shadow: ThemeColorDescriptor{
-			colorRole: colorrole.Shadow,
-		},
+		Scrim:  Scrim,
+		Shadow: Shadow,
 	}
 }
 
@@ -276,18 +245,10 @@ type BasicColorRoleDescriptors struct {
 
 func newBasicColorRoleDescriptors() BasicColorRoleDescriptors {
 	return BasicColorRoleDescriptors{
-		BasicBg: ThemeColorDescriptor{
-			colorRole: colorrole.BasicBg,
-		},
-		BasicFg: ThemeColorDescriptor{
-			colorRole: colorrole.BasicFg,
-		},
-		BasicContrastBg: ThemeColorDescriptor{
-			colorRole: colorrole.BasicContrastBg,
-		},
-		BasicContrastFg: ThemeColorDescriptor{
-			colorRole: colorrole.BasicContrastFg,
-		},
+		BasicBg:         BasicBg,
+		BasicFg:         BasicFg,
+		BasicContrastBg: BasicContrastBg,
+		BasicContrastFg: BasicContrastFg,
 	}
 }
 

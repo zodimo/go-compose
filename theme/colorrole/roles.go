@@ -206,5 +206,5 @@ func (cr ColorRole) String() string {
 		return "BasicContrastFg"
 
 	}
-	panic(fmt.Sprintf("unknown color role %v", cr))
+	panic(fmt.Sprintf("unknown color role %d", cr))
 }

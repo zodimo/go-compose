@@ -111,6 +111,9 @@ func (t ThemeColorDescriptor) initUpdates() ThemeColorDescriptor {
 }
 
 func (t ThemeColorDescriptor) Compare(other ThemeColorDescriptor) bool {
+	if len(t.updates) != len(other.updates) {
+		return false
+	}
 	//compare updates
 	for i := range t.updates {
 		if !t.updates[i].Compare(other.updates[i]) {
@@ -119,6 +122,10 @@ func (t ThemeColorDescriptor) Compare(other ThemeColorDescriptor) bool {
 	}
 	//compare color
 	return t.color == other.color && t.colorRole == other.colorRole && t.isColor == other.isColor
+}
+
+func (t ThemeColorDescriptor) Resolve() ThemeColor {
+	return GetThemeManager().ResolveColorDescriptor(t)
 }
 
 func SetOpacity(value OpacityLevel) *ThemeColorUpdateTyped[OpacityLevel] {
