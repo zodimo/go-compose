@@ -44,16 +44,14 @@ func SingleRowTopAppBar(
 
 					// Title
 					box.Box(
-						func(c Composer) Composer {
-							if title != nil {
-								return surface.Surface(
-									title,
-									surface.WithContentColor(colors.TitleContentColor),
-									surface.WithColor(color.NRGBA{}), // Transparent
-								)(c)
-							}
-							return c
-						},
+						c.When(
+							title != nil,
+							surface.Surface(
+								title,
+								surface.WithContentColor(colors.TitleContentColor),
+								surface.WithColor(color.NRGBA{}), // Transparent
+							),
+						),
 						box.WithModifier(weight.Weight(1)),           // Occupy remaining space
 						box.WithAlignment(layout.W),                  // Align text to start
 						box.WithModifier(padding.Horizontal(16, 16)), // Horizontal(16, 16)
@@ -155,14 +153,12 @@ func CenterAlignedTopAppBar(
 					),
 					// Layer 2: Centered Title
 					box.Box(
-						c.Sequence(
-							c.When(
-								title != nil,
-								surface.Surface(
-									title,
-									surface.WithContentColor(opts.Colors.TitleContentColor),
-									surface.WithColor(color.NRGBA{}),
-								),
+						c.When(
+							title != nil,
+							surface.Surface(
+								title,
+								surface.WithContentColor(opts.Colors.TitleContentColor),
+								surface.WithColor(color.NRGBA{}),
 							),
 						),
 						box.WithAlignment(layout.Center),
@@ -208,24 +204,20 @@ func TwoRowsTopAppBar(
 					),
 					// Bottom Row: Title
 					box.Box(
-						c.Sequence(
-							c.When(
-								title != nil,
-								surface.Surface(
-									func(c Composer) Composer {
-										// Default style for Headline?
-										// For now, just render title.
-										// Ideally we should apply Material3 typography h5 or h6.
-										// But we don't have typography passed in easily yet.
-										// Rely on user passing Text with style.
+						c.When(
+							title != nil,
+							surface.Surface(
+								// Default style for Headline?
+								// For now, just render title.
+								// Ideally we should apply Material3 typography h5 or h6.
+								// But we don't have typography passed in easily yet.
+								// Rely on user passing Text with style.
 
-										// Using ProvideTextStyle? Not yet implemented in foundation?
-										// Just render.
-										return title(c)
-									},
-									surface.WithContentColor(colors.TitleContentColor),
-									surface.WithColor(color.NRGBA{}),
-								),
+								// Using ProvideTextStyle? Not yet implemented in foundation?
+								// Just render.
+								title,
+								surface.WithContentColor(colors.TitleContentColor),
+								surface.WithColor(color.NRGBA{}),
 							),
 						),
 						box.WithModifier(size.FillMaxWidth()),
