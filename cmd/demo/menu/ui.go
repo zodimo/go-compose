@@ -51,7 +51,7 @@ func UI() api.Composable {
 											menu.WithLeadingIcon(func(c api.Composer) api.Composer {
 												return icon.Icon(
 													mdicons.ActionDone,
-													icon.WithColorDescriptor(theme.GetThemeManager().ColorRoleDescriptors().PrimaryRoles.Primary),
+													icon.WithColor(theme.GetThemeManager().ColorRoleDescriptors().PrimaryRoles.Primary),
 												)(c)
 											}),
 										)(c)
@@ -100,7 +100,7 @@ func UI() api.Composable {
 											menu.WithLeadingIcon(func(c api.Composer) api.Composer {
 												return icon.Icon(
 													mdicons.ContentCreate,
-													icon.WithColorDescriptor(theme.GetThemeManager().ColorRoleDescriptors().SurfaceRoles.OnSurface),
+													icon.WithColor(theme.GetThemeManager().ColorRoleDescriptors().SurfaceRoles.OnSurface),
 												)(c)
 											}),
 										)(c)
@@ -110,7 +110,7 @@ func UI() api.Composable {
 											menu.WithLeadingIcon(func(c api.Composer) api.Composer {
 												return icon.Icon(
 													mdicons.ActionSettings,
-													icon.WithColorDescriptor(theme.GetThemeManager().ColorRoleDescriptors().SurfaceRoles.OnSurface),
+													icon.WithColor(theme.GetThemeManager().ColorRoleDescriptors().SurfaceRoles.OnSurface),
 												)(c)
 											}),
 										)(c)
@@ -120,7 +120,7 @@ func UI() api.Composable {
 											menu.WithLeadingIcon(func(c api.Composer) api.Composer {
 												return icon.Icon(
 													mdicons.SocialShare,
-													icon.WithColorDescriptor(theme.GetThemeManager().ColorRoleDescriptors().SurfaceRoles.OnSurface),
+													icon.WithColor(theme.GetThemeManager().ColorRoleDescriptors().SurfaceRoles.OnSurface),
 												)(c)
 											}),
 										)(c)

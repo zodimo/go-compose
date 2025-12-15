@@ -10,6 +10,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/iconbutton"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/scale"
+	"github.com/zodimo/go-compose/theme"
 
 	"github.com/zodimo/go-compose/pkg/api"
 )
@@ -17,6 +18,8 @@ import (
 func UI(c api.Composer) api.LayoutNode {
 	var rows []api.Composable
 	chunkSize := 40
+
+	themeManager := theme.GetThemeManager()
 
 	// Demo IconButtons
 	var demoIconButtons []api.Composable
@@ -66,7 +69,7 @@ func UI(c api.Composer) api.LayoutNode {
 			scaleFactor := 0.8 + 0.7*float32((i+j)%10)/10.0
 
 			rowItems = append(rowItems, icon.Icon(def.Data,
-				icon.WithColor(col),
+				icon.WithColor(themeManager.ColorDescriptor(col)),
 				icon.WithModifier(scale.Scale(scaleFactor)),
 				icon.WithModifier(padding.All(3)),
 			))

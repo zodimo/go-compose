@@ -74,7 +74,7 @@ func UI() api.Composable {
 								//Icon
 								icon.Icon(
 									item.Icon,
-									icon.WithLazyColorDescriptor(func() ColorDescriptor {
+									icon.WithLazyColor(func() ColorDescriptor {
 										if isSelected {
 											return themeManager.ColorRoleDescriptors().SecondaryRoles.OnSecondaryContainer
 										}
@@ -126,7 +126,7 @@ func UI() api.Composable {
 									func(c api.Composer) api.Composer {
 										return icon.Icon(
 											icons.NavigationMenu,
-											icon.WithColor(color.NRGBA{A: 255}),
+											icon.WithColor(themeManager.ColorDescriptor(color.NRGBA{A: 255})),
 											icon.WithModifier(size.Size(24, 24)),
 										)(c)
 									},
@@ -160,7 +160,7 @@ func UI() api.Composable {
 										//icon
 										icon.Icon(
 											item.Icon,
-											icon.WithLazyColorDescriptor(func() ColorDescriptor {
+											icon.WithLazyColor(func() ColorDescriptor {
 												if isSelected {
 													return themeManager.ColorRoleDescriptors().SecondaryRoles.OnSecondaryContainer
 												}

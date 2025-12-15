@@ -1,8 +1,6 @@
 package icon
 
 import (
-	"image/color"
-
 	"github.com/zodimo/go-maybe"
 )
 
@@ -29,18 +27,12 @@ func WithModifier(m Modifier) IconOption {
 	}
 }
 
-func WithColor(color color.Color) IconOption {
-	return func(o *IconOptions) {
-		o.Color = maybe.Some(specificColor(color))
-	}
-}
-
-func WithColorDescriptor(desc ColorDescriptor) IconOption {
+func WithColor(desc ColorDescriptor) IconOption {
 	return func(o *IconOptions) {
 		o.Color = maybe.Some(desc)
 	}
 }
-func WithLazyColorDescriptor(desc func() ColorDescriptor) IconOption {
+func WithLazyColor(desc func() ColorDescriptor) IconOption {
 	return func(o *IconOptions) {
 		o.LazyColor = maybe.Some(desc)
 	}
