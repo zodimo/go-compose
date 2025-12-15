@@ -54,6 +54,10 @@ var EmptyWidgetConstructor = NewLayoutNodeWidgetConstructor(func(node LayoutNode
 	return ZeroGioLayoutWidget
 })
 
+var PassThroughWidgetConstructor = NewLayoutNodeWidgetConstructor(func(node LayoutNode) GioLayoutWidget {
+	return node.Layout
+})
+
 var _ LayoutNodeWidgetConstructor = (*layoutNodeWidgetConstructor)(nil)
 
 type layoutNodeWidgetConstructor struct {
