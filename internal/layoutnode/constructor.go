@@ -1,6 +1,8 @@
 package layoutnode
 
 import (
+	"image"
+
 	"github.com/zodimo/go-compose/internal/immap"
 
 	"github.com/zodimo/go-maybe"
@@ -35,18 +37,22 @@ func NewNodeCoordinator(node LayoutNode) NodeCoordinator {
 	return outNode
 }
 
-var IdentityGioLayoutWidget = func(gtx LayoutContext) LayoutDimensions {
+var ZeroGioLayoutWidget = func(gtx LayoutContext) LayoutDimensions {
 	return LayoutDimensions{
-		Size: gtx.Constraints.Min,
+		Size: image.Pt(0, 0),
 	}
 }
-var IdentityLayoutWidget = NewLayoutWidget(IdentityGioLayoutWidget)
+var ZeroLayoutWidget = NewLayoutWidget(ZeroGioLayoutWidget)
 
 func NewLayoutWidget(innerWidget GioLayoutWidget) LayoutWidget {
 	return layoutWidget{
 		innerWidget: innerWidget,
 	}
 }
+
+var EmptyWidgetConstructor = NewLayoutNodeWidgetConstructor(func(node LayoutNode) GioLayoutWidget {
+	return ZeroGioLayoutWidget
+})
 
 var _ LayoutNodeWidgetConstructor = (*layoutNodeWidgetConstructor)(nil)
 

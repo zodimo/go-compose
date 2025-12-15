@@ -166,6 +166,7 @@ func (c *composer) Key(key any, content Composable) Composable {
 		k := fmt.Sprint(key)
 		c.StartBlock(k)
 		c = content(c)
+		c.SetWidgetConstructor(layoutnode.EmptyWidgetConstructor)
 		c.EndBlock()
 		return c
 	}
