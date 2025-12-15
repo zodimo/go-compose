@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	m3Button "github.com/zodimo/go-compose/compose/foundation/material3/button"
@@ -24,7 +23,7 @@ func UI(c api.Composer) api.LayoutNode {
 	count := c.State("count", func() any { return 0 })
 
 	c = column.Column(
-		compose.Sequence(
+		c.Sequence(
 			m3Text.Text("Control Flow Demo", m3Text.TypestyleHeadlineMedium),
 			m3Divider.Divider(m3Divider.WithModifier(padding.Vertical(16, 16))),
 
@@ -43,7 +42,7 @@ func UI(c api.Composer) api.LayoutNode {
 
 			// Test 'When'
 			m3Text.Text("2. When (Visible only when count > 5)", m3Text.TypestyleTitleMedium),
-			row.Row(compose.Sequence(
+			row.Row(c.Sequence(
 				m3Button.Outlined(func() {
 					count.Set(count.Get().(int) - 1)
 				}, "-"),
