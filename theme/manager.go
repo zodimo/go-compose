@@ -1,6 +1,7 @@
 package theme
 
 import (
+	"image/color"
 	"sync"
 
 	"gioui.org/layout"
@@ -20,6 +21,8 @@ type ThemeManager interface {
 	GetMaterial3Theme() *token.Theme
 
 	ColorRoleDescriptors() ColorRoleDescriptors
+
+	ColorDescriptor(color color.Color) ThemeColorDescriptor
 
 	ThemeColorResolver
 }
@@ -88,6 +91,10 @@ func (tm *themeManager) ResolveColorDescriptor(desc ThemeColorDescriptor) ThemeC
 
 func (tm *themeManager) ColorRoleDescriptors() ColorRoleDescriptors {
 	return tm.colorRoleDescriptors
+}
+
+func (tm *themeManager) ColorDescriptor(color color.Color) ThemeColorDescriptor {
+	return SpecificColor(color)
 }
 
 func GetThemeManager() ThemeManager {
