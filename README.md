@@ -28,6 +28,7 @@ Comparison of official Material 3 components with their implementation status in
 | **Divider** | 🟢 `widget/divider` | 🟢 Implemented | |
 | **Lists** | 🔴 Missing | 🟢 Implemented | Lazy Layouts |
 | **Menus** | 🔴 Missing | 🟢 Implemented | |
+| **Navigation** | 🟢 `compose/navigation` | 🟢 Implemented | Core primitive |
 | **Navigation bar** | 🔴 Missing | 🟢 Implemented | |
 | **Navigation drawer** | 🔴 Missing | 🟢 Implemented | Modal |
 | **Navigation rail** | 🟢 `widget/rail` | 🟢 Implemented | |
