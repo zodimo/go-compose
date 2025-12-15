@@ -25,29 +25,23 @@ func SingleRowTopAppBar(
 	actions []Composable,
 	colors TopAppBarColors,
 ) Composable {
-	return surface.Surface(
-		func(c Composer) Composer {
-
-			return row.Row(
+	return func(c Composer) Composer {
+		return surface.Surface(
+			row.Row(
 				compose.Sequence(
-					func(c Composer) Composer {
-						// Navigation Icon
-						if navigationIcon != nil {
-							box.Box(
-								surface.Surface(
-									navigationIcon,
-									surface.WithContentColor(colors.NavigationIconContentColor),
-									surface.WithColor(color.NRGBA{}), // Transparent background
-								),
-								box.WithAlignment(layout.W),
-								box.WithModifier(padding_modifier.Padding(4, 0, 0, 0)), // Start(4)
-							)(c)
-						} else {
-							// Spacer if no navigation icon but we want alignment consistency?
-							// Material 3 doesn't strictly require a spacer if missing.
-						}
-						return c
-					},
+					// Navigation Icon
+					c.When(
+						navigationIcon != nil,
+						box.Box(
+							surface.Surface(
+								navigationIcon,
+								surface.WithContentColor(colors.NavigationIconContentColor),
+								surface.WithColor(color.NRGBA{}), // Transparent background
+							),
+							box.WithAlignment(layout.W),
+							box.WithModifier(padding_modifier.Padding(4, 0, 0, 0)), // Start(4)
+						),
+					),
 
 					// Title
 					box.Box(
@@ -66,26 +60,24 @@ func SingleRowTopAppBar(
 						box.WithModifier(padding_modifier.Horizontal(16, 16)), // Horizontal(16, 16)
 					),
 					spacer.SpacerWeight(1),
-					func(c Composer) Composer {
-						// Actions
-						if len(actions) > 0 {
-							row.Row(
-								compose.Sequence(actions...),
-								row.WithAlignment(row.Middle),
-								row.WithModifier(padding_modifier.Padding(0, 0, 4, 0)), // End(4)
-							)(c)
-						}
-						return c
-					},
+					// Actions
+					c.When(
+						len(actions) > 0,
+						row.Row(
+							compose.Sequence(actions...),
+							row.WithAlignment(row.Middle),
+							row.WithModifier(padding_modifier.Padding(0, 0, 4, 0)), // End(4)
+						),
+					),
 				),
 				row.WithModifier(size.FillMaxWidth()),
 				row.WithModifier(size.Height(64)), // Standard Height
 				row.WithAlignment(row.Middle),     // Vertical Alignment
-			)(c)
-		},
-		surface.WithModifier(modifier),
-		surface.WithColor(colors.ContainerColor),
-	)
+			),
+			surface.WithModifier(modifier),
+			surface.WithColor(colors.ContainerColor),
+		)(c)
+	}
 }
 
 // TopAppBar displays information and actions at the top of a screen.
@@ -129,65 +121,58 @@ func CenterAlignedTopAppBar(
 		}
 
 		return surface.Surface(
-			func(c Composer) Composer {
-				return box.Box(
-					func(c Composer) Composer {
-						// Layer 1: Navigation Icon and Actions
-						row.Row(
-							func(c Composer) Composer {
-								// Navigation Icon
-								if opts.NavigationIcon != nil {
-									box.Box(
-										surface.Surface(
-											opts.NavigationIcon,
-											surface.WithContentColor(opts.Colors.NavigationIconContentColor),
-											surface.WithColor(color.NRGBA{}),
-										),
-										box.WithAlignment(layout.W),
-										box.WithModifier(padding_modifier.Padding(4, 0, 0, 0)),
-									)(c)
-								}
-
-								// Spacer to push Actions to end
-								spacer.SpacerWeight(1)(c)
-
-								// Actions
-								if len(opts.Actions) > 0 {
-									// Wrap actions in a Row with Middle alignment
-									row.Row(
-										compose.Sequence(opts.Actions...),
-										row.WithAlignment(row.Middle),
-										row.WithModifier(padding_modifier.Padding(0, 0, 4, 0)),
-									)(c)
-								}
-								return c
-							},
-							row.WithModifier(size.FillMaxWidth()),
-							row.WithModifier(size.Height(64)),
-							row.WithAlignment(row.Middle),
-						)(c)
-
-						// Layer 2: Centered Title
-						box.Box(
-							func(c Composer) Composer {
-								if title != nil {
-									return surface.Surface(
-										title,
-										surface.WithContentColor(opts.Colors.TitleContentColor),
+			box.Box(
+				compose.Sequence(
+					// Layer 1: Navigation Icon and Actions
+					row.Row(
+						compose.Sequence(
+							// Navigation Icon
+							c.When(opts.NavigationIcon != nil,
+								box.Box(
+									surface.Surface(
+										opts.NavigationIcon,
+										surface.WithContentColor(opts.Colors.NavigationIconContentColor),
 										surface.WithColor(color.NRGBA{}),
-									)(c)
-								}
-								return c
-							},
-							box.WithAlignment(layout.Center),
-							box.WithModifier(size.FillMax()), // Consume space to allow centering
-						)(c)
-						return c
-					},
-					box.WithModifier(size.FillMaxWidth()),
-					box.WithModifier(size.Height(64)),
-				)(c)
-			},
+									),
+									box.WithAlignment(layout.W),
+									box.WithModifier(padding_modifier.Padding(4, 0, 0, 0)),
+								),
+							),
+							// Spacer to push Actions to end
+							spacer.SpacerWeight(1),
+							// Actions
+							c.When(
+								len(opts.Actions) > 0,
+								row.Row(
+									compose.Sequence(opts.Actions...),
+									row.WithAlignment(row.Middle),
+									row.WithModifier(padding_modifier.Padding(0, 0, 4, 0)),
+								),
+							),
+						),
+						row.WithModifier(size.FillMaxWidth()),
+						row.WithModifier(size.Height(64)),
+						row.WithAlignment(row.Middle),
+					),
+					// Layer 2: Centered Title
+					box.Box(
+						compose.Sequence(
+							c.When(
+								title != nil,
+								surface.Surface(
+									title,
+									surface.WithContentColor(opts.Colors.TitleContentColor),
+									surface.WithColor(color.NRGBA{}),
+								),
+							),
+						),
+						box.WithAlignment(layout.Center),
+						box.WithModifier(size.FillMax()), // Consume space to allow centering
+					),
+				),
+				box.WithModifier(size.FillMaxWidth()),
+				box.WithModifier(size.Height(64)),
+			),
 			surface.WithModifier(opts.Modifier),
 			surface.WithColor(opts.Colors.ContainerColor),
 		)(c)
@@ -204,10 +189,10 @@ func TwoRowsTopAppBar(
 	actions []Composable,
 	colors TopAppBarColors,
 ) Composable {
-	return surface.Surface(
-		func(c Composer) Composer {
-			return column.Column(
-				func(c Composer) Composer {
+	return func(c Composer) Composer {
+		return surface.Surface(
+			column.Column(
+				compose.Sequence(
 					// Top Row: Nav Icon + Actions (No Title)
 					SingleRowTopAppBar(
 						EmptyModifier,
@@ -221,15 +206,13 @@ func TwoRowsTopAppBar(
 							NavigationIconContentColor: colors.NavigationIconContentColor,
 							ActionIconContentColor:     colors.ActionIconContentColor,
 						},
-					)(c)
-
+					),
 					// Bottom Row: Title
 					box.Box(
-						func(c Composer) Composer {
-							if title != nil {
-								// Apply specific typography style here if needed?
-								// Taking title as is for now.
-								return surface.Surface(
+						compose.Sequence(
+							c.When(
+								title != nil,
+								surface.Surface(
 									func(c Composer) Composer {
 										// Default style for Headline?
 										// For now, just render title.
@@ -243,24 +226,22 @@ func TwoRowsTopAppBar(
 									},
 									surface.WithContentColor(colors.TitleContentColor),
 									surface.WithColor(color.NRGBA{}),
-								)(c)
-							}
-							return c
-						},
+								),
+							),
+						),
 						box.WithModifier(size.FillMaxWidth()),
 						box.WithModifier(weight.Weight(1)), // Fill remaining height
 						box.WithAlignment(layout.SW),       // Start, Bottom
 						box.WithModifier(padding_modifier.Padding(16, 0, 16, titleBottomPadding)),
-					)(c)
-					return c
-				},
+					),
+				),
 				column.WithModifier(size.FillMaxWidth()),
 				column.WithModifier(size.Height(maxHeight)),
-			)(c)
-		},
-		surface.WithModifier(modifier),
-		surface.WithColor(colors.ContainerColor),
-	)
+			),
+			surface.WithModifier(modifier),
+			surface.WithColor(colors.ContainerColor),
+		)(c)
+	}
 }
 
 // MediumTopAppBar displays information and actions at the top of a screen.
