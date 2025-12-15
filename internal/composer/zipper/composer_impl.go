@@ -1,6 +1,8 @@
 package zipper
 
 import (
+	"fmt"
+
 	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 )
@@ -156,6 +158,26 @@ func (c *composer) Else(condition bool, ifFalse Composable) Composable {
 
 func (c *composer) Sequence(contents ...Composable) Composable {
 	return Sequence(contents...)
+}
+
+func (c *composer) Key(key any, content Composable) Composable {
+	return func(c Composer) Composer {
+		// We stringify the key to be used as an ID for the block
+		k := fmt.Sprint(key)
+		c.StartBlock(k)
+		c = content(c)
+		c.EndBlock()
+		return c
+	}
+}
+
+func (c *composer) Range(count int, fn func(int) Composable) Composable {
+	return func(c Composer) Composer {
+		for i := 0; i < count; i++ {
+			c = fn(i)(c)
+		}
+		return c
+	}
 }
 
 func emptyComposable() Composable {

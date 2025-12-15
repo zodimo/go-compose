@@ -43,6 +43,10 @@ type Composer interface {
 	Else(condition bool, ifFalse Composable) Composable
 
 	Sequence(contents ...Composable) Composable
+
+	// Control Flow
+	Key(key any, content Composable) Composable
+	Range(count int, fn func(int) Composable) Composable
 }
 
 // Public Modifier interface
