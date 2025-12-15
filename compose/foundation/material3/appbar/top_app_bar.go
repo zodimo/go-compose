@@ -7,6 +7,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
+	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/foundation/material3/surface"
 	padding_modifier "github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -64,7 +65,7 @@ func SingleRowTopAppBar(
 						box.WithAlignment(layout.W),                           // Align text to start
 						box.WithModifier(padding_modifier.Horizontal(16, 16)), // Horizontal(16, 16)
 					),
-					box.Box(compose.Id(), box.WithModifier(weight.Weight(1))),
+					spacer.SpacerWeight(1),
 					func(c Composer) Composer {
 						// Actions
 						if len(actions) > 0 {
@@ -148,7 +149,7 @@ func CenterAlignedTopAppBar(
 								}
 
 								// Spacer to push Actions to end
-								box.Box(compose.Id(), box.WithModifier(weight.Weight(1)))(c)
+								spacer.SpacerWeight(1)(c)
 
 								// Actions
 								if len(opts.Actions) > 0 {

@@ -140,3 +140,22 @@ func (c *composer) If(condition bool, ifTrue Composable, ifFalse Composable) Com
 	}
 	return ifFalse
 }
+
+func (c *composer) When(condition bool, ifTrue Composable) Composable {
+	if condition {
+		return ifTrue
+	}
+	return emptyComposable()
+}
+func (c *composer) Else(condition bool, ifFalse Composable) Composable {
+	if condition {
+		return emptyComposable()
+	}
+	return ifFalse
+}
+
+func emptyComposable() Composable {
+	return func(c Composer) Composer {
+		return c
+	}
+}

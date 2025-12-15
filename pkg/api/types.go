@@ -39,6 +39,8 @@ type Composer interface {
 	WithComposable(composable Composable) Composer
 
 	If(condition bool, ifTrue Composable, ifFalse Composable) Composable
+	When(condition bool, ifTrue Composable) Composable
+	Else(condition bool, ifFalse Composable) Composable
 }
 
 // Public Modifier interface
