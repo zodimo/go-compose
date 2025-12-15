@@ -59,7 +59,7 @@ func Run(window *app.Window) error {
 			gtx = themeManager.Material3ThemeInit(gtx)
 
 			composer := compose.NewComposer(store)
-			composer = DemoUI(composer)(composer)
+			composer = DemoUI()(composer)
 			layoutNode := composer.Build()
 
 			callOp := runtime.Run(gtx, layoutNode)
@@ -69,7 +69,7 @@ func Run(window *app.Window) error {
 	}
 }
 
-func DemoUI(c api.Composer) api.Composable {
+func DemoUI() api.Composable {
 	return func(c api.Composer) api.Composer {
 		navController := navigation.RememberNavController(c)
 
