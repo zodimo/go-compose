@@ -15,6 +15,10 @@ func (im identityManager) ResetKeyCounter() {
 func (im identityManager) EmptyIdentifier() Identifier {
 	return im.manager.EmptyIdentifier()
 }
+
+func (im identityManager) CreateID(seed string) Identifier {
+	return im.manager.Create(seed)
+}
 func (im identityManager) private() {}
 
 func newIdentityManager(manager apiIdentityManager) IdentityManager {

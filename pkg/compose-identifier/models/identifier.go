@@ -28,6 +28,12 @@ func NewScopedIdentifier(scope string) *Identifier {
 		key: keyManager.GenerateKey(),
 	}
 }
+func NewKeyedIdentifier(scope string, seed string) *Identifier {
+	keyManager := key.GetOrCreateKeyManager(scope)
+	return &Identifier{
+		key: keyManager.CreateKey(seed),
+	}
+}
 
 type IdentityManager struct {
 	scope string
@@ -41,6 +47,9 @@ func GetOrCreateIdentityManager(scope string) *IdentityManager {
 
 func (im IdentityManager) GenerateKey() *Identifier {
 	return NewScopedIdentifier(im.scope)
+}
+func (im IdentityManager) Create(seed string) *Identifier {
+	return NewKeyedIdentifier(im.scope, seed)
 }
 func (im IdentityManager) ResetKeyCounter() {
 	im.getKeyManager().ResetKeyCounter()

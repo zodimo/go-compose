@@ -13,6 +13,8 @@ github.com/go-text/typesetting-utils v0.0.0-20241103174707-87a29e9e6066 h1:qCuYC
 github.com/go-text/typesetting-utils v0.0.0-20241103174707-87a29e9e6066/go.mod h1:DDxDdQEnB70R8owOx3LVpEFvpMK9eeH1o2r0yZhFI9o=
 github.com/zodimo/go-maybe v0.1.3 h1:wEGtaSPkhTza+b0S+7J8C5nzkEB8KOoUK2dnQqA4ZEE=
 github.com/zodimo/go-maybe v0.1.3/go.mod h1:xEqMthQw8lMcDFUWXBmrixQAhUL4SQBTqOQ5D/AlNyE=
+github.com/zodimo/go-zero-hash v0.1.0 h1:rk0b+StUT0BICaORHHyYhEmX196+jG5XKp4gqWXImqU=
+github.com/zodimo/go-zero-hash v0.1.0/go.mod h1:7ff6hwK72Xthya8po1z2nCsNbUpmvuGesovXXa9sc+E=
 golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc h1:TS73t7x3KarrNd5qAipmspBDS1rkMcgVG/fS1aRb4Rc=
 golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc/go.mod h1:A+z0yzpGtvnG90cToK5n2tu8UJVP2XUATh+r+sfOOOc=
 golang.org/x/exp/shiny v0.0.0-20250711185948-6ae5c78190dc h1:S4fuoigI+5S10itz/XeV1XmskU912Ahss09uoC3dY8I=

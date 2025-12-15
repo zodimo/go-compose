@@ -8,6 +8,7 @@ require (
 	gioui.org v0.9.0
 	git.sr.ht/~schnwalter/gio-mw v0.0.0-20250713180710-9d8d98474447
 	github.com/zodimo/go-maybe v0.1.3
+	github.com/zodimo/go-zero-hash v0.1.0
 	golang.org/x/exp/shiny v0.0.0-20250711185948-6ae5c78190dc
 )
 
