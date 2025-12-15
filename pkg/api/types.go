@@ -37,6 +37,8 @@ type Composer interface {
 	state.SupportState
 
 	WithComposable(composable Composable) Composer
+
+	If(condition bool, ifTrue Composable, ifFalse Composable) Composable
 }
 
 // Public Modifier interface

@@ -133,3 +133,10 @@ func (c *composer) WithComposable(composable Composable) Composer {
 func (c *composer) SetWidgetConstructor(constructor layoutnode.LayoutNodeWidgetConstructor) {
 	c.focus.SetWidgetConstructor(constructor)
 }
+
+func (c *composer) If(condition bool, ifTrue Composable, ifFalse Composable) Composable {
+	if condition {
+		return ifTrue
+	}
+	return ifFalse
+}
