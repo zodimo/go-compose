@@ -15,6 +15,9 @@ import (
 
 var FallbackColorDescriptor = themeManager.ColorRoleDescriptors().BasicColorRoleDescriptors.BasicFg
 
+// iconCacheKey is the key used to store the GlobalIconCache in the Composer's state.
+var iconCacheKey = "icon_global_cache"
+
 // icons from golang.org/x/exp/shiny/materialdesign/icons
 func Icon(iconByte []byte, options ...IconOption) Composable {
 	opts := DefaultIconOptions()
@@ -32,7 +35,7 @@ func Icon(iconByte []byte, options ...IconOption) Composable {
 		})
 
 		// Retrieve or initialize the global icon cache from the composer's persistent store
-		cacheVal := c.State("icon_global_cache", initCache)
+		cacheVal := c.State(iconCacheKey, initCache)
 		cache := cacheVal.Get().(*GlobalIconCache)
 
 		c.SetWidgetConstructor(iconWidgetConstructor(opts, iconByte, cache))
@@ -71,9 +74,6 @@ type cacheEntry struct {
 	dims layout.Dimensions
 }
 
-// iconCacheKey is the key used to store the GlobalIconCache in the Composer's state.
-var iconCacheKey = "iconCache"
-
 func initCache() any {
 	return NewGlobalIconCache()
 }
@@ -93,9 +93,6 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIc
 			colorDescriptor := FallbackColorDescriptor
 			if options.Color.IsSome() {
 				colorDescriptor = options.Color.UnwrapUnsafe()
-			}
-			if options.LazyColor.IsSome() {
-				colorDescriptor = options.LazyColor.UnwrapUnsafe()()
 			}
 
 			themeColor := themeManager.ResolveColorDescriptor(colorDescriptor)
