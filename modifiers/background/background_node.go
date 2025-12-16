@@ -3,6 +3,7 @@ package background
 import (
 	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/layout"
 	"gioui.org/op/paint"
@@ -30,13 +31,18 @@ func NewBackGroundNode(background BackgroundData) ChainNode {
 				no.AttachDrawModifier(func(widget LayoutWidget) layoutnode.LayoutWidget {
 
 					return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+						// Resolve ColorDescriptor at layout time
+						themeManager := theme.GetThemeManager()
+						themeColor := themeManager.ResolveColorDescriptor(background.Color)
+						nrgba := themeColor.AsNRGBA()
+
 						return layout.Background{}.Layout(gtx,
 							func(gtx layout.Context) layout.Dimensions {
 								// shape
 								// color
 								defer background.Shape.CreateOutline(gtx.Constraints.Min, gtx.Metric).Push(gtx.Ops).Pop()
 
-								paint.Fill(gtx.Ops, ToNRGBA(background.Color))
+								paint.Fill(gtx.Ops, nrgba)
 
 								return layout.Dimensions{Size: gtx.Constraints.Min}
 

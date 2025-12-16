@@ -14,7 +14,7 @@ type IconOption func(*IconOptions)
 func DefaultIconOptions() IconOptions {
 	return IconOptions{
 		Modifier: EmptyModifier,
-		Color:    maybe.None[ColorDescriptor](),
+		Color:    maybe.Some(colorHelper.ColorSelector().SurfaceRoles.OnSurface),
 	}
 }
 

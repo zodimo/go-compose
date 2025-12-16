@@ -1,7 +1,7 @@
 package background
 
 import (
-	"image/color"
+	"github.com/zodimo/go-compose/theme"
 
 	"github.com/zodimo/go-compose/internal/modifier"
 )
@@ -18,7 +18,7 @@ func DefaultBackgroundOptions() BackgroundOptions {
 
 type BackgroundOption func(options *BackgroundOptions)
 
-func Background(color color.Color, options ...BackgroundOption) Modifier {
+func Background(colorDesc theme.ColorDescriptor, options ...BackgroundOption) Modifier {
 
 	opt := DefaultBackgroundOptions()
 	for _, option := range options {
@@ -31,7 +31,7 @@ func Background(color color.Color, options ...BackgroundOption) Modifier {
 		modifier.NewModifier(
 			&BackgroundElement{
 				background: BackgroundData{
-					Color: color,
+					Color: colorDesc,
 					Shape: opt.Shape,
 				},
 			},
@@ -39,7 +39,7 @@ func Background(color color.Color, options ...BackgroundOption) Modifier {
 		modifier.NewInspectorInfo(
 			"background",
 			map[string]any{
-				"color":   color,
+				"color":   colorDesc,
 				"options": opt,
 			},
 		),

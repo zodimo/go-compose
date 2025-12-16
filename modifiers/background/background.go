@@ -1,16 +1,16 @@
 package background
 
 import (
-	"image/color"
+	"github.com/zodimo/go-compose/theme"
 )
 
 type BackgroundData struct {
-	Color color.Color
+	Color theme.ColorDescriptor
 	Shape Shape
 }
 
 func CompareBackground(a, b BackgroundData) bool {
-	return a.Color == b.Color && a.Shape == b.Shape
+	return a.Color.Compare(b.Color) && a.Shape == b.Shape
 }
 
 var _ Element = (*BackgroundElement)(nil)
