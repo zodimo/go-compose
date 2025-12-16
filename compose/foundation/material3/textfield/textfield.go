@@ -14,6 +14,10 @@ type HandlerWrapper struct {
 	Func func(string)
 }
 
+type OnSubmitWrapper struct {
+	Func func()
+}
+
 type TextFieldStateTracker struct {
 	LastValue string
 }
@@ -41,6 +45,16 @@ func TextField(
 		})
 		handlerWrapper := handlerWrapperState.Get().(*HandlerWrapper)
 		handlerWrapper.Func = onValueChange
+
+		// OnSubmit wrapper to avoid closure capture issues
+		var onSubmitWrapper *OnSubmitWrapper
+		if opts.OnSubmit != nil {
+			onSubmitWrapperState := c.State(fmt.Sprintf("%d/%s/onsubmit_wrapper", key, path), func() any {
+				return &OnSubmitWrapper{Func: opts.OnSubmit}
+			})
+			onSubmitWrapper = onSubmitWrapperState.Get().(*OnSubmitWrapper)
+			onSubmitWrapper.Func = opts.OnSubmit
+		}
 
 		// Input widget state
 		// We include SingleLine in key to recreate widget if mode changes
@@ -73,7 +87,7 @@ func TextField(
 			return m.Then(opts.Modifier)
 		})
 
-		c.SetWidgetConstructor(textFieldWidgetConstructor(inp, value, opts, handlerWrapper, tracker))
+		c.SetWidgetConstructor(textFieldWidgetConstructor(inp, value, opts, handlerWrapper, onSubmitWrapper, tracker))
 
 		return c.EndBlock()
 	}
@@ -84,6 +98,7 @@ func textFieldWidgetConstructor(
 	value string,
 	opts TextFieldOptions,
 	handler *HandlerWrapper,
+	onSubmitHandler *OnSubmitWrapper,
 	tracker *TextFieldStateTracker,
 ) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
@@ -102,8 +117,12 @@ func textFieldWidgetConstructor(
 			}
 
 			// 2. Drive Editor Events
-			// Submitted() processes all events for the editor.
-			inp.Editor.Submitted(gtx)
+			// Submitted() processes all events for the editor and returns true if Enter was pressed.
+			if inp.Editor.Submitted(gtx) {
+				if onSubmitHandler != nil && onSubmitHandler.Func != nil {
+					onSubmitHandler.Func()
+				}
+			}
 
 			// 3. Detect User Change
 			// We compare the editor's current internal text with the prop value.

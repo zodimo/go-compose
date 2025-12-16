@@ -11,6 +11,7 @@ type TextFieldOptions struct {
 	Enabled        bool
 	Error          bool
 	SingleLine     bool
+	OnSubmit       func() // Called when Enter is pressed (SingleLine mode)
 }
 
 func DefaultTextFieldOptions() TextFieldOptions {
@@ -51,5 +52,13 @@ func WithError(isError bool) TextFieldOption {
 func WithSingleLine(singleLine bool) TextFieldOption {
 	return func(o *TextFieldOptions) {
 		o.SingleLine = singleLine
+	}
+}
+
+// WithOnSubmit sets a callback that is invoked when Enter is pressed.
+// This only works when SingleLine is true.
+func WithOnSubmit(onSubmit func()) TextFieldOption {
+	return func(o *TextFieldOptions) {
+		o.OnSubmit = onSubmit
 	}
 }
