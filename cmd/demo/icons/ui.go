@@ -3,7 +3,6 @@ package main
 import (
 	"image/color"
 
-	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/icon"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
@@ -31,7 +30,7 @@ func UI(c api.Composer) api.LayoutNode {
 			iconbutton.FilledTonal(func() {}, List[2].Data, "FilledTonal"),
 			iconbutton.Outlined(func() {}, List[3].Data, "Outlined"),
 		)
-		rows = append(rows, row.Row(compose.Sequence(demoIconButtons...)))
+		rows = append(rows, row.Row(c.Sequence(demoIconButtons...)))
 	}
 
 	colors := []color.NRGBA{
@@ -74,11 +73,11 @@ func UI(c api.Composer) api.LayoutNode {
 				icon.WithModifier(padding.All(3)),
 			))
 		}
-		rows = append(rows, row.Row(compose.Sequence(rowItems...)))
+		rows = append(rows, row.Row(c.Sequence(rowItems...)))
 	}
 
 	c = column.Column(
-		compose.Sequence(rows...),
+		c.Sequence(rows...),
 	)(c)
 
 	return c.Build()

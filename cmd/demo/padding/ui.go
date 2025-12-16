@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 
 	"image/color"
@@ -15,7 +14,7 @@ import (
 func UI(c api.Composer) api.LayoutNode {
 
 	c = column.Column(
-		compose.Sequence(
+		c.Sequence(
 			text.Text("hello world",
 				text.WithModifier(background.Background(color.NRGBA{R: 255, G: 0, B: 0, A: 150})),
 				text.WithModifier(padding.All(20)),

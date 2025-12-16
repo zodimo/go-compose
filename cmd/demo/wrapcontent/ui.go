@@ -3,7 +3,6 @@ package main
 import (
 	"image/color"
 
-	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/text"
@@ -15,13 +14,13 @@ import (
 func UI(c api.Composer) api.LayoutNode {
 
 	c = column.Column(
-		compose.Sequence(
+		c.Sequence(
 			// Row with explicitly large size
 			row.Row(
-				compose.Sequence(
+				c.Sequence(
 					// Box 1: Wrapped Content (Text)
 					column.Column(
-						compose.Sequence(
+						c.Sequence(
 							text.Text("Wrap Content (Default)",
 								text.WithTextStyleOptions(
 									text.StyleWithColor(color.NRGBA{R: 255, G: 255, B: 255, A: 255}),
@@ -35,7 +34,7 @@ func UI(c api.Composer) api.LayoutNode {
 
 					// Box 2: Wrapped Content (Top Start)
 					column.Column(
-						compose.Sequence(
+						c.Sequence(
 							text.Text("Top Start",
 								text.WithTextStyleOptions(
 									text.StyleWithColor(color.NRGBA{R: 255, G: 255, B: 255, A: 255}),
@@ -55,10 +54,10 @@ func UI(c api.Composer) api.LayoutNode {
 
 			// A Fixed Size Box containing an aligned Wrapped Child
 			column.Column(
-				compose.Sequence(
+				c.Sequence(
 					// Child is wrapped and aligned BottomEnd
 					column.Column(
-						compose.Sequence(
+						c.Sequence(
 							text.Text("Bottom End Aligned",
 								text.WithTextStyleOptions(
 									text.StyleWithColor(color.NRGBA{R: 0, G: 0, B: 0, A: 255}),

@@ -73,7 +73,7 @@ func UI(c api.Composer) api.LayoutNode {
 
 	// Wrap everything in a Box so LaunchedEffect is just a sibling, not the Root
 	c = box.Box(
-		compose.Sequence(
+		c.Sequence(
 			// LaunchedEffect that reacts to counter
 			effect.LaunchedEffect(func(ctx context.Context) {
 				currentCount := counter.Get().(int)
@@ -101,7 +101,7 @@ func UI(c api.Composer) api.LayoutNode {
 			}, counter.Get()),
 
 			column.Column(
-				compose.Sequence(
+				c.Sequence(
 					text.Text(fmt.Sprintf("Counter: %d", counter.Get()), text.WithModifier(padding.All(10))),
 					text.Text(fmt.Sprintf("Status: %v", effectStatus.Get()), text.WithModifier(padding.All(10))),
 					button.Button(func() {

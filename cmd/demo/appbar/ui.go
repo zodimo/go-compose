@@ -19,7 +19,7 @@ func UI() api.Composable {
 	return scaffold.Scaffold(
 		func(c compose.Composer) compose.Composer {
 			return column.Column(
-				compose.Sequence(
+				c.Sequence(
 					// 1. Simple TopAppBar
 					appbar.TopAppBar(
 						text.Text("Simple TopAppBar", text.TypestyleTitleLarge),

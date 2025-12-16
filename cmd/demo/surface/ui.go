@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/material3/button"
@@ -28,10 +27,10 @@ func UI(c api.Composer) api.LayoutNode {
 	active := activeState.Get().(bool)
 
 	c = column.Column(
-		compose.Sequence(
+		c.Sequence(
 			// Controls
 			row.Row(
-				compose.Sequence(
+				c.Sequence(
 					button.Filled(
 						func() {
 							activeState.Set(!active)
@@ -47,9 +46,9 @@ func UI(c api.Composer) api.LayoutNode {
 			// Content Area
 			// Level 0: Surface (White/Background)
 			surface.Surface(
-				compose.Sequence(
+				c.Sequence(
 					column.Column(
-						compose.Sequence(
+						c.Sequence(
 							m3text.Text("Aloha!", token.TypestyleHeadlineLarge, text.WithTextStyleOptions(text.StyleWithColor(color.NRGBA{R: 28, G: 27, B: 31, A: 255}))), // OnSurface
 							m3text.Text("Level 1: 1", token.TypestyleBodySmall, text.WithTextStyleOptions(text.StyleWithColor(color.NRGBA{R: 28, G: 27, B: 31, A: 255}))),
 							// Start Recursion from Level 2
@@ -135,10 +134,10 @@ func RecursiveSurface(level int, active bool) api.Composable {
 		// The demo shrinks sizes effectively by padding.
 
 		return surface.Surface(
-			compose.Sequence(
+			c.Sequence(
 				// Padding/Margin inside the surface
 				column.Column(
-					compose.Sequence(
+					c.Sequence(
 						m3text.Text(fmt.Sprintf("Level %d: %d", level, cycle), token.TypestyleBodyMedium, text.WithTextStyleOptions(text.StyleWithColor(toNRGBA(textColor)))),
 						RecursiveSurface(level+1, active),
 					),

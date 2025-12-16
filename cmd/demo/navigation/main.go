@@ -88,7 +88,7 @@ func DemoUI() api.Composable {
 func HomeScreen(navController *navigation.NavController) api.Composable {
 	return func(c api.Composer) api.Composer {
 		return column.Column(
-			compose.Sequence(
+			c.Sequence(
 				text.Text("Home Screen", text.TypestyleBodyLarge),
 				button.Filled(
 					func() {
@@ -106,7 +106,7 @@ func HomeScreen(navController *navigation.NavController) api.Composable {
 func DetailsScreen(navController *navigation.NavController) api.Composable {
 	return func(c api.Composer) api.Composer {
 		return column.Column(
-			compose.Sequence(
+			c.Sequence(
 				text.Text("Details Screen", text.TypestyleBodyLarge),
 				button.Filled(
 					func() {

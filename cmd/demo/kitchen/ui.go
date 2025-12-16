@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/overlay"
@@ -41,9 +40,9 @@ func UI(c api.Composer) api.LayoutNode {
 	setShowAck := func(v bool) { showAck.Set(v) }
 	setShowConfirm := func(v bool) { showConfirm.Set(v) }
 
-	c = box.Box(compose.Sequence(
+	c = box.Box(c.Sequence(
 		// Main Content Layer
-		column.Column(compose.Sequence(
+		column.Column(c.Sequence(
 			text.Text("Kitchen Sink"),
 
 			// Section: Dialogs
@@ -61,7 +60,7 @@ func UI(c api.Composer) api.LayoutNode {
 			text.Text("Toggles", text.WithTextStyleOptions(text.StyleWithTextSize(20)), text.WithModifier(padding.Vertical(10, 10))),
 
 			// Checkbox
-			row.Row(compose.Sequence(
+			row.Row(c.Sequence(
 				checkbox.Checkbox(isChecked.Get().(bool), func(b bool) {
 					isChecked.Set(b)
 					fmt.Println("Checkbox changed:", b)
@@ -70,7 +69,7 @@ func UI(c api.Composer) api.LayoutNode {
 			), row.WithAlignment(row.Middle)),
 
 			// Switch
-			column.Column(compose.Sequence(
+			column.Column(c.Sequence(
 				text.Text(fmt.Sprintf("Switch is checked: %v", isSwitched.Get())),
 				mswitch.Switch(isSwitched.Get().(bool), func(b bool) {
 					isSwitched.Set(b)
@@ -79,20 +78,20 @@ func UI(c api.Composer) api.LayoutNode {
 			), column.WithModifier(padding.Padding(padding.NotSet, 10, padding.NotSet, padding.NotSet))),
 
 			// Radio Buttons
-			column.Column(compose.Sequence(
+			column.Column(c.Sequence(
 				text.Text(fmt.Sprintf("Radio selection: %d", radioOption.Get())),
 				// Row 1
-				row.Row(compose.Sequence(
+				row.Row(c.Sequence(
 					radiobutton.RadioButton(radioOption.Get().(int) == 0, func() { radioOption.Set(0) }),
 					text.Text("Option 0"),
 				), row.WithAlignment(row.Middle)),
 				// Row 2
-				row.Row(compose.Sequence(
+				row.Row(c.Sequence(
 					radiobutton.RadioButton(radioOption.Get().(int) == 1, func() { radioOption.Set(1) }),
 					text.Text("Option 1"),
 				), row.WithAlignment(row.Middle)),
 				// Row 3 (Disabled)
-				row.Row(compose.Sequence(
+				row.Row(c.Sequence(
 					radiobutton.RadioButton(radioOption.Get().(int) == 2, func() { radioOption.Set(2) }, radiobutton.WithEnabled(false)),
 					text.Text("Option 2 (Disabled)"),
 				), row.WithAlignment(row.Middle)),
@@ -100,12 +99,12 @@ func UI(c api.Composer) api.LayoutNode {
 
 			// Section: Progress Indicators
 			text.Text("Progress Indicators", text.WithTextStyleOptions(text.StyleWithTextSize(20)), text.WithModifier(padding.Vertical(10, 10))),
-			column.Column(compose.Sequence(
-				row.Row(compose.Sequence(
+			column.Column(c.Sequence(
+				row.Row(c.Sequence(
 					progress.CircularProgressIndicator(progressVal.Get().(float32)),
 					progress.LinearProgressIndicator(progressVal.Get().(float32), progress.WithModifier(size.Width(200)), progress.WithModifier(padding.Horizontal(20, padding.NotSet))),
 				), row.WithAlignment(row.Middle)),
-				row.Row(compose.Sequence(
+				row.Row(c.Sequence(
 					button.Text(func() {
 						p := progressVal.Get().(float32) + 0.1
 						if p > 1 {
@@ -125,7 +124,7 @@ func UI(c api.Composer) api.LayoutNode {
 
 			// Section: m3text Labels
 			text.Text("Material3 Labels", text.WithTextStyleOptions(text.StyleWithTextSize(20)), text.WithModifier(padding.Vertical(10, 10))),
-			column.Column(compose.Sequence(
+			column.Column(c.Sequence(
 				m3text.Text("Display Large", m3text.TypestyleDisplayLarge),
 				m3text.Text("Headline Medium", m3text.TypestyleHeadlineMedium),
 				m3text.Text("Title Small", m3text.TypestyleTitleSmall),
@@ -133,7 +132,7 @@ func UI(c api.Composer) api.LayoutNode {
 				m3text.Text("Label Small", m3text.TypestyleLabelSmall),
 			)),
 
-			column.Column(compose.Sequence(
+			column.Column(c.Sequence(
 				textfield.TextField(
 					textValue.Get().(string),
 					func(s string) {
@@ -146,53 +145,43 @@ func UI(c api.Composer) api.LayoutNode {
 		), column.WithModifier(padding.All(20))),
 
 		// Dialog Layer (Overlay)
-		func(c api.Composer) api.Composer {
-			if showAck.Get().(bool) {
-				return overlay.Overlay(
-					dialog.AlertDialog(
-						func() { setShowAck(false) },
-						func() {
-							fmt.Println("Acknowledged")
-							setShowAck(false)
-						},
-						"OK",
-						dialog.WithTitle("Out of stock"),
-						dialog.WithText("The item in your cart is no longer available."),
-					),
-					overlay.WithOnDismiss(func() {
-						// hide the Dialog
-						setShowAck(false)
-					}),
-				)(c)
-			}
-			return c
-		},
+		c.When(showAck.Get().(bool), overlay.Overlay(
+			dialog.AlertDialog(
+				func() { setShowAck(false) },
+				func() {
+					fmt.Println("Acknowledged")
+					setShowAck(false)
+				},
+				"OK",
+				dialog.WithTitle("Out of stock"),
+				dialog.WithText("The item in your cart is no longer available."),
+			),
+			overlay.WithOnDismiss(func() {
+				// hide the Dialog
+				setShowAck(false)
+			}),
+		)),
 
-		func(c api.Composer) api.Composer {
-			if showConfirm.Get().(bool) {
-				return overlay.Overlay(
-					dialog.AlertDialog(
-						func() { setShowConfirm(false) },
-						func() {
-							fmt.Println("Deleted!")
-							setShowConfirm(false)
-						},
-						"Delete",
-						dialog.WithTitle("Permanently Delete?"),
-						dialog.WithText("Deleting the selected messages will also remove them from synced devices."),
-						dialog.WithDismissButton("Cancel", func() {
-							fmt.Println("Cancelled")
-							setShowConfirm(false)
-						}),
-					),
-					overlay.WithOnDismiss(func() {
-						// hide the Dialog
-						setShowConfirm(false)
-					}),
-				)(c)
-			}
-			return c
-		},
+		c.When(showConfirm.Get().(bool), overlay.Overlay(
+			dialog.AlertDialog(
+				func() { setShowConfirm(false) },
+				func() {
+					fmt.Println("Deleted!")
+					setShowConfirm(false)
+				},
+				"Delete",
+				dialog.WithTitle("Permanently Delete?"),
+				dialog.WithText("Deleting the selected messages will also remove them from synced devices."),
+				dialog.WithDismissButton("Cancel", func() {
+					fmt.Println("Cancelled")
+					setShowConfirm(false)
+				}),
+			),
+			overlay.WithOnDismiss(func() {
+				// hide the Dialog
+				setShowConfirm(false)
+			}),
+		)),
 	))(c)
 
 	return c.Build()

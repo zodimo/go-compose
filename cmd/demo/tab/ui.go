@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/material3/scaffold"
 	"github.com/zodimo/go-compose/compose/foundation/material3/tab"
@@ -23,7 +22,7 @@ func UI() Composable {
 
 		return scaffold.Scaffold(
 			column.Column(
-				compose.Sequence(
+				c.Sequence(
 					// Tab Row 1: Text only
 					text.Text("Primary TabRow", text.TypestyleLabelLarge),
 					tab.TabRow(

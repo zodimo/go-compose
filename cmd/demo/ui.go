@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/material/button"
@@ -29,10 +28,10 @@ func UI(c api.Composer) api.LayoutNode {
 	counterCell := c.State("counter", func() any { return 0 })
 
 	c = column.Column(
-		compose.Sequence(
-			row.Row(compose.Sequence(
+		c.Sequence(
+			row.Row(c.Sequence(
 				column.Column(
-					compose.Sequence(
+					c.Sequence(
 						text.Text(fmt.Sprintf("state=%v", counterCell.Get()),
 							text.WithTextStyleOptions(
 								text.StyleWithColor(color.NRGBA{R: 255, G: 255, B: 255, A: 255}),
@@ -50,7 +49,7 @@ func UI(c api.Composer) api.LayoutNode {
 					column.WithModifier(background.Background(color.NRGBA{R: 0, G: 100, B: 200, A: 200})),
 				),
 				column.Column(
-					compose.Sequence(
+					c.Sequence(
 						button.Button(func() {
 							counterCell.Set(counterCell.Get().(int) + 1)
 							fmt.Println("Button clicked!")
@@ -62,7 +61,7 @@ func UI(c api.Composer) api.LayoutNode {
 					column.WithModifier(background.Background(color.NRGBA{R: 150, G: 0, B: 0, A: 200})),
 				),
 				column.Column(
-					compose.Sequence(),
+					c.Sequence(),
 					column.WithModifier(clip.Clip(shape.ShapeCircle)),
 					column.WithModifier(size.Size(100, 50)),
 					column.WithModifier(background.Background(color.NRGBA{R: 100, G: 0, B: 0, A: 200})),
