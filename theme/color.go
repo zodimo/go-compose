@@ -15,6 +15,7 @@ type ThemeColor interface {
 	AsNRGBA() color.NRGBA
 	SetOpacity(opacity OpacityLevel) ThemeColor
 	AsTokenColor() TokenColor
+	isValid()
 }
 
 type ColorUpdateActions int

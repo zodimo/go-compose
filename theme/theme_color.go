@@ -8,6 +8,9 @@ type themeColor struct {
 	tokenColor TokenColor
 }
 
+func (c themeColor) isValid() {
+}
+
 func (c themeColor) AsHex() string {
 	return c.tokenColor.AsHex()
 }
