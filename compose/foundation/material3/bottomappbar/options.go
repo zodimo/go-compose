@@ -1,9 +1,8 @@
 package bottomappbar
 
 import (
-	"image/color"
-
 	"gioui.org/unit"
+	"github.com/zodimo/go-compose/theme"
 )
 
 // PaddingValues describes the padding to be applied to the content.
@@ -14,8 +13,8 @@ type PaddingValues struct {
 // BottomAppBarOptions configuration
 type BottomAppBarOptions struct {
 	Modifier             Modifier
-	ContainerColor       color.Color
-	ContentColor         color.Color
+	ContainerColor       theme.ColorDescriptor
+	ContentColor         theme.ColorDescriptor
 	TonalElevation       unit.Dp
 	ContentPadding       PaddingValues
 	FloatingActionButton Composable
@@ -47,15 +46,15 @@ func WithModifier(m Modifier) BottomAppBarOption {
 	}
 }
 
-func WithContainerColor(c color.Color) BottomAppBarOption {
+func WithContainerColor(colorDesc theme.ColorDescriptor) BottomAppBarOption {
 	return func(o *BottomAppBarOptions) {
-		o.ContainerColor = c
+		o.ContainerColor = colorDesc
 	}
 }
 
-func WithContentColor(c color.Color) BottomAppBarOption {
+func WithContentColor(colorDesc theme.ColorDescriptor) BottomAppBarOption {
 	return func(o *BottomAppBarOptions) {
-		o.ContentColor = c
+		o.ContentColor = colorDesc
 	}
 }
 

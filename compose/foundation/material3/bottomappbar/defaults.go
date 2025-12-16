@@ -1,15 +1,14 @@
 package bottomappbar
 
 import (
-	"image/color"
-
 	"gioui.org/unit"
+	"github.com/zodimo/go-compose/theme"
 )
 
 // BottomAppBarColors represents the colors used by a BottomAppBar.
 type BottomAppBarColors struct {
-	ContainerColor color.Color
-	ContentColor   color.Color
+	ContainerColor theme.ColorDescriptor
+	ContentColor   theme.ColorDescriptor
 }
 
 // BottomAppBarDefaults holds the default values for BottomAppBar.
@@ -20,10 +19,8 @@ type bottomAppBarDefaults struct{}
 // Colors returns the default colors for a BottomAppBar.
 func (d bottomAppBarDefaults) Colors() BottomAppBarColors {
 	return BottomAppBarColors{
-		// Surface Container: R: 241, G: 244, B: 249
-		ContainerColor: color.NRGBA{R: 241, G: 244, B: 249, A: 255},
-		// On Surface Variant: R: 67, G: 71, B: 78
-		ContentColor: color.NRGBA{R: 67, G: 71, B: 78, A: 255},
+		ContainerColor: theme.ColorHelper.ColorSelector().SurfaceRoles.Container,
+		ContentColor:   theme.ColorHelper.ColorSelector().SurfaceRoles.OnVariant,
 	}
 }
 

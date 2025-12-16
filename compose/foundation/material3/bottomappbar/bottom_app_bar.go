@@ -38,7 +38,7 @@ func BottomAppBar(
 								if actions != nil {
 									return surface.Surface(
 										actions,
-										surface.WithContentColor(theme.ColorHelper.SpecificColor(opts.ContentColor)),
+										surface.WithContentColor(opts.ContentColor),
 										surface.WithColor(theme.ColorHelper.SpecificColor(color.NRGBA{})), // Transparent background
 									)(c)
 								}
@@ -74,7 +74,7 @@ func BottomAppBar(
 				)(c)
 			},
 			surface.WithModifier(opts.Modifier),
-			surface.WithColor(theme.ColorHelper.SpecificColor(opts.ContainerColor)),
+			surface.WithColor(opts.ContainerColor),
 			surface.WithTonalElevation(opts.TonalElevation),
 			// Check Surface implementation. It usually supports WithShadow (elevation).
 			// If TonalElevation is just color adjustment, we might need a separate mechanism or it's handled by Surface logic?
