@@ -101,13 +101,7 @@ func Scaffold(content Composable, options ...ScaffoldOption) Composable {
 						// Layer 3: Snackbar Host
 						c.When(
 							opts.SnackbarHost != nil,
-							box.Box(
-								opts.SnackbarHost,
-								box.WithAlignment(layout.S), // Bottom Center
-								// Ensure it sits above navigation bars if possible,
-								// currently just bottom aligned in the root Box.
-								box.WithModifier(size.FillMax()),
-							),
+							opts.SnackbarHost,
 						),
 					),
 					box.WithModifier(size.FillMax()),

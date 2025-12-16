@@ -8,6 +8,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/material3/button"
 	"github.com/zodimo/go-compose/compose/foundation/material3/scaffold"
+	"github.com/zodimo/go-compose/compose/foundation/material3/snackbar"
 	"github.com/zodimo/go-compose/compose/foundation/material3/surface"
 	m3text "github.com/zodimo/go-compose/compose/foundation/material3/text"
 	ftext "github.com/zodimo/go-compose/compose/foundation/text"
@@ -17,6 +18,10 @@ import (
 )
 
 func UI(c api.Composer) api.LayoutNode {
+
+	// Create snackbar host state outside the loop to persist state
+	snackbarHostState := c.State("snackbarHostState", func() any { return snackbar.NewSnackbarHostState() }).Get().(*snackbar.SnackbarHostState)
+
 	return scaffold.Scaffold(
 		box.Box(
 			func(c api.Composer) api.Composer {
@@ -24,7 +29,7 @@ func UI(c api.Composer) api.LayoutNode {
 					func(c api.Composer) api.Composer {
 						m3text.Text("Scaffold Content Area", m3text.TypestyleBodyLarge)(c)
 						button.Filled(func() {
-							fmt.Println("Fab clicked!")
+							snackbarHostState.ShowSnackbar("Content area button clicked!")
 						}, "Click Me")(c)
 
 						return c
@@ -78,5 +83,6 @@ func UI(c api.Composer) api.LayoutNode {
 				button.WithModifier(padding_modifier.All(0)), // Reset padding?
 			)(c)
 		}),
+		scaffold.WithSnackbarHost(snackbar.SnackbarHost(snackbarHostState)),
 	)(c).Build()
 }
