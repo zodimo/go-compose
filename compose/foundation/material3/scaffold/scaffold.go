@@ -52,63 +52,63 @@ func Scaffold(content Composable, options ...ScaffoldOption) Composable {
 				return box.Box( // Root Stacking Context
 					compose.Sequence(
 						// Layer 1: The App Structure (TopBar -> Content -> BottomBar)
-						func(c Composer) Composer {
-							return column.Column(
-								compose.Sequence(
-									// Top Bar
-									c.When(opts.TopBar != nil,
-										opts.TopBar,
-									),
+						column.Column(
+							compose.Sequence(
+								// Top Bar
+								c.When(opts.TopBar != nil,
+									opts.TopBar,
+								),
 
-									// Content Body
-									// This needs to expand to fill available space.
-									box.Box(
-										content,
-										box.WithModifier(
-											// Expand to fill remaining vertical space
-											weight.Weight(1),
-										),
-									),
-
-									// Bottom Bar
-									c.When(opts.BottomBar != nil,
-										opts.BottomBar,
+								// Content Body
+								// This needs to expand to fill available space.
+								box.Box(
+									content,
+									box.WithModifier(
+										// Expand to fill remaining vertical space
+										weight.Weight(1),
 									),
 								),
-							)(c)
-						},
-						// Layer 2: Floating Action Button
-						func(c Composer) Composer {
-							if opts.FloatingActionButton != nil {
-								alignment := layout.SE // Bottom End
-								if opts.FloatingActionButtonPosition == FabPositionCenter {
-									alignment = layout.S // Bottom Center
-								}
 
-								return box.Box(
+								// Bottom Bar
+								c.When(opts.BottomBar != nil,
+									opts.BottomBar,
+								),
+							),
+						),
+						// Layer 2: Floating Action Button
+						c.When(
+							opts.FloatingActionButton != nil,
+							c.If(
+								opts.FloatingActionButtonPosition == FabPositionCenter,
+								box.Box(
 									opts.FloatingActionButton,
-									box.WithAlignment(alignment),
+									box.WithAlignment(layout.S), // Bottom Center
 									// Add standard padding for FAB
 									box.WithModifier(padding_modifier.All(16)),
 									// Wrapper must fill max to align FAB relative to screen
 									box.WithModifier(size.FillMax()),
-								)(c)
-							}
-							return c
-						},
-						// Layer 3: Snackbar Host
-						func(c Composer) Composer {
-							if opts.SnackbarHost != nil {
-								return box.Box(
-									opts.SnackbarHost,
-									box.WithAlignment(layout.S), // Bottom Center
-									// Ensure it sits above navigation bars if possible,
-									// currently just bottom aligned in the root Box.
+								),
+								box.Box(
+									opts.FloatingActionButton,
+									box.WithAlignment(layout.SE), // Bottom End
+									// Add standard padding for FAB
+									box.WithModifier(padding_modifier.All(16)),
+									// Wrapper must fill max to align FAB relative to screen
 									box.WithModifier(size.FillMax()),
-								)(c)
-							}
-							return c
-						},
+								),
+							),
+						),
+						// Layer 3: Snackbar Host
+						c.When(
+							opts.SnackbarHost != nil,
+							box.Box(
+								opts.SnackbarHost,
+								box.WithAlignment(layout.S), // Bottom Center
+								// Ensure it sits above navigation bars if possible,
+								// currently just bottom aligned in the root Box.
+								box.WithModifier(size.FillMax()),
+							),
+						),
 					),
 					box.WithModifier(size.FillMax()),
 				)(c)
