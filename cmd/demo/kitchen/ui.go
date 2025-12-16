@@ -8,6 +8,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/dialog"
 	"github.com/zodimo/go-compose/compose/foundation/material3/navigationbar"
 	"github.com/zodimo/go-compose/compose/foundation/material3/scaffold"
+	"github.com/zodimo/go-compose/compose/foundation/material3/snackbar"
 	m3text "github.com/zodimo/go-compose/compose/foundation/material3/text"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/modifiers/weight"
@@ -33,6 +34,9 @@ func UI(c api.Composer) api.LayoutNode {
 	// Dialog visibility state
 	showDialog := c.State("showDialog", func() any { return false })
 
+	// Snackbar state
+	snackbarHostState := c.State("snackbarHostState", func() any { return snackbar.NewSnackbarHostState() }).Get().(*snackbar.SnackbarHostState)
+
 	navItems := []struct {
 		Label string
 		Icon  []byte
@@ -44,66 +48,74 @@ func UI(c api.Composer) api.LayoutNode {
 	}
 
 	c = c.Sequence(
-		scaffold.Scaffold(
-			// Content area based on selected category
-			lazy.LazyColumn(
-				func(scope lazy.LazyListScope) {
-					scope.Item(nil, func(c api.Composer) api.Composer {
-						return c.Sequence(
-							c.When(currentCategory == CategoryActions, ActionsScreen(c)),
-							c.When(currentCategory == CategorySelection, SelectionScreen(c)),
-							c.When(currentCategory == CategoryFeedback, FeedbackScreen(c, showDialog)),
-							c.When(currentCategory == CategoryInputs, InputsScreen(c)),
-						)(c)
-					})
-				},
-				lazy.WithModifier(weight.Weight(1)),
-				lazy.WithModifier(size.FillMaxWidth()),
-			),
-			scaffold.WithTopBar(
-				appbar.TopAppBar(
-					m3text.Text("Component Showcase", m3text.TypestyleTitleLarge),
-				),
-			),
-			scaffold.WithBottomBar(
-				navigationbar.NavigationBar(
-					func(c api.Composer) api.Composer {
-						for i, item := range navItems {
-							idx := i
-							navigationbar.NavigationBarItem(
-								currentCategory == idx,
-								func() { selectedCategory.Set(idx) },
-								func(c api.Composer) api.Composer {
-									return icon.Icon(item.Icon)(c)
-								},
-								func(c api.Composer) api.Composer {
-									return m3text.Text(item.Label, m3text.TypestyleLabelMedium)(c)
-								},
+		func(c api.Composer) api.Composer {
+			// Scaffold with navigation
+			scaffold.Scaffold(
+				// Content area based on selected category
+				lazy.LazyColumn(
+					func(scope lazy.LazyListScope) {
+						scope.Item(nil, func(c api.Composer) api.Composer {
+							return c.Sequence(
+								c.When(currentCategory == CategoryActions, ActionsScreen(c)),
+								c.When(currentCategory == CategorySelection, SelectionScreen(c)),
+								c.When(currentCategory == CategoryFeedback, FeedbackScreen(c, showDialog, snackbarHostState)),
+								c.When(currentCategory == CategoryInputs, InputsScreen(c)),
 							)(c)
-						}
-						return c
+						})
 					},
+					lazy.WithModifier(weight.Weight(1)),
+					lazy.WithModifier(size.FillMaxWidth()),
 				),
-			),
-			scaffold.WithModifier(size.FillMax()),
-		),
+				scaffold.WithTopBar(
+					appbar.TopAppBar(
+						m3text.Text("Component Showcase", m3text.TypestyleTitleLarge),
+					),
+				),
+				scaffold.WithBottomBar(
+					navigationbar.NavigationBar(
+						func(c api.Composer) api.Composer {
+							for i, item := range navItems {
+								idx := i
+								navigationbar.NavigationBarItem(
+									currentCategory == idx,
+									func() { selectedCategory.Set(idx) },
+									func(c api.Composer) api.Composer {
+										return icon.Icon(item.Icon)(c)
+									},
+									func(c api.Composer) api.Composer {
+										return m3text.Text(item.Label, m3text.TypestyleLabelMedium)(c)
+									},
+								)(c)
+							}
+							return c
+						},
+					),
+				),
+				scaffold.WithModifier(size.FillMax()),
+			)(c)
 
-		// Dialog overlay
-		c.When(showDialog.Get().(bool), overlay.Overlay(
-			dialog.AlertDialog(
-				func() { showDialog.Set(false) },
-				func() { showDialog.Set(false) },
-				"Confirm",
-				dialog.WithTitle("Example Dialog"),
-				dialog.WithText("This is an example AlertDialog demonstrating the Feedback category."),
-				dialog.WithDismissButton("Cancel", func() {
+			// Dialog overlay
+			c.When(showDialog.Get().(bool), overlay.Overlay(
+				dialog.AlertDialog(
+					func() { showDialog.Set(false) },
+					func() { showDialog.Set(false) },
+					"Confirm",
+					dialog.WithTitle("Example Dialog"),
+					dialog.WithText("This is an example AlertDialog demonstrating the Feedback category."),
+					dialog.WithDismissButton("Cancel", func() {
+						showDialog.Set(false)
+					}),
+				),
+				overlay.WithOnDismiss(func() {
 					showDialog.Set(false)
 				}),
-			),
-			overlay.WithOnDismiss(func() {
-				showDialog.Set(false)
-			}),
-		)),
+			))
+
+			// Snackbar host overlay
+			snackbar.SnackbarHost(snackbarHostState)(c)
+
+			return c
+		},
 	)(c)
 
 	return c.Build()

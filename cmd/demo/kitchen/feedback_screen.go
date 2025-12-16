@@ -8,6 +8,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/badge"
 	"github.com/zodimo/go-compose/compose/foundation/material3/button"
 	"github.com/zodimo/go-compose/compose/foundation/material3/progress"
+	"github.com/zodimo/go-compose/compose/foundation/material3/snackbar"
 	m3text "github.com/zodimo/go-compose/compose/foundation/material3/text"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -16,8 +17,11 @@ import (
 	mdicons "golang.org/x/exp/shiny/materialdesign/icons"
 )
 
-// FeedbackScreen shows dialog trigger, progress, badges
-func FeedbackScreen(c api.Composer, showDialog DialogState) api.Composable {
+// SnackbarHostState for managing snackbar display
+type SnackbarHostState = snackbar.SnackbarHostState
+
+// FeedbackScreen shows dialog trigger, progress, badges, and snackbar
+func FeedbackScreen(c api.Composer, showDialog DialogState, snackbarHostState *SnackbarHostState) api.Composable {
 	progressVal := c.State("fb_progress", func() any { return float32(0.6) })
 
 	return func(c api.Composer) api.Composer {
@@ -54,6 +58,15 @@ func FeedbackScreen(c api.Composer, showDialog DialogState) api.Composable {
 					button.Text(func() {
 						progressVal.Set(float32(0))
 					}, "Reset"),
+				)),
+
+				spacer.Height(24),
+				SectionTitle("Snackbar"),
+				spacer.Height(8),
+				row.Row(c.Sequence(
+					button.Filled(func() {
+						snackbarHostState.ShowSnackbar("Hello from Snackbar!")
+					}, "Show Snackbar"),
 				)),
 
 				spacer.Height(24),
