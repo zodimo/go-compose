@@ -145,23 +145,29 @@ func (c *composer) SetWidgetConstructor(constructor layoutnode.LayoutNodeWidgetC
 }
 
 func (c *composer) If(condition bool, ifTrue Composable, ifFalse Composable) Composable {
+	idTrue := c.GenerateID()
+	idFalse := c.GenerateID()
 	if condition {
-		return ifTrue
+		return c.Key(idTrue, ifTrue)
 	}
-	return ifFalse
+	return c.Key(idFalse, ifFalse)
 }
 
 func (c *composer) When(condition bool, ifTrue Composable) Composable {
+	idTrue := c.GenerateID()
+	idFalse := c.GenerateID()
 	if condition {
-		return ifTrue
+		return c.Key(idTrue, ifTrue)
 	}
-	return emptyComposable()
+	return c.Key(idFalse, emptyComposable())
 }
 func (c *composer) Else(condition bool, ifFalse Composable) Composable {
+	idTrue := c.GenerateID()
+	idFalse := c.GenerateID()
 	if condition {
-		return emptyComposable()
+		return c.Key(idTrue, emptyComposable())
 	}
-	return ifFalse
+	return c.Key(idFalse, ifFalse)
 }
 
 func (c *composer) Sequence(contents ...Composable) Composable {
