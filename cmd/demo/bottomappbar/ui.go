@@ -23,7 +23,7 @@ import (
 func UI() api.Composable {
 	return func(c api.Composer) api.Composer {
 		return column.Column(
-			func(c api.Composer) api.Composer {
+			c.Sequence(
 				// Content Area
 				box.Box(
 					func(c api.Composer) api.Composer {
@@ -37,21 +37,17 @@ func UI() api.Composable {
 					},
 					box.WithModifier(weight.Weight(1)),
 					box.WithAlignment(layout.Center),
-				)(c)
-
+				),
 				// Bottom App Bar with FAB
 				bottomappbar.BottomAppBar(
-					func(c api.Composer) api.Composer {
-						return row.Row(
-							func(c api.Composer) api.Composer {
-								IconButton(mdicons.NavigationMenu)(c)
-								IconButton(mdicons.ActionSearch)(c)
-								IconButton(mdicons.ContentSave)(c)
-								IconButton(mdicons.SocialShare)(c)
-								return c
-							},
-						)(c)
-					},
+					row.Row(
+						c.Sequence(
+							IconButton(mdicons.NavigationMenu),
+							IconButton(mdicons.ActionSearch),
+							IconButton(mdicons.ContentSave),
+							IconButton(mdicons.SocialShare),
+						),
+					),
 					bottomappbar.WithFloatingActionButton(
 						func(c api.Composer) api.Composer {
 							// Simulate FAB
@@ -62,9 +58,8 @@ func UI() api.Composable {
 							)(c)
 						},
 					),
-				)(c)
-				return c
-			},
+				),
+			),
 			column.WithModifier(size.FillMax()),
 		)(c)
 	}
