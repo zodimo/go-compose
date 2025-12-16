@@ -249,3 +249,13 @@ Migrate components in this order (dependencies first):
 - Use `SpecificColor()` only for truly custom/branded colors in demos
 - Remember to add `theme` import and remove unused `color`/`token` imports
 - Test with both light and dark themes to ensure proper contrast
+
+## Progress Tracking
+
+Track migration progress and see the status of all components:
+- [ColorDescriptor Migration Progress](../docs/colordescriptor_migration_progress.md)
+
+**After completing a migration**, update the progress document by:
+1. Moving the component from "Pending" to "Completed" section
+2. Adding the completion date
+3. Adding any relevant notes about the migration
