@@ -73,22 +73,47 @@ func (e ellipseOutline) Path(ops *op.Ops) clip.PathSpec {
 
 var ShapeCircle Shape = circleShape{}
 
-// RoundedCornerShape
+// RoundedCornerShape supports uniform radius via Radius, or per-corner radius
+// via TopStart (NW), TopEnd (NE), BottomEnd (SE), BottomStart (SW).
+// Per-corner fields take precedence when any are non-zero.
+// This follows Jetpack Compose's RoundedCornerShape API.
 type RoundedCornerShape struct {
+	// Uniform radius applied to all corners (used when per-corner fields are all zero)
 	Radius unit.Dp
+
+	// Per-corner radius (following LTR layout direction):
+	// TopStart = NW (top-left), TopEnd = NE (top-right)
+	// BottomEnd = SE (bottom-right), BottomStart = SW (bottom-left)
+	TopStart    unit.Dp
+	TopEnd      unit.Dp
+	BottomEnd   unit.Dp
+	BottomStart unit.Dp
 }
 
 func (r RoundedCornerShape) CreateOutline(size image.Point, metric unit.Metric) Outline {
-	radius := metric.Dp(r.Radius)
-	if radius == 0 {
-		return rectOutline{clip.Rect{Max: size}}
+	// Determine if per-corner radius is being used
+	hasPerCorner := r.TopStart > 0 || r.TopEnd > 0 || r.BottomEnd > 0 || r.BottomStart > 0
+
+	var nw, ne, se, sw int
+	if hasPerCorner {
+		nw = metric.Dp(r.TopStart)
+		ne = metric.Dp(r.TopEnd)
+		se = metric.Dp(r.BottomEnd)
+		sw = metric.Dp(r.BottomStart)
+	} else {
+		radius := metric.Dp(r.Radius)
+		if radius == 0 {
+			return rectOutline{clip.Rect{Max: size}}
+		}
+		nw, ne, se, sw = radius, radius, radius, radius
 	}
+
 	return rrectOutline{clip.RRect{
 		Rect: image.Rectangle{Max: size},
-		SE:   radius,
-		SW:   radius,
-		NW:   radius,
-		NE:   radius,
+		NW:   nw,
+		NE:   ne,
+		SE:   se,
+		SW:   sw,
 	}}
 }
 

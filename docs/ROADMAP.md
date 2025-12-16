@@ -43,7 +43,7 @@ To provide a feature-complete, idiomatic Go implementation of Jetpack Compose's 
 - [ ] **Pickers**:
     - [ ] Date Picker (Modal and Docked).
     - [ ] Time Picker (Dial and Input).
-- [ ] **Segmented Button**: Single-select and multi-select variants.
+- [x] **Segmented Button**: Single-select and multi-select variants.
 - [ ] **Menus**:
     - [x] Dropdown Menu (polish existing implementation).
     - [ ] Exposed Dropdown Menu (ComboBox).
