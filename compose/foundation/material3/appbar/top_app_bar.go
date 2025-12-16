@@ -11,6 +11,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/modifiers/weight"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/layout"
 )
@@ -34,8 +35,8 @@ func SingleRowTopAppBar(
 						box.Box(
 							surface.Surface(
 								navigationIcon,
-								surface.WithContentColor(colors.NavigationIconContentColor),
-								surface.WithColor(color.NRGBA{}), // Transparent background
+								surface.WithContentColor(theme.ColorHelper.SpecificColor(colors.NavigationIconContentColor)),
+								surface.WithColor(theme.ColorHelper.SpecificColor(color.NRGBA{})), // Transparent background
 							),
 							box.WithAlignment(layout.W),
 							box.WithModifier(padding.Padding(4, 0, 0, 0)), // Start(4)
@@ -48,8 +49,8 @@ func SingleRowTopAppBar(
 							if title != nil {
 								return surface.Surface(
 									title,
-									surface.WithContentColor(colors.TitleContentColor),
-									surface.WithColor(color.NRGBA{}), // Transparent
+									surface.WithContentColor(theme.ColorHelper.SpecificColor(colors.TitleContentColor)),
+									surface.WithColor(theme.ColorHelper.SpecificColor(color.NRGBA{})), // Transparent
 								)(c)
 							}
 							return c
@@ -74,7 +75,7 @@ func SingleRowTopAppBar(
 				row.WithAlignment(row.Middle),     // Vertical Alignment
 			),
 			surface.WithModifier(modifier),
-			surface.WithColor(colors.ContainerColor),
+			surface.WithColor(theme.ColorHelper.SpecificColor(colors.ContainerColor)),
 		)(c)
 	}
 }
@@ -130,8 +131,8 @@ func CenterAlignedTopAppBar(
 								box.Box(
 									surface.Surface(
 										opts.NavigationIcon,
-										surface.WithContentColor(opts.Colors.NavigationIconContentColor),
-										surface.WithColor(color.NRGBA{}),
+										surface.WithContentColor(theme.ColorHelper.SpecificColor(opts.Colors.NavigationIconContentColor)),
+										surface.WithColor(theme.ColorHelper.SpecificColor(color.NRGBA{})),
 									),
 									box.WithAlignment(layout.W),
 									box.WithModifier(padding.Padding(4, 0, 0, 0)),
@@ -160,8 +161,8 @@ func CenterAlignedTopAppBar(
 								title != nil,
 								surface.Surface(
 									title,
-									surface.WithContentColor(opts.Colors.TitleContentColor),
-									surface.WithColor(color.NRGBA{}),
+									surface.WithContentColor(theme.ColorHelper.SpecificColor(opts.Colors.TitleContentColor)),
+									surface.WithColor(theme.ColorHelper.SpecificColor(color.NRGBA{})),
 								),
 							),
 						),
@@ -173,7 +174,7 @@ func CenterAlignedTopAppBar(
 				box.WithModifier(size.Height(64)),
 			),
 			surface.WithModifier(opts.Modifier),
-			surface.WithColor(opts.Colors.ContainerColor),
+			surface.WithColor(theme.ColorHelper.SpecificColor(opts.Colors.ContainerColor)),
 		)(c)
 	}
 }
@@ -223,8 +224,8 @@ func TwoRowsTopAppBar(
 										// Just render.
 										return title(c)
 									},
-									surface.WithContentColor(colors.TitleContentColor),
-									surface.WithColor(color.NRGBA{}),
+									surface.WithContentColor(theme.ColorHelper.SpecificColor(colors.TitleContentColor)),
+									surface.WithColor(theme.ColorHelper.SpecificColor(color.NRGBA{})),
 								),
 							),
 						),
@@ -238,7 +239,7 @@ func TwoRowsTopAppBar(
 				column.WithModifier(size.Height(maxHeight)),
 			),
 			surface.WithModifier(modifier),
-			surface.WithColor(colors.ContainerColor),
+			surface.WithColor(theme.ColorHelper.SpecificColor(colors.ContainerColor)),
 		)(c)
 	}
 }

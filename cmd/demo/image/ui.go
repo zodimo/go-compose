@@ -8,6 +8,7 @@ import (
 	fImage "github.com/zodimo/go-compose/compose/foundation/image"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	uilayout "github.com/zodimo/go-compose/compose/ui/layout"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/unit"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
@@ -39,7 +40,8 @@ func UI() api.Composable {
 						imageResource,
 						fImage.WithContentScale(uilayout.ContentScaleFit),
 					),
-					surface.WithModifier(size.Size(150, 100, size.SizeRequired()).Then(border.Border(unit.Dp(1), color.NRGBA{0, 0, 0, 255}, shape.ShapeRectangle))),
+					surface.WithModifier(
+						size.Size(150, 100, size.SizeRequired()).Then(border.Border(unit.Dp(1), theme.ColorHelper.SpecificColor(color.NRGBA{0, 0, 0, 255}), shape.ShapeRectangle))),
 				)(c)
 				spacer.Height(16)(c)
 
@@ -51,7 +53,7 @@ func UI() api.Composable {
 						imageResource,
 						fImage.WithContentScale(uilayout.ContentScaleCrop),
 					),
-					surface.WithModifier(size.Size(150, 100, size.SizeRequired()).Then(border.Border(unit.Dp(1), color.NRGBA{0, 0, 0, 255}, shape.ShapeRectangle))),
+					surface.WithModifier(size.Size(150, 100, size.SizeRequired()).Then(border.Border(unit.Dp(1), theme.ColorHelper.SpecificColor(color.NRGBA{0, 0, 0, 255}), shape.ShapeRectangle))),
 				)(c)
 				spacer.Height(16)(c)
 
@@ -66,7 +68,7 @@ func UI() api.Composable {
 						fImage.WithAlpha(0.5),
 						fImage.WithModifier(size.Size(50, 50)),
 					),
-					surface.WithModifier(size.Size(150, 100, size.SizeRequired()).Then(border.Border(unit.Dp(1), color.NRGBA{0, 0, 0, 255}, shape.ShapeRectangle))),
+					surface.WithModifier(size.Size(150, 100, size.SizeRequired()).Then(border.Border(unit.Dp(1), theme.ColorHelper.SpecificColor(color.NRGBA{0, 0, 0, 255}), shape.ShapeRectangle))),
 				)(c)
 
 				return c

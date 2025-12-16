@@ -13,6 +13,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clip"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/modifiers/weight"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/layout"
 	"gioui.org/unit"
@@ -65,12 +66,12 @@ func NavigationBarItem(
 								box.WithAlignment(layout.Center),
 							)(c)
 						},
-						surface.WithColor(func() color.Color {
+						surface.WithColor(theme.ColorHelper.SpecificColor(func() color.Color {
 							if selected {
 								return colors.IndicatorColor
 							}
 							return color.NRGBA{A: 0} // Transparent
-						}()),
+						}())),
 						surface.WithShape(shape.RoundedCornerShape{Radius: unit.Dp(16)}),
 						surface.WithModifier(
 							EmptyModifier.

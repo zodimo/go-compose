@@ -14,6 +14,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/theme"
 )
 
 func UI() api.Composable {
@@ -77,7 +78,7 @@ func GridItem(index int) api.Composable {
 		box.WithModifier(
 			size.Height(80).
 				Then(size.FillMaxWidth()).
-				Then(background.Background(bgColor)).
+				Then(background.Background(theme.ColorHelper.SpecificColor(bgColor))).
 				Then(padding.All(8)),
 		),
 		box.WithAlignment(box.Center),

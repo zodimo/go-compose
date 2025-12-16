@@ -11,6 +11,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/widget"
 )
@@ -117,8 +118,8 @@ func Chip(onClick func(), label string, options ...ChipOption) api.Composable {
 		// Surface options
 		surfaceOpts := []surface.SurfaceOption{
 			surface.WithShape(opts.Shape),
-			surface.WithColor(opts.Color),
-			surface.WithBorder(opts.BorderWidth, opts.BorderColor),
+			surface.WithColor(theme.ColorHelper.SpecificColor(opts.Color)),
+			surface.WithBorder(opts.BorderWidth, theme.ColorHelper.SpecificColor(opts.BorderColor)),
 			surface.WithShadowElevation(opts.Elevation),
 		}
 

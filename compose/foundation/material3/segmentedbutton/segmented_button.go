@@ -12,6 +12,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -165,8 +166,8 @@ func SegmentedButton(
 		// Surface options
 		surfaceOpts := []surface.SurfaceOption{
 			surface.WithShape(segmentShape),
-			surface.WithColor(bgColor),
-			surface.WithBorder(opts.BorderWidth, opts.BorderColor),
+			surface.WithColor(theme.ColorHelper.SpecificColor(bgColor)),
+			surface.WithBorder(opts.BorderWidth, theme.ColorHelper.SpecificColor(opts.BorderColor)),
 			surface.WithModifier(finalModifier),
 		}
 

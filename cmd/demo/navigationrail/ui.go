@@ -104,7 +104,7 @@ func UI() api.Composable {
 											ftext.StyleWithColor(textColor),
 										),
 										// ftext.WithAlignment(ftext.Middle), // align to the middle horizontally not vertically
-										// ftext.WithModifier(background.Background(color.NRGBA{R: 0, G: 0, B: 200, A: 200})),
+										// ftext.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0, G: 0, B: 200, A: 200})))),
 
 									)(c)
 								},

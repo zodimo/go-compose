@@ -59,7 +59,7 @@ func DismissibleNavigationDrawer(
 					func(c Composer) Composer {
 						return surface.Surface(
 							drawerContent,
-							surface.WithColor(drawerContainerColor),
+							surface.WithColor(theme.ColorHelper.SpecificColor(drawerContainerColor)),
 							surface.WithShape(shape.RoundedCornerShape{Radius: unit.Dp(0)}),
 							surface.WithModifier(
 								modifier.EmptyModifier.

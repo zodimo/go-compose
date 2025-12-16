@@ -11,6 +11,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
+	"github.com/zodimo/go-compose/theme"
 )
 
 // TabRow contains a row of Tabs and displays an indicator underneath the currently selected Tab.
@@ -44,10 +45,10 @@ func TabRow(
 		SurfaceOptions := []surface.SurfaceOption{}
 		// Surface Options
 		if opts.ContainerColor.IsSome() {
-			SurfaceOptions = append(SurfaceOptions, surface.WithColor(opts.ContainerColor.UnwrapUnsafe()))
+			SurfaceOptions = append(SurfaceOptions, surface.WithColor(theme.ColorHelper.SpecificColor(opts.ContainerColor.UnwrapUnsafe())))
 		}
 		if opts.ContentColor.IsSome() {
-			SurfaceOptions = append(SurfaceOptions, surface.WithContentColor(opts.ContentColor.UnwrapUnsafe()))
+			SurfaceOptions = append(SurfaceOptions, surface.WithContentColor(theme.ColorHelper.SpecificColor(opts.ContentColor.UnwrapUnsafe())))
 		}
 
 		SurfaceOptions = append(SurfaceOptions, surface.WithModifier(opts.Modifier.Then(size.FillMaxWidth())))
@@ -154,7 +155,7 @@ func Tab(
 								box.WithModifier(
 									size.FillMaxWidth().
 										Then(size.Height(3)). // 3dp
-										Then(background.Background(TabRowDefaults.IndicatorColor())),
+										Then(background.Background(theme.ColorHelper.SpecificColor(TabRowDefaults.IndicatorColor()))),
 								),
 							)(c)
 						} else {
@@ -165,7 +166,7 @@ func Tab(
 								box.WithModifier(
 									size.FillMaxWidth().
 										Then(size.Height(3)).
-										Then(background.Background(color.NRGBA{})), // Transparent
+										Then(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{}))), // Transparent
 								),
 							)(c)
 						}
@@ -181,8 +182,8 @@ func Tab(
 					Then(size.FillMaxHeight()).       // Fill row height
 					Then(clickable.OnClick(onClick)), // Use clickable package
 			),
-			surface.WithColor(color.NRGBA{}), // Transparent container
-			surface.WithContentColor(contentColor),
+			surface.WithColor(theme.ColorHelper.SpecificColor(color.NRGBA{})), // Transparent container
+			surface.WithContentColor(theme.ColorHelper.SpecificColor(contentColor)),
 		)(c)
 	}
 }

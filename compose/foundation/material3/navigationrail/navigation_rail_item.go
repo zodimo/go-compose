@@ -54,7 +54,7 @@ func NavigationRailItem(
 				// Icon Container (Indicator)
 				surface.Surface(
 					icon,
-					surface.WithColor(func() color.Color {
+					surface.WithColor(theme.ColorHelper.SpecificColor(func() color.Color {
 						if selected {
 							tm := theme.GetThemeManager()
 							m3 := tm.GetMaterial3Theme()
@@ -62,7 +62,7 @@ func NavigationRailItem(
 							return m3.Scheme.SecondaryContainer.Color.AsNRGBA()
 						}
 						return color.NRGBA{A: 0} // Transparent
-					}()),
+					}())),
 					surface.WithShape(shape.RoundedCornerShape{Radius: unit.Dp(12)}), // Pill shape (approx)
 					surface.WithModifier(
 						api.EmptyModifier.

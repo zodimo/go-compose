@@ -16,6 +16,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/theme"
 )
 
 func UI() api.Composable {
@@ -153,7 +154,7 @@ func UI() api.Composable {
 			box.WithModifier(
 				api.EmptyModifier.
 					Then(size.FillMax()).
-					Then(background.Background(color.NRGBA{255, 255, 255, 255})),
+					Then(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{255, 255, 255, 255}))),
 			),
 		)(c)
 	}

@@ -99,7 +99,7 @@ func ModalNavigationDrawer(
 					// 3. Drawer Sheet
 					surface.Surface(
 						drawerContent,
-						surface.WithColor(drawerContainerColor),
+						surface.WithColor(theme.ColorHelper.SpecificColor(drawerContainerColor)),
 						surface.WithShape(shape.RoundedCornerShape{Radius: unit.Dp(16)}),
 						surface.WithModifier(
 							modifier.EmptyModifier.

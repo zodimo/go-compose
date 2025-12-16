@@ -14,6 +14,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/unit"
 	"git.sr.ht/~schnwalter/gio-mw/token"
@@ -57,9 +58,9 @@ func UI(c api.Composer) api.LayoutNode {
 						column.WithModifier(padding.All(16)),
 					),
 				),
-				surface.WithColor(color.NRGBA{R: 255, G: 251, B: 254, A: 255}), // Surface
-				surface.WithShape(shape.CutCornerShape{Radius: unit.Dp(28)}),   // TopEnd chamfer in demo usually, here simplified to all cut
-				surface.WithShadowElevation(0),                                 // Root usually flat?
+				surface.WithColor(theme.ColorHelper.SpecificColor(color.NRGBA{R: 255, G: 251, B: 254, A: 255})), // Surface
+				surface.WithShape(shape.CutCornerShape{Radius: unit.Dp(28)}),                                    // TopEnd chamfer in demo usually, here simplified to all cut
+				surface.WithShadowElevation(0), // Root usually flat?
 				surface.WithModifier(size.FillMax()),
 			),
 		),
@@ -145,7 +146,7 @@ func RecursiveSurface(level int, active bool) api.Composable {
 					column.WithModifier(padding.All(4)), // changed from 20 to 4
 				),
 			),
-			surface.WithColor(bgColor),
+			surface.WithColor(theme.ColorHelper.SpecificColor(bgColor)),
 			surface.WithShape(currentShape),
 			surface.WithShadowElevation(elevation),
 			// surface.WithBorder(unit.Dp(1), toNRGBA(textColor)), // Optional border for contrast

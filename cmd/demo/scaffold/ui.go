@@ -15,6 +15,7 @@ import (
 	padding_modifier "github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/theme"
 )
 
 func UI(c api.Composer) api.LayoutNode {
@@ -53,7 +54,7 @@ func UI(c api.Composer) api.LayoutNode {
 						box.WithModifier(padding_modifier.All(16)),
 					)(c)
 				},
-				surface.WithColor(color.NRGBA{R: 98, G: 0, B: 238, A: 255}), // Purple 500
+				surface.WithColor(theme.ColorHelper.SpecificColor(color.NRGBA{R: 98, G: 0, B: 238, A: 255})), // Purple 500
 				surface.WithModifier(size.FillMaxWidth()),
 				surface.WithModifier(size.Height(56)),
 			)(c)
@@ -70,7 +71,7 @@ func UI(c api.Composer) api.LayoutNode {
 						box.WithAlignment(box.Center),
 					)(c)
 				},
-				surface.WithColor(color.NRGBA{R: 240, G: 240, B: 240, A: 255}), // Light Gray
+				surface.WithColor(theme.ColorHelper.SpecificColor(color.NRGBA{R: 240, G: 240, B: 240, A: 255})), // Light Gray
 				surface.WithModifier(size.FillMaxWidth()),
 				surface.WithModifier(size.Height(80)),
 			)(c)

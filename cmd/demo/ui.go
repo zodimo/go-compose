@@ -10,6 +10,7 @@ import (
 	m3Card "github.com/zodimo/go-compose/compose/foundation/material3/card"
 	m3Divider "github.com/zodimo/go-compose/compose/foundation/material3/divider"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
+	"github.com/zodimo/go-compose/theme"
 
 	"image/color"
 
@@ -44,9 +45,9 @@ func UI(c api.Composer) api.LayoutNode {
 						counterCell.Set(counterCell.Get().(int) + 1)
 					})),
 					column.WithModifier(weight.Weight(1)),
-					column.WithModifier(background.Background(color.NRGBA{R: 0, G: 0, B: 200, A: 200})),
+					column.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0, G: 0, B: 200, A: 200}))),
 					column.WithModifier(padding.All(20)),
-					column.WithModifier(background.Background(color.NRGBA{R: 0, G: 100, B: 200, A: 200})),
+					column.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0, G: 100, B: 200, A: 200}))),
 				),
 				column.Column(
 					c.Sequence(
@@ -58,20 +59,20 @@ func UI(c api.Composer) api.LayoutNode {
 						),
 					),
 					column.WithModifier(weight.Weight(1)),
-					column.WithModifier(background.Background(color.NRGBA{R: 150, G: 0, B: 0, A: 200})),
+					column.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 150, G: 0, B: 0, A: 200}))),
 				),
 				column.Column(
 					c.Sequence(),
 					column.WithModifier(clip.Clip(shape.ShapeCircle)),
 					column.WithModifier(size.Size(100, 50)),
-					column.WithModifier(background.Background(color.NRGBA{R: 100, G: 0, B: 0, A: 200})),
+					column.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 100, G: 0, B: 0, A: 200}))),
 					column.WithModifier(clickable.OnClick(func() {
 						fmt.Println("Last Column clicked!!")
 					})),
 				),
 			),
 				row.WithModifier(size.Size(500, 300)),
-				row.WithModifier(background.Background(color.NRGBA{R: 0, G: 200, B: 0, A: 200})),
+				row.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0, G: 200, B: 0, A: 200}))),
 			),
 			text.Text("hello world",
 				text.Selectable(),
@@ -79,9 +80,9 @@ func UI(c api.Composer) api.LayoutNode {
 				text.WithTextStyleOptions(
 					text.StyleWithColor(color.NRGBA{R: 255, G: 255, B: 255, A: 255}),
 				),
-				text.WithModifier(background.Background(color.NRGBA{R: 100, G: 0, B: 0, A: 150})),
+				text.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 100, G: 0, B: 0, A: 150}))),
 				text.WithModifier(padding.All(20)),
-				text.WithModifier(background.Background(color.NRGBA{R: 200, G: 0, B: 50, A: 50})),
+				text.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 200, G: 0, B: 50, A: 50}))),
 			),
 
 			m3Button.Text(func() {
@@ -107,7 +108,7 @@ func UI(c api.Composer) api.LayoutNode {
 			)),
 		),
 		column.WithModifier(size.FillMax()),
-		column.WithModifier(background.Background(color.NRGBA{R: 200, G: 0, B: 0, A: 50})),
+		column.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 200, G: 0, B: 0, A: 50}))),
 
 		column.WithAlignment(column.Middle),
 	)(c)

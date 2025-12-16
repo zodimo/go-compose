@@ -149,7 +149,7 @@ func ModalBottomSheet(
 										column.WithAlignment(column.Middle),
 									)(c)
 								},
-								surface.WithColor(containerColor.AsNRGBA()),
+								surface.WithColor(theme.ColorHelper.SpecificColor(containerColor.AsNRGBA())),
 								// Use the custom shape. Surface expects Shape type, so we might need adapter or use corner radius if uniform?
 								// M3 sheet usually has only Top corners rounded.
 								// Our Surface/Shape implementation might need check.

@@ -30,7 +30,7 @@ func PermanentNavigationDrawer(
 				// 1. Drawer Sheet
 				surface.Surface(
 					drawerContent,
-					surface.WithColor(drawerContainerColor),
+					surface.WithColor(theme.ColorHelper.SpecificColor(drawerContainerColor)),
 					// Standard drawer doesn't usually have rounded corners on the edge touching the content
 					// unless it's a specific variant, but M3 defaults often show 0 radius or small radius.
 					// We'll stick to a standard square edge or small radius if needed.

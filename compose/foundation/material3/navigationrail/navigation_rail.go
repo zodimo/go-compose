@@ -49,8 +49,8 @@ func NavigationRail(
 					),
 				)(c)
 			},
-			surface.WithColor(containerColor),
-			surface.WithContentColor(contentColor),
+			surface.WithColor(theme.ColorHelper.SpecificColor(containerColor)),
+			surface.WithContentColor(theme.ColorHelper.SpecificColor(contentColor)),
 			surface.WithModifier(
 				modifier.
 					Then(size.Width(80)).
