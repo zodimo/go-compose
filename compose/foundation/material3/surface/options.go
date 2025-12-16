@@ -1,28 +1,24 @@
 package surface
 
 import (
-	"image/color" // This import is still needed for DefaultSurfaceOptions and WithBorder, but the instruction implies it should be removed.
-	// The provided snippet for imports is malformed. I will try to infer the correct imports.
-	// Based on the struct changes, "image/color" will be replaced by "github.com/zodimo/go-compose/theme".
-	// "github.com/zodimo/go-compose/modifiers/shadow" is added in the snippet, but not directly used in the struct definition.
-	// "github.com/zodimo/go-compose/internal/modifier" is still needed for Modifier type.
+	"image/color"
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/theme" // Added based on instruction
+	"github.com/zodimo/go-compose/theme"
 )
 
 type SurfaceOptions struct {
 	Modifier        Modifier
 	Shape           Shape
-	Color           theme.ColorDescriptor // Changed from color.Color
-	ContentColor    theme.ColorDescriptor // Changed from color.Color
+	Color           theme.ColorDescriptor
+	ContentColor    theme.ColorDescriptor
 	TonalElevation  Dp
 	ShadowElevation Dp
 	BorderWidth     Dp
-	BorderColor     theme.ColorDescriptor // Changed from color.Color
-	Alignment       box.Direction         // Optional alignment for content inside surface
+	BorderColor     theme.ColorDescriptor
+	Alignment       box.Direction // Optional alignment for content inside surface
 }
 
 type SurfaceOption func(*SurfaceOptions)

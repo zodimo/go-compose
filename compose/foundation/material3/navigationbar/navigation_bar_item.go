@@ -72,6 +72,12 @@ func NavigationBarItem(
 							}
 							return theme.ColorHelper.SpecificColor(color.NRGBA{A: 0}) // Transparent
 						}()),
+						surface.WithContentColor(func() theme.ColorDescriptor {
+							if selected {
+								return theme.ColorHelper.ColorSelector().SecondaryRoles.OnContainer
+							}
+							return colors.ContentColor
+						}()),
 						surface.WithShape(shape.RoundedCornerShape{Radius: unit.Dp(16)}),
 						surface.WithModifier(
 							EmptyModifier.
