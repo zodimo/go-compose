@@ -1,38 +1,44 @@
 package surface
 
 import (
-	"image/color"
+	"image/color" // This import is still needed for DefaultSurfaceOptions and WithBorder, but the instruction implies it should be removed.
+	// The provided snippet for imports is malformed. I will try to infer the correct imports.
+	// Based on the struct changes, "image/color" will be replaced by "github.com/zodimo/go-compose/theme".
+	// "github.com/zodimo/go-compose/modifiers/shadow" is added in the snippet, but not directly used in the struct definition.
+	// "github.com/zodimo/go-compose/internal/modifier" is still needed for Modifier type.
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/modifier"
+	"github.com/zodimo/go-compose/theme" // Added based on instruction
 )
 
 type SurfaceOptions struct {
 	Modifier        Modifier
 	Shape           Shape
-	Color           color.Color
-	ContentColor    color.Color
+	Color           theme.ColorDescriptor // Changed from color.Color
+	ContentColor    theme.ColorDescriptor // Changed from color.Color
 	TonalElevation  Dp
 	ShadowElevation Dp
 	BorderWidth     Dp
-	BorderColor     color.Color
-	Alignment       box.Direction // Optional alignment for content inside surface
+	BorderColor     theme.ColorDescriptor // Changed from color.Color
+	Alignment       box.Direction         // Optional alignment for content inside surface
 }
 
 type SurfaceOption func(*SurfaceOptions)
 
 func DefaultSurfaceOptions() SurfaceOptions {
+	colorHelper := theme.ColorHelper
 	return SurfaceOptions{
 		Modifier:        modifier.EmptyModifier,
 		Shape:           shape.ShapeRectangle,
-		Color:           color.NRGBA{R: 255, G: 255, B: 255, A: 255}, // Default white? Or theme?
-		ContentColor:    color.NRGBA{A: 255},                         // Black?
+		Color:           colorHelper.ColorSelector().SurfaceRoles.Surface,
+		ContentColor:    colorHelper.ColorSelector().SurfaceRoles.OnSurface,
 		TonalElevation:  0,
 		ShadowElevation: 0,
 		BorderWidth:     0,
-		BorderColor:     color.NRGBA{A: 0},
-		Alignment:       box.NW, // Default to NW to match Box default, or Center? Box defaults to NW.
+		BorderColor:     colorHelper.SpecificColor(color.NRGBA{A: 0}), // Transparent
+		Alignment:       box.NW,
 	}
 }
 
@@ -48,15 +54,15 @@ func WithShape(s Shape) SurfaceOption {
 	}
 }
 
-func WithColor(c color.Color) SurfaceOption {
+func WithColor(colorDesc theme.ColorDescriptor) SurfaceOption {
 	return func(o *SurfaceOptions) {
-		o.Color = c
+		o.Color = colorDesc
 	}
 }
 
-func WithContentColor(c color.Color) SurfaceOption {
+func WithContentColor(colorDesc theme.ColorDescriptor) SurfaceOption {
 	return func(o *SurfaceOptions) {
-		o.ContentColor = c
+		o.Color = colorDesc
 	}
 }
 
@@ -72,10 +78,10 @@ func WithShadowElevation(elevation Dp) SurfaceOption {
 	}
 }
 
-func WithBorder(width Dp, color color.Color) SurfaceOption {
+func WithBorder(width Dp, colorDesc theme.ColorDescriptor) SurfaceOption {
 	return func(o *SurfaceOptions) {
 		o.BorderWidth = width
-		o.BorderColor = color
+		o.BorderColor = colorDesc
 	}
 }
 
