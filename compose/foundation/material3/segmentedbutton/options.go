@@ -1,11 +1,10 @@
 package segmentedbutton
 
 import (
-	"image/color"
-
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/unit"
 )
@@ -52,11 +51,11 @@ type SegmentOptions struct {
 	SelectedIcon           Composable // Icon shown when selected (default: checkmark)
 	ShowSelectedIcon       bool       // Whether to show selected icon
 	Enabled                bool
-	SelectedColor          color.NRGBA // Background color when selected
-	UnselectedColor        color.NRGBA // Background color when unselected
-	SelectedContentColor   color.NRGBA // Content color when selected
-	UnselectedContentColor color.NRGBA // Content color when unselected
-	BorderColor            color.NRGBA
+	SelectedColor          theme.ColorDescriptor // Background color when selected
+	UnselectedColor        theme.ColorDescriptor // Background color when unselected
+	SelectedContentColor   theme.ColorDescriptor // Content color when selected
+	UnselectedContentColor theme.ColorDescriptor // Content color when unselected
+	BorderColor            theme.ColorDescriptor
 	BorderWidth            unit.Dp
 }
 
@@ -69,11 +68,11 @@ func DefaultSegmentOptions() SegmentOptions {
 		ShowSelectedIcon: true,
 		Enabled:          true,
 		// Colors will be resolved from theme at render time
-		SelectedColor:          color.NRGBA{},                                   // Will use SecondaryContainer
-		UnselectedColor:        color.NRGBA{A: 0},                               // Transparent
-		SelectedContentColor:   color.NRGBA{},                                   // Will use OnSecondaryContainer
-		UnselectedContentColor: color.NRGBA{},                                   // Will use OnSurface
-		BorderColor:            color.NRGBA{R: 0x79, G: 0x74, B: 0x7E, A: 0xFF}, // Outline
+		SelectedColor:          theme.ColorHelper.ColorSelector().SecondaryRoles.Container,
+		UnselectedColor:        theme.ColorHelper.ColorSelector().SurfaceRoles.Surface,
+		SelectedContentColor:   theme.ColorHelper.ColorSelector().SecondaryRoles.OnContainer,
+		UnselectedContentColor: theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface,
+		BorderColor:            theme.ColorHelper.ColorSelector().OutlineRoles.Outline,
 		BorderWidth:            unit.Dp(1),
 	}
 }
@@ -114,21 +113,21 @@ func WithEnabled(enabled bool) SegmentOption {
 }
 
 // WithSelectedColor sets the background color when selected.
-func WithSelectedColor(c color.NRGBA) SegmentOption {
+func WithSelectedColor(c theme.ColorDescriptor) SegmentOption {
 	return func(o *SegmentOptions) {
 		o.SelectedColor = c
 	}
 }
 
 // WithUnselectedColor sets the background color when unselected.
-func WithUnselectedColor(c color.NRGBA) SegmentOption {
+func WithUnselectedColor(c theme.ColorDescriptor) SegmentOption {
 	return func(o *SegmentOptions) {
 		o.UnselectedColor = c
 	}
 }
 
 // WithBorder sets the border width and color.
-func WithBorder(width unit.Dp, c color.NRGBA) SegmentOption {
+func WithBorder(width unit.Dp, c theme.ColorDescriptor) SegmentOption {
 	return func(o *SegmentOptions) {
 		o.BorderWidth = width
 		o.BorderColor = c

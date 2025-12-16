@@ -2,7 +2,6 @@ package segmentedbutton
 
 import (
 	"fmt"
-	"image/color"
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
@@ -12,7 +11,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
-	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -104,8 +102,10 @@ func SegmentedButton(
 
 		// Determine colors based on checked state
 		bgColor := opts.UnselectedColor
+		contentColor := opts.UnselectedContentColor
 		if checked {
 			bgColor = opts.SelectedColor
+			contentColor = opts.SelectedContentColor
 		}
 
 		// Get the appropriate shape for this segment
@@ -139,13 +139,19 @@ func SegmentedButton(
 						)(c)
 					}
 
+					// Apply content color to text
+					// Text color is usually handled by providing LocalContentColor
+					// We can use surface.WithContentColor if text component supports it,
+					// or we can wrap with a component providing content color values.
+					// However, surface.Surface handles content color.
+					// Let's rely on surface option below unless we need to override.
+
 					// Label
 					text.Text(label, text.TypestyleLabelLarge)(c)
 
 					return c
 				},
 				row.WithAlignment(row.Middle),
-				row.WithSpacing(row.SpaceSides),
 			)(c)
 		}
 
@@ -166,8 +172,9 @@ func SegmentedButton(
 		// Surface options
 		surfaceOpts := []surface.SurfaceOption{
 			surface.WithShape(segmentShape),
-			surface.WithColor(theme.ColorHelper.SpecificColor(bgColor)),
-			surface.WithBorder(opts.BorderWidth, theme.ColorHelper.SpecificColor(opts.BorderColor)),
+			surface.WithColor(bgColor),
+			surface.WithContentColor(contentColor),
+			surface.WithBorder(opts.BorderWidth, opts.BorderColor),
 			surface.WithModifier(finalModifier),
 		}
 
@@ -175,7 +182,7 @@ func SegmentedButton(
 		paddedContent := func(c Composer) Composer {
 			return box.Box(
 				contentComposable,
-				box.WithModifier(contentPadding),
+				box.WithModifier(contentPadding.Then(size.FillMaxHeight())),
 				box.WithAlignment(box.Center),
 			)(c)
 		}
@@ -185,21 +192,4 @@ func SegmentedButton(
 			surfaceOpts...,
 		)(c)
 	}
-}
-
-// SegmentedButtonDefaults provides default values and helpers.
-var SegmentedButtonDefaults = struct {
-	// SelectedColor returns the default selected background color.
-	SelectedColor func() color.NRGBA
-	// UnselectedColor returns the default unselected background color.
-	UnselectedColor func() color.NRGBA
-}{
-	SelectedColor: func() color.NRGBA {
-		// SecondaryContainer - a purple-ish tint in M3 default
-		return color.NRGBA{R: 0xE8, G: 0xDE, B: 0xF8, A: 0xFF}
-	},
-	UnselectedColor: func() color.NRGBA {
-		// Transparent
-		return color.NRGBA{A: 0}
-	},
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/text"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/theme"
 
 	mdicons "golang.org/x/exp/shiny/materialdesign/icons"
 )
@@ -62,7 +63,7 @@ func UI() api.Composable {
 							},
 							label,
 							shape,
-							segmentedbutton.WithSelectedColor(color.NRGBA{R: 0xE8, G: 0xDE, B: 0xF8, A: 0xFF}),
+							segmentedbutton.WithSelectedColor(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0xE8, G: 0xDE, B: 0xF8, A: 0xFF})),
 							segmentedbutton.WithSelectedIcon(checkIcon),
 						)
 					}),
@@ -92,7 +93,7 @@ func UI() api.Composable {
 							},
 							label,
 							shape,
-							segmentedbutton.WithSelectedColor(color.NRGBA{R: 0xE8, G: 0xDE, B: 0xF8, A: 0xFF}),
+							segmentedbutton.WithSelectedColor(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0xE8, G: 0xDE, B: 0xF8, A: 0xFF})),
 							segmentedbutton.WithSelectedIcon(checkIcon),
 						)
 					}),

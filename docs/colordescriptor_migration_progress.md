@@ -21,8 +21,9 @@ Components that use `theme.ColorDescriptor`:
 | **floatingactionbutton** | 2025-12-16 | Uses ColorDescriptor for ContainerColor, ContentColor (defaults to PrimaryContainer/OnPrimaryContainer) |
 | **chip** | 2025-12-16 | Uses ColorDescriptor for Color (Surface) and BorderColor (OutlineVariant) |
 | **navigationbar** | 2025-12-16 | Uses ColorDescriptor for ContainerColor/ContentColor and Item IndicatorColor. Defaults: SurfaceContainer, OnVariant, SecondaryContainer |
+| **segmentedbutton** | 2025-12-16 | Uses ColorDescriptor for Selected/Unselected Color/ContentColor and BorderColor. Defaults: SecondaryContainer, Surface, OnSecondaryContainer, OnSurface, Outline |
 
-### 📋 Pending ColorDescriptor Migration (7 components)
+### 📋 Pending ColorDescriptor Migration (6 components)
 
 Native go-compose components using `color.Color` or `color.NRGBA` that should be migrated:
 
@@ -31,7 +32,6 @@ Native go-compose components using `color.Color` or `color.NRGBA` that should be
 | **badge** | `ContainerColor`, `ContentColor` (NRGBA) | Medium | Simple component |
 
 
-| **segmentedbutton** | `SelectedColor`, `UnselectedColor`, `SelectedContentColor`, `UnselectedContentColor`, `BorderColor` (NRGBA) | High | Selection component |
 | **slider** | `SliderColors` struct with 10 color.NRGBA fields | Medium | Input control |
 | **divider** | `Color` (Color) | Low | Simple component, but also uses gio-mw |
 
