@@ -1,7 +1,6 @@
 package floatingactionbutton
 
 import (
-	"github.com/zodimo/go-compose/theme"
 	"fmt"
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
@@ -82,8 +81,8 @@ func SurfaceWithThemeDefaults(
 		surfaceOpts := []surface.SurfaceOption{
 			surface.WithShadowElevation(ElevationToDp(elevation)),
 			surface.WithShape(opts.Shape),
-			surface.WithColor(theme.ColorHelper.SpecificColor(opts.ContainerColor)),
-			surface.WithContentColor(theme.ColorHelper.SpecificColor(opts.ContentColor)),
+			surface.WithColor(opts.ContainerColor),
+			surface.WithContentColor(opts.ContentColor),
 			surface.WithModifier(fabModifier),
 		}
 

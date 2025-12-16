@@ -1,10 +1,9 @@
 package floatingactionbutton
 
 import (
-	"image/color"
-
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/modifier"
+	"github.com/zodimo/go-compose/theme"
 
 	// "github.com/zodimo/go-compose/pkg/api" // Removed unused api import
 
@@ -26,8 +25,8 @@ const (
 )
 
 type FloatingActionButtonOptions struct {
-	ContainerColor color.Color
-	ContentColor   color.Color
+	ContainerColor theme.ColorDescriptor
+	ContentColor   theme.ColorDescriptor
 	Elevation      token.ElevationLevel
 	Modifier       modifier.Modifier
 	Shape          shape.Shape
@@ -41,24 +40,24 @@ var DefaultFABElevation = token.ElevationLevel3
 
 func DefaultFloatingActionButtonOptions() FloatingActionButtonOptions {
 	return FloatingActionButtonOptions{
-		// Defaults will be resolved in the component if zero values are detected,
-		// or we can set them here if we have access to theme.
-		Elevation: DefaultFABElevation,
-		Modifier:  modifier.EmptyModifier,
-		Shape:     shape.ShapeCircle,
-		Size:      FabSizeMedium,
+		ContainerColor: theme.ColorHelper.ColorSelector().PrimaryRoles.Container,
+		ContentColor:   theme.ColorHelper.ColorSelector().PrimaryRoles.OnContainer,
+		Elevation:      DefaultFABElevation,
+		Modifier:       modifier.EmptyModifier,
+		Shape:          shape.ShapeCircle,
+		Size:           FabSizeMedium,
 	}
 }
 
-func WithContainerColor(color color.Color) FloatingActionButtonOption {
+func WithContainerColor(colorDesc theme.ColorDescriptor) FloatingActionButtonOption {
 	return func(o *FloatingActionButtonOptions) {
-		o.ContainerColor = color
+		o.ContainerColor = colorDesc
 	}
 }
 
-func WithContentColor(color color.Color) FloatingActionButtonOption {
+func WithContentColor(colorDesc theme.ColorDescriptor) FloatingActionButtonOption {
 	return func(o *FloatingActionButtonOptions) {
-		o.ContentColor = color
+		o.ContentColor = colorDesc
 	}
 }
 
