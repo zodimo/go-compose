@@ -25,7 +25,7 @@ To provide a feature-complete, idiomatic Go implementation of Jetpack Compose's 
 - [ ] **Lists**: 
     - [x] Wrappers for `gio.List` to match Compose `LazyColumn`/`LazyRow` API.
     - [ ] Item spacing and content padding support.
-- [ ] **Grids**: Lazy grids.
+- [x] **Grids**: `LazyVerticalGrid`, `LazyHorizontalGrid` with Fixed and Adaptive column/row sizing.
 - [ ] **Chips**:
     - [x] Chips (Assist, Filter, Input, Suggestion) chips.
 - [x] **Badges**: Integration with navigation items and icons.
