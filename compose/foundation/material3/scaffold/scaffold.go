@@ -55,32 +55,25 @@ func Scaffold(content Composable, options ...ScaffoldOption) Composable {
 						func(c Composer) Composer {
 							return column.Column(
 								compose.Sequence(
-									func(c Composer) Composer {
-										// Top Bar
-										if opts.TopBar != nil {
-											opts.TopBar(c)
-										}
-										return c
-									},
-									func(c Composer) Composer {
-										// Content Body
-										// This needs to expand to fill available space.
-										return box.Box(
-											content,
-											box.WithModifier(
-												// Expand to fill remaining vertical space
-												weight.Weight(1),
-											),
-											box.WithModifier(size.FillMaxWidth()),
-										)(c)
-									},
-									func(c Composer) Composer {
-										// Bottom Bar
-										if opts.BottomBar != nil {
-											opts.BottomBar(c)
-										}
-										return c
-									},
+									// Top Bar
+									c.When(opts.TopBar != nil,
+										opts.TopBar,
+									),
+
+									// Content Body
+									// This needs to expand to fill available space.
+									box.Box(
+										content,
+										box.WithModifier(
+											// Expand to fill remaining vertical space
+											weight.Weight(1),
+										),
+									),
+
+									// Bottom Bar
+									c.When(opts.BottomBar != nil,
+										opts.BottomBar,
+									),
 								),
 							)(c)
 						},
