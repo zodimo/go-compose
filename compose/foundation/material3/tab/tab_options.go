@@ -1,9 +1,8 @@
 package tab
 
 import (
-	"image/color"
-
 	"github.com/zodimo/go-compose/internal/modifier"
+	"github.com/zodimo/go-compose/theme"
 
 	"github.com/zodimo/go-maybe"
 )
@@ -11,8 +10,8 @@ import (
 // TabRowOptions holds the configuration for TabRow.
 type TabRowOptions struct {
 	Modifier       modifier.Modifier
-	ContainerColor maybe.Maybe[color.Color]
-	ContentColor   maybe.Maybe[color.Color]
+	ContainerColor maybe.Maybe[theme.ColorDescriptor]
+	ContentColor   maybe.Maybe[theme.ColorDescriptor]
 	Indicator      Composable
 }
 
@@ -28,8 +27,8 @@ func WithTabRowModifier(modifier modifier.Modifier) TabRowOption {
 func DefaultTabRowOptions() TabRowOptions {
 	return TabRowOptions{
 		Modifier:       modifier.EmptyModifier,
-		ContainerColor: maybe.None[color.Color](),
-		ContentColor:   maybe.None[color.Color](),
+		ContainerColor: maybe.None[theme.ColorDescriptor](),
+		ContentColor:   maybe.None[theme.ColorDescriptor](),
 		Indicator:      TabRowDefaults.Indicator(),
 	}
 }
@@ -40,8 +39,8 @@ type TabOptions struct {
 	Selected               bool
 	OnClick                func()
 	Enabled                bool
-	SelectedContentColor   color.NRGBA
-	UnselectedContentColor color.NRGBA
+	SelectedContentColor   theme.ColorDescriptor
+	UnselectedContentColor theme.ColorDescriptor
 }
 
 type TabOption func(options *TabOptions)

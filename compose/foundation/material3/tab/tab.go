@@ -45,10 +45,10 @@ func TabRow(
 		SurfaceOptions := []surface.SurfaceOption{}
 		// Surface Options
 		if opts.ContainerColor.IsSome() {
-			SurfaceOptions = append(SurfaceOptions, surface.WithColor(theme.ColorHelper.SpecificColor(opts.ContainerColor.UnwrapUnsafe())))
+			SurfaceOptions = append(SurfaceOptions, surface.WithColor(opts.ContainerColor.UnwrapUnsafe()))
 		}
 		if opts.ContentColor.IsSome() {
-			SurfaceOptions = append(SurfaceOptions, surface.WithContentColor(theme.ColorHelper.SpecificColor(opts.ContentColor.UnwrapUnsafe())))
+			SurfaceOptions = append(SurfaceOptions, surface.WithContentColor(opts.ContentColor.UnwrapUnsafe()))
 		}
 
 		SurfaceOptions = append(SurfaceOptions, surface.WithModifier(opts.Modifier.Then(size.FillMaxWidth())))
@@ -155,7 +155,7 @@ func Tab(
 								box.WithModifier(
 									size.FillMaxWidth().
 										Then(size.Height(3)). // 3dp
-										Then(background.Background(theme.ColorHelper.SpecificColor(TabRowDefaults.IndicatorColor()))),
+										Then(background.Background(TabRowDefaults.IndicatorColor())),
 								),
 							)(c)
 						} else {
@@ -183,7 +183,7 @@ func Tab(
 					Then(clickable.OnClick(onClick)), // Use clickable package
 			),
 			surface.WithColor(theme.ColorHelper.SpecificColor(color.NRGBA{})), // Transparent container
-			surface.WithContentColor(theme.ColorHelper.SpecificColor(contentColor)),
+			surface.WithContentColor(contentColor),
 		)(c)
 	}
 }
