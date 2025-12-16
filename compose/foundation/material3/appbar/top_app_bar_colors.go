@@ -1,16 +1,16 @@
 package appbar
 
 import (
-	"image/color"
+	"github.com/zodimo/go-compose/theme"
 )
 
 // TopAppBarColors represents the colors used by a TopAppBar in different states.
 type TopAppBarColors struct {
-	ContainerColor             color.Color
-	ScrolledContainerColor     color.Color
-	NavigationIconContentColor color.Color
-	TitleContentColor          color.Color
-	ActionIconContentColor     color.Color
+	ContainerColor             theme.ColorDescriptor
+	ScrolledContainerColor     theme.ColorDescriptor
+	NavigationIconContentColor theme.ColorDescriptor
+	TitleContentColor          theme.ColorDescriptor
+	ActionIconContentColor     theme.ColorDescriptor
 }
 
 // TopAppBarDefaults holds the default values for TopAppBar.
@@ -18,19 +18,19 @@ var TopAppBarDefaults = topAppBarDefaults{}
 
 type topAppBarDefaults struct{}
 
-// CenterAlignedTopAppBarColors returns the default colors for a CenterAlignedTopAppBar.
+// Colors returns the default colors for a TopAppBar.
 func (d topAppBarDefaults) Colors() TopAppBarColors {
 	return TopAppBarColors{
 		// Surface
-		ContainerColor: color.NRGBA{R: 251, G: 252, B: 254, A: 255},
+		ContainerColor: theme.ColorHelper.ColorSelector().SurfaceRoles.Surface,
 		// Surface Container
-		ScrolledContainerColor: color.NRGBA{R: 241, G: 244, B: 249, A: 255},
+		ScrolledContainerColor: theme.ColorHelper.ColorSelector().SurfaceRoles.Container,
 		// On Surface
-		NavigationIconContentColor: color.NRGBA{R: 25, G: 28, B: 32, A: 255},
+		NavigationIconContentColor: theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface,
 		// On Surface
-		TitleContentColor: color.NRGBA{R: 25, G: 28, B: 32, A: 255},
+		TitleContentColor: theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface,
 		// On Surface Variant
-		ActionIconContentColor: color.NRGBA{R: 67, G: 71, B: 78, A: 255},
+		ActionIconContentColor: theme.ColorHelper.ColorSelector().SurfaceRoles.OnVariant,
 	}
 }
 

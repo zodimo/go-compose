@@ -11,6 +11,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/theme"
 
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
@@ -124,6 +125,32 @@ func UI() api.Composable {
 								"More",
 							),
 						),
+					),
+					spacer.Height(16),
+
+					// 7. Custom Colors - Primary Theme
+					appbar.TopAppBar(
+						text.Text("Custom Colors", text.TypestyleTitleLarge),
+						appbar.WithNavigationIcon(
+							iconbutton.Standard(
+								func() {},
+								icons.NavigationMenu,
+								"Menu",
+							),
+						),
+						appbar.WithActions(
+							iconbutton.Standard(
+								func() {},
+								icons.ActionSearch,
+								"Search",
+							),
+						),
+						appbar.WithColors(appbar.TopAppBarColors{
+							ContainerColor:             theme.ColorHelper.ColorSelector().PrimaryRoles.Primary,
+							NavigationIconContentColor: theme.ColorHelper.ColorSelector().PrimaryRoles.OnPrimary,
+							TitleContentColor:          theme.ColorHelper.ColorSelector().PrimaryRoles.OnPrimary,
+							ActionIconContentColor:     theme.ColorHelper.ColorSelector().PrimaryRoles.OnPrimary,
+						}),
 					),
 					spacer.Height(16),
 				),

@@ -6,25 +6,25 @@ This document tracks the migration of Material3 components to use the `ColorDesc
 
 Last Updated: 2025-12-16 (Complete Component Audit)
 
-### ✅ Migrated to ColorDescriptor (5 components)
+### ✅ Migrated to ColorDescriptor (6 components)
 
 Components that use `theme.ColorDescriptor`:
 
 | Component | Date Completed | Notes |
 |-----------|----------------|-------|
 | **surface** | - | Foundation component, uses ColorDescriptor for Color, ContentColor, BorderColor |
+| **appbar** | 2025-12-16 | Uses ColorDescriptor for TopAppBarColors (5 fields: ContainerColor, ScrolledContainerColor, NavigationIconContentColor, TitleContentColor, ActionIconContentColor) |
 | **bottomappbar** | 2025-12-16 | Uses ColorDescriptor for ContainerColor, ContentColor |
 | **navigationrail** | - | Uses surface wrapper with SpecificColor (relies on surface's ColorDescriptor) |
 | **tab** | 2025-12-16 | Uses ColorDescriptor for TabRow ContainerColor/ContentColor and Tab SelectedContentColor/UnselectedContentColor |
 | **scaffold** | 2025-12-16 | Uses ColorDescriptor for ContainerColor, ContentColor - core layout container |
 
-### 📋 Pending ColorDescriptor Migration (8 components)
+### 📋 Pending ColorDescriptor Migration (7 components)
 
 Native go-compose components using `color.Color` or `color.NRGBA` that should be migrated:
 
 | Component | Color Fields | Priority | Notes |
 |-----------|--------------|----------|-------|
-| **appbar** | `TopAppBarColors` struct with 5 color.Color fields | High | Layout container |
 | **badge** | `ContainerColor`, `ContentColor` (NRGBA) | Medium | Simple component |
 | **chip** | `Color`, `BorderColor` (NRGBA) | High | Selection component |
 | **floatingactionbutton** | `ContainerColor`, `ContentColor` (Color) | High | Primary action |
@@ -94,12 +94,12 @@ For step-by-step migration instructions, see:
 
 **Total Material3 Components: 28**
 
-**ColorDescriptor Migration Progress: 5 of 13 native components (38%)**
+**ColorDescriptor Migration Progress: 6 of 13 native components (46%)**
 
 | Category | Count | Components |
 |----------|-------|------------|
-| ✅ **Migrated** | 5 | surface, bottomappbar, navigationrail, tab, scaffold |
-| 📋 **Pending** | 8 | appbar, badge, chip, floatingactionbutton, navigationbar, segmentedbutton, slider, divider |
+| ✅ **Migrated** | 6 | surface, appbar, bottomappbar, navigationrail, tab, scaffold |
+| 📋 **Pending** | 7 | badge, chip, floatingactionbutton, navigationbar, segmentedbutton, slider, divider |
 | 🔗 **External widgets** | 13 | button, card, checkbox, dialog, iconbutton, menu, progress, radiobutton, snackbar, switch, text, textfield, tooltip |
 | ⚠️ **Special cases** | 2 | bottomsheet (uses token.MatColor), navigationdrawer (no colors) |
 
@@ -107,8 +107,7 @@ For step-by-step migration instructions, see:
 
 Based on component importance and usage:
 
-**High Priority (5 components):**
-- `appbar` - Layout container, widely used
+**High Priority (4 components):**
 - `chip` - Selection component
 - `floatingactionbutton` - Primary action button
 - `navigationbar` - Navigation component
@@ -124,8 +123,8 @@ Based on component importance and usage:
 ### Component Type Breakdown
 
 **Native Components (13):** Built in go-compose, support or should support ColorDescriptor
-- 5 migrated: surface, bottomappbar, navigationrail, tab, scaffold
-- 8 pending migration: appbar, badge, chip, floatingactionbutton, navigationbar, segmentedbutton, slider, divider
+- 6 migrated: surface, appbar, bottomappbar, navigationrail, tab, scaffold
+- 7 pending migration: badge, chip, floatingactionbutton, navigationbar, segmentedbutton, slider, divider
 
 **External Widget Components (13):** Wrap gio-mw widgets, use gio-mw themes
 - No color customization exposed
@@ -137,8 +136,8 @@ Based on component importance and usage:
 
 ## Notes
 
-- 5 of 13 native components now use `theme.ColorDescriptor` (38% complete)
-- 8 high-value native components still need migration
+- 6 of 13 native components now use `theme.ColorDescriptor` (46% complete)
+- 7 high-value native components still need migration
 - External widget components (13) use gio-mw themes - no migration needed
 - All pending components have been verified by file inspection
 - `SpecificColor()` should only wrap non-theme colors in migrated components
