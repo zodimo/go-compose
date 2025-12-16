@@ -35,7 +35,7 @@ func UI(c api.Composer) api.LayoutNode {
 					c.Sequence(
 						text.Text(fmt.Sprintf("state=%v", counterCell.Get()),
 							text.WithTextStyleOptions(
-								text.StyleWithColor(color.NRGBA{R: 255, G: 255, B: 255, A: 255}),
+								text.StyleWithColor(theme.ColorHelper.SpecificColor(color.NRGBA{R: 255, G: 255, B: 255, A: 255})),
 							),
 						),
 					),
@@ -71,15 +71,12 @@ func UI(c api.Composer) api.LayoutNode {
 					})),
 				),
 			),
-				row.WithModifier(size.Size(500, 300)),
+				row.WithModifier(size.Height(300)),
 				row.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0, G: 200, B: 0, A: 200}))),
 			),
 			text.Text("hello world",
 				text.Selectable(),
 				text.WithAlignment(text.Middle),
-				text.WithTextStyleOptions(
-					text.StyleWithColor(color.NRGBA{R: 255, G: 255, B: 255, A: 255}),
-				),
 				text.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 100, G: 0, B: 0, A: 150}))),
 				text.WithModifier(padding.All(20)),
 				text.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 200, G: 0, B: 50, A: 50}))),
