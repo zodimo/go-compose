@@ -67,12 +67,12 @@ To provide a feature-complete, idiomatic Go implementation of Jetpack Compose's 
 
 | Component Group | Status | Key Missing Items |
 | :--- | :--- | :--- |
-| **Actions** | 🟢 Good | FAB, Segmented Button ✓, Ext. FAB pending |
-| **Communication** | 🟢 Good | Tooltips ✓, Badges ✓ |
-| **Containment** | 🟢 Good | Scaffold ✓, Modal Bottom Sheet ✓, Standard Bottom Sheet pending |
-| **Navigation** | 🟢 Good | App Bars ✓, Bottom Nav ✓, Tabs ✓, Drawer ✓ |
-| **Selection** | 🟡 Partial | Chips ✓, Segmented Button ✓, Pickers pending |
-| **Text Inputs** | 🟢 Good | TextField ✓, Search Bar ✓ |
+| **Actions** | 🟢 Good | Extended FAB |
+| **Communication** | 🟢 Good | — |
+| **Containment** | 🟢 Good | Standard Bottom Sheet |
+| **Navigation** | 🟢 Good | — |
+| **Selection** | 🟡 Partial | Date Picker, Time Picker |
+| **Text Inputs** | 🟢 Good | — |
 
 ## Recent Milestones (Completed)
 - [x] **Core Inputs**: Button, TextField, Checkbox, Radio, Switch.
