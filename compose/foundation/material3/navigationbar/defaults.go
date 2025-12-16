@@ -1,16 +1,16 @@
 package navigationbar
 
 import (
-	"image/color"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/unit"
 )
 
 // NavigationBarColors represents the colors used by a NavigationBar.
 type NavigationBarColors struct {
-	ContainerColor color.Color
-	ContentColor   color.Color
-	IndicatorColor color.Color
+	ContainerColor theme.ColorDescriptor
+	ContentColor   theme.ColorDescriptor
+	IndicatorColor theme.ColorDescriptor
 }
 
 // NavigationBarDefaults holds the default values for NavigationBar.
@@ -21,14 +21,12 @@ type navigationBarDefaults struct{}
 // Colors returns the default colors for a NavigationBar.
 func (d navigationBarDefaults) Colors() NavigationBarColors {
 	return NavigationBarColors{
-		// Surface Container: R: 242, G: 237, B: 246 (Light Theme approximation)
-		// Ideally this should come from the theme, but for defaults we often hardcode or provide a way to resolve against theme.
-		// Matching BottomAppBar's approach of hardcoded defaults for now.
-		ContainerColor: color.NRGBA{R: 242, G: 237, B: 246, A: 255},
-		// On Surface Variant: R: 73, G: 69, B: 79
-		ContentColor: color.NRGBA{R: 73, G: 69, B: 79, A: 255},
-		// Secondary Container: R: 232, G: 222, B: 248
-		IndicatorColor: color.NRGBA{R: 232, G: 222, B: 248, A: 255},
+		// Surface Container
+		ContainerColor: theme.ColorHelper.ColorSelector().SurfaceRoles.Container,
+		// On Surface Variant
+		ContentColor: theme.ColorHelper.ColorSelector().SurfaceRoles.OnVariant,
+		// Secondary Container
+		IndicatorColor: theme.ColorHelper.ColorSelector().SecondaryRoles.Container,
 	}
 }
 

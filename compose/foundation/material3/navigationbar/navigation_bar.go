@@ -1,7 +1,6 @@
 package navigationbar
 
 import (
-	"github.com/zodimo/go-compose/theme"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/material3/surface"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -24,28 +23,25 @@ func NavigationBar(
 			}
 			option(&opts)
 		}
-
 		return surface.Surface(
-			func(c Composer) Composer {
-				return row.Row(
-					func(c Composer) Composer {
-						if content != nil {
-							content(c)
-						}
-						return c
-					},
-					row.WithModifier(size.FillMax()),
-					// Items utilize weight to distribute space evenly
-					row.WithAlignment(row.Middle), // Vertically centered
-				)(c)
-			},
+			row.Row(
+				func(c Composer) Composer {
+					if content != nil {
+						content(c)
+					}
+					return c
+				},
+				row.WithModifier(size.FillMax()),
+				// Items utilize weight to distribute space evenly
+				row.WithAlignment(row.Middle), // Vertically centered
+			),
 			surface.WithModifier(
 				opts.Modifier.
 					Then(size.FillMaxWidth()).
 					Then(size.Height(int(opts.Height))),
 			),
-			surface.WithColor(theme.ColorHelper.SpecificColor(opts.ContainerColor)),
-			surface.WithContentColor(theme.ColorHelper.SpecificColor(opts.ContentColor)),
+			surface.WithColor(opts.ContainerColor),
+			surface.WithContentColor(opts.ContentColor),
 			surface.WithTonalElevation(opts.TonalElevation),
 		)(c)
 	}

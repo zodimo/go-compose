@@ -55,9 +55,9 @@ func NavigationBarItem(
 
 		return box.Box(
 			column.Column(
-				func(c Composer) Composer {
-					spacer.Uniform(12)(c) // Top padding
-
+				c.Sequence(
+					// Top padding
+					spacer.Uniform(12),
 					// Icon Container (Indicator)
 					surface.Surface(
 						func(c Composer) Composer {
@@ -66,12 +66,12 @@ func NavigationBarItem(
 								box.WithAlignment(layout.Center),
 							)(c)
 						},
-						surface.WithColor(theme.ColorHelper.SpecificColor(func() color.Color {
+						surface.WithColor(func() theme.ColorDescriptor {
 							if selected {
 								return colors.IndicatorColor
 							}
-							return color.NRGBA{A: 0} // Transparent
-						}())),
+							return theme.ColorHelper.SpecificColor(color.NRGBA{A: 0}) // Transparent
+						}()),
 						surface.WithShape(shape.RoundedCornerShape{Radius: unit.Dp(16)}),
 						surface.WithModifier(
 							EmptyModifier.
@@ -80,17 +80,18 @@ func NavigationBarItem(
 								Then(clip.Clip(shape.RoundedCornerShape{Radius: unit.Dp(16)})),
 						),
 						surface.WithAlignment(layout.Center),
-					)(c)
-
+					),
 					// Label
-					if label != nil {
-						spacer.Uniform(4)(c)
-						label(c)
-					}
-
-					spacer.Uniform(12)(c) // Bottom padding
-					return c
-				},
+					c.When(
+						label != nil,
+						c.Sequence(
+							spacer.Uniform(4),
+							label,
+						),
+					),
+					// Bottom padding
+					spacer.Uniform(12),
+				),
 				column.WithAlignment(column.Middle), // Center children horizontally
 			),
 			box.WithModifier(

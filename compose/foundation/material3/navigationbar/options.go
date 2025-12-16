@@ -1,7 +1,7 @@
 package navigationbar
 
 import (
-	"image/color"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/unit"
 )
@@ -9,8 +9,8 @@ import (
 // NavigationBarOptions configuration
 type NavigationBarOptions struct {
 	Modifier       Modifier
-	ContainerColor color.Color
-	ContentColor   color.Color
+	ContainerColor theme.ColorDescriptor
+	ContentColor   theme.ColorDescriptor
 	TonalElevation unit.Dp
 	Height         unit.Dp
 }
@@ -35,13 +35,13 @@ func WithModifier(m Modifier) NavigationBarOption {
 	}
 }
 
-func WithContainerColor(c color.Color) NavigationBarOption {
+func WithContainerColor(c theme.ColorDescriptor) NavigationBarOption {
 	return func(o *NavigationBarOptions) {
 		o.ContainerColor = c
 	}
 }
 
-func WithContentColor(c color.Color) NavigationBarOption {
+func WithContentColor(c theme.ColorDescriptor) NavigationBarOption {
 	return func(o *NavigationBarOptions) {
 		o.ContentColor = c
 	}
