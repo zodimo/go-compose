@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
-	"github.com/zodimo/go-compose/compose/foundation/layout/row"
+	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/foundation/material3/appbar"
 	"github.com/zodimo/go-compose/compose/foundation/material3/iconbutton"
 	"github.com/zodimo/go-compose/compose/foundation/material3/scaffold"
@@ -24,7 +24,7 @@ func UI() api.Composable {
 					appbar.TopAppBar(
 						text.Text("Simple TopAppBar", text.TypestyleTitleLarge),
 					),
-					Spacer(16),
+					spacer.Height(16),
 
 					// 2. TopAppBar with Navigation Icon
 					appbar.TopAppBar(
@@ -37,7 +37,7 @@ func UI() api.Composable {
 							),
 						),
 					),
-					Spacer(16),
+					spacer.Height(16),
 
 					// 3. TopAppBar with Actions
 					appbar.TopAppBar(
@@ -60,7 +60,7 @@ func UI() api.Composable {
 							),
 						),
 					),
-					Spacer(16),
+					spacer.Height(16),
 
 					// 4. Center Aligned TopAppBar
 					appbar.CenterAlignedTopAppBar(
@@ -80,7 +80,7 @@ func UI() api.Composable {
 							),
 						),
 					),
-					Spacer(16),
+					spacer.Height(16),
 
 					// 5. Medium TopAppBar
 					appbar.MediumTopAppBar(
@@ -100,7 +100,7 @@ func UI() api.Composable {
 							),
 						),
 					),
-					Spacer(16),
+					spacer.Height(16),
 
 					// 6. Large TopAppBar
 					appbar.LargeTopAppBar(
@@ -125,20 +125,11 @@ func UI() api.Composable {
 							),
 						),
 					),
-					Spacer(16),
+					spacer.Height(16),
 				),
 				column.WithModifier(size.FillMax()),
 				column.WithModifier(padding.All(16)), // Add some padding around the column
 			)(c)
 		},
 	)
-}
-
-func Spacer(dp int) compose.Composable {
-	return func(c compose.Composer) compose.Composer {
-		return row.Row(
-			func(c compose.Composer) compose.Composer { return c },
-			row.WithModifier(size.Height(dp)),
-		)(c)
-	}
 }
