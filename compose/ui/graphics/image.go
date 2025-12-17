@@ -6,7 +6,6 @@ import (
 	"image"
 	"io"
 	"io/fs"
-	"log"
 	"os"
 
 	"gioui.org/op/paint"
@@ -30,12 +29,10 @@ func NewResourceFromImageByPath(imagePath string) ImageResource {
 // imageFile
 
 func requireImage(imageFile io.Reader) ImageResource {
-	decodedImage, format, err := image.Decode(imageFile)
+	decodedImage, _, err := image.Decode(imageFile)
 	if err != nil {
 		panic(fmt.Errorf("failed to decode image file: %v", err))
 	}
-	size := decodedImage.Bounds().Size()
-	log.Printf("decoded iamge format: %s, size: %s\n", format, size)
 	return ImageResource{
 		ImageOp: paint.NewImageOp(decodedImage),
 	}
