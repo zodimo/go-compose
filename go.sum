@@ -11,8 +11,12 @@ github.com/go-text/typesetting v0.3.0 h1:OWCgYpp8njoxSRpwrdd1bQOxdjOXDj9Rqart9ML
 github.com/go-text/typesetting v0.3.0/go.mod h1:qjZLkhRgOEYMhU9eHBr3AR4sfnGJvOXNLt8yRAySFuY=
 github.com/go-text/typesetting-utils v0.0.0-20241103174707-87a29e9e6066 h1:qCuYC+94v2xrb1PoS4NIDe7DGYtLnU2wWiQe9a1B1c0=
 github.com/go-text/typesetting-utils v0.0.0-20241103174707-87a29e9e6066/go.mod h1:DDxDdQEnB70R8owOx3LVpEFvpMK9eeH1o2r0yZhFI9o=
+github.com/zodimo/go-lazy v0.1.0 h1:kuAFEi5w4xfFeTAdSRhtCrC3cRe5dh7aAs2qwZEXIA0=
+github.com/zodimo/go-lazy v0.1.0/go.mod h1:+GKplxvAWyHv/XirM6KZwdHDvXBQDGGjCRpbUGlrZyg=
 github.com/zodimo/go-maybe v0.1.3 h1:wEGtaSPkhTza+b0S+7J8C5nzkEB8KOoUK2dnQqA4ZEE=
 github.com/zodimo/go-maybe v0.1.3/go.mod h1:xEqMthQw8lMcDFUWXBmrixQAhUL4SQBTqOQ5D/AlNyE=
+github.com/zodimo/go-ternary v0.1.1 h1:SJQ4A1r/FbpSe3yqOYjsRYzneBg7uikrgkQHFuAOETI=
+github.com/zodimo/go-ternary v0.1.1/go.mod h1:OqDc4PqIxO8eNroVTgLkpBkhDxx2gR9Kei7hvlBmYgg=
 github.com/zodimo/go-zero-hash v0.1.0 h1:rk0b+StUT0BICaORHHyYhEmX196+jG5XKp4gqWXImqU=
 github.com/zodimo/go-zero-hash v0.1.0/go.mod h1:7ff6hwK72Xthya8po1z2nCsNbUpmvuGesovXXa9sc+E=
 golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc h1:TS73t7x3KarrNd5qAipmspBDS1rkMcgVG/fS1aRb4Rc=

@@ -17,6 +17,7 @@ import (
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/foundation/material3/surface"
+	"github.com/zodimo/go-ternary"
 
 	"gioui.org/unit"
 
@@ -45,6 +46,9 @@ func NavigationRailItem(
 		clickValue := c.State(clickStatePath, func() any { return &widget.Clickable{} })
 		clickWidget := clickValue.Get().(*widget.Clickable)
 
+		colors := theme.ColorHelper.ColorSelector()
+		specificColor := theme.ColorHelper.SpecificColor
+
 		// Define indicator styling (pill shape)
 		// Usually 56x32dp or similar for indicator.
 		// We'll wrap the icon in a Surface that acts as the indicator.
@@ -54,15 +58,11 @@ func NavigationRailItem(
 				// Icon Container (Indicator)
 				surface.Surface(
 					icon,
-					surface.WithColor(theme.ColorHelper.SpecificColor(func() color.Color {
-						if selected {
-							tm := theme.GetThemeManager()
-							m3 := tm.GetMaterial3Theme()
-							// Secondary Container color for selected state
-							return m3.Scheme.SecondaryContainer.Color.AsNRGBA()
-						}
-						return color.NRGBA{A: 0} // Transparent
-					}())),
+					surface.WithColor(ternary.Ternary(
+						selected,
+						colors.SecondaryRoles.Container,
+						specificColor(color.NRGBA{A: 0}), // Transparent
+					)),
 					surface.WithShape(shape.RoundedCornerShape{Radius: unit.Dp(12)}), // Pill shape (approx)
 					surface.WithModifier(
 						api.EmptyModifier.

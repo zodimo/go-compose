@@ -70,6 +70,29 @@ colors.SurfaceRoles.OnVariant
 theme.ColorHelper.SpecificColor(color.NRGBA{R: 255, G: 0, B: 0, A: 255})
 ```
 
+## Conditional Values (go-ternary)
+
+Go lacks ternary operators, so use the `go-ternary` package for conditional values:
+
+```go
+import "github.com/zodimo/go-ternary"
+
+colors := theme.ColorHelper.ColorSelector()
+specificColor := theme.ColorHelper.SpecificColor
+
+// Conditional color based on state
+surface.WithColor(ternary.Ternary(
+    selected,
+    colors.SecondaryRoles.Container,
+    specificColor(color.NRGBA{A: 0}), // Transparent
+)),
+```
+
+This mirrors Kotlin's inline if-expression:
+```kotlin
+color = if (selected) colorScheme.secondaryContainer else Color.Transparent
+```
+
 ## Common Shape Options
 
 ```go

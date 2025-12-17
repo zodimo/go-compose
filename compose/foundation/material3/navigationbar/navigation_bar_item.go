@@ -14,6 +14,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/modifiers/weight"
 	"github.com/zodimo/go-compose/theme"
+	"github.com/zodimo/go-ternary"
 
 	"gioui.org/layout"
 	"gioui.org/unit"
@@ -66,12 +67,11 @@ func NavigationBarItem(
 								box.WithAlignment(layout.Center),
 							)(c)
 						},
-						surface.WithColor(func() theme.ColorDescriptor {
-							if selected {
-								return colors.IndicatorColor
-							}
-							return theme.ColorHelper.SpecificColor(color.NRGBA{A: 0}) // Transparent
-						}()),
+						surface.WithColor(ternary.Ternary(
+							selected,
+							colors.IndicatorColor,
+							theme.ColorHelper.SpecificColor(color.NRGBA{A: 0}), // Transparent
+						)),
 						surface.WithShape(shape.RoundedCornerShape{Radius: unit.Dp(16)}),
 						surface.WithModifier(
 							EmptyModifier.
