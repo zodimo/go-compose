@@ -100,12 +100,21 @@ func TodoItem(
 
 ### Type-Safe State Helper
 
-Use a typed getter to avoid repetitive type assertions:
+Use the `store` package for type-safe state management, which wraps `MutableValue` with generic helpers:
 
 ```go
-func GetAppState(mv api.MutableValue) *AppState {
-    return mv.Get().(*AppState)
-}
+import "github.com/zodimo/go-compose/store"
+
+// Create typed state
+// store.State returns (TypedMutableValueInterface[T], error)
+// store.StateUnsafe panics on error (useful for top-level initialization)
+todoStateValue := store.StateUnsafe[*TodoState](c, "todoState", func() *TodoState {
+    return NewTodoState()
+})
+
+// Get and Set are now typed
+state := todoStateValue.Get() // returns *TodoState
+todoStateValue.Set(newState)  // requires *TodoState
 ```
 
 ## Conditional Component Rendering
@@ -174,26 +183,28 @@ type TodoState struct {
 
 func (s *TodoState) AddTodo(text string) *TodoState {
     return &TodoState{
-        Todos:  append(s.Todos, Todo{Text: text}),
-        Filter: s.Filter,
+        Todos:     append(s.Todos, Todo{Text: text}),
+        Filter:    s.Filter,
+        EditingID: s.EditingID,
+        NextID:    s.NextID + 1,
     }
 }
 
-// Component receiving MutableValue
-func TodoFooter(stateValue state.MutableValue) api.Composable {
+// Component receiving TypedMutableValueInterface
+func TodoFooter(todoStateValue store.TypedMutableValueInterface[*TodoState]) api.Composable {
     return func(c api.Composer) api.Composer {
-        state := GetTodoState(stateValue)
+        state := todoStateValue.Get()
         
         // Use c.If for buttons that change type based on selection
         c.If(
             state.Filter == FilterAll,
             button.Filled(func() {
-                newState := GetTodoState(stateValue).SetFilter(FilterAll)
-                stateValue.Set(newState)
+                newState := todoStateValue.Get().SetFilter(FilterAll)
+                todoStateValue.Set(newState)
             }, "All"),
             button.Text(func() {
-                newState := GetTodoState(stateValue).SetFilter(FilterAll)
-                stateValue.Set(newState)
+                newState := todoStateValue.Get().SetFilter(FilterAll)
+                todoStateValue.Set(newState)
             }, "All"),
         )(c)
         
