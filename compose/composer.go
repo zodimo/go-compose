@@ -14,6 +14,7 @@ func NewComposer(store state.PersistentState) Composer {
 	return zipper.NewComposer(store)
 }
 
+// Use This Sequence When not inside of a composable but composing composables
 var Sequence = sequence.Sequence
 
 func Id() Composable {
