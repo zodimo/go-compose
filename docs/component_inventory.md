@@ -23,7 +23,7 @@ This document tracks the status of Jetpack Compose components within `github.com
 | Component | Status | `gio-mw` | Notes |
 | :--- | :--- | :--- | :--- |
 | **Badges** | ✅ Implemented | `compose/foundation/material3/badge` | |
-| **Progress Indicators** | ✅ Implemented | `widget/indicator` | `compose/foundation/material3/progress` |
+| **Progress Indicators** | ✅ Implemented | `widget/indicator` | `compose/foundation/material3/progress`. Includes `LoadingIndicator` (indeterminate). |
 | **Snackbar** | ✅ Implemented | `widget/snackbar` | `compose/foundation/material3/snackbar` |
 | **Tooltips** | ✅ Implemented | `widget/tooltip` | `compose/foundation/material3/tooltip` |
 
