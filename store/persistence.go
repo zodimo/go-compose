@@ -10,16 +10,10 @@ import (
 
 type MutableValueInterface = state.MutableValue
 type PersistentStateInterface = state.PersistentState
+type TypedMutableValueInterface[T any] = state.TypedMutableValue[T]
 
 var _ MutableValueInterface = &MutableValue{}
 var _ MutableValueInterface = &MutableValueTypedWrapper[any]{}
-
-type TypedMutableValueInterface[T any] interface {
-	Get() T
-	Set(value T)
-
-	Unwrap() MutableValueInterface
-}
 
 var _ TypedMutableValueInterface[any] = &MutableValueTypedWrapper[any]{}
 
