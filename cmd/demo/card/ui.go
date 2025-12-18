@@ -21,6 +21,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	uilayout "github.com/zodimo/go-compose/compose/ui/layout"
 	"github.com/zodimo/go-compose/modifiers/background"
+	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
@@ -55,7 +56,7 @@ func UI(c api.Composer) api.LayoutNode {
 								),
 							),
 						),
-						card.WithModifier(size.Width(340)),
+						card.WithModifier(size.Width(340, size.SizeRequired())),
 					),
 					spacer.Height(24),
 				),
@@ -75,7 +76,7 @@ func UI(c api.Composer) api.LayoutNode {
 								),
 							),
 						),
-						card.WithModifier(size.Width(340)),
+						card.WithModifier(size.Width(340, size.SizeRequired())),
 					),
 					spacer.Height(24),
 				),
@@ -95,7 +96,7 @@ func UI(c api.Composer) api.LayoutNode {
 								),
 							),
 						),
-						card.WithModifier(size.Width(340)),
+						card.WithModifier(size.Width(340, size.SizeRequired())),
 					),
 					spacer.Height(24),
 				),
@@ -112,7 +113,7 @@ func UI(c api.Composer) api.LayoutNode {
 								InteractiveCardContent(inputValue),
 							),
 						),
-						card.WithModifier(size.Width(340)),
+						card.WithModifier(size.Width(340, size.SizeRequired())),
 					),
 					spacer.Height(24),
 				),
@@ -138,7 +139,7 @@ func UI(c api.Composer) api.LayoutNode {
 								),
 							),
 						),
-						card.WithModifier(size.Width(340)),
+						card.WithModifier(size.Width(340, size.SizeRequired())),
 					),
 					spacer.Height(24),
 				),
@@ -162,7 +163,7 @@ func UI(c api.Composer) api.LayoutNode {
 								ActionButtons(),
 							),
 						),
-						card.WithModifier(size.Width(340)),
+						card.WithModifier(size.Width(340, size.SizeRequired())),
 					),
 					spacer.Height(24),
 				),
@@ -192,7 +193,53 @@ func UI(c api.Composer) api.LayoutNode {
 								),
 							),
 						),
-						card.WithModifier(size.Width(340)),
+						card.WithModifier(size.Width(340, size.SizeRequired())),
+					),
+					spacer.Height(24),
+				),
+			))
+
+			// Clickable Cards - demonstrates hover effect with onClick
+			scope.Item("clickable", column.Column(
+				c.Sequence(
+					SectionTitle("Clickable Cards (Hover Effect Demo)"),
+					m3text.Text("Cards with onClick show hover effect clipped to rounded corners", m3text.TypestyleBodySmall),
+					spacer.Height(8),
+					row.Row(
+						c.Sequence(
+							card.Elevated(
+								card.CardContents(
+									card.Content(SmallCardContent("Click Me")),
+								),
+								card.WithModifier(
+									size.Width(120).Then(clickable.OnClick(func() {
+										// Handle click
+									})),
+								),
+							),
+							spacer.Width(16),
+							card.Filled(
+								card.CardContents(
+									card.Content(SmallCardContent("Click Me")),
+								),
+								card.WithModifier(
+									size.Width(120).Then(clickable.OnClick(func() {
+										// Handle click
+									})),
+								),
+							),
+							spacer.Width(16),
+							card.Outlined(
+								card.CardContents(
+									card.Content(SmallCardContent("Click Me")),
+								),
+								card.WithModifier(
+									size.Width(120).Then(clickable.OnClick(func() {
+										// Handle click
+									})),
+								),
+							),
+						),
 					),
 					spacer.Height(24),
 				),
