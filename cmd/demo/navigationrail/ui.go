@@ -13,6 +13,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/navigationrail"
 	"github.com/zodimo/go-compose/compose/foundation/material3/text"
 	ftext "github.com/zodimo/go-compose/compose/foundation/text"
+	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -106,7 +107,7 @@ func UI() api.Composable {
 
 									)(c)
 								},
-								api.EmptyModifier,
+								ui.EmptyModifier,
 							)(c)
 							spacer.Uniform(4)(c) // Changed spacer size
 						}
@@ -121,7 +122,7 @@ func UI() api.Composable {
 					func(c api.Composer) api.Composer {
 						// Navigation Rail (Collapsed state)
 						navigationrail.NavigationRail(
-							api.EmptyModifier,
+							ui.EmptyModifier,
 							func(c api.Composer) api.Composer {
 								// Header (Menu Icon to toggle drawer)
 								return box.Box(
@@ -191,7 +192,7 @@ func UI() api.Composable {
 												ftext.WithAlignment(ftext.Middle),
 											)(c)
 										},
-										api.EmptyModifier,
+										ui.EmptyModifier,
 									)(c)
 									spacer.Uniform(12)(c)
 								}

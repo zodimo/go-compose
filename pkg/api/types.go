@@ -49,12 +49,6 @@ type Composer interface {
 	Range(count int, fn func(int) Composable) Composable
 }
 
-// Public Modifier interface
-type Modifier interface {
-	// Then chains this modifier with another
-	Then(other Modifier) Modifier
-}
-
 type LayoutNode = layoutnode.LayoutNode
 
 type TreeBuilderComposer interface {
