@@ -26,6 +26,11 @@ type Composer interface {
 
 	modifier.ModifierAwareComposer
 
+	// -- Composition Locals
+	StartProviders(values []ProvidedValue) Composer
+	EndProviders() Composer
+	Consume(key interface{}) interface{}
+
 	// -- id management
 	GenerateID() Identifier
 
