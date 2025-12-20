@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"strconv"
 	"time"
 
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/f32"
 	"gioui.org/gesture"
@@ -28,7 +30,6 @@ const Material3OutlinedTextFieldNodeID = "Material3OutlinedTextField"
 func Outlined(
 	value string,
 	onValueChange func(string),
-	label string,
 	options ...TextFieldOption,
 ) Composable {
 	return func(c Composer) Composer {
@@ -76,8 +77,15 @@ func Outlined(
 		tracker := trackerState.Get().(*TextFieldStateTracker)
 
 		// Update static properties
+		// Update static properties
 		outWidget.Editor.SingleLine = opts.SingleLine
 		outWidget.Editor.Submit = opts.OnSubmit != nil
+		outWidget.CharLimit = opts.CharLimit
+		outWidget.Prefix = opts.Prefix
+		outWidget.Suffix = opts.Suffix
+		outWidget.Helper = opts.SupportingText
+		outWidget.Colors = opts.Colors
+		outWidget.SetError(opts.Error, opts.SupportingText) // Use SupportingText as error message if Error is true
 
 		c.StartBlock(Material3OutlinedTextFieldNodeID)
 		c.Modifier(func(m Modifier) Modifier {
@@ -145,11 +153,26 @@ type OutlinedTextFieldWidget struct {
 	widget.Editor
 	click gesture.Click
 
+	// Config
+	Helper    string
+	CharLimit uint
+	Prefix    layout.Widget
+	Suffix    layout.Widget
+	Colors    TextFieldColors
+
 	// Animation state
 	state
 	label  label
 	border border
+	helper helper
 	anim   *Progress
+
+	errored bool
+}
+
+type helper struct {
+	Color color.NRGBA
+	Text  string
 }
 
 type label struct {
@@ -171,6 +194,41 @@ const (
 	activated
 	focused
 )
+
+// IsActive if input is in an active state (Active, Focused or Errored).
+func (in *OutlinedTextFieldWidget) IsActive() bool {
+	return in.state >= activated
+}
+
+// IsErrored if input is in an errored state.
+// Typically this is when the validator has returned an error message.
+func (in *OutlinedTextFieldWidget) IsErrored() bool {
+	return in.errored
+}
+
+// SetError puts the input into an errored state with the specified error text.
+func (in *OutlinedTextFieldWidget) SetError(isError bool, err string) {
+	in.errored = isError
+	in.helper.Text = err
+}
+
+// ClearError clears any errored status.
+func (in *OutlinedTextFieldWidget) ClearError() {
+	in.errored = false
+	in.helper.Text = in.Helper
+}
+
+// Clear the input text and reset any error status.
+func (in *OutlinedTextFieldWidget) Clear() {
+	in.Editor.SetText("")
+	in.ClearError()
+}
+
+// TextTooLong returns whether the current editor text exceeds the set character
+// limit.
+func (in *OutlinedTextFieldWidget) TextTooLong() bool {
+	return !(in.CharLimit == 0 || uint(len(in.Editor.Text())) < in.CharLimit)
+}
 
 func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *material.Theme, hint string) layout.Dimensions {
 	// Logic from gio-x Update + Layout
@@ -261,11 +319,34 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *material.Theme
 								Alignment: layout.Middle,
 							}.Layout(
 								gtx,
+								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+									if in.IsActive() && in.Prefix != nil {
+										return in.Prefix(gtx)
+									}
+									return layout.Dimensions{}
+								}),
 								// Prefix would go here
 								layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-									return material.Editor(th, &in.Editor, "").Layout(gtx)
+									// Resolve editor colors
+									m := theme.GetThemeManager()
+									textColor := m.ResolveColorDescriptor(in.Colors.TextColor).AsNRGBA()
+									if !gtx.Enabled() {
+										textColor = m.ResolveColorDescriptor(in.Colors.DisabledTextColor).AsNRGBA()
+									}
+									selectionColor := m.ResolveColorDescriptor(in.Colors.SelectionColor).AsNRGBA()
+
+									ed := material.Editor(th, &in.Editor, "")
+									ed.Color = textColor
+									ed.SelectionColor = selectionColor
+
+									return ed.Layout(gtx)
 								}),
-								// Suffix would go here
+								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+									if in.IsActive() && in.Suffix != nil {
+										return in.Suffix(gtx)
+									}
+									return layout.Dimensions{}
+								}),
 							)
 						},
 					)
@@ -280,7 +361,51 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *material.Theme
 				}),
 			)
 		}),
-		// Helper text would go here
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+			return layout.Flex{
+				Axis:      layout.Horizontal,
+				Alignment: layout.Middle,
+				Spacing:   layout.SpaceBetween,
+			}.Layout(
+				gtx,
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					if in.helper.Text == "" {
+						return layout.Dimensions{}
+					}
+					return layout.Inset{
+						Top:  unit.Dp(4),
+						Left: unit.Dp(10),
+					}.Layout(
+						gtx,
+						func(gtx layout.Context) layout.Dimensions {
+							helper := material.Label(th, unit.Sp(12), in.helper.Text)
+							helper.Color = in.helper.Color
+							return helper.Layout(gtx)
+						},
+					)
+				}),
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					if in.CharLimit == 0 {
+						return layout.Dimensions{}
+					}
+					return layout.Inset{
+						Top:   unit.Dp(4),
+						Right: unit.Dp(10),
+					}.Layout(
+						gtx,
+						func(gtx layout.Context) layout.Dimensions {
+							count := material.Label(
+								th,
+								unit.Sp(12),
+								strconv.Itoa(in.Editor.Len())+"/"+strconv.Itoa(int(in.CharLimit)),
+							)
+							count.Color = in.helper.Color
+							return count.Layout(gtx)
+						},
+					)
+				}),
+			)
+		}),
 	)
 	return layout.Dimensions{
 		Size: image.Point{
@@ -292,6 +417,9 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *material.Theme
 }
 
 func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *material.Theme, hint string) {
+	// Resolve colors
+	m := theme.GetThemeManager()
+
 	disabled := gtx.Source == (input.Source{})
 	for {
 		ev, ok := in.click.Update(gtx.Source)
@@ -334,29 +462,52 @@ func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *material.Theme
 	}
 	in.anim.Update(gtx.Now)
 
-	// Styles - TODO: Use real theme colors
 	var (
-		textNormal         = th.TextSize
-		textSmall          = th.TextSize * 0.8
-		borderColor        = color.NRGBA{R: 120, G: 120, B: 120, A: 255} // Placeholder
-		borderColorHovered = color.NRGBA{R: 0, G: 0, B: 0, A: 255}       // Placeholder
-		borderColorActive  = th.Palette.ContrastBg
+		textNormal = th.TextSize
+		textSmall  = th.TextSize * 0.8
+
+		borderColor         = m.ResolveColorDescriptor(in.Colors.UnfocusedIndicatorColor).AsNRGBA()
+		borderColorHovered  = m.ResolveColorDescriptor(in.Colors.HoveredIndicatorColor).AsNRGBA()
+		borderColorActive   = m.ResolveColorDescriptor(in.Colors.FocusedIndicatorColor).AsNRGBA()
+		borderColorError    = m.ResolveColorDescriptor(in.Colors.ErrorIndicatorColor).AsNRGBA()
+		borderColorDisabled = m.ResolveColorDescriptor(in.Colors.DisabledIndicatorColor).AsNRGBA()
 
 		borderThickness       = unit.Dp(1)
 		borderThicknessActive = unit.Dp(2)
+
+		helperColor         = m.ResolveColorDescriptor(in.Colors.SupportingTextColor).AsNRGBA()
+		helperColorError    = m.ResolveColorDescriptor(in.Colors.ErrorSupportingTextColor).AsNRGBA()
+		helperColorDisabled = m.ResolveColorDescriptor(in.Colors.DisabledSupportingTextColor).AsNRGBA()
 	)
+
+	if disabled {
+		borderColor = borderColorDisabled
+		borderColorHovered = borderColorDisabled
+		borderColorActive = borderColorDisabled
+		borderColorError = borderColorDisabled
+		helperColor = helperColorDisabled
+		helperColorError = helperColorDisabled
+	}
 
 	in.label.TextSize = unit.Sp(lerp(float32(textSmall), float32(textNormal), 1.0-in.anim.Progress()))
 	switch in.state {
 	case inactive:
 		in.border.Thickness = borderThickness
 		in.border.Color = borderColor
+		in.helper.Color = helperColor
 	case hovered, activated:
 		in.border.Thickness = borderThickness
 		in.border.Color = borderColorHovered
+		in.helper.Color = helperColor
 	case focused:
 		in.border.Thickness = borderThicknessActive
 		in.border.Color = borderColorActive
+		in.helper.Color = helperColor
+	}
+
+	if in.IsErrored() {
+		in.border.Color = borderColorError
+		in.helper.Color = helperColorError
 	}
 
 	// Calculate smallest label for cutout
@@ -370,7 +521,9 @@ func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *material.Theme
 		Left:  spacing,
 		Right: spacing,
 	}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		return material.Label(th, textSmall, hint).Layout(gtx)
+		l := material.Label(th, textSmall, hint)
+		l.Color = in.border.Color
+		return l.Layout(gtx)
 	})
 	macro.Stop()
 
@@ -383,67 +536,12 @@ func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *material.Theme
 	}
 }
 
-// Utils
-type Progress struct {
-	begin time.Time
-	dir   Direction
-	dur   time.Duration
-	frac  float32
-}
-
-type Direction int
-
-const (
-	Forward Direction = iota
-	Reverse
-)
-
-func (p *Progress) Start(now time.Time, dir Direction, dur time.Duration) {
-	if p.dir == dir && (p.frac == 1.0 || p.frac == 0.0) && dur == p.dur {
-		return
-	}
-	if p.dir != dir {
-		p.frac = 1.0 - p.frac
-		p.begin = now.Add(time.Duration(float32(dur)*(1-p.frac)) * -1)
-	} else {
-		p.begin = now.Add(time.Duration(float32(dur)*p.frac) * -1)
-	}
-	p.dir = dir
-	p.dur = dur
-}
-
-func (p *Progress) Started() bool {
-	return p.dur > 0 && (p.frac < 1.0 && p.frac > 0.0)
-}
-
-func (p *Progress) Finished() bool {
-	return p.frac == 1.0
-}
-
-func (p *Progress) Update(now time.Time) {
-	if p.dur == 0 {
-		if p.dir == Forward {
-			p.frac = 1.0
-		} else {
-			p.frac = 0.0
-		}
-		return
-	}
-	elapsed := now.Sub(p.begin)
-	if elapsed > p.dur {
-		p.frac = 1.0
-		return
-	}
-	p.frac = float32(elapsed) / float32(p.dur)
-}
-
-func (p *Progress) Progress() float32 {
-	if p.dir == Reverse {
-		return 1.0 - p.frac
-	}
-	return p.frac
-}
-
+// interpolate linearly between two values based on progress.
+//
+// Progress is expected to be [0, 1]. Values greater than 1 will therefore be
+// become a coeficient.
+//
+// For example, 2.5 is 250% progress.
 func lerp(start, end, progress float32) float32 {
 	return start + (end-start)*progress
 }

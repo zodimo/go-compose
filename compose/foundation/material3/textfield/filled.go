@@ -14,7 +14,6 @@ const Material3FilledTextFieldNodeID = "Material3FilledTextField"
 func Filled(
 	value string,
 	onValueChange func(string),
-	label string,
 	options ...TextFieldOption,
 ) Composable {
 	return func(c Composer) Composer {
