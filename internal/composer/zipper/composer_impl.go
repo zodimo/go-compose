@@ -16,12 +16,14 @@ type pathItem struct {
 }
 
 type composer struct {
-	focus      LayoutNode // group we are currently inside
-	path       []pathItem // how to climb back to root
-	memo       Memo       // remember cache for this composition run
-	state      PersistentState
-	idManager  IdentityManager
-	overrideID *Identifier // single override ID for c.Key (one Key affects one component)
+	focus          LayoutNode // group we are currently inside
+	path           []pathItem // how to climb back to root
+	memo           Memo       // remember cache for this composition run
+	state          PersistentState
+	idManager      IdentityManager
+	overrideID     *Identifier // single override ID for c.Key (one Key affects one component)
+	locals         map[interface{}]interface{}
+	providersStack []map[interface{}]interface{}
 }
 
 // Tree Builder operations
@@ -195,6 +197,32 @@ func (c *composer) Range(count int, fn func(int) Composable) Composable {
 		}
 		return c
 	}
+}
+
+func (c *composer) StartProviders(values []ProvidedValue) Composer {
+	c.providersStack = append(c.providersStack, c.locals)
+	newLocals := make(map[interface{}]interface{}, len(c.locals)+len(values))
+	for k, v := range c.locals {
+		newLocals[k] = v
+	}
+	for _, v := range values {
+		newLocals[v.CompositionLocal] = v.Value
+	}
+	c.locals = newLocals
+	return c
+}
+
+func (c *composer) EndProviders() Composer {
+	if len(c.providersStack) == 0 {
+		panic("Unbalanced StartProviders/EndProviders")
+	}
+	c.locals = c.providersStack[len(c.providersStack)-1]
+	c.providersStack = c.providersStack[:len(c.providersStack)-1]
+	return c
+}
+
+func (c *composer) Consume(key interface{}) interface{} {
+	return c.locals[key]
 }
 
 func emptyComposable() Composable {

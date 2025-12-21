@@ -35,4 +35,6 @@ type RootNode = node.TreeNode
 type Composable = api.Composable
 type Composer = api.Composer
 
+type ProvidedValue = api.ProvidedValue
+
 var Sequence = sequence.Sequence
