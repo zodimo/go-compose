@@ -1,10 +1,10 @@
+// Package graphics provides UI graphics primitives.
 package graphics
 
 import (
 	"fmt"
 	"image/color"
 
-	"github.com/zodimo/go-compose/compose/ui/geometry"
 	"github.com/zodimo/go-compose/compose/ui/utils/lerp"
 	"github.com/zodimo/go-compose/theme"
 )
@@ -19,15 +19,15 @@ type Shadow struct {
 	BlurRadius float32 // Blur radius in pixels
 }
 
-// None represents no shadow. Use this constant instead of allocating a new zero Shadow.
-var None = Shadow{
-	Color:      theme.ColorHelper.SpecificColor(color.RGBA{R: 0, G: 0, B: 0, A: 255}), // Define Black as: Color{R:0, G:0, B:0, A:1}
-	Offset:     ZeroOffset,
-	BlurRadius: 0,
-}
+// Zero constants (define these once)
+var (
+	Black = theme.ColorHelper.SpecificColor(color.RGBA{R: 0, G: 0, B: 0, A: 255}) // Define Black as: Color{R:0, G:0, B:0, A:1}
+	// ShadowNone represents no shadow. Use this constant instead of allocating a new zero Shadow.
+	ShadowNone = NewShadow(Black, ZeroOffset, 0)
+)
 
-// NewShadow creates a new Shadow instance with the given properties.
-func NewShadow(color Color, offset geometry.Offset, blurRadius float32) Shadow {
+// NewShadow creates a new Shadow instance.
+func NewShadow(color Color, offset Offset, blurRadius float32) Shadow {
 	return Shadow{
 		Color:      color,
 		Offset:     offset,
@@ -36,10 +36,9 @@ func NewShadow(color Color, offset geometry.Offset, blurRadius float32) Shadow {
 }
 
 // Copy creates a new Shadow with optional field overrides.
-// Pass nil for any parameter you want to keep unchanged.
-func (s Shadow) Copy(color *Color, offset *geometry.Offset, blurRadius *float32) Shadow {
+// Pass nil for parameters you want unchanged.
+func (s Shadow) Copy(color *Color, offset *Offset, blurRadius *float32) Shadow {
 	result := s
-
 	if color != nil {
 		result.Color = *color
 	}
@@ -49,37 +48,30 @@ func (s Shadow) Copy(color *Color, offset *geometry.Offset, blurRadius *float32)
 	if blurRadius != nil {
 		result.BlurRadius = *blurRadius
 	}
-
 	return result
 }
 
-// Equal performs deep equality check on all Shadow fields.
+// Equal performs deep equality check with epsilon tolerance for all fields.
 func (s Shadow) Equal(other Shadow) bool {
 	return s.Color.Compare(other.Color) &&
 		s.Offset.Equal(other.Offset) &&
-		s.BlurRadius == other.BlurRadius
+		floatEquals(s.BlurRadius, other.BlurRadius)
 }
 
-// String returns a human-readable representation of the Shadow.
+// String returns a human-readable representation.
 func (s Shadow) String() string {
 	return fmt.Sprintf("Shadow(color=%v, offset=%v, blurRadius=%.2f)",
 		s.Color, s.Offset, s.BlurRadius)
 }
 
 // Lerp performs linear interpolation between two shadows.
-// Each field (color, offset, blurRadius) is interpolated independently.
 func Lerp(start, stop Shadow, fraction float32) Shadow {
-	// Color interpolation (components)
-	colorLerped := theme.ColorLerp(start.Color, stop.Color, fraction)
-
-	// Offset interpolation (each axis)
-	offset := geometry.Offset{
-		X: lerp.Float32(start.Offset.X, stop.Offset.X, fraction),
-		Y: lerp.Float32(start.Offset.Y, stop.Offset.Y, fraction),
-	}
-
-	// Blur radius interpolation
-	blurRadius := lerp.Float32(start.BlurRadius, stop.BlurRadius, fraction)
-
-	return NewShadow(colorLerped, offset, blurRadius)
+	return NewShadow(
+		theme.ColorLerp(start.Color, stop.Color, fraction),
+		Offset{
+			X: lerp.Float32(start.Offset.X, stop.Offset.X, fraction),
+			Y: lerp.Float32(start.Offset.Y, stop.Offset.Y, fraction),
+		},
+		lerp.Float32(start.BlurRadius, stop.BlurRadius, fraction),
+	)
 }
