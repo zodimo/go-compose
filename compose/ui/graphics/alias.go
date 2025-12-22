@@ -4,10 +4,8 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/geometry"
 	"github.com/zodimo/go-compose/compose/ui/utils/lerp"
 	"github.com/zodimo/go-compose/pkg/floatutils"
-	"github.com/zodimo/go-compose/theme"
 )
 
-type Color = theme.ColorDescriptor
 type Offset = geometry.Offset
 
 var ZeroOffset = geometry.OffsetZero
