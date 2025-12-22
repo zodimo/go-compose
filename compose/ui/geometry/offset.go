@@ -108,8 +108,8 @@ func (o Offset) String() string {
 	return "Offset.Unspecified"
 }
 
-// Lerp linearly interpolates between two offsets.
-func Lerp(start, stop Offset, fraction float32) Offset {
+// LerpOffset linearly interpolates between two offsets.
+func LerpOffset(start, stop Offset, fraction float32) Offset {
 	return Offset{
 		X: lerpBetween(start.X, stop.X, float64(fraction)),
 		Y: lerpBetween(start.Y, stop.Y, float64(fraction)),

@@ -149,13 +149,13 @@ func TestLerp(t *testing.T) {
 	start := Offset{0, 0}
 	end := Offset{10, 20}
 
-	mid := Lerp(start, end, 0.5)
+	mid := LerpOffset(start, end, 0.5)
 	if mid.X != 5 || mid.Y != 10 {
 		t.Errorf("Lerp(0.5) = %v, want (5, 10)", mid)
 	}
 
 	// Extrapolation
-	extra := Lerp(start, end, 2.0)
+	extra := LerpOffset(start, end, 2.0)
 	if extra.X != 20 || extra.Y != 40 {
 		t.Errorf("Lerp(2.0) = %v, want (20, 40)", extra)
 	}
