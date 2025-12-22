@@ -4,7 +4,6 @@ package graphics
 import (
 	"fmt"
 
-	"github.com/zodimo/go-compose/compose/ui/utils/lerp"
 	"github.com/zodimo/go-compose/theme"
 )
 
@@ -53,7 +52,7 @@ func (s Shadow) Copy(color *Color, offset *Offset, blurRadius *float32) Shadow {
 func (s Shadow) Equal(other Shadow) bool {
 	return s.Color.Compare(other.Color) &&
 		s.Offset.Equal(other.Offset) &&
-		floatEquals(s.BlurRadius, other.BlurRadius)
+		float32Equals(s.BlurRadius, other.BlurRadius, float32EqualityThreshold)
 }
 
 // String returns a human-readable representation.
@@ -62,14 +61,14 @@ func (s Shadow) String() string {
 		s.Color, s.Offset, s.BlurRadius)
 }
 
-// Lerp performs linear interpolation between two shadows.
-func Lerp(start, stop Shadow, fraction float32) Shadow {
+// LerpShadow performs linear interpolation between two shadows.
+func LerpShadow(start, stop Shadow, fraction float32) Shadow {
 	return NewShadow(
 		theme.ColorLerp(start.Color, stop.Color, fraction),
 		Offset{
-			X: lerp.Float32(start.Offset.X, stop.Offset.X, fraction),
-			Y: lerp.Float32(start.Offset.Y, stop.Offset.Y, fraction),
+			X: lerpBetween(start.Offset.X, stop.Offset.X, float64(fraction)),
+			Y: lerpBetween(start.Offset.Y, stop.Offset.Y, float64(fraction)),
 		},
-		lerp.Float32(start.BlurRadius, stop.BlurRadius, fraction),
+		lerpBetween(start.BlurRadius, stop.BlurRadius, float64(fraction)),
 	)
 }

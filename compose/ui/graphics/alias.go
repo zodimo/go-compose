@@ -2,6 +2,7 @@ package graphics
 
 import (
 	"github.com/zodimo/go-compose/compose/ui/geometry"
+	"github.com/zodimo/go-compose/compose/ui/utils/lerp"
 	"github.com/zodimo/go-compose/pkg/floatutils"
 	"github.com/zodimo/go-compose/theme"
 )
@@ -9,8 +10,8 @@ import (
 type Color = theme.ColorDescriptor
 type Offset = geometry.Offset
 
-var ZeroOffset = geometry.OffsetZero()
+var ZeroOffset = geometry.OffsetZero
 
-var floatEquals = func(a, b float32) bool {
-	return floatutils.Float32Equals(a, b, floatutils.Float32EqualityThreshold)
-}
+var lerpBetween = lerp.Between[float32]
+var float32Equals = floatutils.Float32Equals
+var float32EqualityThreshold = floatutils.Float32EqualityThreshold
