@@ -3,7 +3,6 @@ package graphics
 
 import (
 	"fmt"
-	"image/color"
 
 	"github.com/zodimo/go-compose/compose/ui/utils/lerp"
 	"github.com/zodimo/go-compose/theme"
@@ -21,7 +20,6 @@ type Shadow struct {
 
 // Zero constants (define these once)
 var (
-	Black = theme.ColorHelper.SpecificColor(color.RGBA{R: 0, G: 0, B: 0, A: 255}) // Define Black as: Color{R:0, G:0, B:0, A:1}
 	// ShadowNone represents no shadow. Use this constant instead of allocating a new zero Shadow.
 	ShadowNone = NewShadow(Black, ZeroOffset, 0)
 )
