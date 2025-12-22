@@ -1,78 +1,79 @@
 package font
 
-type SynthesisFlag int
+import "fmt"
+
+// FontSynthesis specifies whether the system should fake bold or slanted glyphs
+// when the FontFamily used does not contain bold or oblique Fonts.
+type FontSynthesis struct {
+	value int
+}
 
 const (
-	None       SynthesisFlag = 0
-	WeightFlag SynthesisFlag = 1
-	StyleFlag  SynthesisFlag = 2
-	AllFlags   SynthesisFlag = 0xffff
+	// Internal flag constants matching Kotlin implementation
+	synthesisAllFlags   = 0xffff
+	synthesisWeightFlag = 0x1
+	synthesisStyleFlag  = 0x2
 )
 
-func (f SynthesisFlag) String() string {
-	switch f {
-	case None:
+var (
+	// FontSynthesisNone turns off font synthesis.
+	// Neither bold nor slanted faces are synthesized.
+	FontSynthesisNone = FontSynthesis{value: 0}
+
+	// FontSynthesisWeight synthesizes only bold font if not available.
+	// Slanted fonts will not be synthesized.
+	FontSynthesisWeight = FontSynthesis{value: synthesisWeightFlag}
+
+	// FontSynthesisStyle synthesizes only slanted font if not available.
+	// Bold fonts will not be synthesized.
+	FontSynthesisStyle = FontSynthesis{value: synthesisStyleFlag}
+
+	// FontSynthesisAll synthesizes both bold and slanted fonts if either
+	// is not available in the FontFamily.
+	FontSynthesisAll = FontSynthesis{value: synthesisAllFlags}
+)
+
+// Value returns the underlying integer value.
+func (f FontSynthesis) Value() int {
+	return f.value
+}
+
+// IsWeightOn returns true if weight synthesis is enabled.
+func (f FontSynthesis) IsWeightOn() bool {
+	return f.value&synthesisWeightFlag != 0
+}
+
+// IsStyleOn returns true if style synthesis is enabled.
+func (f FontSynthesis) IsStyleOn() bool {
+	return f.value&synthesisStyleFlag != 0
+}
+
+// String returns a string representation of the FontSynthesis.
+func (f FontSynthesis) String() string {
+	switch f.value {
+	case 0:
 		return "None"
-	case WeightFlag:
+	case synthesisWeightFlag:
 		return "Weight"
-	case StyleFlag:
+	case synthesisStyleFlag:
 		return "Style"
-	case AllFlags:
+	case synthesisAllFlags:
 		return "All"
 	default:
 		return "Invalid"
 	}
 }
 
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/font/FontSynthesis.kt;drc=182f9f08cf26aaa426d03f39b6dcef1c33e9f41b;l=44
-type FontSynthesis struct {
-	flag SynthesisFlag
+// Equals checks if two FontSynthesis values are equal.
+func (f FontSynthesis) Equals(other FontSynthesis) bool {
+	return f.value == other.value
 }
 
-func (f FontSynthesis) String() string {
-	return f.flag.String()
-}
-
-func (f FontSynthesis) IsWeightOn() bool {
-	return f.flag == WeightFlag
-}
-
-func (f FontSynthesis) IsStyleOn() bool {
-	return f.flag == StyleFlag
-}
-
-// Perform platform-specific font synthesis such as fake bold or fake italic.
-// Platforms are not required to support synthesis, in which case they should return [typeface].
-// Platforms that support synthesis should check [FontSynthesis.isWeightOn] and
-// [FontSynthesis.isStyleOn] in this method before synthesizing bold or italic, respectively.
-// @param typeface a platform-specific typeface
-// @param font initial font that generated the typeface via loading
-// @param requestedWeight app-requested weight (may be different than the font's weight)
-// @param requestedStyle app-requested style (may be different than the font's style)
-// @return a synthesized typeface, or the passed [typeface] if synthesis is not needed or supported.
-// func (f FontSynthesis) SynthesizeTypeface(typeface any, font Font, requestedWeight FontWeight, requestedStyle FontStyle) any {
-// 	return typeface
-// }
-
-func FontSynthesisNone() FontSynthesis {
-	return FontSynthesis{flag: None}
-}
-
-func FontSynthesisWeight() FontSynthesis {
-	return FontSynthesis{flag: WeightFlag}
-}
-
-func FontSynthesisStyle() FontSynthesis {
-	return FontSynthesis{flag: StyleFlag}
-}
-
-func FontSynthesisAll() FontSynthesis {
-	return FontSynthesis{flag: AllFlags}
-}
-
-func NewFontSynthesis(flag SynthesisFlag) FontSynthesis {
-	if flag.String() == "Invalid" {
-		panic("invalid font flag")
+// FontSynthesisValueOf creates a FontSynthesis from an integer value.
+// Returns an error if the value is not recognized.
+func FontSynthesisValueOf(value int) (FontSynthesis, error) {
+	if value != 0 && value != synthesisWeightFlag && value != synthesisStyleFlag && value != synthesisAllFlags {
+		return FontSynthesis{}, fmt.Errorf("the given value=%d is not recognized by FontSynthesis", value)
 	}
-	return FontSynthesis{flag: flag}
+	return FontSynthesis{value: value}, nil
 }
