@@ -94,6 +94,7 @@ type ColorDescriptor interface {
 	Darken(percentage float32) ColorDescriptor
 	Compare(other ColorDescriptor) bool
 	Updates() []ColorUpdate
+	TakeOrElse(other func() ColorDescriptor) ColorDescriptor // support unspecifiedXXX compose pattern
 }
 
 var _ ColorDescriptor = (*colorDescriptor)(nil)
@@ -156,6 +157,10 @@ func (t colorDescriptor) Compare(other ColorDescriptor) bool {
 	}
 	//compare color
 	return t.color == otherColorDescriptor.color && t.colorRole == otherColorDescriptor.colorRole && t.isColor == otherColorDescriptor.isColor
+}
+
+func (t colorDescriptor) TakeOrElse(other func() ColorDescriptor) ColorDescriptor {
+	return t
 }
 
 func SetOpacity(value OpacityLevel) *ColorUpdateTyped[OpacityLevel] {
@@ -280,4 +285,37 @@ func (u LerpColorUpdate) Compare(other ColorUpdate) bool {
 
 func (u LerpColorUpdate) isThemeColorUpdate() bool {
 	return true
+}
+
+var _ ColorDescriptor = (*unspecifiedColorDescriptor)(nil)
+
+type unspecifiedColorDescriptor struct {
+}
+
+func (u unspecifiedColorDescriptor) AppendUpdate(update ColorUpdate) ColorDescriptor {
+	panic("unspecified color descriptor cannot be updated")
+}
+
+func (u unspecifiedColorDescriptor) SetOpacity(opacity OpacityLevel) ColorDescriptor {
+	panic("unspecified color descriptor cannot be updated")
+}
+
+func (u unspecifiedColorDescriptor) Lighten(percentage float32) ColorDescriptor {
+	panic("unspecified color descriptor cannot be updated")
+}
+
+func (u unspecifiedColorDescriptor) Darken(percentage float32) ColorDescriptor {
+	panic("unspecified color descriptor cannot be updated")
+}
+
+func (u unspecifiedColorDescriptor) Compare(other ColorDescriptor) bool {
+	panic("unspecified color descriptor cannot be compared")
+}
+
+func (u unspecifiedColorDescriptor) Updates() []ColorUpdate {
+	panic("unspecified color descriptor cannot have updates")
+}
+
+func (u unspecifiedColorDescriptor) TakeOrElse(other func() ColorDescriptor) ColorDescriptor {
+	return other()
 }

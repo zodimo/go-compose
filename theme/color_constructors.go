@@ -31,3 +31,7 @@ func ThemeColorFromTokenColor(color TokenColor) ThemeColor {
 		tokenColor: color,
 	}
 }
+
+func UnspecifiedColor() ColorDescriptor {
+	return unspecifiedColorDescriptor{}
+}

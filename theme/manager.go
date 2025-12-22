@@ -21,6 +21,7 @@ func init() {
 type ThemeColorHelper interface {
 	ColorSelector() *ColorRoleDescriptors
 	SpecificColor(color color.Color) ColorDescriptor
+	UnspecifiedColor() ColorDescriptor
 }
 
 var _ ThemeColorHelper = (*themeColorHelper)(nil)
@@ -34,6 +35,9 @@ func (tch themeColorHelper) ColorSelector() *ColorRoleDescriptors {
 }
 func (tch themeColorHelper) SpecificColor(color color.Color) ColorDescriptor {
 	return SpecificColor(color)
+}
+func (tch themeColorHelper) UnspecifiedColor() ColorDescriptor {
+	return UnspecifiedColor()
 }
 func newTheColorHelper() ThemeColorHelper {
 	return themeColorHelper{
