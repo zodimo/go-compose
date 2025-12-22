@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/zodimo/go-compose/compose/ui/utils/lerp"
 	"github.com/zodimo/go-compose/pkg/floatutils"
 )
 
@@ -144,8 +143,12 @@ func (tu TextUnit) String() string {
 	}
 }
 
-// Lerp linearly interpolates between two TextUnits.
-func Lerp(start, stop TextUnit, fraction float32) TextUnit {
+func (tu TextUnit) Equals(other TextUnit) bool {
+	return float32Equals(tu.value, other.value, float32EqualityThreshold) && tu.unitType == other.unitType
+}
+
+// LerpTextUnit linearly interpolates between two TextUnits.
+func LerpTextUnit(start, stop TextUnit, fraction float32) TextUnit {
 	if start.IsUnspecified() || stop.IsUnspecified() {
 		panic("Cannot perform operation for Unspecified type.")
 	}
@@ -153,7 +156,7 @@ func Lerp(start, stop TextUnit, fraction float32) TextUnit {
 		panic(fmt.Sprintf("Cannot perform operation for %s and %s", start.unitType, stop.unitType))
 	}
 
-	val := lerp.Between32(start.value, stop.value, fraction)
+	val := lerpBetween(start.value, stop.value, float64(fraction))
 	return TextUnit{
 		value:    val,
 		unitType: start.unitType,

@@ -120,17 +120,17 @@ func TestTextUnit_Lerp(t *testing.T) {
 	v1 := Sp(10)
 	v2 := Sp(20)
 
-	mid := Lerp(v1, v2, 0.5)
+	mid := LerpTextUnit(v1, v2, 0.5)
 	if mid.Value() != 15 || !mid.IsSp() {
 		t.Errorf("Lerp 0.5 failed: %v", mid)
 	}
 
-	start := Lerp(v1, v2, 0)
+	start := LerpTextUnit(v1, v2, 0)
 	if start.Value() != 10 {
 		t.Errorf("Lerp 0 failed: %v", start)
 	}
 
-	end := Lerp(v1, v2, 1)
+	end := LerpTextUnit(v1, v2, 1)
 	if end.Value() != 20 {
 		t.Errorf("Lerp 1 failed: %v", end)
 	}
@@ -169,7 +169,7 @@ func TestTextUnit_Lerp_Panic_MixedTypes(t *testing.T) {
 			t.Error("The code did not panic")
 		}
 	}()
-	Lerp(Sp(10), Em(20), 0.5)
+	LerpTextUnit(Sp(10), Em(20), 0.5)
 }
 
 // Ensure NaN handling in Unspecified
