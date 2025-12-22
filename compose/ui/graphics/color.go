@@ -14,4 +14,6 @@ type ColorProducer = func() Color
 
 type Color = theme.ColorDescriptor
 
+type OpacityLevel = theme.OpacityLevel
+
 var ColorUnspecified = theme.UnspecifiedColor()
