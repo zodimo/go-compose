@@ -52,10 +52,10 @@ func TestHorizontalGradient(t *testing.T) {
 	colors := []graphics.Color{graphics.Black, graphics.Transparent}
 	g := graphics.HorizontalGradient(colors, 0, 100, graphics.TileModeMirror)
 
-	if g.Start.X != 0 || g.Start.Y != 0 {
+	if g.Start.X() != 0 || g.Start.Y() != 0 {
 		t.Errorf("HorizontalGradient start should be (0,0)")
 	}
-	if g.End.X != 100 || g.End.Y != 0 {
+	if g.End.X() != 100 || g.End.Y() != 0 {
 		t.Errorf("HorizontalGradient end should be (100,0)")
 	}
 	if g.TileMode != graphics.TileModeMirror {
@@ -88,8 +88,8 @@ func TestLerpBrush(t *testing.T) {
 	if !ok {
 		t.Fatalf("Lerp of LinearGradient should be LinearGradient")
 	}
-	if lg3.End.X != 150 {
-		t.Errorf("LerpBrush(0.5) LinearGradient End.X = %v, want 150", lg3.End.X)
+	if lg3.End.X() != 150 {
+		t.Errorf("LerpBrush(0.5) LinearGradient End.X = %v, want 150", lg3.End.X())
 	}
 
 	// Case 3: Mixed (Solid <-> Gradient)

@@ -94,28 +94,28 @@ func (l LinearGradient) IntrinsicSize() geometry.Size {
 	width := float32(math.NaN())
 	height := float32(math.NaN())
 	if l.Start.IsFinite() && l.End.IsFinite() {
-		width = float32(math.Abs(float64(l.Start.X - l.End.X)))
-		height = float32(math.Abs(float64(l.Start.Y - l.End.Y)))
+		width = float32(math.Abs(float64(l.Start.X() - l.End.X())))
+		height = float32(math.Abs(float64(l.Start.Y() - l.End.Y())))
 	}
 	return geometry.NewSize(width, height)
 }
 
 func (l LinearGradient) CreateShader(size geometry.Size) Shader {
-	startX := l.Start.X
+	startX := l.Start.X()
 	if startX == float32(math.Inf(1)) {
-		startX = size.Width
+		startX = size.Width()
 	}
-	startY := l.Start.Y
+	startY := l.Start.Y()
 	if startY == float32(math.Inf(1)) {
-		startY = size.Height
+		startY = size.Height()
 	}
-	endX := l.End.X
+	endX := l.End.X()
 	if endX == float32(math.Inf(1)) {
-		endX = size.Width
+		endX = size.Width()
 	}
-	endY := l.End.Y
+	endY := l.End.Y()
 	if endY == float32(math.Inf(1)) {
-		endY = size.Height
+		endY = size.Height()
 	}
 	return LinearGradientShader{
 		Colors:     l.Colors,
@@ -178,18 +178,18 @@ func (r RadialGradient) IntrinsicSize() geometry.Size {
 }
 
 func (r RadialGradient) CreateShader(size geometry.Size) Shader {
-	centerX := r.Center.X
-	centerY := r.Center.Y
+	centerX := r.Center.X()
+	centerY := r.Center.Y()
 	if r.Center.IsUnspecified() {
 		center := size.Center()
-		centerX = center.X
-		centerY = center.Y
+		centerX = center.X()
+		centerY = center.Y()
 	} else {
 		if centerX == float32(math.Inf(1)) {
-			centerX = size.Width
+			centerX = size.Width()
 		}
 		if centerY == float32(math.Inf(1)) {
-			centerY = size.Height
+			centerY = size.Height()
 		}
 	}
 	radius := r.Radius
@@ -252,18 +252,18 @@ func (s SweepGradient) IntrinsicSize() geometry.Size {
 }
 
 func (s SweepGradient) CreateShader(size geometry.Size) Shader {
-	centerX := s.Center.X
-	centerY := s.Center.Y
+	centerX := s.Center.X()
+	centerY := s.Center.Y()
 	if s.Center.IsUnspecified() {
 		center := size.Center()
-		centerX = center.X
-		centerY = center.Y
+		centerX = center.X()
+		centerY = center.Y()
 	} else {
 		if centerX == float32(math.Inf(1)) {
-			centerX = size.Width
+			centerX = size.Width()
 		}
 		if centerY == float32(math.Inf(1)) {
-			centerY = size.Height
+			centerY = size.Height()
 		}
 	}
 	return SweepGradientShader{

@@ -37,7 +37,7 @@ func TestRectProperties(t *testing.T) {
 	}
 
 	s := r.Size()
-	if s.Width != 20 || s.Height != 20 {
+	if s.Width() != 20 || s.Height() != 20 {
 		t.Errorf("Size = %v, want Size(20, 20)", s)
 	}
 

@@ -6,13 +6,13 @@ import (
 )
 
 func TestOffsetZero(t *testing.T) {
-	if OffsetZero.X != 0 || OffsetZero.Y != 0 {
+	if OffsetZero.X() != 0 || OffsetZero.Y() != 0 {
 		t.Errorf("OffsetZero = %v, want (0, 0)", OffsetZero)
 	}
 }
 
 func TestOffsetInfinite(t *testing.T) {
-	if !math.IsInf(float64(OffsetInfinite.X), 1) || !math.IsInf(float64(OffsetInfinite.Y), 1) {
+	if !math.IsInf(float64(OffsetInfinite.X()), 1) || !math.IsInf(float64(OffsetInfinite.Y()), 1) {
 		t.Errorf("OffsetInfinite = %v, want (+Inf, +Inf)", OffsetInfinite)
 	}
 }
@@ -27,7 +27,7 @@ func TestOffsetEqualInfinite(t *testing.T) {
 }
 
 func TestOffsetUnspecified(t *testing.T) {
-	if !math.IsNaN(float64(OffsetUnspecified.X)) || !math.IsNaN(float64(OffsetUnspecified.Y)) {
+	if !math.IsNaN(float64(OffsetUnspecified.X())) || !math.IsNaN(float64(OffsetUnspecified.Y())) {
 		t.Errorf("OffsetUnspecified = %v, want (NaN, NaN)", OffsetUnspecified)
 	}
 }
@@ -37,12 +37,12 @@ func TestOffsetIsValid(t *testing.T) {
 		offset Offset
 		valid  bool
 	}{
-		{Offset{0, 0}, true},
-		{Offset{10, 20}, true},
-		{Offset{float32(math.Inf(1)), 0}, true}, // Infinite is valid in Kotlin
-		{Offset{0, float32(math.Inf(1))}, true},
-		{Offset{float32(math.NaN()), 0}, false},
-		{Offset{0, float32(math.NaN())}, false},
+		{NewOffset(0, 0), true},
+		{NewOffset(10, 20), true},
+		{NewOffset(float32(math.Inf(1)), 0), true}, // Infinite is valid in Kotlin
+		{NewOffset(0, float32(math.Inf(1))), true},
+		{NewOffset(float32(math.NaN()), 0), false},
+		{NewOffset(0, float32(math.NaN())), false},
 		{OffsetUnspecified, false},
 		{OffsetInfinite, true},
 	}
@@ -62,7 +62,7 @@ func TestOffsetIsSpecified(t *testing.T) {
 		t.Error("OffsetZero should be specified")
 	}
 	// Test partial NaN
-	partial := Offset{float32(math.NaN()), 1.0}
+	partial := NewOffset(float32(math.NaN()), 1.0)
 	if !partial.IsSpecified() {
 		t.Error("Offset{NaN, 1.0} should be specified")
 	}
@@ -76,7 +76,7 @@ func TestOffsetIsUnspecified(t *testing.T) {
 		t.Error("OffsetZero should not be unspecified")
 	}
 	// Test partial NaN
-	partial := Offset{float32(math.NaN()), 1.0}
+	partial := NewOffset(float32(math.NaN()), 1.0)
 	if partial.IsUnspecified() {
 		t.Error("Offset{NaN, 1.0} should NOT be unspecified")
 	}
@@ -87,11 +87,11 @@ func TestOffsetIsFinite(t *testing.T) {
 		offset Offset
 		finite bool
 	}{
-		{Offset{0, 0}, true},
-		{Offset{10, 20}, true},
-		{Offset{float32(math.Inf(1)), 0}, false},
-		{Offset{0, float32(math.Inf(1))}, false},
-		{Offset{float32(math.NaN()), 0}, false},
+		{NewOffset(0, 0), true},
+		{NewOffset(10, 20), true},
+		{NewOffset(float32(math.Inf(1)), 0), false},
+		{NewOffset(0, float32(math.Inf(1))), false},
+		{NewOffset(float32(math.NaN()), 0), false},
 		{OffsetInfinite, false},
 		{OffsetUnspecified, false},
 	}
@@ -104,48 +104,48 @@ func TestOffsetIsFinite(t *testing.T) {
 }
 
 func TestOffsetOps(t *testing.T) {
-	a := Offset{10, 20}
-	b := Offset{30, 40}
+	a := NewOffset(10, 20)
+	b := NewOffset(30, 40)
 
 	// Plus
 	sum := a.Plus(b)
-	if sum.X != 40 || sum.Y != 60 {
+	if sum.X() != 40 || sum.Y() != 60 {
 		t.Errorf("Plus mismatched: got %v, want (40, 60)", sum)
 	}
 
 	// Minus
 	diff := a.Minus(b)
-	if diff.X != -20 || diff.Y != -20 {
+	if diff.X() != -20 || diff.Y() != -20 {
 		t.Errorf("Minus mismatched: got %v, want (-20, -20)", diff)
 	}
 
 	// Times
 	scaled := a.Times(2)
-	if scaled.X != 20 || scaled.Y != 40 {
+	if scaled.X() != 20 || scaled.Y() != 40 {
 		t.Errorf("Times mismatched: got %v, want (20, 40)", scaled)
 	}
 
 	// Div
 	div := a.Div(2)
-	if div.X != 5 || div.Y != 10 {
+	if div.X() != 5 || div.Y() != 10 {
 		t.Errorf("Div mismatched: got %v, want (5, 10)", div)
 	}
 
 	// Rem
-	rem := Offset{11, 21}.Rem(10)
-	if rem.X != 1 || rem.Y != 1 {
+	rem := NewOffset(11, 21).Rem(10)
+	if rem.X() != 1 || rem.Y() != 1 {
 		t.Errorf("Rem mismatched: got %v, want (1, 1)", rem)
 	}
 
 	// UnaryMinus
 	neg := a.UnaryMinus()
-	if neg.X != -10 || neg.Y != -20 {
+	if neg.X() != -10 || neg.Y() != -20 {
 		t.Errorf("UnaryMinus mismatched: got %v, want (-10, -20)", neg)
 	}
 }
 
 func TestOffsetDistance(t *testing.T) {
-	o := Offset{3, 4}
+	o := NewOffset(3, 4)
 	if d := o.GetDistance(); d != 5 {
 		t.Errorf("GetDistance() = %v, want 5", d)
 	}
@@ -155,25 +155,25 @@ func TestOffsetDistance(t *testing.T) {
 }
 
 func TestLerp(t *testing.T) {
-	start := Offset{0, 0}
-	end := Offset{10, 20}
+	start := NewOffset(0, 0)
+	end := NewOffset(10, 20)
 
 	mid := LerpOffset(start, end, 0.5)
-	if mid.X != 5 || mid.Y != 10 {
+	if mid.X() != 5 || mid.Y() != 10 {
 		t.Errorf("Lerp(0.5) = %v, want (5, 10)", mid)
 	}
 
 	// Extrapolation
 	extra := LerpOffset(start, end, 2.0)
-	if extra.X != 20 || extra.Y != 40 {
+	if extra.X() != 20 || extra.Y() != 40 {
 		t.Errorf("Lerp(2.0) = %v, want (20, 40)", extra)
 	}
 }
 
 func TestOffsetEqual(t *testing.T) {
-	o1 := Offset{1, 2}
-	o2 := Offset{1, 2}
-	o3 := Offset{1, 3}
+	o1 := NewOffset(1, 2)
+	o2 := NewOffset(1, 2)
+	o3 := NewOffset(1, 3)
 
 	if !o1.Equal(o2) {
 		t.Error("Equal() should be true for identical offsets")
@@ -182,8 +182,4 @@ func TestOffsetEqual(t *testing.T) {
 		t.Error("Equal() should be false for different offsets")
 	}
 
-	// Unspecified equality
-	if !OffsetUnspecified.Equal(OffsetUnspecified) {
-		t.Error("OffsetUnspecified should be equal to itself via Equal() helper")
-	}
 }

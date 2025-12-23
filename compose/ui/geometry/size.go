@@ -74,7 +74,7 @@ func (s Size) String() string {
 
 // Center returns the Offset of the center of the rect from the point of [0, 0] with this Size.
 func (s Size) Center() Offset {
-	return Offset{X: s.Width() / 2, Y: s.Height() / 2}
+	return NewOffset(s.Width()/2, s.Height()/2)
 }
 
 // Equal checks equality with another Size.
@@ -82,8 +82,8 @@ func (s Size) Equal(other Size) bool {
 	if s == SizeUnspecified && other == SizeUnspecified {
 		return true
 	}
-	return float32Equals(s.Width(), other.Width(), float32EqualityThreshold) &&
-		float32Equals(s.Height(), other.Height(), float32EqualityThreshold)
+	return floatutils.Float32Equals(s.Width(), other.Width(), floatutils.Float32EqualityThreshold) &&
+		floatutils.Float32Equals(s.Height(), other.Height(), floatutils.Float32EqualityThreshold)
 }
 
 // LerpSize linearly interpolates between two sizes.

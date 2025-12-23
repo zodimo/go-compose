@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/zodimo/go-compose/pkg/floatutils"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 )
 
@@ -26,30 +27,30 @@ func NewRect(left, top, right, bottom float32) Rect {
 // RectFromOffsetSize constructs a rectangle from its left and top edges as well as its width and height.
 func RectFromOffsetSize(offset Offset, size Size) Rect {
 	return Rect{
-		Left:   offset.X,
-		Top:    offset.Y,
-		Right:  offset.X + size.Width,
-		Bottom: offset.Y + size.Height,
+		Left:   offset.X(),
+		Top:    offset.Y(),
+		Right:  offset.X() + size.Width(),
+		Bottom: offset.Y() + size.Height(),
 	}
 }
 
 // RectFromTwoOffsets constructs the smallest rectangle that encloses the given offsets, treating them as vectors from the origin.
 func RectFromTwoOffsets(topLeft, bottomRight Offset) Rect {
 	return Rect{
-		Left:   topLeft.X,
-		Top:    topLeft.Y,
-		Right:  bottomRight.X,
-		Bottom: bottomRight.Y,
+		Left:   topLeft.X(),
+		Top:    topLeft.Y(),
+		Right:  bottomRight.X(),
+		Bottom: bottomRight.Y(),
 	}
 }
 
 // RectFromCircle constructs a rectangle that bounds the given circle.
 func RectFromCircle(center Offset, radius float32) Rect {
 	return Rect{
-		Left:   center.X - radius,
-		Top:    center.Y - radius,
-		Right:  center.X + radius,
-		Bottom: center.Y + radius,
+		Left:   center.X() - radius,
+		Top:    center.Y() - radius,
+		Right:  center.X() + radius,
+		Bottom: center.Y() + radius,
 	}
 }
 
@@ -65,7 +66,7 @@ func (r Rect) Height() float32 {
 
 // Size returns the distance between the upper-left corner and the lower-right corner of this rectangle.
 func (r Rect) Size() Size {
-	return Size{Width: r.Width(), Height: r.Height()}
+	return NewSize(r.Width(), r.Height())
 }
 
 // IsInfinite returns true if any of the coordinates of this rectangle are equal to positive infinity.
@@ -92,10 +93,10 @@ func (r Rect) IsEmpty() bool {
 // Translate returns a new rectangle translated by the given offset.
 func (r Rect) Translate(offset Offset) Rect {
 	return Rect{
-		Left:   r.Left + offset.X,
-		Top:    r.Top + offset.Y,
-		Right:  r.Right + offset.X,
-		Bottom: r.Bottom + offset.Y,
+		Left:   r.Left + offset.X(),
+		Top:    r.Top + offset.Y(),
+		Right:  r.Right + offset.X(),
+		Bottom: r.Bottom + offset.Y(),
 	}
 }
 
@@ -162,53 +163,53 @@ func (r Rect) MaxDimension() float32 {
 
 // TopLeft returns the offset to the intersection of the top and left edges of this rectangle.
 func (r Rect) TopLeft() Offset {
-	return Offset{X: r.Left, Y: r.Top}
+	return NewOffset(r.Left, r.Top)
 }
 
 // TopCenter returns the offset to the center of the top edge of this rectangle.
 func (r Rect) TopCenter() Offset {
-	return Offset{X: r.Left + r.Width()/2, Y: r.Top}
+	return NewOffset(r.Left+r.Width()/2, r.Top)
 }
 
 // TopRight returns the offset to the intersection of the top and right edges of this rectangle.
 func (r Rect) TopRight() Offset {
-	return Offset{X: r.Right, Y: r.Top}
+	return NewOffset(r.Right, r.Top)
 }
 
 // CenterLeft returns the offset to the center of the left edge of this rectangle.
 func (r Rect) CenterLeft() Offset {
-	return Offset{X: r.Left, Y: r.Top + r.Height()/2}
+	return NewOffset(r.Left, r.Top+r.Height()/2)
 }
 
 // Center returns the offset to the point halfway between the left and right and the top and bottom edges.
 func (r Rect) Center() Offset {
-	return Offset{X: r.Left + r.Width()/2, Y: r.Top + r.Height()/2}
+	return NewOffset(r.Left+r.Width()/2, r.Top+r.Height()/2)
 }
 
 // CenterRight returns the offset to the center of the right edge of this rectangle.
 func (r Rect) CenterRight() Offset {
-	return Offset{X: r.Right, Y: r.Top + r.Height()/2}
+	return NewOffset(r.Right, r.Top+r.Height()/2)
 }
 
 // BottomLeft returns the offset to the intersection of the bottom and left edges of this rectangle.
 func (r Rect) BottomLeft() Offset {
-	return Offset{X: r.Left, Y: r.Bottom}
+	return NewOffset(r.Left, r.Bottom)
 }
 
 // BottomCenter returns the offset to the center of the bottom edge of this rectangle.
 func (r Rect) BottomCenter() Offset {
-	return Offset{X: r.Left + r.Width()/2, Y: r.Bottom}
+	return NewOffset(r.Left+r.Width()/2, r.Bottom)
 }
 
 // BottomRight returns the offset to the intersection of the bottom and right edges of this rectangle.
 func (r Rect) BottomRight() Offset {
-	return Offset{X: r.Right, Y: r.Bottom}
+	return NewOffset(r.Right, r.Bottom)
 }
 
 // Contains returns whether the point specified by the given offset lies between the left and right and the top and bottom edges.
 // Rectangles include their top and left edges but exclude their bottom and right edges.
 func (r Rect) Contains(offset Offset) bool {
-	return offset.X >= r.Left && offset.X < r.Right && offset.Y >= r.Top && offset.Y < r.Bottom
+	return offset.X() >= r.Left && offset.X() < r.Right && offset.Y() >= r.Top && offset.Y() < r.Bottom
 }
 
 // String returns a string representation of the object.
@@ -218,10 +219,10 @@ func (r Rect) String() string {
 
 // Equal checks equality with another Rect.
 func (r Rect) Equal(other Rect) bool {
-	return float32Equals(r.Left, other.Left, float32EqualityThreshold) &&
-		float32Equals(r.Top, other.Top, float32EqualityThreshold) &&
-		float32Equals(r.Right, other.Right, float32EqualityThreshold) &&
-		float32Equals(r.Bottom, other.Bottom, float32EqualityThreshold)
+	return floatutils.Float32Equals(r.Left, other.Left, floatutils.Float32EqualityThreshold) &&
+		floatutils.Float32Equals(r.Top, other.Top, floatutils.Float32EqualityThreshold) &&
+		floatutils.Float32Equals(r.Right, other.Right, floatutils.Float32EqualityThreshold) &&
+		floatutils.Float32Equals(r.Bottom, other.Bottom, floatutils.Float32EqualityThreshold)
 }
 
 // LerpRect linearly interpolates between two rectangles.
