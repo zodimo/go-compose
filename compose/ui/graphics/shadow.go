@@ -56,15 +56,15 @@ func (s Shadow) Copy(color *Color, offset *Offset, blurRadius *float32) Shadow {
 	return result
 }
 
-func (s Shadow) IsUnspecified() bool {
-	return s.Color == ColorUnspecified &&
+func (s Shadow) IsSpecified() bool {
+	return !(s.Color == ColorUnspecified &&
 		s.Offset == geometry.OffsetUnspecified &&
-		s.BlurRadius == floatutils.Float32Unspecified
+		s.BlurRadius == floatutils.Float32Unspecified)
 }
 
 // Equal performs deep equality check with epsilon tolerance for all fields.
 func (s Shadow) Equal(other Shadow) bool {
-	if s.IsUnspecified() && other.IsUnspecified() {
+	if !s.IsSpecified() && !other.IsSpecified() {
 		return true
 	}
 
@@ -74,6 +74,9 @@ func (s Shadow) Equal(other Shadow) bool {
 
 // String returns a human-readable representation.
 func (s Shadow) String() string {
+	if !s.IsSpecified() {
+		return "ShadowUnspecified"
+	}
 	return fmt.Sprintf("Shadow(color=%v, offset=%v, blurRadius=%.2f)",
 		s.Color, s.Offset, s.BlurRadius)
 }
