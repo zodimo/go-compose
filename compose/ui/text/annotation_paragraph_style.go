@@ -37,7 +37,7 @@ func (s ParagraphStyle) Merge(other ParagraphStyle) ParagraphStyle {
 	return ParagraphStyle{
 		TextAlign:       takeTextAlignOrElse(s.TextAlign, other.TextAlign),
 		TextDirection:   takeTextDirectionOrElse(s.TextDirection, other.TextDirection),
-		LineHeight:      s.LineHeight.TakeOrElse(func() unit.TextUnit { return other.LineHeight }),
+		LineHeight:      s.LineHeight.TakeOrElse(other.LineHeight),
 		TextIndent:      takeTextIndentOrElse(s.TextIndent, other.TextIndent),
 		PlatformStyle:   s.PlatformStyle.Merge(other.PlatformStyle),
 		LineHeightStyle: takeLineHeightStyleOrElse(s.LineHeightStyle, other.LineHeightStyle),
@@ -45,6 +45,49 @@ func (s ParagraphStyle) Merge(other ParagraphStyle) ParagraphStyle {
 		Hyphens:         takeHyphensOrElse(s.Hyphens, other.Hyphens),
 		TextMotion:      takeTextMotionOrElse(s.TextMotion, other.TextMotion),
 	}
+}
+
+// Equals returns true if the other ParagraphStyle is equal to this one.
+func (s ParagraphStyle) Equals(other ParagraphStyle) bool {
+	return s.TextAlign == other.TextAlign &&
+		s.TextDirection == other.TextDirection &&
+		s.LineHeight.Equals(other.LineHeight) &&
+		textIndentEquals(s.TextIndent, other.TextIndent) &&
+		s.PlatformStyle.Equals(other.PlatformStyle) &&
+		lineHeightStyleEquals(s.LineHeightStyle, other.LineHeightStyle) &&
+		s.LineBreak == other.LineBreak &&
+		s.Hyphens == other.Hyphens &&
+		textMotionEquals(s.TextMotion, other.TextMotion)
+}
+
+func textIndentEquals(a, b *style.TextIndent) bool {
+	if a == b {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return a.Equals(*b)
+}
+
+func lineHeightStyleEquals(a, b *style.LineHeightStyle) bool {
+	if a == b {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return a.Equals(*b)
+}
+
+func textMotionEquals(a, b *style.TextMotion) bool {
+	if a == b {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	return *a == *b
 }
 
 // Helpers

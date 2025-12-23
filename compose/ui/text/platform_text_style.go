@@ -29,6 +29,41 @@ func (s *PlatformSpanStyle) Equals(other *PlatformSpanStyle) bool {
 type PlatformParagraphStyle struct {
 }
 
+// PlatformTextStyle contains platform-specific text styling combining span and paragraph styles.
+type PlatformTextStyle struct {
+	SpanStyle      *PlatformSpanStyle
+	ParagraphStyle *PlatformParagraphStyle
+}
+
+func (s *PlatformTextStyle) Merge(other *PlatformTextStyle) *PlatformTextStyle {
+	if s == nil {
+		return other
+	}
+	if other == nil {
+		return s
+	}
+	return &PlatformTextStyle{
+		SpanStyle:      s.SpanStyle.Merge(other.SpanStyle),
+		ParagraphStyle: s.ParagraphStyle.Merge(other.ParagraphStyle),
+	}
+}
+
+func (s *PlatformTextStyle) Equals(other *PlatformTextStyle) bool {
+	if s == other {
+		return true
+	}
+	if s == nil || other == nil {
+		return false
+	}
+	if !s.SpanStyle.Equals(other.SpanStyle) {
+		return false
+	}
+	if !s.ParagraphStyle.Equals(other.ParagraphStyle) {
+		return false
+	}
+	return true
+}
+
 func (s *PlatformParagraphStyle) Merge(other *PlatformParagraphStyle) *PlatformParagraphStyle {
 	if s == nil {
 		return other

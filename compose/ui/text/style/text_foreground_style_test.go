@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/zodimo/go-compose/compose/ui/graphics"
-	"github.com/zodimo/go-compose/theme"
 )
 
 // --- Tests for TextForegroundStyleUnspecified ---
@@ -33,7 +32,7 @@ func TestTextForegroundStyleUnspecified_TakeOrElse(t *testing.T) {
 	u := TextForegroundStyleUnspecified
 
 	// A specified color
-	specifiedColor := theme.SpecificColor(colorRed())
+	specifiedColor := graphics.ColorRed
 	fallback := TextForegroundStyleFromColor(specifiedColor)
 
 	result := u.TakeOrElse(func() TextForegroundStyle { return fallback })
@@ -47,7 +46,7 @@ func TestTextForegroundStyleUnspecified_TakeOrElse(t *testing.T) {
 // --- Tests for ColorStyle ---
 
 func TestTextForegroundStyleFromColor_Specified(t *testing.T) {
-	specifiedColor := theme.SpecificColor(colorRed())
+	specifiedColor := graphics.ColorRed
 	style := TextForegroundStyleFromColor(specifiedColor)
 
 	// Color should be the specified color
@@ -76,7 +75,7 @@ func TestTextForegroundStyleFromColor_Unspecified(t *testing.T) {
 }
 
 func TestColorStyle_TakeOrElse(t *testing.T) {
-	specifiedColor := theme.SpecificColor(colorRed())
+	specifiedColor := graphics.ColorRed
 	style := TextForegroundStyleFromColor(specifiedColor)
 
 	// TakeOrElse should return the style itself
@@ -99,7 +98,7 @@ func TestTextForegroundStyleFromBrush_Nil(t *testing.T) {
 }
 
 func TestTextForegroundStyleFromBrush_SolidColor(t *testing.T) {
-	color := theme.SpecificColor(colorRed())
+	color := graphics.ColorRed
 	brush := graphics.NewSolidColor(color)
 
 	style := TextForegroundStyleFromBrush(brush, 1.0)
@@ -177,7 +176,7 @@ func TestMerge_BrushStyleAndColorStyle(t *testing.T) {
 	brush := graphics.NewShaderBrushForTest()
 	brushStyle := TextForegroundStyleFromBrush(brush, 0.5)
 
-	color := theme.SpecificColor(colorRed())
+	color := graphics.ColorRed
 	colorStyle := TextForegroundStyleFromColor(color)
 
 	// Merging color over brush should preserve brush
@@ -194,7 +193,7 @@ func TestMerge_BrushStyleAndColorStyle(t *testing.T) {
 }
 
 func TestMerge_ColorStyleAndUnspecified(t *testing.T) {
-	color := theme.SpecificColor(colorRed())
+	color := graphics.ColorRed
 	colorStyle := TextForegroundStyleFromColor(color)
 
 	merged := colorStyle.Merge(TextForegroundStyleUnspecified)
@@ -239,7 +238,7 @@ func TestLerpTextForegroundStyle_Discrete(t *testing.T) {
 	brush := graphics.NewShaderBrushForTest()
 	brushStyle := TextForegroundStyleFromBrush(brush, 0.5)
 
-	color := theme.SpecificColor(colorRed())
+	color := graphics.ColorRed
 	colorStyle := TextForegroundStyleFromColor(color)
 
 	// Lerp at 0.25 should return brushStyle (discrete snap < 0.5)
@@ -258,44 +257,35 @@ func TestLerpTextForegroundStyle_Discrete(t *testing.T) {
 // --- Tests for ModulateColor ---
 
 func TestModulateColor_NaN(t *testing.T) {
-	color := theme.SpecificColor(colorRed())
+	color := graphics.ColorRed
 	result := ModulateColor(color, float32(math.NaN()))
 
 	// Should return the color unchanged
-	if !color.Compare(result) {
+	if color != result {
 		t.Errorf("Expected unchanged color for NaN alpha")
 	}
 }
 
 func TestModulateColor_FullAlpha(t *testing.T) {
-	color := theme.SpecificColor(colorRed())
+	color := graphics.ColorRed
 	result := ModulateColor(color, 1.0)
 
 	// Should return the color unchanged
-	if !color.Compare(result) {
+	if color != result {
 		t.Errorf("Expected unchanged color for alpha 1.0")
 	}
 }
 
 func TestModulateColor_HalfAlpha(t *testing.T) {
-	color := theme.SpecificColor(colorRed())
+	color := graphics.ColorRed
 	result := ModulateColor(color, 0.5)
 
-	// Should return a modified color (SetOpacity was called)
-	// The result should have opacity set
-	if result == nil {
-		t.Errorf("Expected non-nil result")
+	// Should return a modified color
+	if result == color {
+		t.Errorf("Expected modified color")
 	}
-}
-
-// --- Helper functions ---
-
-func colorRed() interface{ RGBA() (r, g, b, a uint32) } {
-	return redColor{}
-}
-
-type redColor struct{}
-
-func (r redColor) RGBA() (uint32, uint32, uint32, uint32) {
-	return 0xFFFF, 0x0000, 0x0000, 0xFFFF
+	// Roughly check alpha
+	if result.Alpha() == color.Alpha() {
+		t.Errorf("Expected modified alpha")
+	}
 }

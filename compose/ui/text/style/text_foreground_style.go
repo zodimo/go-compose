@@ -191,9 +191,9 @@ func defaultMerge(current, other TextForegroundStyle) TextForegroundStyle {
 func LerpTextForegroundStyle(start, stop TextForegroundStyle, fraction float32) TextForegroundStyle {
 	if !IsBrushStyle(start) && !IsBrushStyle(stop) {
 		// Both are colors - lerp colors
-		// TODO: implement color lerp when available
-		// For now, use discrete lerp
-		return lerpDiscrete(start, stop, fraction)
+		c1 := start.Color()
+		c2 := stop.Color()
+		return TextForegroundStyleFromColor(graphics.Lerp(c1, c2, fraction))
 	}
 
 	if IsBrushStyle(start) && IsBrushStyle(stop) {
@@ -218,14 +218,12 @@ func ModulateColor(color graphics.Color, alpha float32) graphics.Color {
 	if math.IsNaN(float64(alpha)) || alpha >= 1.0 {
 		return color
 	}
-	// Use SetOpacity to apply the alpha modulation
-	// The color's alpha is multiplied by the given alpha
-	return color.SetOpacity(alphaToOpacity(alpha))
+	return color.Copy(color.Alpha()*alpha, color.Red(), color.Green(), color.Blue())
 }
 
 // isColorSpecified checks if a color is specified (not the Unspecified sentinel).
 func isColorSpecified(color graphics.Color) bool {
-	return color.TakeOrElse(func() graphics.Color { return nil }) != nil
+	return color != graphics.ColorUnspecified
 }
 
 // takeOrElseFloat returns the value if it's not NaN, otherwise calls block().
@@ -239,18 +237,4 @@ func takeOrElseFloat(value float32, block func() float32) float32 {
 // lerpFloat linearly interpolates between two floats.
 func lerpFloat(a, b, fraction float32) float32 {
 	return a + (b-a)*fraction
-}
-
-// alphaToOpacity converts a 0-1 alpha to an OpacityLevel.
-// This is a simple mapping for the SetOpacity interface.
-func alphaToOpacity(alpha float32) graphics.OpacityLevel {
-	// Clamp alpha to 0-1 range
-	if alpha < 0 {
-		alpha = 0
-	}
-	if alpha > 1 {
-		alpha = 1
-	}
-	// Map to opacity level (0-100 scale typically)
-	return graphics.OpacityLevel(alpha * 100)
 }
