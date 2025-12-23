@@ -21,7 +21,7 @@ type Shadow struct {
 // Zero constants (define these once)
 var (
 	// ShadowNone represents no shadow. Use this constant instead of allocating a new zero Shadow.
-	ShadowNone = NewShadow(Black, ZeroOffset, 0)
+	ShadowNone = NewShadow(ColorBlack, ZeroOffset, 0)
 )
 
 // NewShadow creates a new Shadow instance.

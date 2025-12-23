@@ -8,9 +8,9 @@ import (
 )
 
 func TestSolidColor_Equal(t *testing.T) {
-	c1 := graphics.NewSolidColor(graphics.Black)
-	c2 := graphics.NewSolidColor(graphics.Black)
-	c3 := graphics.NewSolidColor(graphics.Transparent)
+	c1 := graphics.NewSolidColor(graphics.ColorBlack)
+	c2 := graphics.NewSolidColor(graphics.ColorBlack)
+	c3 := graphics.NewSolidColor(graphics.ColorTransparent)
 
 	if !c1.Equal(c2) {
 		t.Errorf("SolidColor Black should equal Black")
@@ -21,7 +21,7 @@ func TestSolidColor_Equal(t *testing.T) {
 }
 
 func TestLinearGradient_Equal(t *testing.T) {
-	colors := []graphics.Color{graphics.Black, graphics.Transparent}
+	colors := []graphics.Color{graphics.ColorBlack, graphics.ColorTransparent}
 	g1 := graphics.LinearGradientBrush(colors, geometry.OffsetZero, geometry.OffsetInfinite, graphics.TileModeClamp)
 	g2 := graphics.LinearGradientBrush(colors, geometry.OffsetZero, geometry.OffsetInfinite, graphics.TileModeClamp)
 	g3 := graphics.LinearGradientBrush(colors, geometry.OffsetZero, geometry.NewOffset(10, 10), graphics.TileModeClamp)
@@ -35,7 +35,7 @@ func TestLinearGradient_Equal(t *testing.T) {
 }
 
 func TestRadialGradient_Equal(t *testing.T) {
-	colors := []graphics.Color{graphics.Black, graphics.Transparent}
+	colors := []graphics.Color{graphics.ColorBlack, graphics.ColorTransparent}
 	g1 := graphics.RadialGradientBrush(colors, geometry.OffsetZero, 100, graphics.TileModeClamp)
 	g2 := graphics.RadialGradientBrush(colors, geometry.OffsetZero, 100, graphics.TileModeClamp)
 	g3 := graphics.RadialGradientBrush(colors, geometry.OffsetZero, 200, graphics.TileModeClamp)
@@ -49,7 +49,7 @@ func TestRadialGradient_Equal(t *testing.T) {
 }
 
 func TestHorizontalGradient(t *testing.T) {
-	colors := []graphics.Color{graphics.Black, graphics.Transparent}
+	colors := []graphics.Color{graphics.ColorBlack, graphics.ColorTransparent}
 	g := graphics.HorizontalGradient(colors, 0, 100, graphics.TileModeMirror)
 
 	if g.Start.X() != 0 || g.Start.Y() != 0 {
@@ -65,8 +65,8 @@ func TestHorizontalGradient(t *testing.T) {
 
 func TestLerpBrush(t *testing.T) {
 	// Case 1: SolidColor <-> SolidColor
-	c1 := graphics.NewSolidColor(graphics.Black)
-	c2 := graphics.NewSolidColor(graphics.Transparent)
+	c1 := graphics.NewSolidColor(graphics.ColorBlack)
+	c2 := graphics.NewSolidColor(graphics.ColorTransparent)
 	// Lerp at 0.0 -> Black
 	l1 := graphics.LerpBrush(c1, c2, 0.0)
 	if !l1.Equal(c1) {
@@ -79,8 +79,8 @@ func TestLerpBrush(t *testing.T) {
 	}
 
 	// Case 2: LinearGradient <-> LinearGradient
-	g1 := graphics.HorizontalGradient([]graphics.Color{graphics.Black, graphics.Transparent}, 0, 100, graphics.TileModeClamp)
-	g2 := graphics.HorizontalGradient([]graphics.Color{graphics.Black, graphics.Transparent}, 0, 200, graphics.TileModeClamp)
+	g1 := graphics.HorizontalGradient([]graphics.Color{graphics.ColorBlack, graphics.ColorTransparent}, 0, 100, graphics.TileModeClamp)
+	g2 := graphics.HorizontalGradient([]graphics.Color{graphics.ColorBlack, graphics.ColorTransparent}, 0, 200, graphics.TileModeClamp)
 
 	// Lerp at 0.5 -> EndX should be 150
 	l3 := graphics.LerpBrush(g1, g2, 0.5)
