@@ -32,11 +32,11 @@ func (bs BaselineShift) IsSpecified() bool {
 
 // TakeOrElse returns this BaselineShift if it's specified, otherwise returns the result of block.
 // This is equivalent to Kotlin's inline function with lambda.
-func (bs BaselineShift) TakeOrElse(block func() BaselineShift) BaselineShift {
+func (bs BaselineShift) TakeOrElse(block BaselineShift) BaselineShift {
 	if bs.IsSpecified() {
 		return bs
 	}
-	return block()
+	return block
 }
 
 // Multiplier returns the underlying multiplier value for use in calculations

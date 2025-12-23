@@ -47,27 +47,21 @@ func TestBaselineShift_TakeOrElse(t *testing.T) {
 	fallback := NewBaselineShift(0.75)
 
 	t.Run("returns self when specified", func(t *testing.T) {
-		result := BaselineShiftSuperscript.TakeOrElse(func() BaselineShift {
-			return fallback
-		})
+		result := BaselineShiftSuperscript.TakeOrElse(fallback)
 		if result != BaselineShiftSuperscript {
 			t.Errorf("Expected Superscript, got %v", result)
 		}
 	})
 
 	t.Run("returns block result when unspecified", func(t *testing.T) {
-		result := BaselineShiftUnspecified.TakeOrElse(func() BaselineShift {
-			return fallback
-		})
+		result := BaselineShiftUnspecified.TakeOrElse(fallback)
 		if result != fallback {
 			t.Errorf("Expected fallback %v, got %v", fallback, result)
 		}
 	})
 
 	t.Run("None returns self (not fallback)", func(t *testing.T) {
-		result := BaselineShiftNone.TakeOrElse(func() BaselineShift {
-			return fallback
-		})
+		result := BaselineShiftNone.TakeOrElse(fallback)
 		if result != BaselineShiftNone {
 			t.Errorf("Expected None, got %v", result)
 		}
