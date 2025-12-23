@@ -5,6 +5,7 @@ import "fmt"
 // FontFamily is the primary typography interface for Compose applications.
 type FontFamily interface {
 	fontFamilyMarker()
+	Equals(other FontFamily) bool
 }
 
 // SystemFontFamily is a base type for FontFamilies installed on the system.
@@ -28,6 +29,16 @@ type GenericFontFamily struct {
 
 func (g *GenericFontFamily) fontFamilyMarker()       {}
 func (g *GenericFontFamily) systemFontFamilyMarker() {}
+func (g *GenericFontFamily) Equals(other FontFamily) bool {
+	if other == nil {
+		return false
+	}
+	otherGeneric, ok := other.(*GenericFontFamily)
+	if !ok {
+		return false
+	}
+	return g.name == otherGeneric.name && g.fontFamilyName == otherGeneric.fontFamilyName
+}
 
 // Name returns the generic font family name (e.g., "sans-serif", "serif").
 func (g *GenericFontFamily) Name() string {
@@ -49,6 +60,13 @@ type DefaultFontFamily struct{}
 
 func (d *DefaultFontFamily) fontFamilyMarker()       {}
 func (d *DefaultFontFamily) systemFontFamilyMarker() {}
+func (d *DefaultFontFamily) Equals(other FontFamily) bool {
+	if other == nil {
+		return false
+	}
+	_, ok := other.(*DefaultFontFamily)
+	return ok
+}
 
 // String returns the font family display name.
 func (d *DefaultFontFamily) String() string {
@@ -63,6 +81,16 @@ type FontListFontFamily struct {
 
 func (f *FontListFontFamily) fontFamilyMarker()          {}
 func (f *FontListFontFamily) fileBasedFontFamilyMarker() {}
+func (f *FontListFontFamily) Equals(other FontFamily) bool {
+	if other == nil {
+		return false
+	}
+	otherList, ok := other.(*FontListFontFamily)
+	if !ok {
+		return false
+	}
+	return f.equal(otherList)
+}
 
 // NewFontListFontFamily creates a FontListFontFamily from a list of fonts.
 // Panics if the fonts list is empty.
@@ -74,7 +102,7 @@ func NewFontListFontFamily(fonts []Font) *FontListFontFamily {
 }
 
 // Equals checks if two FontListFontFamilies are equal.
-func (f *FontListFontFamily) Equals(other *FontListFontFamily) bool {
+func (f *FontListFontFamily) equal(other *FontListFontFamily) bool {
 	if f == other {
 		return true
 	}
@@ -110,14 +138,16 @@ func NewLoadedFontFamily(typeface Typeface) *LoadedFontFamily {
 }
 
 // Equals checks if two LoadedFontFamilies are equal.
-func (l *LoadedFontFamily) Equals(other *LoadedFontFamily) bool {
-	if l == other {
-		return true
-	}
+func (l *LoadedFontFamily) Equals(other FontFamily) bool {
+
 	if other == nil {
 		return false
 	}
-	return l.Typeface == other.Typeface
+	otherLoadedFontFamily, ok := other.(*LoadedFontFamily)
+	if !ok {
+		return false
+	}
+	return l.Typeface == otherLoadedFontFamily.Typeface
 }
 
 // String returns a string representation of the LoadedFontFamily.

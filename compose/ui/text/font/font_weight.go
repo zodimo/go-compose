@@ -1,6 +1,14 @@
 package font
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+)
+
+const weightUnspecified = -1
+
+var FontWeightUnspecified = FontWeight{weight: weightUnspecified}
 
 // FontWeight represents the thickness of the glyphs, in a range of [1, 1000].
 type FontWeight struct {
@@ -24,6 +32,9 @@ func (w FontWeight) Weight() int {
 // Compare compares two FontWeights.
 // Returns -1 if w < other, 0 if equal, 1 if w > other.
 func (w FontWeight) Compare(other FontWeight) int {
+	if !w.IsSpecified() || !other.IsSpecified() {
+		panic("FontWeight must be specified")
+	}
 	if w.weight < other.weight {
 		return -1
 	} else if w.weight > other.weight {
@@ -44,7 +55,21 @@ func (w FontWeight) HashCode() int {
 
 // String returns a string representation of the FontWeight.
 func (w FontWeight) String() string {
+	if !w.IsSpecified() {
+		return "FontWeightUnspecified"
+	}
 	return fmt.Sprintf("FontWeight(weight=%d)", w.weight)
+}
+
+func (w FontWeight) IsSpecified() bool {
+	return w.weight != weightUnspecified
+}
+
+func (w FontWeight) TakeOrElse(other FontWeight) FontWeight {
+	if !w.IsSpecified() {
+		return w
+	}
+	return other
 }
 
 // Standard font weight constants
@@ -98,7 +123,10 @@ func FontWeightValues() []FontWeight {
 // LerpFontWeight linearly interpolates between two FontWeights.
 // The fraction represents position on the timeline: 0.0 returns start, 1.0 returns stop.
 func LerpFontWeight(start, stop FontWeight, fraction float32) FontWeight {
-	weight := float32(start.weight) + (float32(stop.weight)-float32(start.weight))*fraction
+	if !start.IsSpecified() || !stop.IsSpecified() {
+		panic("FontWeight must be specified")
+	}
+	weight := lerp.Between32(float32(start.weight), float32(stop.weight), fraction)
 	// Coerce to valid range
 	if weight < 1 {
 		weight = 1

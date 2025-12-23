@@ -41,25 +41,25 @@ func (m *FontMatcher) MatchFont(fonts []Font, weight FontWeight, style FontStyle
 		// If the desired weight is less than 400:
 		// - weights less than or equal to the desired weight are checked in descending order
 		// - followed by weights above the desired weight in ascending order
-		result = m.filterByClosestWeight(fontsToSearch, weight, true, nil, nil)
+		result = m.filterByClosestWeight(fontsToSearch, weight, true, FontWeightUnspecified, FontWeightUnspecified)
 
 	case weight.Compare(FontWeightW500) > 0:
 		// If the desired weight is greater than 500:
 		// - weights greater than or equal to the desired weight are checked in ascending order
 		// - followed by weights below the desired weight in descending order
-		result = m.filterByClosestWeight(fontsToSearch, weight, false, nil, nil)
+		result = m.filterByClosestWeight(fontsToSearch, weight, false, FontWeightUnspecified, FontWeightUnspecified)
 
 	default:
 		// If the desired weight is inclusively between 400 and 500:
 		// - weights greater than or equal to the target weight are checked in ascending order until 500
 		// - followed by weights less than the target weight in descending order
 		// - followed by weights greater than 500
-		result = m.filterByClosestWeight(fontsToSearch, weight, false, nil, &FontWeightW500)
+		result = m.filterByClosestWeight(fontsToSearch, weight, false, FontWeightUnspecified, FontWeightW500)
 		if len(result) == 0 {
-			result = m.filterByClosestWeight(fontsToSearch, weight, true, nil, nil)
+			result = m.filterByClosestWeight(fontsToSearch, weight, true, FontWeightUnspecified, FontWeightUnspecified)
 		}
 		if len(result) == 0 {
-			result = m.filterByClosestWeight(fontsToSearch, weight, false, &FontWeightW500, nil)
+			result = m.filterByClosestWeight(fontsToSearch, weight, false, FontWeightW500, FontWeightUnspecified)
 		}
 	}
 
@@ -79,66 +79,66 @@ func (m *FontMatcher) filterByClosestWeight(
 	fonts []Font,
 	weight FontWeight,
 	preferBelow bool,
-	minSearchRange *FontWeight,
-	maxSearchRange *FontWeight,
+	minSearchRange FontWeight,
+	maxSearchRange FontWeight,
 ) []Font {
-	var bestWeightAbove *FontWeight
-	var bestWeightBelow *FontWeight
+	var bestWeightAbove FontWeight = FontWeightUnspecified
+	var bestWeightBelow FontWeight = FontWeightUnspecified
 
 	for _, font := range fonts {
 		possibleWeight := font.Weight()
 
 		// Apply range filters
-		if minSearchRange != nil && possibleWeight.Compare(*minSearchRange) < 0 {
+		if minSearchRange.IsSpecified() && possibleWeight.Compare(minSearchRange) < 0 {
 			continue
 		}
-		if maxSearchRange != nil && possibleWeight.Compare(*maxSearchRange) > 0 {
+		if maxSearchRange.IsSpecified() && possibleWeight.Compare(maxSearchRange) > 0 {
 			continue
 		}
 
 		cmp := possibleWeight.Compare(weight)
 		if cmp < 0 {
 			// possibleWeight < target weight
-			if bestWeightBelow == nil || possibleWeight.Compare(*bestWeightBelow) > 0 {
+			if !bestWeightBelow.IsSpecified() || possibleWeight.Compare(bestWeightBelow) > 0 {
 				w := possibleWeight
-				bestWeightBelow = &w
+				bestWeightBelow = w
 			}
 		} else if cmp > 0 {
 			// possibleWeight > target weight
-			if bestWeightAbove == nil || possibleWeight.Compare(*bestWeightAbove) < 0 {
+			if !bestWeightAbove.IsSpecified() || possibleWeight.Compare(bestWeightAbove) < 0 {
 				w := possibleWeight
-				bestWeightAbove = &w
+				bestWeightAbove = w
 			}
 		} else {
 			// Exact weight match
 			w := possibleWeight
-			bestWeightAbove = &w
-			bestWeightBelow = &w
+			bestWeightAbove = w
+			bestWeightBelow = w
 			break
 		}
 	}
 
-	var bestWeight *FontWeight
+	var bestWeight FontWeight
 	if preferBelow {
-		if bestWeightBelow != nil {
+		if bestWeightBelow.IsSpecified() {
 			bestWeight = bestWeightBelow
 		} else {
 			bestWeight = bestWeightAbove
 		}
 	} else {
-		if bestWeightAbove != nil {
+		if bestWeightAbove.IsSpecified() {
 			bestWeight = bestWeightAbove
 		} else {
 			bestWeight = bestWeightBelow
 		}
 	}
 
-	if bestWeight == nil {
+	if !bestWeight.IsSpecified() {
 		return nil
 	}
 
 	return filterFonts(fonts, func(f Font) bool {
-		return f.Weight().Equals(*bestWeight)
+		return f.Weight().Equals(bestWeight)
 	})
 }
 
