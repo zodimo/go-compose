@@ -7,6 +7,8 @@ import (
 	"github.com/zodimo/go-compose/theme"
 )
 
+var BrushUnspecified Brush = nil
+
 // Brush is the interface for all brush types used for drawing.
 // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-graphics/src/commonMain/kotlin/androidx/compose/ui/graphics/Brush.kt
 type Brush interface {

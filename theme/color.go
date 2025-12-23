@@ -4,6 +4,8 @@ import (
 	"image/color"
 )
 
+var ColorUnspecified ColorDescriptor = nil
+
 type ResolvableColor interface {
 	ResolveColorDescriptor(colorDesc ColorDescriptor) ThemeColor
 }
@@ -285,40 +287,4 @@ func (u LerpColorUpdate) Compare(other ColorUpdate) bool {
 
 func (u LerpColorUpdate) isThemeColorUpdate() bool {
 	return true
-}
-
-var _ ColorDescriptor = (*unspecifiedColorDescriptor)(nil)
-
-type unspecifiedColorDescriptor struct {
-}
-
-func (u unspecifiedColorDescriptor) AppendUpdate(update ColorUpdate) ColorDescriptor {
-	panic("unspecified color descriptor cannot be updated")
-}
-
-func (u unspecifiedColorDescriptor) SetOpacity(opacity OpacityLevel) ColorDescriptor {
-	panic("unspecified color descriptor cannot be updated")
-}
-
-func (u unspecifiedColorDescriptor) Lighten(percentage float32) ColorDescriptor {
-	panic("unspecified color descriptor cannot be updated")
-}
-
-func (u unspecifiedColorDescriptor) Darken(percentage float32) ColorDescriptor {
-	panic("unspecified color descriptor cannot be updated")
-}
-
-func (u unspecifiedColorDescriptor) Compare(other ColorDescriptor) bool {
-	if _, ok := other.(unspecifiedColorDescriptor); ok {
-		return true
-	}
-	return false
-}
-
-func (u unspecifiedColorDescriptor) Updates() []ColorUpdate {
-	panic("unspecified color descriptor cannot have updates")
-}
-
-func (u unspecifiedColorDescriptor) TakeOrElse(other func() ColorDescriptor) ColorDescriptor {
-	return other()
 }

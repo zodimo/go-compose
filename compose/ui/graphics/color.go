@@ -16,4 +16,4 @@ type Color = theme.ColorDescriptor
 
 type OpacityLevel = theme.OpacityLevel
 
-var ColorUnspecified = theme.UnspecifiedColor()
+var ColorUnspecified = theme.ColorUnspecified

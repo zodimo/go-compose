@@ -37,7 +37,7 @@ func (tch themeColorHelper) SpecificColor(color color.Color) ColorDescriptor {
 	return SpecificColor(color)
 }
 func (tch themeColorHelper) UnspecifiedColor() ColorDescriptor {
-	return UnspecifiedColor()
+	return ColorUnspecified
 }
 func newTheColorHelper() ThemeColorHelper {
 	return themeColorHelper{
