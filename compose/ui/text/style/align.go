@@ -96,9 +96,9 @@ func (t TextAlign) IsSpecified() bool {
 
 // TakeOrElse returns this TextAlign if IsSpecified() is true,
 // otherwise executes the provided function and returns its result.
-func (t TextAlign) TakeOrElse(block func() TextAlign) TextAlign {
+func (t TextAlign) TakeOrElse(block TextAlign) TextAlign {
 	if t.IsSpecified() {
 		return t
 	}
-	return block()
+	return block
 }

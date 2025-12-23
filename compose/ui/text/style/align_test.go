@@ -149,7 +149,7 @@ func TestTextAlign_TakeOrElse(t *testing.T) {
 
 	t.Run("specified value returns itself", func(t *testing.T) {
 		align := TextAlignCenter
-		result := align.TakeOrElse(func() TextAlign { return defaultAlign })
+		result := align.TakeOrElse(defaultAlign)
 		if result != TextAlignCenter {
 			t.Errorf("TakeOrElse() = %v, want %v", result, TextAlignCenter)
 		}
@@ -157,33 +157,25 @@ func TestTextAlign_TakeOrElse(t *testing.T) {
 
 	t.Run("unspecified value returns block result", func(t *testing.T) {
 		align := TextAlignUnspecified
-		result := align.TakeOrElse(func() TextAlign { return defaultAlign })
+		result := align.TakeOrElse(defaultAlign)
 		if result != defaultAlign {
 			t.Errorf("TakeOrElse() = %v, want %v", result, defaultAlign)
 		}
 	})
 
 	t.Run("block is not called when specified", func(t *testing.T) {
-		called := false
 		align := TextAlignRight
-		align.TakeOrElse(func() TextAlign {
-			called = true
-			return defaultAlign
-		})
-		if called {
-			t.Error("TakeOrElse() should not call block when value is specified")
+		takeAlign := align.TakeOrElse(defaultAlign)
+		if takeAlign != TextAlignRight {
+			t.Errorf("TakeOrElse() = %v, want %v", takeAlign, TextAlignRight)
 		}
 	})
 
 	t.Run("block is called when unspecified", func(t *testing.T) {
-		called := false
 		align := TextAlignUnspecified
-		align.TakeOrElse(func() TextAlign {
-			called = true
-			return defaultAlign
-		})
-		if !called {
-			t.Error("TakeOrElse() should call block when value is unspecified")
+		takeAlign := align.TakeOrElse(defaultAlign)
+		if takeAlign != defaultAlign {
+			t.Errorf("TakeOrElse() = %v, want %v", takeAlign, defaultAlign)
 		}
 	})
 }
