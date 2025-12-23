@@ -9,13 +9,13 @@ import (
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 )
 
-var ShadowUnspecified = Shadow{
+// EmptyShadow is the singleton sentinel for unspecified/empty Shadow.
+// It is allocated in the data segment (global) and used as a pointer to avoid allocations.
+var EmptyShadow = &Shadow{
 	Color:      ColorUnspecified,
 	Offset:     geometry.OffsetUnspecified,
 	BlurRadius: floatutils.Float32Unspecified,
 }
-
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-graphics/src/commonMain/kotlin/androidx/compose/ui/graphics/Shadow.kt;drc=4970f6e96cdb06089723da0ab8ec93ae3f067c7a;l=27
 
 // Shadow represents a single shadow with color, offset, and blur radius.
 // All fields are immutable after creation; use Copy() to create modified versions.
@@ -56,26 +56,28 @@ func (s Shadow) Copy(color *Color, offset *Offset, blurRadius *float32) Shadow {
 	return result
 }
 
-func (s Shadow) IsSpecified() bool {
-	return !(s.Color == ColorUnspecified &&
-		s.Offset == geometry.OffsetUnspecified &&
-		s.BlurRadius == floatutils.Float32Unspecified)
+// TakeOrElse returns the existing shadow if it's specified, otherwise the default.
+// This is a package-level function to handle nil receivers safely.
+func TakeOrElse(s, defaultShadow *Shadow) *Shadow {
+	if s == nil || s == EmptyShadow {
+		return defaultShadow
+	}
+	return s
 }
 
 // Equal performs deep equality check with epsilon tolerance for all fields.
-func (s Shadow) Equal(other Shadow) bool {
-	if !s.IsSpecified() && !other.IsSpecified() {
-		return true
-	}
+func (s *Shadow) Equal(other *Shadow) bool {
+	return ShadowEquals(s, other)
+}
 
-	return s.Color == other.Color && s.Offset.Equal(other.Offset) &&
-		float32Equals(s.BlurRadius, other.BlurRadius, float32EqualityThreshold)
+func (s *Shadow) IsSpecified() bool {
+	return ShadowIsSpecified(s)
 }
 
 // String returns a human-readable representation.
-func (s Shadow) String() string {
+func (s *Shadow) String() string {
 	if !s.IsSpecified() {
-		return "ShadowUnspecified"
+		return "EmptyShadow"
 	}
 	return fmt.Sprintf("Shadow(color=%v, offset=%v, blurRadius=%.2f)",
 		s.Color, s.Offset, s.BlurRadius)
@@ -83,9 +85,9 @@ func (s Shadow) String() string {
 
 // LerpShadow interpolates between two Shadows.
 func LerpShadow(start, stop *Shadow, fraction float32) Shadow {
-	if start == nil || stop == nil {
-		panic("Shadow must be specified")
-	}
+	start = TakeOrElse(start, EmptyShadow)
+	stop = TakeOrElse(stop, EmptyShadow)
+
 	if fraction == 0 {
 		return *start
 	}
@@ -97,4 +99,22 @@ func LerpShadow(start, stop *Shadow, fraction float32) Shadow {
 		geometry.LerpOffset(start.Offset, stop.Offset, fraction),
 		lerp.Between32(start.BlurRadius, stop.BlurRadius, fraction),
 	)
+}
+
+func ShadowIsSpecified(s *Shadow) bool {
+	shallow := s != nil && s != EmptyShadow
+	if shallow {
+		// making sure s is not empty
+		return s.Color.IsSpecified() && s.Offset.IsSpecified() && floatutils.IsSpecified(s.BlurRadius)
+	}
+	return shallow
+}
+
+func ShadowEquals(s1, s2 *Shadow) bool {
+	if !ShadowIsSpecified(s1) && !ShadowIsSpecified(s2) {
+		return true
+	}
+
+	return s1.Color == s2.Color && s1.Offset.Equal(s2.Offset) &&
+		float32Equals(s1.BlurRadius, s2.BlurRadius, float32EqualityThreshold)
 }
