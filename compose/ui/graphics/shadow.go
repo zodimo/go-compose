@@ -6,7 +6,6 @@ import (
 
 	"github.com/zodimo/go-compose/compose/ui/geometry"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
-	"github.com/zodimo/go-compose/theme"
 )
 
 // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-graphics/src/commonMain/kotlin/androidx/compose/ui/graphics/Shadow.kt;drc=4970f6e96cdb06089723da0ab8ec93ae3f067c7a;l=27
@@ -26,7 +25,7 @@ var (
 )
 
 // NewShadow creates a new Shadow instance.
-func NewShadow(color Color, offset Offset, blurRadius float32) Shadow {
+func NewShadow(color Color, offset geometry.Offset, blurRadius float32) Shadow {
 	return Shadow{
 		Color:      color,
 		Offset:     offset,
@@ -52,8 +51,10 @@ func (s Shadow) Copy(color *Color, offset *Offset, blurRadius *float32) Shadow {
 
 // Equal performs deep equality check with epsilon tolerance for all fields.
 func (s Shadow) Equal(other Shadow) bool {
-	return s.Color.Compare(other.Color) &&
-		s.Offset.Equal(other.Offset) &&
+	if s.Color != other.Color {
+		return false
+	}
+	return s.Offset.Equal(other.Offset) &&
 		float32Equals(s.BlurRadius, other.BlurRadius, float32EqualityThreshold)
 }
 
@@ -63,14 +64,11 @@ func (s Shadow) String() string {
 		s.Color, s.Offset, s.BlurRadius)
 }
 
-// LerpShadow performs linear interpolation between two shadows.
+// LerpShadow interpolates between two Shadows.
 func LerpShadow(start, stop Shadow, fraction float32) Shadow {
 	return NewShadow(
-		theme.ColorLerp(start.Color, stop.Color, fraction),
-		geometry.NewOffset(
-			lerp.Between32(start.Offset.X(), stop.Offset.X(), fraction),
-			lerp.Between32(start.Offset.Y(), stop.Offset.Y(), fraction),
-		),
+		Lerp(start.Color, stop.Color, fraction),
+		geometry.LerpOffset(start.Offset, stop.Offset, fraction),
 		lerp.Between32(start.BlurRadius, stop.BlurRadius, fraction),
 	)
 }

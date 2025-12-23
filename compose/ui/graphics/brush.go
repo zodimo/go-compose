@@ -4,7 +4,6 @@ import (
 	"math"
 
 	"github.com/zodimo/go-compose/compose/ui/geometry"
-	"github.com/zodimo/go-compose/theme"
 )
 
 var BrushUnspecified Brush = nil
@@ -45,10 +44,7 @@ func (s SolidColor) IntrinsicSize() geometry.Size {
 
 func (s SolidColor) Equal(other Brush) bool {
 	if other, ok := other.(SolidColor); ok {
-		// Use ColorDescriptor comparison
-		// return s.Value.Compare(other.Value)
-		// But s.Value is an interface.
-		return s.Value.Compare(other.Value)
+		return s.Value == other.Value
 	}
 	return false
 }
@@ -72,7 +68,7 @@ type ShaderBrush interface {
 func applyToShaderBrush(s ShaderBrush, size geometry.Size, p *Paint, alpha float32) {
 	p.Shader = s.CreateShader(size)
 	p.Alpha = alpha
-	p.Color = nil // Or unspecified
+	p.Color = ColorUnspecified
 }
 
 // LinearGradient Brush implementation.
@@ -135,7 +131,7 @@ func (l LinearGradient) Equal(other Brush) bool {
 		return false
 	}
 	for i := range l.Colors {
-		if !l.Colors[i].Compare(o.Colors[i]) {
+		if l.Colors[i] != o.Colors[i] {
 			return false
 		}
 	}
@@ -215,7 +211,7 @@ func (r RadialGradient) Equal(other Brush) bool {
 		return false
 	}
 	for i := range r.Colors {
-		if !r.Colors[i].Compare(o.Colors[i]) {
+		if r.Colors[i] != o.Colors[i] {
 			return false
 		}
 	}
@@ -285,7 +281,7 @@ func (s SweepGradient) Equal(other Brush) bool {
 		return false
 	}
 	for i := range s.Colors {
-		if !s.Colors[i].Compare(o.Colors[i]) {
+		if s.Colors[i] != o.Colors[i] {
 			return false
 		}
 	}
@@ -442,37 +438,7 @@ func LerpBrush(start, stop Brush, fraction float32) Brush {
 	// Case 1: Both SolidColor
 	if s1, ok1 := start.(SolidColor); ok1 {
 		if s2, ok2 := stop.(SolidColor); ok2 {
-			// Resolve colors. For now assume Color type has methods or we use theme helper.
-			// But SolidColor.Value is theme.ColorDescriptor.
-			// theme.Lerp exists.
-			// However theme.Lerp returns LerpColorUpdate.
-			// We need a helper to actually lerp two ColorDescriptors if possible,
-			// or just wrap them in a SolidColor that resolves at draw time?
-			// The theme package seems to rely on updates.
-			// But for now, let's look at how SolidColor.Value is used.
-			// If we can't easily lerp descriptors directly without context,
-			// maybe we just return one or the other if types mismatch or use a specialized Lerp implementation.
-			// Actually, Kotlin implementation:
-			// return SolidColor(lerp(value, other.value, t))
-			// Color.kt lerp:
-			// fun lerp(start: Color, stop: Color, fraction: Float): Color
-			//
-			// In our Go theme package, we have Lerp(stop, fraction).
-			// But that's an Update.
-			// If we want to return a NEW Brush that represents the interpolated state,
-			// we might need a "LerpColor" brush or "LerpColorDescriptor".
-			// OR, if the underlying ColorDescriptor supports Lerp (it doesn't seem to verifyably return a new descriptor directly in the interface).
-			//
-			// HOWEVER, `theme.ColorDescriptor` interface doesn't have `Lerp` method.
-			// But `theme` package might have `LerpColors(c1, c2, t)`.
-			// Let's assume for now we cannot fully implement Color lerp without more theme helpers
-			// so we will stub it or use a discrete switch for 0.5 if we can't lerp.
-			//
-			// Wait, `theme/color.go` had `Lerp(stop, fraction)` which returned `LerpColorUpdate`.
-			// This suggests the "Color" is dynamic.
-			// So we can return a SolidColor whose Value is `start.Value.AppendUpdate(theme.Lerp(stop.Value, fraction))`.
-			// Yes! That seems to be the design.
-			return NewSolidColor(s1.Value.AppendUpdate(theme.Lerp(s2.Value, fraction)))
+			return NewSolidColor(Lerp(s1.Value, s2.Value, fraction))
 		}
 	}
 
@@ -525,8 +491,7 @@ func lerpColors(a, b []Color, t float32) []Color {
 	for i := 0; i < n; i++ {
 		c1 := a[min(i, len(a)-1)]
 		c2 := b[min(i, len(b)-1)]
-		// Use the AppendUpdate pattern for lerping colors
-		res[i] = c1.AppendUpdate(theme.Lerp(c2, t))
+		res[i] = Lerp(c1, c2, t)
 	}
 	return res
 }
