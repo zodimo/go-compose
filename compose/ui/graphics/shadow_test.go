@@ -56,7 +56,7 @@ func TestShadow_Copy(t *testing.T) {
 
 	t.Run("Identity Copy", func(t *testing.T) {
 		copy := original.Copy()
-		if !EqualShadow(&copy, original) {
+		if !EqualShadow(copy, original) {
 			t.Errorf("Identity copy failed. Expected %v, got %v", original, copy)
 		}
 	})
@@ -66,7 +66,7 @@ func TestShadow_Copy(t *testing.T) {
 		copy := original.Copy(WithColor(newColor))
 
 		expected := NewShadow(newColor, initialOffset, initialBlur)
-		if !EqualShadow(&copy, expected) {
+		if !EqualShadow(copy, expected) {
 			t.Errorf("Copy with Color failed. Expected %v, got %v", expected, copy)
 		}
 		// Verify original unchanged
@@ -80,7 +80,7 @@ func TestShadow_Copy(t *testing.T) {
 		copy := original.Copy(WithOffset(newOffset))
 
 		expected := NewShadow(initialColor, newOffset, initialBlur)
-		if !EqualShadow(&copy, expected) {
+		if !EqualShadow(copy, expected) {
 			t.Errorf("Copy with Offset failed. Expected %v, got %v", expected, copy)
 		}
 	})
@@ -90,7 +90,7 @@ func TestShadow_Copy(t *testing.T) {
 		copy := original.Copy(WithBlurRadius(newBlur))
 
 		expected := NewShadow(initialColor, initialOffset, newBlur)
-		if !EqualShadow(&copy, expected) {
+		if !EqualShadow(copy, expected) {
 			t.Errorf("Copy with BlurRadius failed. Expected %v, got %v", expected, copy)
 		}
 	})
@@ -107,7 +107,7 @@ func TestShadow_Copy(t *testing.T) {
 		)
 
 		expected := NewShadow(newColor, newOffset, newBlur)
-		if !EqualShadow(&copy, expected) {
+		if !EqualShadow(copy, expected) {
 			t.Errorf("Copy all failed. Expected %v, got %v", expected, copy)
 		}
 	})

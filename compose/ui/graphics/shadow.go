@@ -41,13 +41,13 @@ func NewShadow(color Color, offset geometry.Offset, blurRadius float32) *Shadow 
 }
 
 // Copy creates a new Shadow with optional field overrides.
-func (s Shadow) Copy(options ...ShadowOption) Shadow {
+func (s Shadow) Copy(options ...ShadowOption) *Shadow {
 	opt := ShadowOptionsDefault
 	for _, option := range options {
-		option(opt)
+		option(&opt)
 	}
 
-	return Shadow{
+	return &Shadow{
 		Color:      opt.Color.TakeOrElse(s.Color),
 		Offset:     opt.Offset.TakeOrElse(s.Offset),
 		BlurRadius: floatutils.TakeOrElse(opt.BlurRadius, s.BlurRadius),

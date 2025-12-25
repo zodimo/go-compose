@@ -5,7 +5,7 @@ import (
 	"github.com/zodimo/go-compose/pkg/floatutils"
 )
 
-var ShadowOptionsDefault = &ShadowOptions{
+var ShadowOptionsDefault = ShadowOptions{
 	Color:      ColorUnspecified,
 	Offset:     geometry.OffsetUnspecified,
 	BlurRadius: floatutils.Float32Unspecified,
