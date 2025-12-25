@@ -85,15 +85,15 @@ func TextDirectionValueOf(value int) (TextDirection, error) {
 	return TextDirection(value), nil
 }
 
-// IsSpecified returns true if this TextDirection is not TextDirectionUnspecified.
-func (t TextDirection) IsSpecified() bool {
+// TextDirection returns true if this TextDirection is not TextDirectionUnspecified.
+func (t TextDirection) IsTextDirection() bool {
 	return t != TextDirectionUnspecified
 }
 
 // TakeOrElse returns this TextDirection if IsSpecified() is true,
 // otherwise executes the provided function and returns its result.
 func (t TextDirection) TakeOrElse(block TextDirection) TextDirection {
-	if t.IsSpecified() {
+	if t.IsTextDirection() {
 		return t
 	}
 	return block
