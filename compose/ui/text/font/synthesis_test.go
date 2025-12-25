@@ -49,7 +49,7 @@ func TestFontSynthesis_IsStyleOn(t *testing.T) {
 
 func TestFontSynthesis_String(t *testing.T) {
 	tests := []struct {
-		fs       FontSynthesis
+		fs       *FontSynthesis
 		expected string
 	}{
 		{FontSynthesisNone, "None"},
@@ -67,7 +67,7 @@ func TestFontSynthesis_String(t *testing.T) {
 func TestFontSynthesisValueOf_Valid(t *testing.T) {
 	tests := []struct {
 		value    int
-		expected FontSynthesis
+		expected *FontSynthesis
 	}{
 		{0, FontSynthesisNone},
 		{1, FontSynthesisWeight},
@@ -79,7 +79,7 @@ func TestFontSynthesisValueOf_Valid(t *testing.T) {
 		if err != nil {
 			t.Errorf("Unexpected error for value %d: %v", tt.value, err)
 		}
-		if !result.Equals(tt.expected) {
+		if !EqualFontSynthesis(result, tt.expected) {
 			t.Errorf("Expected %v for value %d, got %v", tt.expected, tt.value, result)
 		}
 	}
@@ -96,10 +96,10 @@ func TestFontSynthesisValueOf_Invalid(t *testing.T) {
 }
 
 func TestFontSynthesis_Equals(t *testing.T) {
-	if !FontSynthesisNone.Equals(FontSynthesisNone) {
+	if !EqualFontSynthesis(FontSynthesisNone, FontSynthesisNone) {
 		t.Error("None should equal None")
 	}
-	if FontSynthesisNone.Equals(FontSynthesisWeight) {
+	if EqualFontSynthesis(FontSynthesisNone, FontSynthesisWeight) {
 		t.Error("None should not equal Weight")
 	}
 }
