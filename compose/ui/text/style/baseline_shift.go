@@ -2,8 +2,8 @@ package style
 
 import (
 	"fmt"
-	"math"
 
+	"github.com/zodimo/go-compose/pkg/floatutils"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 )
 
@@ -23,17 +23,17 @@ const (
 )
 
 // BaselineShiftUnspecified represents an unset baseline shift (NaN value)
-var BaselineShiftUnspecified = BaselineShift(math.NaN())
+var BaselineShiftUnspecified = BaselineShift(floatutils.Float32Unspecified)
 
-// IsSpecified returns true if this baseline shift is not Unspecified (i.e., not NaN)
-func (bs BaselineShift) IsSpecified() bool {
-	return !math.IsNaN(float64(bs))
+// IsBaselineShift returns true if this baseline shift is not Unspecified (i.e., not NaN)
+func IsBaselineShift(bs BaselineShift) bool {
+	return floatutils.IsSpecified(bs)
 }
 
-// TakeOrElse returns this BaselineShift if it's specified, otherwise returns the result of block.
+// TakeOrElseBaselineShift returns this BaselineShift if it's specified, otherwise returns the result of block.
 // This is equivalent to Kotlin's inline function with lambda.
-func (bs BaselineShift) TakeOrElse(block BaselineShift) BaselineShift {
-	if bs.IsSpecified() {
+func TakeOrElseBaselineShift(bs, block BaselineShift) BaselineShift {
+	if IsBaselineShift(bs) {
 		return bs
 	}
 	return block
@@ -49,10 +49,18 @@ func NewBaselineShift(multiplier float32) BaselineShift {
 	return BaselineShift(multiplier)
 }
 
-// String returns a string representation of the BaselineShift
-func (bs BaselineShift) String() string {
+// MergeBaselineShift returns the first argument if it is specified, otherwise the second.
+func MergeBaselineShift(a, b BaselineShift) BaselineShift {
+	if IsBaselineShift(a) {
+		return a
+	}
+	return b
+}
+
+// StringBaselineShift returns a string representation of the BaselineShift
+func StringBaselineShift(bs BaselineShift) string {
 	switch {
-	case !bs.IsSpecified():
+	case !IsBaselineShift(bs):
 		return "BaselineShift.Unspecified"
 	case bs == BaselineShiftSuperscript:
 		return "BaselineShift.Superscript"
@@ -63,6 +71,11 @@ func (bs BaselineShift) String() string {
 	default:
 		return fmt.Sprintf("BaselineShift(multiplier=%v)", bs.Multiplier())
 	}
+}
+
+// String returns a string representation of the BaselineShift
+func (bs BaselineShift) String() string {
+	return StringBaselineShift(bs)
 }
 
 // LerpBaselineShift linearly interpolates between two BaselineShifts.

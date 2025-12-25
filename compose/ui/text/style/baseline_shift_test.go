@@ -21,7 +21,7 @@ func TestBaselineShift_Constants(t *testing.T) {
 	}
 }
 
-func TestBaselineShift_IsSpecified(t *testing.T) {
+func TestBaselineShift_IsBaselineShift(t *testing.T) {
 	tests := []struct {
 		name     string
 		bs       BaselineShift
@@ -36,34 +36,58 @@ func TestBaselineShift_IsSpecified(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.bs.IsSpecified(); got != tt.expected {
-				t.Errorf("IsSpecified() = %v, want %v", got, tt.expected)
+			if got := IsBaselineShift(tt.bs); got != tt.expected {
+				t.Errorf("IsBaselineShift() = %v, want %v", got, tt.expected)
 			}
 		})
 	}
+
 }
 
-func TestBaselineShift_TakeOrElse(t *testing.T) {
+func TestTakeOrElseBaselineShift(t *testing.T) {
 	fallback := NewBaselineShift(0.75)
 
 	t.Run("returns self when specified", func(t *testing.T) {
-		result := BaselineShiftSuperscript.TakeOrElse(fallback)
+		result := TakeOrElseBaselineShift(BaselineShiftSuperscript, fallback)
 		if result != BaselineShiftSuperscript {
 			t.Errorf("Expected Superscript, got %v", result)
 		}
 	})
 
 	t.Run("returns block result when unspecified", func(t *testing.T) {
-		result := BaselineShiftUnspecified.TakeOrElse(fallback)
+		result := TakeOrElseBaselineShift(BaselineShiftUnspecified, fallback)
 		if result != fallback {
 			t.Errorf("Expected fallback %v, got %v", fallback, result)
 		}
 	})
 
 	t.Run("None returns self (not fallback)", func(t *testing.T) {
-		result := BaselineShiftNone.TakeOrElse(fallback)
+		result := TakeOrElseBaselineShift(BaselineShiftNone, fallback)
 		if result != BaselineShiftNone {
 			t.Errorf("Expected None, got %v", result)
+		}
+	})
+}
+
+func TestMergeBaselineShift(t *testing.T) {
+	t.Run("returns first when specified", func(t *testing.T) {
+		result := MergeBaselineShift(BaselineShiftSuperscript, BaselineShiftSubscript)
+		if result != BaselineShiftSuperscript {
+			t.Errorf("Expected Superscript, got %v", result)
+		}
+	})
+
+	t.Run("returns second when first is unspecified", func(t *testing.T) {
+		result := MergeBaselineShift(BaselineShiftUnspecified, BaselineShiftSubscript)
+		if result != BaselineShiftSubscript {
+			t.Errorf("Expected Subscript, got %v", result)
+		}
+	})
+
+	t.Run("returns unspecified when both are unspecified", func(t *testing.T) {
+		result := MergeBaselineShift(BaselineShiftUnspecified, BaselineShiftUnspecified)
+		if IsBaselineShift(result) {
+			t.Errorf("Expected Unspecified, got %v", result)
 		}
 	})
 }
@@ -94,7 +118,7 @@ func TestNewBaselineShift(t *testing.T) {
 	if bs.Multiplier() != 0.33 {
 		t.Errorf("Expected multiplier 0.33, got %v", bs.Multiplier())
 	}
-	if !bs.IsSpecified() {
+	if !IsBaselineShift(bs) {
 		t.Errorf("Expected new BaselineShift to be specified")
 	}
 }
@@ -114,11 +138,16 @@ func TestBaselineShift_String(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if got := StringBaselineShift(tt.bs); got != tt.expected {
+				t.Errorf("StringBaselineShift() = %v, want %v", got, tt.expected)
+			}
+			// Also verify the String() method still works
 			if got := tt.bs.String(); got != tt.expected {
 				t.Errorf("String() = %v, want %v", got, tt.expected)
 			}
 		})
 	}
+
 }
 
 func TestLerpBaselineShift(t *testing.T) {
@@ -154,14 +183,14 @@ func TestLerpBaselineShift(t *testing.T) {
 
 	t.Run("lerp with Unspecified start produces Unspecified", func(t *testing.T) {
 		result := LerpBaselineShift(BaselineShiftUnspecified, BaselineShiftSuperscript, 0.5)
-		if result.IsSpecified() {
+		if IsBaselineShift(result) {
 			t.Errorf("Expected Unspecified result when start is Unspecified, got %v", result)
 		}
 	})
 
 	t.Run("lerp with Unspecified stop produces Unspecified", func(t *testing.T) {
 		result := LerpBaselineShift(BaselineShiftSubscript, BaselineShiftUnspecified, 0.5)
-		if result.IsSpecified() {
+		if IsBaselineShift(result) {
 			t.Errorf("Expected Unspecified result when stop is Unspecified, got %v", result)
 		}
 	})
