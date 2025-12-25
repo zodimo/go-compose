@@ -2,18 +2,18 @@ package font
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 )
 
-const weightUnspecified = -1
-
-var FontWeightUnspecified = FontWeight{weight: weightUnspecified}
-
 // FontWeight represents the thickness of the glyphs, in a range of [1, 1000].
-type FontWeight struct {
-	weight int
-}
+type FontWeight int
+
+const (
+	weightUnspecified                = -1
+	FontWeightUnspecified FontWeight = weightUnspecified
+)
 
 // NewFontWeight creates a FontWeight with validation.
 // Panics if weight is not in range [1, 1000].
@@ -21,12 +21,12 @@ func NewFontWeight(weight int) FontWeight {
 	if weight < 1 || weight > 1000 {
 		panic(fmt.Sprintf("Font weight can be in range [1, 1000]. Current value: %d", weight))
 	}
-	return FontWeight{weight: weight}
+	return FontWeight(weight)
 }
 
 // Weight returns the underlying weight value.
 func (w FontWeight) Weight() int {
-	return w.weight
+	return int(w)
 }
 
 // Compare compares two FontWeights.
@@ -35,9 +35,9 @@ func (w FontWeight) Compare(other FontWeight) int {
 	if !w.IsSpecified() || !other.IsSpecified() {
 		panic("FontWeight must be specified")
 	}
-	if w.weight < other.weight {
+	if w < other {
 		return -1
-	} else if w.weight > other.weight {
+	} else if w > other {
 		return 1
 	}
 	return 0
@@ -45,12 +45,7 @@ func (w FontWeight) Compare(other FontWeight) int {
 
 // Equals checks if two FontWeights are equal.
 func (w FontWeight) Equals(other FontWeight) bool {
-	return w.weight == other.weight
-}
-
-// HashCode returns a hash code for the FontWeight.
-func (w FontWeight) HashCode() int {
-	return w.weight
+	return w == other
 }
 
 // String returns a string representation of the FontWeight.
@@ -58,41 +53,43 @@ func (w FontWeight) String() string {
 	if !w.IsSpecified() {
 		return "FontWeightUnspecified"
 	}
-	return fmt.Sprintf("FontWeight(weight=%d)", w.weight)
+	return fmt.Sprintf("FontWeight(weight=%d)", w)
 }
 
 func (w FontWeight) IsSpecified() bool {
-	return w.weight != weightUnspecified
+	return w != FontWeightUnspecified
 }
 
 func (w FontWeight) TakeOrElse(other FontWeight) FontWeight {
-	if !w.IsSpecified() {
+	if w.IsSpecified() {
 		return w
 	}
 	return other
 }
 
 // Standard font weight constants
-var (
+const (
 	// FontWeightW100 is the thinnest font weight (Thin)
-	FontWeightW100 = NewFontWeight(100)
+	FontWeightW100 FontWeight = 100
 	// FontWeightW200 is extra light weight
-	FontWeightW200 = NewFontWeight(200)
+	FontWeightW200 FontWeight = 200
 	// FontWeightW300 is light weight
-	FontWeightW300 = NewFontWeight(300)
+	FontWeightW300 FontWeight = 300
 	// FontWeightW400 is normal/regular weight
-	FontWeightW400 = NewFontWeight(400)
+	FontWeightW400 FontWeight = 400
 	// FontWeightW500 is medium weight
-	FontWeightW500 = NewFontWeight(500)
+	FontWeightW500 FontWeight = 500
 	// FontWeightW600 is semi-bold weight
-	FontWeightW600 = NewFontWeight(600)
+	FontWeightW600 FontWeight = 600
 	// FontWeightW700 is bold weight
-	FontWeightW700 = NewFontWeight(700)
+	FontWeightW700 FontWeight = 700
 	// FontWeightW800 is extra-bold weight
-	FontWeightW800 = NewFontWeight(800)
+	FontWeightW800 FontWeight = 800
 	// FontWeightW900 is black (heaviest) weight
-	FontWeightW900 = NewFontWeight(900)
+	FontWeightW900 FontWeight = 900
+)
 
+const (
 	// Aliases for standard weights
 	FontWeightThin       = FontWeightW100
 	FontWeightExtraLight = FontWeightW200
@@ -126,12 +123,13 @@ func LerpFontWeight(start, stop FontWeight, fraction float32) FontWeight {
 	if !start.IsSpecified() || !stop.IsSpecified() {
 		panic("FontWeight must be specified")
 	}
-	weight := lerp.Between32(float32(start.weight), float32(stop.weight), fraction)
+	weight := lerp.Between32(float32(start), float32(stop), fraction)
 	// Coerce to valid range
-	if weight < 1 {
-		weight = 1
-	} else if weight > 1000 {
-		weight = 1000
+	intWeight := int(math.Round(float64(weight)))
+	if intWeight < 1 {
+		intWeight = 1
+	} else if intWeight > 1000 {
+		intWeight = 1000
 	}
-	return FontWeight{weight: int(weight)}
+	return FontWeight(intWeight)
 }

@@ -73,8 +73,8 @@ func (m *FontMatcher) MatchFontFromFamily(family *FontListFontFamily, weight Fon
 
 // filterByClosestWeight finds the closest weight match.
 // preferBelow: if true, prefer weights below the target; otherwise prefer above.
-// minSearchRange: if not nil, exclude weights below this value.
-// maxSearchRange: if not nil, exclude weights above this value.
+// minSearchRange: if not specified, exclude weights below this value.
+// maxSearchRange: if not specified, exclude weights above this value.
 func (m *FontMatcher) filterByClosestWeight(
 	fonts []Font,
 	weight FontWeight,
@@ -100,20 +100,17 @@ func (m *FontMatcher) filterByClosestWeight(
 		if cmp < 0 {
 			// possibleWeight < target weight
 			if !bestWeightBelow.IsSpecified() || possibleWeight.Compare(bestWeightBelow) > 0 {
-				w := possibleWeight
-				bestWeightBelow = w
+				bestWeightBelow = possibleWeight
 			}
 		} else if cmp > 0 {
 			// possibleWeight > target weight
 			if !bestWeightAbove.IsSpecified() || possibleWeight.Compare(bestWeightAbove) < 0 {
-				w := possibleWeight
-				bestWeightAbove = w
+				bestWeightAbove = possibleWeight
 			}
 		} else {
 			// Exact weight match
-			w := possibleWeight
-			bestWeightAbove = w
-			bestWeightBelow = w
+			bestWeightAbove = possibleWeight
+			bestWeightBelow = possibleWeight
 			break
 		}
 	}

@@ -121,9 +121,3 @@ func TestLerpFontWeight(t *testing.T) {
 		t.Errorf("Lerp should clamp to 1000, got %d", result.Weight())
 	}
 }
-
-func TestFontWeight_HashCode(t *testing.T) {
-	if FontWeightNormal.HashCode() != 400 {
-		t.Errorf("HashCode should return weight value")
-	}
-}
