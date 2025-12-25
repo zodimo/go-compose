@@ -2,7 +2,11 @@
 // It offers three precision levels: standard (fast), precise (accurate), and fixed-point (fastest).
 package lerp
 
-import "math"
+import (
+	"math"
+
+	"github.com/zodimo/go-compose/pkg/floatutils"
+)
 
 // Float constraint for all float32 and float64 based types.
 type Float interface {
@@ -20,6 +24,14 @@ type Float interface {
 //
 //	pos := lerp.Between(0.0, 100.0, 0.5) // 50.0
 func Between[T Float](start, stop T, fraction float64) T {
+	// if start or stop unspeficied then unspecified
+	if !floatutils.IsSpecified(start) {
+		return start
+	}
+	if !floatutils.IsSpecified(stop) {
+		return stop
+	}
+
 	if fraction == 0 {
 		return start
 	}
@@ -36,9 +48,17 @@ func Between[T Float](start, stop T, fraction float64) T {
 //
 //	opacity := lerp.Between32(0.0, 1.0, 0.5) // 0.5
 func Between32[T ~float32](start, stop T, fraction float32) T {
+	// if start or stop unspeficied then unspecified
+	if !floatutils.IsSpecified(start) {
+		return start
+	}
+	if !floatutils.IsSpecified(stop) {
+		return stop
+	}
 	if fraction == 0 {
 		return start
 	}
+
 	if fraction == 1 {
 		return stop
 	}
