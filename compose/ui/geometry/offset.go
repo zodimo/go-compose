@@ -96,7 +96,7 @@ func (o Offset) Rem(operand float32) Offset {
 
 // String returns a string representation of the object.
 func (o Offset) String() string {
-	if o.IsSpecified() {
+	if o.IsOffset() {
 		return fmt.Sprintf("Offset(%.1f, %.1f)", o.X(), o.Y())
 	}
 	return "Offset.Unspecified"
@@ -136,8 +136,8 @@ func (o Offset) IsInfinite() bool {
 	return math.IsInf(float64(x), 0) || math.IsInf(float64(y), 0)
 }
 
-// IsSpecified returns true if this is not Offset.Unspecified.
-func (o Offset) IsSpecified() bool {
+// IsOffset returns true if this is not Offset.Unspecified.
+func (o Offset) IsOffset() bool {
 	return o != OffsetUnspecified
 }
 

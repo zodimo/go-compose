@@ -55,15 +55,15 @@ func TestOffsetIsValid(t *testing.T) {
 }
 
 func TestOffsetIsSpecified(t *testing.T) {
-	if OffsetUnspecified.IsSpecified() {
+	if OffsetUnspecified.IsOffset() {
 		t.Error("OffsetUnspecified should not be specified")
 	}
-	if !OffsetZero.IsSpecified() {
+	if !OffsetZero.IsOffset() {
 		t.Error("OffsetZero should be specified")
 	}
 	// Test partial NaN
 	partial := NewOffset(float32(math.NaN()), 1.0)
-	if !partial.IsSpecified() {
+	if !partial.IsOffset() {
 		t.Error("Offset{NaN, 1.0} should be specified")
 	}
 }
