@@ -1,357 +1,346 @@
+# The Unspecified Pattern: Complete Go Reference  
+*Declarative UI Composition with Zero-Allocation Semantics*
 
+---
 
-# The Unspecified Pattern: A Go Implementation Guide
+> **AGENT CONTRACT**: This is a single-file, copy-paste-ready reference. Every exported type `T` must provide exactly **4 symbols**:  
+> 1. `TUnspecified` – sentinel (constant for values, singleton for structs)  
+> 2. `IsT` – predicate, package-level function  
+> 3. `TakeOrElseT` – 2-param fallback, package-level function  
+> 4. `MergeT` – composition merge, package-level function  
+> No other public symbols are required. All verification commands are in Section 8.
 
-**Reference Document for Declarative UI Composition**
+---
+
+## 0. Quick Glance Cheat-Sheet
+
+| Type Family | Go Declaration | Sentinel | Is-Specified Check | Alloc/Cost | Use-Case |
+|-------------|----------------|----------|--------------------|------------|----------|
+| **Primitive** | `type Color uint64` | `const ColorUnspecified = 0` | `c != ColorUnspecified` | **0 B / 2 ns** | color, dp, unit |
+| **Complex** | `type TextStyle struct{ ... }` | `var TextStyleUnspecified = &TextStyle{ ... }` | `IsTextStyle(style)` | **0 B if nil / 24 B if custom** | style, modifier |
 
 ---
 
 ## 1. The Two Mutually Exclusive Patterns
 
-This pattern is **not one-size-fits-all**. Choose based on **type complexity**—**never** mix them.
+Choose **once per type**—never mix.
 
-### **Pattern 1: Primitive/Value Types (Zero-Cost Sentinel)**
-
-For types you control that can be represented as **primitives** (`int`, `float`, `uint64`).
+### 1-A Primitive / Value Types (zero-allocation sentinel)
 
 ```go
-// ✅ CORRECT: Value type with bit-pattern sentinel
+// 1. Declare the value type
 type Color uint64
 
-// Sentinel: A valid bit pattern that means "use ambient/default"
-const ColorUnspecified Color = 0  // Transparent black is rare
-const ColorRed       Color = 0xFFFF0000
+// 2. Pick a sentinel bit-pattern that is never a valid explicit value
+const ColorUnspecified Color = 0          // transparent black
+const ColorRed       Color = 0xFFFF0000   // normal colours
 
-// Check is a single comparison (no defensive nil check)
-func (c Color) IsSpecified() bool {
-    return c != ColorUnspecified
+// 3. Zero-defensive method (value receiver → never nil)
+func (c Color) IsColor() bool {
+	return c != ColorUnspecified
 }
 
-// TakeOrElse: No allocation, register-only
-func (c Color) TakeOrElse(defaultColor Color) Color {
-    if c.IsSpecified() {
-        return c
-    }
-    return defaultColor
+// 4. Zero-allocation fallback
+func (c Color) TakeOrElseColor(defaultColor Color) Color {
+	if c.IsColor() {
+		return c
+	}
+	return defaultColor
 }
-
-// USAGE: Zero allocation, zero heap
-var bg Color = ColorUnspecified  // 8 bytes on stack
-final := bg.TakeOrElse(themeColor)  // Inlined, 0 allocations
 ```
 
-**Performance**: **0 allocations**, **2ns/call**, fits in CPU register.
+**Sentinel choice guide**  
+- `0` → OK when 0 is rare (Color)  
+- `NaN` → use when 0 is common (Dp, TextUnit)  
+- `MinInt32` → for packed structs (IntOffset)  
+- `iota 0` → for enums (Alignment, FontWeight)
+
+**Guarantees**: lives in `.rodata`, copied into register/stack → **zero heap bytes**.
 
 ---
 
-### **Pattern 2: Complex Object Types (Nullable Pointer + Singleton)**
-
-For `struct` types with **multiple fields** that cannot be packed into a primitive.
+### 1-B Complex Object Types (nullable pointer + singleton)
 
 ```go
-// ✅ CORRECT: Pointer type with singleton sentinel
+// 1. Multi-field struct
 type TextStyle struct {
-    color Color
-    size  Dp
-    // ... more fields
+	color      Color
+	fontSize   Dp
+	fontWeight FontWeight
 }
 
-// Singleton: Pre-allocated immutable instance (data segment)
-var EmptyTextStyle = &TextStyle{
-    color: ColorUnspecified,
-    size:  DpUnspecified,
+// 2. ONE global singleton (static data segment)
+var TextStyleUnspecified = &TextStyle{
+	color:      ColorUnspecified,
+	fontSize:   DpUnspecified,
+	fontWeight: FontWeightUnspecified,
 }
 
-// ✅ PACKAGE-LEVEL FUNCTION (not method): Safe, idiomatic, clear
-func TakeOrElse(style, defaultStyle *TextStyle) *TextStyle {
-    if style == nil || style == EmptyTextStyle {
-        return defaultStyle
-    }
-    return style
+// 3. Package-level helpers (NO methods on *TextStyle)
+func IsTextStyle(style *TextStyle) bool {
+	return style != nil && style != TextStyleUnspecified
 }
 
-// USAGE: Zero allocation if nil or singleton
-var style *TextStyle = nil                    // 0 allocations
-final := TakeOrElse(style, themeStyle)        // 0 allocations
+// 4. Package-level helpers (NO methods on *TextStyle)
+func TakeOrElseTextStyle(style, defaultStyle *TextStyle) *TextStyle {
+	if style == nil || style == TextStyleUnspecified {
+		return defaultStyle
+	}
+	return style
+}
+
+// 5. Generic 3-param helper (used inside helpers)
+func takeOrElse[T comparable](a, b, sentinel T) T {
+	if a != sentinel {
+		return a
+	}
+	return b
+}
+
+// 6. Merge / equality helpers
+func MergeTextStyle(a, b *TextStyle) *TextStyle {
+	a = CoalesceTextStyle(a, TextStyleUnspecified)
+	b = CoalesceTextStyle(b, TextStyleUnspecified)
+
+	if a == TextStyleUnspecified { return b }
+	if b == TextStyleUnspecified { return a }
+
+	// Both are custom: allocate new merged style
+	return &TextStyle{
+		color:      takeOrElse(a.color, b.color, ColorUnspecified),
+		fontSize:   takeOrElse(a.fontSize, b.fontSize, DpUnspecified),
+		fontWeight: takeOrElse(a.fontWeight, b.fontWeight, FontWeightUnspecified),
+	}
+}
+
+func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle {
+	if ptr == nil {
+		return def
+	}
+	return ptr
+}
 ```
 
-**Performance**: **0 allocations** if `nil` or singleton, **24 bytes** if custom struct.
+**Memory layout**: pointer on stack (8 B) → singleton in `.data` → **zero heap bytes at call site**.
 
 ---
 
-## 2. Semantic Distinction: `nil` vs `UnspecifiedColor`
+## 2. Semantic Levels of "Unspecified"
 
-**These are NOT interchangeable.** They solve **different composition problems**.
+| Level | Value | Meaning | Typical Use |
+|-------|-------|---------|-------------|
+| **Object absent** | `nil` | "No style provided" | function parameter default |
+| **Object present, all fields deferred** | `TextStyleUnspecified` | "Use theme for everything" | partial merge base |
+| **Field absent** | `ColorUnspecified` (inside struct) | "Use ambient for this field" | field-level override |
 
-| Value | Means | Level | Use Case |
-|-------|-------|-------|----------|
-| **`nil`** | "**Object** is absent" | Function parameter | `Text("hi", style = nil)` |
-| **`EmptyTextStyle`** | "**Object** exists, but all fields defer to theme" | Partial merge | `Text(style = EmptyTextStyle.Merge(myPartial))` |
-| **`ColorUnspecified`** | "**Field** is absent" | Struct field | `TextStyle(color = ColorUnspecified)` |
-
-**Critical Example**:
+**Example**:
 ```go
-// ❌ IMPOSSIBLE with only nil:
-partial := &TextStyle{
-    color: ???, // Want theme color, but my font size
-    size:  20,
-}
-
-// ✅ POSSIBLE with singleton:
-partial := &TextStyle{
-    color: ColorUnspecified, // "Theme decides this"
-    size:  20,                // "I decide this"
-}
-```
-
-## **2.1 Stack-Allocation Guarantee (The Golden Rule)**
-
-The pattern **must** ensure `Unspecified` is **zero-heap-cost** at the call site. There are **two ways** to achieve this, based on type category:
-
-### **For Primitives: Immediate Constant**
-```go
-// ✅ The value is embedded directly in machine code
-const ColorUnspecified Color = 0  // No memory address, just a literal
-
-// USAGE: Stack-allocated (actually register-allocated)
-var bg Color = ColorUnspecified  // MOVQ $0, AX (one instruction, no memory)
-```
-
-**Guarantee**: The value lives in **`.rodata`** (read-only data segment) and is **copied directly** into the stack/register at call time. **Zero heap allocation.**
-
----
-
-### **For Complex Objects: Global Singleton Pointer**
-```go
-// ✅ Singleton allocated ONCE at program start (data segment)
-var EmptyTextStyle = &TextStyle{ /* ... */ }  // Static initialization
-
-// USAGE: Stack-allocated pointer (8 bytes on stack, points to global)
-var style *TextStyle = EmptyTextStyle  // LEAQ EmptyTextStyle(SB), AX
-```
-
-**Guarantee**: The **pointer** is on the stack (8 bytes), but the pointed-to `TextStyle` is in static memory (`.data` segment). **Zero heap allocation at call site.**
-
-## **Updated Rule**
-
-**The unspecified value must be ONE of:**
-1. **A compile-time constant** (`const XUnspecified = 0`, `.rodata`)
-2. **A global singleton pointer** (`var EmptyX = &X{...}`, `.data`)
-3. **`nil`** (zero value, stack-allocated pointer)
-
-**NEVER a local variable or function return that escapes to heap.**
-
-
-## 3. Anti-Patterns: What NOT to Do
-
-### ❌ **Never Mix Patterns**
-```go
-// WRONG: Value type that can be nil (interface or pointer)
-type Color interface { IsSpecified() bool }  // Forces allocation
-var UnspecifiedColor Color = nil             // Panic risk
-
-// WRONG: Struct with "isSpecified" flag (temporal coupling)
-type Color struct {
-    isSpecified bool  // Separate field = double memory + defensive checks
-    value       uint64
-}
-```
-
-### ❌ **Never Use Methods on Nil Receivers**
-```go
-// WRONG: Method on pointer (confusing, error-prone)
-func (ts *TextStyle) TakeOrElse(defaultStyle *TextStyle) *TextStyle {
-    if ts == nil {  // Defensive check = code smell
-        return defaultStyle
-    }
-    return ts
-}
-
-// Risk: Future edit adds ts.color without nil check → PANIC
-```
-
-### ❌ **Never Use `nil` for Primitive Fields**
-```go
-// WRONG: Can't distinguish "unspecified" from "explicitly zero"
-type TextStyle struct {
-    color *Color  // If nil = unspecified, how do you say "transparent black"?
-}
+Text("hi", nil)                                    // nil → use theme 100 %
+Text("hi", TextStyleUnspecified)                   // singleton → use theme 100 %
+Text("hi", &TextStyle{fontSize: 20})               // partial → theme color + 20 sp
 ```
 
 ---
 
-## 4. Decision Tree
+## 3. Public API for Complex Types (Nil-Safe, No Scattered Checks)
 
-```plaintext
-Is your type a single primitive (int, float, uint64)?
-├── YES → Pattern 1: Value type + sentinel constant
-│           Example: Color, Dp, TextUnit
-│
-└── NO → Does it have multiple fields or interface behavior?
-    ├── YES → Pattern 2: Pointer type + singleton + package function
-    │           Example: TextStyle, Modifier, Painter?
-    └── NO → Rethink your type (likely a primitive in disguise)
+Expose **only** these four functions for complex types—**never** methods on `*T`:
+
+```go
+// Identity (2 ns)
+func SameStyle(a, b *TextStyle) bool
+
+// Semantic equality (field-by-field, 20 ns)
+func EqualStyle(a, b *TextStyle) bool
+
+// Merge (0 or 1 alloc)
+func MergeTextStyle(a, b *TextStyle) *TextStyle
+
+// Coalesce nil → singleton
+func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle
 ```
+
+Business code **never writes `== nil`** outside these four helpers.
 
 ---
 
-## 5. Performance Reality Check
+## 4. Sentinel Choice Reference
 
-### **Microbenchmark (per call)**
-
-| Pattern | Allocations | Heap | CPU | Use For |
-|---------|-------------|------|-----|---------|
-| **Primitive sentinel** | 0 | 0 B | 2ns | `Color`, `Dp`, `TextUnit` |
-| **Complex (nil)** | 0 | 0 B | 5ns | `*TextStyle` when `nil` |
-| **Complex (custom)** | 1 | 24 B | 20ns | `*TextStyle{...}` |
-| **Interface pattern** | 2 | 40 B | 152ns | **NEVER** |
+| Domain | Sentinel | Reason |
+|--------|----------|--------|
+| `Color` | `0` | transparent black is rare |
+| `Dp` | `math.NaN()` | 0 dp is common |
+| `TextUnit` | `math.NaN()` | 0 sp is valid |
+| `IntOffset` | `(math.MinInt32, math.MinInt32)` | extremes unused |
+| `FontWeight` | `0` (iota) | zero = unspecified |
+| `Alignment` | `0` (iota) | zero = unspecified |
 
 ---
 
-## 6. Real-World Examples from Compose
+## 5. Sentinel Patterns for `int`, `string`, `bool`
 
-### **Primitives (Pattern 1)**
+When the type cannot hold an actual `NaN`, reserve a **valid bit-pattern** that is **semantically impossible** in your domain.
+
+### 5-A `int` (or `int32`, `int64`, `uint`, …)
+
 ```go
-// Dp: NaN sentinel because 0 is valid
-type Dp float32
-const DpUnspecified = Dp(math.NaN())
+type Offset int32
+const OffsetUnspecified Offset = math.MinInt32  // 0x80000000
+func (o Offset) IsOffset() bool              { return o != OffsetUnspecified }
 
-// TextUnit: Same pattern
-type TextUnit float32
-const TextUnitUnspecified TextUnit = TextUnit(math.NaN())
-
-// Alignment: Enum, zero value is sentinel
-type Alignment int
-const AlignmentUnspecified Alignment = 0
+// Usage: 0 is valid → MinInt32 is sentinel
+var off Offset = OffsetUnspecified  // register literal, 0 heap
 ```
 
-### **Complex Objects (Pattern 2)**
-```go
-// Modifier: Interface, but Modifier companion is singleton
-var Modifier Modifier = modifierCompanion()  // Singleton
+### 5-B `string`
 
-// TextStyle: Data class, null means unspecified
-data class TextStyle(
-    val color: Color = Color.Unspecified,  // Value sentinel INSIDE
-    val fontSize: TextUnit = TextUnit.Unspecified
+```go
+type Profile string
+const ProfileUnspecified Profile = ""  // zero value = sentinel (when empty is rare)
+func (p Profile) IsProfile() bool { return p != ProfileUnspecified }
+```
+
+If **empty string is meaningful**, reserve a **globally unique** magic value:
+
+```go
+const ProfileUnspecified Profile = "\x00unspecified"  // impossible in user data
+```
+
+Both are **zero-allocation**: the constant lives in `.rodata`, the field stores a **pointer to that data**.
+
+### 5-C `bool`
+
+```go
+type Visible bool
+const VisibleUnspecified Visible = false  // zero value = sentinel
+func (v Visible) IsVisible() bool { return v != VisibleUnspecified }
+```
+
+If you **must** distinguish “explicitly false” from “unspecified”, promote to an enum:
+
+```go
+type Visible int8
+const (
+	VisibleUnspecified Visible = iota  // 0
+	VisibleFalse
+	VisibleTrue
 )
-// Function parameter: style: TextStyle? = null
 ```
 
 ---
 
-## 7. Best Practices for Your Agent
-
-**When writing a new type, ask:**
-
-1. **Can I pack this into a primitive?**  
-   → YES: Use Pattern 1 (`type MyType uint64`, `const MyTypeUnspecified`)
-
-2. **Does it have >1 field or must be an interface?**  
-   → YES: Use Pattern 2 (`type MyType struct { ... }`, `var EmptyMyType = &MyType{...}`)
-
-3. **Will this be a function parameter?**  
-   → YES: Accept `*MyType` (nullable) for complex objects.
-
-4. **Will I ever need partial overrides?**  
-   → YES: Use sentinel values for primitive fields **inside** the struct.
-
-5. **Will I ever call TakeOrElse?**  
-   → YES: Use package-level function for complex objects.
-
----
-
-## 8. Quick Reference Cheat Sheet
+## 6. Copy-Paste Templates
 
 ```go
-// ============================================================
-// PATTERN 1: Primitive Value Type (e.g., Color, Dp)
-// ============================================================
-type Color uint64
-const ColorUnspecified Color = 0
-func (c Color) IsSpecified() bool { return c != ColorUnspecified }
-func (c Color) TakeOrElse(d Color) Color { if c.IsSpecified() { return c }; return d }
+// Primitive type
+type MyUnit float32
+const MyUnitUnspecified MyUnit = MyUnit(math.NaN())
+func (u MyUnit) IsMyUnit() bool { return !math.IsNaN(float64(u)) }
 
-// USAGE:
-var bg Color = ColorUnspecified  // Stack, 0 allocs
-final := bg.TakeOrElse(red)      // Inlined, 0 allocs
+// Complex type
+type MyStyle struct { field1 Color; field2 Dp }
+var MyStyleUnspecified = &MyStyle{field1: ColorUnspecified, field2: DpUnspecified}
 
-
-// ============================================================
-// PATTERN 2: Complex Object Type (e.g., TextStyle)
-// ============================================================
-type TextStyle struct { color Color; size Dp }
-var EmptyTextStyle = &TextStyle{color: ColorUnspecified, size: DpUnspecified}
-
-// Package-level function (not method)
-func TakeOrElse(s, d *TextStyle) *TextStyle { if s == nil || s == EmptyTextStyle { return d }; return s }
-
-// USAGE:
-var style *TextStyle = nil  // 0 allocs
-final := TakeOrElse(style, themeStyle)  // 0 allocs
-```
-
----
-
-## 9. Common Pitfalls for Agents
-
-**If you see this in code review, reject it:**
-```go
-❌ func (t *T) Method()  // Method on pointer that checks nil
-❌ type T struct { isSpecified bool }  // Flag field
-❌ var Unspecified T = nil  // Nil interface value
-❌ TakeOrElse(func() T)  // Function literal parameter
-```
-
-**If you see this, approve it:**
-```go
-✅ func DoSomething(t *T)  // Package function, clear nil semantics
-✅ const TUnspecified T = 0  // Value sentinel
-✅ var EmptyT = &T{...}  // Singleton for complex objects
-```
-
----
-
-**Document Version**: 1.0  
-**Last Updated**: 2025-12-23  
-**Applies To**: All declarative UI composition code in this project
-
-
----
-
-
-## **Anti-Pattern: Heap-Allocated "Unspecified"**
-
-### **❌ WRONG: Creating sentinel at call time**
-```go
-// ❌ This is NOT the pattern
-func Text(style *TextStyle) {
-	var UnspecifiedOnStack = &TextStyle{ /* ... */ }  // Heap escape!
-	// ...
+func IsMyStyle(s *MyStyle) bool {
+	return s != nil && s != MyStyleUnspecified
 }
-
-// ❌ Also wrong: Returning a new sentinel per call
-func UnspecifiedColor() *Color {
-	return &Color{}  // New allocation every call = disaster
+func TakeOrElseMyStyle(s, def *MyStyle) *MyStyle {
+	if s == nil || s == MyStyleUnspecified { return def }
+	return s
 }
 ```
 
-**Why it's wrong**: Defeats the entire purpose. You pay **24-40 bytes per frame** instead of **0 bytes**.
+---
 
-## **Stack vs Heap: Quick Test**
+## 7. Performance Contract
 
-```go
-// ✅ Stack-allocated (good)
-go run -gcflags="-m" yourfile.go
-# command-line-arguments
-# ./main.go:10:6: can inline TakeOrElse
-# ./main.go:15:15: bg does not escape
+- **Primitive sentinel**: 0 heap bytes, 2 ns, inlined by compiler
+- **Complex nil**: 0 heap bytes, 5 ns
+- **Complex custom**: 24 B struct alloc, 20 ns (paid only when user creates new style)
 
-// ❌ Heap-allocated (bad)
-go run -gcflags="-m" yourfile.go
-# ./main.go:20:23: func literal escapes to heap
-# ./main.go:25:9: &TextStyle{...} escapes to heap
+Verify with:
+```bash
+go test -bench=. -gcflags="-m" 2>&1 | grep -E "does not escape|inlined"
 ```
 
-**Your agent must ensure `go build -gcflags="-m"` reports "does not escape" for all unspecified values.**
+---
 
+## 8. Anti-Patterns (reject on sight)
+
+```go
+❌ type Color interface { IsSpecified() bool }        // interface forces alloc
+❌ var UnspecifiedColor *Color = nil                  // nil interface → panic
+❌ func (ts *TextStyle) IsTextStyle() bool            // method on nil receiver
+❌ func (ts *TextStyle) TakeOrElseTextStyle(block *TextStyle) *TextStyle // REJECT: method on nil receiver
+❌ func TakeOrElseColor(block func() Color) Color // lambda escapes in Go
+❌ type T struct { isSpecified bool }                 // flag field = double mem
+```
+
+---
+
+## 9. Function Signatures (Principle of Least Parameters)
+
+### Public API (2-parameter fallback)
+```go
+// TakeOrElseTextStyle: public API - clear, no lambda, no 3rd param
+func TakeOrElseTextStyle(style, defaultStyle *TextStyle) *TextStyle {
+	if style == nil || style == TextStyleUnspecified {
+		return defaultStyle
+	}
+	return style
+}
+```
+
+### Private Helper (3-parameter generic)
+```go
+// takeOrElse: generic 3-param helper used INSIDE helpers to merge fields
+func takeOrElse[T comparable](a, b, sentinel T) T {
+	if a != sentinel {
+		return a
+	}
+	return b
+}
+```
+
+**Rule**: Public API always exposes **2-parameter** `TakeOrElseT`; the 3-param generic is an **implementation detail**.
+
+---
+
+## 10. Package-Level Contract (Machine-Readable)
+
+```go
+// UI_PACKAGE_CONTRACT
+// For every exported type T in package ui, the following symbols MUST exist:
+//   const/var TUnspecified  // Sentinel value or singleton pointer
+//   func IsT(v *T) bool      // Package-level predicate (never method on *T)
+//   func TakeOrElseT(a, b *T) *T // Package-level fallback (never method on *T)
+//   func MergeT(a, b *T) *T      // Package-level composition (never method on *T)
+// Additional symbols (abbreviations, helpers) are allowed but must be documented.
+// All sentinel values must be compile-time constants or package-level variables.
+// No function may accept func() parameters in hot paths (forces heap escape).
+// No method may have a pointer receiver that checks for nil (anti-pattern).
+// END_CONTRACT
+```
+
+---
+
+## 11. Verification Commands
+
+```bash
+# Check for heap escapes (must show "does not escape")
+go test -gcflags="-m" -run=ExampleUsage 2>&1 | grep -E "does not escape|escapes to heap"
+
+# Check for inlining (must show "can inline" for hot paths)
+go test -gcflags="-m" -run=ExampleUsage 2>&1 | grep "can inline"
+
+# Benchmark allocation counts (should be 0 or 1 per operation)
+go test -bench=. -benchmem
+
+# Build with escape analysis for entire package
+go build -gcflags="-m" ./... 2>&1 | grep "ui/"
+```
+
+---
+
+**Document Version**: 2.2  
+**Last Updated**: 2025-12-24
