@@ -99,15 +99,15 @@ func TextAlignValueOf(value int) (TextAlign, error) {
 	}
 }
 
-// IsSpecified returns true if this TextAlign is not TextAlignUnspecified.
-func (t TextAlign) IsSpecified() bool {
+// TextAlign returns true if this TextAlign is not TextAlignUnspecified.
+func (t TextAlign) IsTextAlign() bool {
 	return t != TextAlignUnspecified
 }
 
 // TakeOrElse returns this TextAlign if IsSpecified() is true,
 // otherwise executes the provided function and returns its result.
 func (t TextAlign) TakeOrElse(other TextAlign) TextAlign {
-	if t.IsSpecified() {
+	if t.IsTextAlign() {
 		return t
 	}
 	return other
