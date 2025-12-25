@@ -7,7 +7,12 @@ import (
 
 type TextDecorationMask int
 
+var TextDecorationUnspecified = &TextDecoration{
+	mask: TextDecorationMaskUnspecified,
+}
+
 const (
+	TextDecorationMaskUnspecified TextDecorationMask = -1
 	TextDecorationMaskNone        TextDecorationMask = 0x0
 	TextDecorationMaskUnderline   TextDecorationMask = 0x1
 	TextDecorationMaskLineThrough TextDecorationMask = 0x2
@@ -66,6 +71,13 @@ func (t TextDecoration) String() string {
 		return "TextDecoration." + values[0]
 	}
 	return "TextDecoration[" + strings.Join(values, ", ") + "]"
+}
+
+func (t TextDecoration) Equals(other *TextDecoration) bool {
+	if other == nil {
+		return false
+	}
+	return t.mask == other.mask
 }
 
 // NewTextDecoration constructs a TextDecoration instance from the underlying mask.
