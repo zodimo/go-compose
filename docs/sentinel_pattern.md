@@ -7,7 +7,8 @@
 > 1. `TUnspecified` – sentinel (constant for values, singleton for structs)  
 > 2. `IsT` – predicate, package-level function  
 > 3. `TakeOrElseT` – 2-param fallback, package-level function  
-> 4. `MergeT` – composition merge, package-level function  
+> 4. `MergeT` – composition merge, package-level function
+> 5. `StringT` – stringification, package-level function  
 > No other public symbols are required. All verification commands are in Section 8.
 
 ---
@@ -129,7 +130,7 @@ func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle {
 
 | Level | Value | Meaning | Typical Use |
 |-------|-------|---------|-------------|
-| **Object absent** | `nil` | "No style provided" | function parameter default |
+| **Object absent** | `nil` | "No style provided" | function parameter default , will be coalesced to unspecified |
 | **Object present, all fields deferred** | `TextStyleUnspecified` | "Use theme for everything" | partial merge base |
 | **Field absent** | `ColorUnspecified` (inside struct) | "Use ambient for this field" | field-level override |
 
@@ -158,13 +159,66 @@ func MergeTextStyle(a, b *TextStyle) *TextStyle
 
 // Coalesce nil → singleton
 func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle
+
+// Stringification
+func StringTextStyle(s *TextStyle) string
 ```
 
 Business code **never writes `== nil`** outside these four helpers.
 
 ---
 
+
+## 3.1 The Copy Pattern (Functional Options)
+
+Use **functional options** backed by sentinel values to implement strictly typed partial updates (Copy). This solves the ambiguity between "set to zero" and "no change".
+
+**Example**: `Shadow.Copy(WithBlurRadius(0))` vs `Shadow.Copy()`
+
+```go
+// 1. Options Struct (fields match the type, initialized to Unspecified)
+type ShadowOptions struct {
+	Color      Color
+	Offset     Offset
+	BlurRadius float32
+}
+
+var ShadowOptionsDefault = ShadowOptions{
+	Color:      ColorUnspecified,
+	Offset:     OffsetUnspecified,
+	BlurRadius: Float32Unspecified,
+}
+
+// 2. Functional Option
+type ShadowOption func(*ShadowOptions)
+
+func WithBlurRadius(r float32) ShadowOption {
+	return func(o *ShadowOptions) {
+		o.BlurRadius = r
+	}
+}
+
+// 3. Copy Method
+func (s *Shadow) Copy(options ...ShadowOption) *Shadow {
+	// Start with defaults (all Unspecified)
+	opt := ShadowOptionsDefault
+	for _, option := range options {
+		option(&opt)
+	}
+
+	return &Shadow{
+		// TakeOrElse: if opt.Color is Unspecified, keep s.Color
+		Color:      opt.Color.TakeOrElse(s.Color),
+		Offset:     opt.Offset.TakeOrElse(s.Offset),
+		BlurRadius: floatutils.TakeOrElse(opt.BlurRadius, s.BlurRadius),
+	}
+}
+```
+
+---
+
 ## 4. Sentinel Choice Reference
+
 
 | Domain | Sentinel | Reason |
 |--------|----------|--------|
