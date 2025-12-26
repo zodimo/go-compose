@@ -47,7 +47,7 @@ func TestLineHeightStyleTrim(t *testing.T) {
 }
 
 func TestAlignmentString(t *testing.T) {
-	if LineHeightStyleAlignmentTop.String() != "LineHeightStyle.Alignment.Top" {
+	if StringLineHeightStyleAlignment(LineHeightStyleAlignmentTop) != "LineHeightStyle.Alignment.Top" {
 		t.Errorf("Top alignment string mismatch")
 	}
 	// Verify custom alignment
@@ -55,7 +55,7 @@ func TestAlignmentString(t *testing.T) {
 	if custom.TopRatio != 0.25 {
 		t.Errorf("Custom TopRatio mismatch")
 	}
-	if custom.String() != "LineHeightStyle.Alignment(topRatio = 0.25)" {
-		t.Errorf("String() mismatch, got %s", custom.String())
+	if StringLineHeightStyleAlignment(&custom) != "LineHeightStyle.Alignment(topRatio = 0.25)" {
+		t.Errorf("String() mismatch, got %s", StringLineHeightStyleAlignment(&custom))
 	}
 }
