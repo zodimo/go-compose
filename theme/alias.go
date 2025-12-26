@@ -17,4 +17,4 @@ type TokenColor = token.MatColor
 
 type OpacityLevel = token.OpacityLevel
 
-var colorLerp = lerp.ColorLerp
+var colorLerp = lerp.Color

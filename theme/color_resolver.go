@@ -28,7 +28,7 @@ func (cr *themeColorResolver) Material(reader ThemeBasicColorReaderFunc) ThemeCo
 
 func (cr *themeColorResolver) ResolveColorDescriptor(colorDesc ColorDescriptor) ThemeColor {
 	//this should panic when colorDesc is a unspecifiedColorDescriptor, its a logical error
-	if colorDesc == nil || !colorDesc.IsSpecified() {
+	if !IsSpecifiedColor(colorDesc) {
 		panic("unspecified color descriptor cannot be resolved")
 	}
 	colorDescriptor := colorDesc.(colorDescriptor)

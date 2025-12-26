@@ -6,7 +6,10 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 )
 
-var ColorUnspecified ColorDescriptor = nil
+var ColorUnspecified ColorDescriptor = &colorDescriptor{
+	color:   graphics.ColorUnspecified,
+	isColor: true,
+}
 
 type ResolvableColor interface {
 	ResolveColorDescriptor(colorDesc ColorDescriptor) ThemeColor
@@ -98,8 +101,6 @@ type ColorDescriptor interface {
 	Darken(percentage float32) ColorDescriptor
 	Compare(other ColorDescriptor) bool
 	Updates() []ColorUpdate
-	IsSpecified() bool
-	TakeOrElse(other ColorDescriptor) ColorDescriptor // support unspecifiedXXX compose pattern
 }
 
 var _ ColorDescriptor = (*colorDescriptor)(nil)
@@ -146,6 +147,8 @@ func (t colorDescriptor) Updates() []ColorUpdate {
 
 func (t colorDescriptor) Compare(other ColorDescriptor) bool {
 
+	other = CoalesceColor(other, ColorUnspecified)
+
 	otherColorDescriptor, ok := other.(colorDescriptor)
 	if !ok {
 		return false
@@ -162,14 +165,6 @@ func (t colorDescriptor) Compare(other ColorDescriptor) bool {
 	}
 	//compare color
 	return t.color == otherColorDescriptor.color && t.colorRole == otherColorDescriptor.colorRole && t.isColor == otherColorDescriptor.isColor
-}
-
-func (t colorDescriptor) IsSpecified() bool {
-	return !(t.isColor && t.color == graphics.ColorUnspecified)
-}
-
-func (t colorDescriptor) TakeOrElse(other ColorDescriptor) ColorDescriptor {
-	return t
 }
 
 func SetOpacity(value OpacityLevel) *ColorUpdateTyped[OpacityLevel] {
@@ -219,7 +214,7 @@ type LerpColorUpdateParams struct {
 	Fraction float32
 }
 
-func Lerp(stop ColorDescriptor, fraction float32) LerpColorUpdate {
+func LerpColor(stop ColorDescriptor, fraction float32) LerpColorUpdate {
 	return LerpColorUpdate{
 		value: LerpColorUpdateParams{
 			Stop:     stop,
@@ -294,4 +289,22 @@ func (u LerpColorUpdate) Compare(other ColorUpdate) bool {
 
 func (u LerpColorUpdate) isThemeColorUpdate() bool {
 	return true
+}
+
+func IsSpecifiedColor(colorDescriptor ColorDescriptor) bool {
+	return colorDescriptor != nil && colorDescriptor != ColorUnspecified
+}
+
+func CoalesceColor(ptr, def ColorDescriptor) ColorDescriptor {
+	if ptr == nil {
+		return def
+	}
+	return ptr
+}
+
+func TakeOrElseColor(colorDescriptor, defaultColor ColorDescriptor) ColorDescriptor {
+	if colorDescriptor == nil || colorDescriptor == ColorUnspecified {
+		return defaultColor
+	}
+	return colorDescriptor
 }
