@@ -57,7 +57,7 @@ func (s Shadow) Copy(options ...ShadowOption) *Shadow {
 // Helper functions
 
 func StringShadow(s *Shadow) string {
-	if !IsShadow(s) {
+	if !IsSpecifiedShadow(s) {
 		return "EmptyShadow"
 	}
 	return fmt.Sprintf("Shadow(color=%v, offset=%v, blurRadius=%.2f)",
@@ -87,13 +87,6 @@ func LerpShadow(start, stop *Shadow, fraction float32) *Shadow {
 	)
 }
 
-func ShadowTakeOrElse(s, defaultShadow *Shadow) *Shadow {
-	if !IsShadow(s) {
-		return defaultShadow
-	}
-	return s
-}
-
 func takeOrElse[T comparable](a, b, sentinel T) T {
 	if a != sentinel {
 		return a
@@ -102,11 +95,11 @@ func takeOrElse[T comparable](a, b, sentinel T) T {
 }
 
 // Short for IsSpecifiedShadow
-func IsShadow(s *Shadow) bool {
+func IsSpecifiedShadow(s *Shadow) bool {
 	return s != nil && s != ShadowUnspecified
 }
 func TakeOrElseShadow(s, def *Shadow) *Shadow {
-	if !IsShadow(s) {
+	if !IsSpecifiedShadow(s) {
 		return def
 	}
 	return s

@@ -11,7 +11,7 @@ func TestShadow_SentinelPattern(t *testing.T) {
 	if ShadowUnspecified == nil {
 		t.Error("EmptyShadow should not be nil")
 	}
-	if IsShadow(ShadowUnspecified) {
+	if IsSpecifiedShadow(ShadowUnspecified) {
 		t.Error("EmptyShadow should not be specified")
 	}
 
