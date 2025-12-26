@@ -34,12 +34,99 @@ type ParagraphStyle struct {
 func (s ParagraphStyle) isAnnotation() {}
 
 type ParagraphStyleOptions struct {
+	TextAlign       style.TextAlign
+	TextDirection   style.TextDirection
+	LineHeight      unit.TextUnit
+	TextIndent      *style.TextIndent
+	PlatformStyle   *PlatformParagraphStyle
+	LineHeightStyle *style.LineHeightStyle
+	LineBreak       style.LineBreak
+	Hyphens         style.Hyphens
+	TextMotion      *style.TextMotion
+}
+
+func ParagraphStyleWithTextAlign(textAlign style.TextAlign) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.TextAlign = textAlign
+	}
+}
+
+func ParagraphStyleWithTextDirection(textDirection style.TextDirection) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.TextDirection = textDirection
+	}
+}
+
+func ParagraphStyleWithLineHeight(lineHeight unit.TextUnit) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.LineHeight = lineHeight
+	}
+}
+
+func ParagraphStyleWithTextIndent(textIndent *style.TextIndent) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.TextIndent = textIndent
+	}
+}
+
+func ParagraphStyleWithPlatformStyle(platformStyle *PlatformParagraphStyle) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.PlatformStyle = platformStyle
+	}
+}
+
+func ParagraphStyleWithLineHeightStyle(lineHeightStyle *style.LineHeightStyle) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.LineHeightStyle = lineHeightStyle
+	}
+}
+
+func ParagraphStyleWithLineBreak(lineBreak style.LineBreak) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.LineBreak = lineBreak
+	}
+}
+
+func ParagraphStyleWithHyphens(hyphens style.Hyphens) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.Hyphens = hyphens
+	}
+}
+
+func ParagraphStyleWithTextMotion(textMotion *style.TextMotion) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.TextMotion = textMotion
+	}
 }
 
 type ParagraphStyleOption = func(*ParagraphStyleOptions)
 
 func (s ParagraphStyle) Copy(options ...ParagraphStyleOption) *ParagraphStyle {
-	panic("ParagraphStyle Copy not implemented")
+	opts := &ParagraphStyleOptions{
+		TextAlign:       style.TextAlignUnspecified,
+		TextDirection:   style.TextDirectionUnspecified,
+		LineHeight:      unit.TextUnitUnspecified,
+		TextIndent:      nil,
+		PlatformStyle:   nil,
+		LineHeightStyle: nil,
+		LineBreak:       style.LineBreakUnspecified,
+		Hyphens:         style.HyphensUnspecified,
+		TextMotion:      nil,
+	}
+	for _, option := range options {
+		option(opts)
+	}
+	return &ParagraphStyle{
+		TextAlign:       opts.TextAlign.TakeOrElse(s.TextAlign),
+		TextDirection:   opts.TextDirection.TakeOrElse(s.TextDirection),
+		LineHeight:      opts.LineHeight.TakeOrElse(s.LineHeight),
+		TextIndent:      style.TakeOrElseTextIndent(opts.TextIndent, s.TextIndent),
+		PlatformStyle:   TakeOrElsePlatformParagraphStyle(opts.PlatformStyle, s.PlatformStyle),
+		LineHeightStyle: style.MergeLineHeightStyle(opts.LineHeightStyle, s.LineHeightStyle),
+		LineBreak:       opts.LineBreak.TakeOrElse(s.LineBreak),
+		Hyphens:         opts.Hyphens.TakeOrElse(s.Hyphens),
+		TextMotion:      style.TakeOrElseTextMotion(opts.TextMotion, s.TextMotion),
+	}
 }
 
 func StringParagraphStyle(s *ParagraphStyle) string {
