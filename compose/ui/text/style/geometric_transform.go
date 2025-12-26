@@ -24,27 +24,6 @@ type TextGeometricTransform struct {
 	SkewX  float32
 }
 
-func (gt TextGeometricTransform) Equals(other *TextGeometricTransform) bool {
-	if !TextGeometricTransformIsSpecified(other) {
-		return false
-	}
-	epsilon := floatutils.Float32EqualityThreshold
-	return floatutils.Float32Equals(gt.ScaleX, other.ScaleX, epsilon) && floatutils.Float32Equals(gt.SkewX, other.SkewX, epsilon)
-}
-
-func (gt TextGeometricTransform) String() string {
-	return fmt.Sprintf("TextGeometricTransform(scaleX=%f, skewX=%f)", gt.ScaleX, gt.SkewX)
-
-}
-
-func (gt *TextGeometricTransform) IsUnspecified() bool {
-	return !TextGeometricTransformIsSpecified(gt)
-}
-
-func (gt *TextGeometricTransform) TakeOrElse(other *TextGeometricTransform) *TextGeometricTransform {
-	return TextGeometricTransformTakeOrElse(gt, other)
-}
-
 func LerpGeometricTransform(
 	start *TextGeometricTransform,
 	stop *TextGeometricTransform,
@@ -65,13 +44,76 @@ func LerpGeometricTransform(
 	}
 }
 
-func TextGeometricTransformIsSpecified(gt *TextGeometricTransform) bool {
+func StringTextGeometricTransform(gt *TextGeometricTransform) string {
+	if !IsSpecifiedTextGeometricTransform(gt) {
+		return "TextGeometricTransformUnspecified"
+	}
+	return fmt.Sprintf("TextGeometricTransform(scaleX=%f, skewX=%f)", gt.ScaleX, gt.SkewX)
+}
+
+func IsSpecifiedTextGeometricTransform(gt *TextGeometricTransform) bool {
 	return gt != nil && gt != TextGeometricTransformUnspecified
 }
 
-func TextGeometricTransformTakeOrElse(gt *TextGeometricTransform, defaultGT *TextGeometricTransform) *TextGeometricTransform {
-	if !TextGeometricTransformIsSpecified(gt) {
+func TakeOrElseTextGeometricTransform(gt *TextGeometricTransform, defaultGT *TextGeometricTransform) *TextGeometricTransform {
+	if !IsSpecifiedTextGeometricTransform(gt) {
 		return defaultGT
 	}
 	return gt
+}
+
+// Identity (2 ns)
+func SameTextGeometricTransform(a, b *TextGeometricTransform) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil {
+		return b == TextGeometricTransformUnspecified
+	}
+	if b == nil {
+		return a == TextGeometricTransformUnspecified
+	}
+	return a == b
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualTextGeometricTransform(a, b *TextGeometricTransform) bool {
+
+	a = CoalesceTextGeometricTransform(a, TextGeometricTransformUnspecified)
+	b = CoalesceTextGeometricTransform(b, TextGeometricTransformUnspecified)
+
+	return a.ScaleX == b.ScaleX &&
+		a.SkewX == b.SkewX
+}
+
+func EqualTextGeometricTransform(a, b *TextGeometricTransform) bool {
+	if !SameTextGeometricTransform(a, b) {
+		return SemanticEqualTextGeometricTransform(a, b)
+	}
+	return true
+}
+
+func MergeTextGeometricTransform(a, b *TextGeometricTransform) *TextGeometricTransform {
+	a = CoalesceTextGeometricTransform(a, TextGeometricTransformUnspecified)
+	b = CoalesceTextGeometricTransform(b, TextGeometricTransformUnspecified)
+
+	if a == TextGeometricTransformUnspecified {
+		return b
+	}
+	if b == TextGeometricTransformUnspecified {
+		return a
+	}
+
+	// Both are custom: allocate new merged style
+	return &TextGeometricTransform{
+		ScaleX: floatutils.TakeOrElse(b.ScaleX, a.ScaleX),
+		SkewX:  floatutils.TakeOrElse(b.SkewX, a.SkewX),
+	}
+}
+
+func CoalesceTextGeometricTransform(ptr, def *TextGeometricTransform) *TextGeometricTransform {
+	if ptr == nil {
+		return def
+	}
+	return ptr
 }
