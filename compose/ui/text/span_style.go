@@ -61,12 +61,58 @@ func (s SpanStyle) Alpha() float32 {
 	return s.textForegroundStyle.Alpha
 }
 
-func (s SpanStyle) Copy() *SpanStyle {
+type SpanStyleOptions struct {
+}
+
+type SpanStyleOption = func(*SpanStyleOptions)
+
+func (s SpanStyle) Copy(options ...SpanStyleOption) *SpanStyle {
 	panic("SpanStyle Copy not implemented")
 }
 
-func (s SpanStyle) ToString() string {
+func StringSpanStyle(s *SpanStyle) string {
 	panic("SpanStyle ToString not implemented")
+}
+
+func IsSpecifiedSpanStyle(s *SpanStyle) bool {
+	return s != nil && s != SpanStyleUnspecified
+}
+
+func TakeOrElseSpanStyle(s, def *SpanStyle) *SpanStyle {
+	if !IsSpecifiedSpanStyle(s) {
+		return def
+	}
+	return s
+}
+
+// Identity (2 ns)
+func SameSpanStyle(a, b *SpanStyle) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil {
+		return b == SpanStyleUnspecified
+	}
+	if b == nil {
+		return a == SpanStyleUnspecified
+	}
+	return a == b
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualSpanStyle(a, b *SpanStyle) bool {
+
+	a = CoalesceSpanStyle(a, SpanStyleUnspecified)
+	b = CoalesceSpanStyle(b, SpanStyleUnspecified)
+
+	panic("SpanStyle SemanticEqualSpanStyle not implemented")
+}
+
+func EqualSpanStyle(a, b *SpanStyle) bool {
+	if !SameSpanStyle(a, b) {
+		return SemanticEqualSpanStyle(a, b)
+	}
+	return true
 }
 
 func MergeSpanStyle(a, b *SpanStyle) *SpanStyle {

@@ -8,6 +8,12 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
+var TextStyleUnspecified *TextStyle = &TextStyle{
+	spanStyle:      SpanStyleUnspecified,
+	paragraphStyle: ParagraphStyleUnspecified,
+	platformStyle:  nil,
+}
+
 type TextStyle struct {
 	spanStyle      *SpanStyle
 	paragraphStyle *ParagraphStyle
@@ -26,16 +32,9 @@ func (ts TextStyle) ToPlatformTextStyle() *PlatformTextStyle {
 	return ts.platformStyle
 }
 
-func (ts TextStyle) Merge(other *TextStyle) *TextStyle {
-	return &TextStyle{
-		spanStyle:      ts.spanStyle.Merge(other.spanStyle),
-		paragraphStyle: ts.paragraphStyle.Merge(other.paragraphStyle),
-	}
-}
-
 func (ts TextStyle) MergeSpanStyle(other *SpanStyle) *TextStyle {
 	return &TextStyle{
-		spanStyle:      ts.spanStyle.Merge(other),
+		spanStyle:      MergeSpanStyle(ts.spanStyle, other),
 		paragraphStyle: ts.paragraphStyle,
 	}
 }
@@ -43,12 +42,13 @@ func (ts TextStyle) MergeSpanStyle(other *SpanStyle) *TextStyle {
 func (ts TextStyle) MergeParagraphStyle(other *ParagraphStyle) *TextStyle {
 	return &TextStyle{
 		spanStyle:      ts.spanStyle,
-		paragraphStyle: ts.paragraphStyle.Merge(other),
+		paragraphStyle: MergeParagraphStyle(ts.paragraphStyle, other),
 	}
 }
 
-func (ts TextStyle) Plus(other *TextStyle) *TextStyle {
-	return ts.Merge(other)
+func (ts *TextStyle) Plus(other *TextStyle) *TextStyle {
+	//breaking the rules here
+	return MergeTextStyle(ts, other)
 }
 
 func (ts TextStyle) PlusSpanStyle(other *SpanStyle) *TextStyle {
@@ -166,4 +166,71 @@ func (ts TextStyle) TextMotion() *style.TextMotion {
 
 func (s TextStyle) ToString() string {
 	panic("TextStyle ToString not implemented")
+}
+
+func IsSpecifiedTextStyle(style *TextStyle) bool {
+	return style != nil && style != TextStyleUnspecified
+}
+
+func TakeOrElseTextStyle(style, defaultStyle *TextStyle) *TextStyle {
+	if style == nil || style == TextStyleUnspecified {
+		return defaultStyle
+	}
+	return style
+}
+
+// Identity (2 ns)
+func SameTextStyle(a, b *TextStyle) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil {
+		return b == TextStyleUnspecified
+	}
+	if b == nil {
+		return a == TextStyleUnspecified
+	}
+	return a == b
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualTextStyle(a, b *TextStyle) bool {
+
+	a = CoalesceTextStyle(a, TextStyleUnspecified)
+	b = CoalesceTextStyle(b, TextStyleUnspecified)
+
+	return SemanticEqualSpanStyle(a.spanStyle, b.spanStyle) &&
+		SemanticEqualParagraphStyle(a.paragraphStyle, b.paragraphStyle)
+}
+
+func EqualTextStyle(a, b *TextStyle) bool {
+	if !SameTextStyle(a, b) {
+		return SemanticEqualTextStyle(a, b)
+	}
+	return true
+}
+
+func MergeTextStyle(a, b *TextStyle) *TextStyle {
+	a = CoalesceTextStyle(a, TextStyleUnspecified)
+	b = CoalesceTextStyle(b, TextStyleUnspecified)
+
+	if a == TextStyleUnspecified {
+		return b
+	}
+	if b == TextStyleUnspecified {
+		return a
+	}
+
+	// Both are custom: allocate new merged style
+	return &TextStyle{
+		spanStyle:      MergeSpanStyle(a.spanStyle, b.spanStyle),
+		paragraphStyle: MergeParagraphStyle(a.paragraphStyle, b.paragraphStyle),
+	}
+}
+
+func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle {
+	if ptr == nil {
+		return def
+	}
+	return ptr
 }
