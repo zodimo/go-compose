@@ -8,6 +8,7 @@ func TestLinearity_String(t *testing.T) {
 		lin      Linearity
 		expected string
 	}{
+		{"Unspecified", LinearityUnspecified, "Linearity.Unspecified"},
 		{"Linear", LinearityLinear, "Linearity.Linear"},
 		{"FontHinting", LinearityFontHinting, "Linearity.FontHinting"},
 		{"None", LinearityNone, "Linearity.None"},
@@ -27,8 +28,8 @@ func TestLinearity_String(t *testing.T) {
 func TestTextMotion_Equals(t *testing.T) {
 	tests := []struct {
 		name     string
-		a        TextMotion
-		b        TextMotion
+		a        *TextMotion
+		b        *TextMotion
 		expected bool
 	}{
 		{
@@ -51,37 +52,37 @@ func TestTextMotion_Equals(t *testing.T) {
 		},
 		{
 			name: "Custom with same values",
-			a: TextMotion{
+			a: &TextMotion{
 				Linearity:               LinearityLinear,
-				SubpixelTextPositioning: true,
+				SubpixelTextPositioning: SubpixelTextPositioningTrue,
 			},
-			b: TextMotion{
+			b: &TextMotion{
 				Linearity:               LinearityLinear,
-				SubpixelTextPositioning: true,
+				SubpixelTextPositioning: SubpixelTextPositioningTrue,
 			},
 			expected: true,
 		},
 		{
 			name: "Different linearity",
-			a: TextMotion{
+			a: &TextMotion{
 				Linearity:               LinearityLinear,
-				SubpixelTextPositioning: true,
+				SubpixelTextPositioning: SubpixelTextPositioningTrue,
 			},
-			b: TextMotion{
+			b: &TextMotion{
 				Linearity:               LinearityFontHinting,
-				SubpixelTextPositioning: true,
+				SubpixelTextPositioning: SubpixelTextPositioningTrue,
 			},
 			expected: false,
 		},
 		{
 			name: "Different subpixel",
-			a: TextMotion{
+			a: &TextMotion{
 				Linearity:               LinearityLinear,
-				SubpixelTextPositioning: true,
+				SubpixelTextPositioning: SubpixelTextPositioningTrue,
 			},
-			b: TextMotion{
+			b: &TextMotion{
 				Linearity:               LinearityLinear,
-				SubpixelTextPositioning: false,
+				SubpixelTextPositioning: SubpixelTextPositioningFalse,
 			},
 			expected: false,
 		},
@@ -89,7 +90,7 @@ func TestTextMotion_Equals(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.a.Equals(tt.b)
+			result := EqualTextMotion(tt.a, tt.b)
 			if result != tt.expected {
 				t.Errorf("Equals() = %v, expected %v", result, tt.expected)
 			}
@@ -99,34 +100,34 @@ func TestTextMotion_Equals(t *testing.T) {
 
 func TestTextMotion_Copy(t *testing.T) {
 	// Copy with no changes
-	copied := TextMotionStatic.Copy(nil, nil)
-	if !copied.Equals(TextMotionStatic) {
+	copied := TextMotionStatic.Copy()
+	if !EqualTextMotion(copied, TextMotionStatic) {
 		t.Errorf("Copy with no changes should equal original")
 	}
 
 	// Copy with linearity change
 	newLinearity := LinearityLinear
-	copied = TextMotionStatic.Copy(&newLinearity, nil)
+	copied = TextMotionStatic.Copy(WithLinearity(newLinearity))
 	if copied.Linearity != LinearityLinear {
 		t.Errorf("Copy should have updated Linearity to LinearityLinear")
 	}
-	if copied.SubpixelTextPositioning != false {
+	if copied.SubpixelTextPositioning != TextMotionStatic.SubpixelTextPositioning {
 		t.Errorf("Copy should have preserved SubpixelTextPositioning as false")
 	}
 
 	// Copy with subpixel change
 	newSubpixel := true
-	copied = TextMotionStatic.Copy(nil, &newSubpixel)
+	copied = TextMotionStatic.Copy(WithSubpixelTextPositioning(newSubpixel))
 	if copied.Linearity != LinearityFontHinting {
 		t.Errorf("Copy should have preserved Linearity as FontHinting")
 	}
-	if copied.SubpixelTextPositioning != true {
+	if copied.SubpixelTextPositioning != SubpixelTextPositioningTrue {
 		t.Errorf("Copy should have updated SubpixelTextPositioning to true")
 	}
 
 	// Copy with both changes
-	copied = TextMotionStatic.Copy(&newLinearity, &newSubpixel)
-	if !copied.Equals(TextMotionAnimated) {
+	copied = TextMotionStatic.Copy(WithLinearity(newLinearity), WithSubpixelTextPositioning(newSubpixel))
+	if !EqualTextMotion(copied, TextMotionAnimated) {
 		t.Errorf("Copy with Linear and subpixel=true should equal TextMotionAnimated")
 	}
 }
@@ -134,24 +135,25 @@ func TestTextMotion_Copy(t *testing.T) {
 func TestTextMotion_String(t *testing.T) {
 	tests := []struct {
 		name     string
-		motion   TextMotion
+		motion   *TextMotion
 		expected string
 	}{
+
 		{"Static", TextMotionStatic, "TextMotion.Static"},
 		{"Animated", TextMotionAnimated, "TextMotion.Animated"},
 		{
 			"Custom",
-			TextMotion{
+			&TextMotion{
 				Linearity:               LinearityNone,
-				SubpixelTextPositioning: false,
+				SubpixelTextPositioning: SubpixelTextPositioningFalse,
 			},
-			"TextMotion(Linearity.None, subpixel=false)",
+			"TextMotion(Linearity.None, subpixel=False)",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tt.motion.String()
+			result := StringTextMotion(tt.motion)
 			if result != tt.expected {
 				t.Errorf("String() = %s, expected %s", result, tt.expected)
 			}
@@ -164,7 +166,7 @@ func TestTextMotion_Constants(t *testing.T) {
 	if TextMotionStatic.Linearity != LinearityFontHinting {
 		t.Errorf("TextMotionStatic.Linearity should be LinearityFontHinting")
 	}
-	if TextMotionStatic.SubpixelTextPositioning != false {
+	if TextMotionStatic.SubpixelTextPositioning != SubpixelTextPositioningFalse {
 		t.Errorf("TextMotionStatic.SubpixelTextPositioning should be false")
 	}
 
@@ -172,7 +174,7 @@ func TestTextMotion_Constants(t *testing.T) {
 	if TextMotionAnimated.Linearity != LinearityLinear {
 		t.Errorf("TextMotionAnimated.Linearity should be LinearityLinear")
 	}
-	if TextMotionAnimated.SubpixelTextPositioning != true {
+	if TextMotionAnimated.SubpixelTextPositioning != SubpixelTextPositioningTrue {
 		t.Errorf("TextMotionAnimated.SubpixelTextPositioning should be true")
 	}
 }
