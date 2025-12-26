@@ -6,6 +6,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/text/intl"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
 	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/pkg/sentinel"
 )
 
 var SpanStyleUnspecified *SpanStyle = &SpanStyle{
@@ -48,7 +49,8 @@ type SpanStyle struct {
 	DrawStyle              graphics.DrawStyle
 }
 
-func (s SpanStyle) isAnnotation() {}
+func (s SpanStyle) isAnnotation() {
+}
 
 // Props
 func (s SpanStyle) Color() graphics.Color {
@@ -62,12 +64,141 @@ func (s SpanStyle) Alpha() float32 {
 }
 
 type SpanStyleOptions struct {
+	textForegroundStyle    *style.TextForegroundStyle
+	FontSize               unit.TextUnit
+	FontWeight             font.FontWeight
+	FontStyle              font.FontStyle
+	FontSynthesis          *font.FontSynthesis
+	FontFamily             font.FontFamily
+	FontFeatureSettings    string
+	LetterSpacing          unit.TextUnit
+	BaselineShift          style.BaselineShift
+	TextGeometricTransform *style.TextGeometricTransform
+	LocaleList             *intl.LocaleList
+	Background             graphics.Color
+	TextDecoration         *style.TextDecoration
+	Shadow                 *graphics.Shadow
+	PlatformStyle          *PlatformSpanStyle
+	DrawStyle              graphics.DrawStyle
+}
+
+func SpanStyleWithColor(color graphics.Color) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.textForegroundStyle = &style.TextForegroundStyle{
+			Color: color,
+		}
+	}
+}
+
+func SpanStyleWithBrush(brush graphics.Brush, alpha float32) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.textForegroundStyle = &style.TextForegroundStyle{
+			Brush: brush,
+			Alpha: alpha,
+		}
+	}
+}
+func SpanStyleWithFontSize(fontSize unit.TextUnit) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.FontSize = fontSize
+	}
+}
+func SpanStyleWithFontWeight(fontWeight font.FontWeight) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.FontWeight = fontWeight
+	}
+}
+func SpanStyleWithFontStyle(fontStyle font.FontStyle) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.FontStyle = fontStyle
+	}
+}
+func SpanStyleWithFontSynthesis(fontSynthesis *font.FontSynthesis) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.FontSynthesis = fontSynthesis
+	}
+}
+func SpanStyleWithFontFamily(fontFamily font.FontFamily) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.FontFamily = fontFamily
+	}
+}
+func SpanStyleWithFontFeatureSettings(fontFeatureSettings string) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.FontFeatureSettings = fontFeatureSettings
+	}
+}
+func SpanStyleWithLetterSpacing(letterSpacing unit.TextUnit) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.LetterSpacing = letterSpacing
+	}
+}
+func SpanStyleWithBaselineShift(baselineShift style.BaselineShift) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.BaselineShift = baselineShift
+	}
+}
+func SpanStyleWithTextGeometricTransform(textGeometricTransform *style.TextGeometricTransform) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.TextGeometricTransform = textGeometricTransform
+	}
+}
+func SpanStyleWithLocaleList(localeList *intl.LocaleList) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.LocaleList = localeList
+	}
+}
+func SpanStyleWithBackground(background graphics.Color) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.Background = background
+	}
+}
+func SpanStyleWithTextDecoration(textDecoration *style.TextDecoration) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.TextDecoration = textDecoration
+	}
+}
+func SpanStyleWithShadow(shadow *graphics.Shadow) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.Shadow = shadow
+	}
+}
+func SpanStyleWithPlatformStyle(platformStyle *PlatformSpanStyle) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.PlatformStyle = platformStyle
+	}
+}
+func SpanStyleWithDrawStyle(drawStyle graphics.DrawStyle) SpanStyleOption {
+	return func(opts *SpanStyleOptions) {
+		opts.DrawStyle = drawStyle
+	}
 }
 
 type SpanStyleOption = func(*SpanStyleOptions)
 
 func (s SpanStyle) Copy(options ...SpanStyleOption) *SpanStyle {
-	panic("SpanStyle Copy not implemented")
+	opts := &SpanStyleOptions{}
+	for _, option := range options {
+		option(opts)
+	}
+	return &SpanStyle{
+		textForegroundStyle:    style.TakeOrElseTextForegroundStyle(opts.textForegroundStyle, s.textForegroundStyle),
+		FontSize:               opts.FontSize.TakeOrElse(s.FontSize),
+		FontWeight:             opts.FontWeight.TakeOrElse(s.FontWeight),
+		FontStyle:              opts.FontStyle.TakeOrElse(s.FontStyle),
+		FontSynthesis:          font.TakeOrElseFontSynthesis(opts.FontSynthesis, s.FontSynthesis),
+		FontFamily:             font.TakeOrElseFontFamily(opts.FontFamily, s.FontFamily),
+		FontFeatureSettings:    sentinel.TakeOrElseString(opts.FontFeatureSettings, s.FontFeatureSettings),
+		LetterSpacing:          opts.LetterSpacing.TakeOrElse(s.LetterSpacing),
+		BaselineShift:          style.TakeOrElseBaselineShift(opts.BaselineShift, s.BaselineShift),
+		TextGeometricTransform: style.TakeOrElseTextGeometricTransform(opts.TextGeometricTransform, s.TextGeometricTransform),
+		LocaleList:             intl.TakeOrElseLocaleList(opts.LocaleList, s.LocaleList),
+		Background:             opts.Background.TakeOrElse(s.Background),
+		TextDecoration:         style.TakeOrElseTextDecoration(opts.TextDecoration, s.TextDecoration),
+		Shadow:                 graphics.TakeOrElseShadow(opts.Shadow, s.Shadow),
+		PlatformStyle:          TakeOrElsePlatformSpanStyle(opts.PlatformStyle, s.PlatformStyle),
+		DrawStyle:              graphics.TakeOrElseDrawStyle(opts.DrawStyle, s.DrawStyle),
+	}
 }
 
 func StringSpanStyle(s *SpanStyle) string {
