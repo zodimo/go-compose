@@ -12,10 +12,10 @@ func TestSolidColor_Equal(t *testing.T) {
 	c2 := graphics.NewSolidColor(graphics.ColorBlack)
 	c3 := graphics.NewSolidColor(graphics.ColorTransparent)
 
-	if !c1.Equal(c2) {
+	if !graphics.EqualBrush(c1, c2) {
 		t.Errorf("SolidColor Black should equal Black")
 	}
-	if c1.Equal(c3) {
+	if graphics.EqualBrush(c1, c3) {
 		t.Errorf("SolidColor Black should not equal Transparent")
 	}
 }
@@ -26,10 +26,10 @@ func TestLinearGradient_Equal(t *testing.T) {
 	g2 := graphics.LinearGradientBrush(colors, geometry.OffsetZero, geometry.OffsetInfinite, graphics.TileModeClamp)
 	g3 := graphics.LinearGradientBrush(colors, geometry.OffsetZero, geometry.NewOffset(10, 10), graphics.TileModeClamp)
 
-	if !g1.Equal(g2) {
+	if !graphics.EqualBrush(g1, g2) {
 		t.Errorf("LinearGradient should equal identical instance")
 	}
-	if g1.Equal(g3) {
+	if graphics.EqualBrush(g1, g3) {
 		t.Errorf("LinearGradient should not equal different end offset")
 	}
 }
@@ -40,10 +40,10 @@ func TestRadialGradient_Equal(t *testing.T) {
 	g2 := graphics.RadialGradientBrush(colors, geometry.OffsetZero, 100, graphics.TileModeClamp)
 	g3 := graphics.RadialGradientBrush(colors, geometry.OffsetZero, 200, graphics.TileModeClamp)
 
-	if !g1.Equal(g2) {
+	if !graphics.EqualBrush(g1, g2) {
 		t.Errorf("RadialGradient should equal identical instance")
 	}
-	if g1.Equal(g3) {
+	if graphics.EqualBrush(g1, g3) {
 		t.Errorf("RadialGradient should not equal different radius")
 	}
 }
@@ -69,12 +69,12 @@ func TestLerpBrush(t *testing.T) {
 	c2 := graphics.NewSolidColor(graphics.ColorTransparent)
 	// Lerp at 0.0 -> Black
 	l1 := graphics.LerpBrush(c1, c2, 0.0)
-	if !l1.Equal(c1) {
+	if !graphics.EqualBrush(l1, c1) {
 		t.Errorf("LerpBrush(0.0) should be equal to start")
 	}
 	// Lerp at 1.0 -> Transparent
 	l2 := graphics.LerpBrush(c1, c2, 1.0)
-	if !l2.Equal(c2) {
+	if !graphics.EqualBrush(l2, c2) {
 		t.Errorf("LerpBrush(1.0) should be equal to stop")
 	}
 
@@ -84,7 +84,7 @@ func TestLerpBrush(t *testing.T) {
 
 	// Lerp at 0.5 -> EndX should be 150
 	l3 := graphics.LerpBrush(g1, g2, 0.5)
-	lg3, ok := l3.(graphics.LinearGradient)
+	lg3, ok := l3.(*graphics.LinearGradient)
 	if !ok {
 		t.Fatalf("Lerp of LinearGradient should be LinearGradient")
 	}
@@ -95,12 +95,12 @@ func TestLerpBrush(t *testing.T) {
 	// Case 3: Mixed (Solid <-> Gradient)
 	// < 0.5 -> start
 	l4 := graphics.LerpBrush(c1, g1, 0.4)
-	if !l4.Equal(c1) {
+	if !graphics.EqualBrush(l4, c1) {
 		t.Errorf("LerpBrush(0.4) mixed should be start")
 	}
 	// >= 0.5 -> stop
 	l5 := graphics.LerpBrush(c1, g1, 0.6)
-	if !l5.Equal(g1) {
+	if !graphics.EqualBrush(l5, g1) {
 		t.Errorf("LerpBrush(0.6) mixed should be stop")
 	}
 }

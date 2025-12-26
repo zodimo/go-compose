@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/zodimo/go-compose/compose/ui/geometry"
+	"github.com/zodimo/go-compose/pkg/floatutils"
 )
 
 // RadialGradient Brush implementation.
@@ -48,7 +49,7 @@ func (r RadialGradient) CreateShader(size geometry.Size) Shader {
 		radius = size.MinDimension() / 2
 	}
 
-	return RadialGradientShader{
+	return &RadialGradientShader{
 		Colors:     r.Colors,
 		ColorStops: r.Stops,
 		Center:     geometry.NewOffset(centerX, centerY),
@@ -57,40 +58,49 @@ func (r RadialGradient) CreateShader(size geometry.Size) Shader {
 	}
 }
 
-func (r RadialGradient) Equal(other Brush) bool {
-	o, ok := other.(RadialGradient)
-	if !ok {
-		return false
-	}
-	if len(r.Colors) != len(o.Colors) {
-		return false
-	}
-	for i := range r.Colors {
-		if r.Colors[i] != o.Colors[i] {
-			return false
-		}
-	}
-	if !float32SliceEqual(r.Stops, o.Stops) {
-		return false
-	}
-	if !r.Center.Equal(o.Center) {
-		return false
-	}
-	if r.Radius != o.Radius {
-		return false
-	}
-	if r.TileMode != o.TileMode {
-		return false
-	}
-	return true
-}
-
-func RadialGradientBrush(colors []Color, center geometry.Offset, radius float32, tileMode TileMode) RadialGradient {
+func RadialGradientBrush(colors []Color, center geometry.Offset, radius float32, tileMode TileMode) *RadialGradient {
 	// Defaults: center=Unspecified, radius=Infinite, tileMode=Clamp
-	return RadialGradient{
+	return &RadialGradient{
 		Colors:   colors,
 		Center:   center,
 		Radius:   radius,
 		TileMode: tileMode,
 	}
+}
+
+func SemanticEqualRadialGradient(a, b *RadialGradient) bool {
+	a = CoalesceBrush(a, BrushUnspecified).(*RadialGradient)
+	b = CoalesceBrush(b, BrushUnspecified).(*RadialGradient)
+
+	// colors
+	if len(a.Colors) != len(b.Colors) {
+		return false
+	}
+	for i := range a.Colors {
+		if a.Colors[i] != b.Colors[i] {
+			return false
+		}
+	}
+	//center
+	if !a.Center.Equal(b.Center) {
+		return false
+	}
+	//radius
+	if !floatutils.Float32Equals(a.Radius, b.Radius, floatutils.Float32EqualityThreshold) {
+		return false
+	}
+
+	//tileMode
+	if a.TileMode != b.TileMode {
+		return false
+	}
+
+	return true
+}
+
+func EqualRadialGradient(a, b *RadialGradient) bool {
+	if !SameBrush(a, b) {
+		return SemanticEqualRadialGradient(a, b)
+	}
+	return true
 }

@@ -38,38 +38,49 @@ func (s SweepGradient) CreateShader(size geometry.Size) Shader {
 			centerY = size.Height()
 		}
 	}
-	return SweepGradientShader{
+	return &SweepGradientShader{
 		Center:     geometry.NewOffset(centerX, centerY),
 		Colors:     s.Colors,
 		ColorStops: s.Stops,
 	}
 }
 
-func (s SweepGradient) Equal(other Brush) bool {
-	o, ok := other.(SweepGradient)
-	if !ok {
-		return false
-	}
-	if !s.Center.Equal(o.Center) {
-		return false
-	}
-	if len(s.Colors) != len(o.Colors) {
-		return false
-	}
-	for i := range s.Colors {
-		if s.Colors[i] != o.Colors[i] {
-			return false
-		}
-	}
-	if !float32SliceEqual(s.Stops, o.Stops) {
-		return false
-	}
-	return true
-}
-
-func SweepGradientBrush(colors []Color, center geometry.Offset) SweepGradient {
-	return SweepGradient{
+func SweepGradientBrush(colors []Color, center geometry.Offset) *SweepGradient {
+	return &SweepGradient{
 		Colors: colors,
 		Center: center,
 	}
+}
+
+func SemanticEqualSweepGradient(a, b *SweepGradient) bool {
+	a = CoalesceBrush(a, BrushUnspecified).(*SweepGradient)
+	b = CoalesceBrush(b, BrushUnspecified).(*SweepGradient)
+
+	//center
+	if !a.Center.Equal(b.Center) {
+		return false
+	}
+	// colors
+	if len(a.Colors) != len(b.Colors) {
+		return false
+	}
+	for i := range a.Colors {
+		if a.Colors[i] != b.Colors[i] {
+			return false
+		}
+	}
+
+	//stops
+	if !float32SliceEqual(a.Stops, b.Stops) {
+		return false
+	}
+
+	return true
+}
+
+func EqualSweepGradient(a, b *SweepGradient) bool {
+	if !SameBrush(a, b) {
+		return SemanticEqualSweepGradient(a, b)
+	}
+	return true
 }

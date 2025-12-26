@@ -48,7 +48,7 @@ func (l LinearGradient) CreateShader(size geometry.Size) Shader {
 	if endY == float32(math.Inf(1)) {
 		endY = size.Height()
 	}
-	return LinearGradientShader{
+	return &LinearGradientShader{
 		Colors:     l.Colors,
 		ColorStops: l.Stops,
 		From:       geometry.NewOffset(startX, startY),
@@ -57,39 +57,10 @@ func (l LinearGradient) CreateShader(size geometry.Size) Shader {
 	}
 }
 
-func (l LinearGradient) Equal(other Brush) bool {
-	o, ok := other.(LinearGradient)
-	if !ok {
-		return false
-	}
-	if len(l.Colors) != len(o.Colors) {
-		return false
-	}
-	for i := range l.Colors {
-		if l.Colors[i] != o.Colors[i] {
-			return false
-		}
-	}
-	// Check stops, start, end, tileMode
-	if !float32SliceEqual(l.Stops, o.Stops) {
-		return false
-	}
-	if !l.Start.Equal(o.Start) {
-		return false
-	}
-	if !l.End.Equal(o.End) {
-		return false
-	}
-	if l.TileMode != o.TileMode {
-		return false
-	}
-	return true
-}
-
-func LinearGradientBrush(colors []Color, start, end geometry.Offset, tileMode TileMode) LinearGradient {
+func LinearGradientBrush(colors []Color, start, end geometry.Offset, tileMode TileMode) *LinearGradient {
 	// Defaults are handled by caller or explicitly passed.
 	// In Kotlin: start=Zero, end=Infinite, tileMode=Clamp
-	return LinearGradient{
+	return &LinearGradient{
 		Colors:   colors,
 		Start:    start,
 		End:      end,
@@ -100,14 +71,14 @@ func LinearGradientBrush(colors []Color, start, end geometry.Offset, tileMode Ti
 func LinearGradientBrushWithStops(colorStops []struct {
 	Stop  float32
 	Color Color
-}, start, end geometry.Offset, tileMode TileMode) LinearGradient {
+}, start, end geometry.Offset, tileMode TileMode) *LinearGradient {
 	colors := make([]Color, len(colorStops))
 	stops := make([]float32, len(colorStops))
 	for i, cs := range colorStops {
 		colors[i] = cs.Color
 		stops[i] = cs.Stop
 	}
-	return LinearGradient{
+	return &LinearGradient{
 		Colors:   colors,
 		Stops:    stops,
 		Start:    start,
@@ -116,7 +87,7 @@ func LinearGradientBrushWithStops(colorStops []struct {
 	}
 }
 
-func HorizontalGradient(colors []Color, startX, endX float32, tileMode TileMode) LinearGradient {
+func HorizontalGradient(colors []Color, startX, endX float32, tileMode TileMode) *LinearGradient {
 	return LinearGradientBrush(
 		colors,
 		geometry.NewOffset(startX, 0.0),
@@ -125,11 +96,51 @@ func HorizontalGradient(colors []Color, startX, endX float32, tileMode TileMode)
 	)
 }
 
-func VerticalGradient(colors []Color, startY, endY float32, tileMode TileMode) LinearGradient {
+func VerticalGradient(colors []Color, startY, endY float32, tileMode TileMode) *LinearGradient {
 	return LinearGradientBrush(
 		colors,
 		geometry.NewOffset(0.0, startY),
 		geometry.NewOffset(0.0, endY),
 		tileMode,
 	)
+}
+
+func SemanticEqualLinearGradient(a, b *LinearGradient) bool {
+	a = CoalesceBrush(a, BrushUnspecified).(*LinearGradient)
+	b = CoalesceBrush(b, BrushUnspecified).(*LinearGradient)
+
+	// colors
+	if len(a.Colors) != len(b.Colors) {
+		return false
+	}
+	for i := range a.Colors {
+		if a.Colors[i] != b.Colors[i] {
+			return false
+		}
+	}
+	//stops
+	if !float32SliceEqual(a.Stops, b.Stops) {
+		return false
+	}
+	//start
+	if !a.Start.Equal(b.Start) {
+		return false
+	}
+	//end
+	if !a.End.Equal(b.End) {
+		return false
+	}
+	//tileMode
+	if a.TileMode != b.TileMode {
+		return false
+	}
+
+	return true
+}
+
+func EqualLinearGradient(a, b *LinearGradient) bool {
+	if !SameBrush(a, b) {
+		return SemanticEqualLinearGradient(a, b)
+	}
+	return true
 }

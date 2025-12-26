@@ -27,14 +27,21 @@ func (s SolidColor) IntrinsicSize() geometry.Size {
 	return geometry.SizeUnspecified
 }
 
-func (s SolidColor) Equal(other Brush) bool {
-	if other, ok := other.(SolidColor); ok {
-		return s.Value == other.Value
-	}
-	return false
+// NewSolidColor creates a new SolidColor brush from a Color.
+func NewSolidColor(color Color) *SolidColor {
+	return &SolidColor{Value: color}
 }
 
-// NewSolidColor creates a new SolidColor brush from a Color.
-func NewSolidColor(color Color) SolidColor {
-	return SolidColor{Value: color}
+func SemanticEqualSolidColor(a, b *SolidColor) bool {
+	a = CoalesceBrush(a, BrushUnspecified).(*SolidColor)
+	b = CoalesceBrush(b, BrushUnspecified).(*SolidColor)
+
+	return a.Value == b.Value
+}
+
+func EqualSolidColor(a, b *SolidColor) bool {
+	if !SameBrush(a, b) {
+		return SemanticEqualSolidColor(a, b)
+	}
+	return true
 }

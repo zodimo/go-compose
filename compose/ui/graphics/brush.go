@@ -1,18 +1,19 @@
 package graphics
 
 import (
+	"fmt"
+
 	"github.com/zodimo/go-compose/compose/ui/geometry"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 )
 
-var BrushUnspecified Brush = nil
+var BrushUnspecified Brush = &SolidColor{Value: ColorUnspecified}
 
 // Brush is the interface for all brush types used for drawing.
 // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-graphics/src/commonMain/kotlin/androidx/compose/ui/graphics/Brush.kt
 type Brush interface {
 	ApplyTo(size geometry.Size, p *Paint, alpha float32)
 	IntrinsicSize() geometry.Size
-	Equal(other Brush) bool
 
 	//closed interface
 	isBrush()
@@ -54,7 +55,7 @@ func float32SliceEqual(a, b []float32) bool {
 // Compatibility constants and helpers
 
 func IsSolidColor(b Brush) bool {
-	_, ok := b.(SolidColor)
+	_, ok := b.(*SolidColor)
 	return ok
 }
 
@@ -64,8 +65,8 @@ func IsShaderBrush(b Brush) bool {
 }
 
 func AsSolidColor(b Brush) *SolidColor {
-	if sc, ok := b.(SolidColor); ok {
-		return &sc
+	if sc, ok := b.(*SolidColor); ok {
+		return sc
 	}
 	return nil
 }
@@ -115,9 +116,9 @@ func LerpBrush(start, stop Brush, fraction float32) Brush {
 	}
 
 	// Case 1: Both SolidColor
-	if s1, ok1 := start.(SolidColor); ok1 {
-		if s2, ok2 := stop.(SolidColor); ok2 {
-			return NewSolidColor(LerpColor(s1.Value, s2.Value, fraction))
+	if s1, ok1 := start.(*SolidColor); ok1 {
+		if s2, ok2 := stop.(*SolidColor); ok2 {
+			return &SolidColor{Value: LerpColor(s1.Value, s2.Value, fraction)}
 		}
 	}
 
@@ -126,9 +127,9 @@ func LerpBrush(start, stop Brush, fraction float32) Brush {
 	// We need to handle this.
 	// But first, let's handle same-type gradients.
 
-	if l1, ok1 := start.(LinearGradient); ok1 {
-		if l2, ok2 := stop.(LinearGradient); ok2 {
-			return LinearGradient{
+	if l1, ok1 := start.(*LinearGradient); ok1 {
+		if l2, ok2 := stop.(*LinearGradient); ok2 {
+			return &LinearGradient{
 				Colors:   LerpColors(l1.Colors, l2.Colors, fraction),
 				Stops:    lerp.FloatList32(l1.Stops, l2.Stops, fraction),
 				Start:    geometry.LerpOffset(l1.Start, l2.Start, fraction),
@@ -138,9 +139,9 @@ func LerpBrush(start, stop Brush, fraction float32) Brush {
 		}
 	}
 
-	if r1, ok1 := start.(RadialGradient); ok1 {
-		if r2, ok2 := stop.(RadialGradient); ok2 {
-			return RadialGradient{
+	if r1, ok1 := start.(*RadialGradient); ok1 {
+		if r2, ok2 := stop.(*RadialGradient); ok2 {
+			return &RadialGradient{
 				Colors:   LerpColors(r1.Colors, r2.Colors, fraction),
 				Stops:    lerp.FloatList32(r1.Stops, r2.Stops, fraction),
 				Center:   geometry.LerpOffset(r1.Center, r2.Center, fraction),
@@ -166,4 +167,74 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// Short for IsSpecifiedShadow
+func IsSpecifiedBrush(s Brush) bool {
+	return s != nil && s != BrushUnspecified
+}
+func TakeOrElseBrush(s, def Brush) Brush {
+	if !IsSpecifiedBrush(s) {
+		return def
+	}
+	return s
+}
+
+func CoalesceBrush(ptr, def Brush) Brush {
+	if ptr == nil {
+		return def
+	}
+	return ptr
+}
+
+// Identity (2 ns)
+func SameBrush(a, b Brush) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil {
+		return b == BrushUnspecified
+	}
+	if b == nil {
+		return a == BrushUnspecified
+	}
+	// must be pointers
+	return a == b
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualBrush(a, b Brush) bool {
+
+	a = CoalesceBrush(a, BrushUnspecified)
+	b = CoalesceBrush(b, BrushUnspecified)
+
+	switch brush := a.(type) {
+	case *SolidColor:
+		if brushB, ok := b.(*SolidColor); ok {
+			return brush.Value == brushB.Value
+		}
+		return false
+	case *LinearGradient:
+		if brushB, ok := b.(*LinearGradient); ok {
+			return EqualLinearGradient(brush, brushB)
+		}
+	case *RadialGradient:
+		if brush2, ok := b.(*RadialGradient); ok {
+			return EqualRadialGradient(brush, brush2)
+		}
+	case *SweepGradient:
+		if brush2, ok := b.(*SweepGradient); ok {
+			return EqualSweepGradient(brush, brush2)
+		}
+	default:
+		panic(fmt.Sprintf("unhandled brush type, %T", a))
+	}
+	return false
+}
+
+func EqualBrush(a, b Brush) bool {
+	if !SameBrush(a, b) {
+		return SemanticEqualBrush(a, b)
+	}
+	return true
 }
