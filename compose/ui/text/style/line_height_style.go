@@ -185,9 +185,9 @@ func MergeLineHeightStyle(a, b *LineHeightStyle) *LineHeightStyle {
 
 	// Both are custom: allocate new merged style
 	return &LineHeightStyle{
-		Alignment: TakeOrElseLineHeightStyleAlignment(a.Alignment, b.Alignment),
-		Trim:      a.Trim.TakeOrElse(b.Trim),
-		Mode:      a.Mode.TakeOrElse(b.Mode),
+		Alignment: TakeOrElseLineHeightStyleAlignment(b.Alignment, a.Alignment),
+		Trim:      b.Trim.TakeOrElse(a.Trim),
+		Mode:      b.Mode.TakeOrElse(a.Mode),
 	}
 }
 
