@@ -6,6 +6,8 @@ import (
 	"math"
 	"sort"
 	"strings"
+
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // ============================================================================
@@ -160,6 +162,150 @@ func paragraphStylesFromAnnotations(annotations []Range[Annotation]) []Range[Par
 		}
 	}
 	return paraStyles
+}
+
+// NormalizedParagraphStyles determines the paragraph boundaries and merges styles.
+// It handles gaps (using defaultParagraphStyle) and nested paragraphs.
+func (as AnnotatedString) NormalizedParagraphStyles(defaultParagraphStyle ParagraphStyle) []Range[ParagraphStyle] {
+	spanStyles := as.paragraphStyles
+	length := len(as.text)
+
+	// Create a copy and sort by start
+	sortedParagraphs := make([]Range[ParagraphStyle], len(spanStyles))
+	copy(sortedParagraphs, spanStyles)
+	sort.Slice(sortedParagraphs, func(i, j int) bool {
+		return sortedParagraphs[i].Start < sortedParagraphs[j].Start
+	})
+
+	var result []Range[ParagraphStyle]
+	lastAdded := 0
+	var stack []Range[ParagraphStyle]
+
+	for _, current := range sortedParagraphs {
+		// Merge current with parent if nested
+		if len(stack) > 0 {
+			// Current is nested in stack top?
+			// The validation ensures proper nesting or no overlap.
+			// But we need to merge styles.
+			// In Kotlin: val current = it.copy(defaultParagraphStyle.merge(it.item))
+			// But wait, Kotlin merges with default first?
+			// current = it.copy(defaultParagraphStyle.merge(it.item))
+			// Actually Kotlin code says:
+			// val current = it.copy(defaultParagraphStyle.merge(it.item))
+			// So it merges the current item ON TOP OF default.
+
+			// In Go we have MergeParagraphStyle(a, b) -> yields b merged over a.
+			// So default.Merge(item) -> item on top of default.
+			merged := MergeParagraphStyle(&defaultParagraphStyle, &current.Item)
+			current.Item = *merged
+		} else {
+			merged := MergeParagraphStyle(&defaultParagraphStyle, &current.Item)
+			current.Item = *merged
+		}
+
+		for lastAdded < current.Start && len(stack) > 0 {
+			lastInStack := stack[len(stack)-1]
+			if current.Start < lastInStack.End {
+				result = append(result, Range[ParagraphStyle]{
+					Item:  lastInStack.Item,
+					Start: lastAdded,
+					End:   current.Start,
+				})
+				lastAdded = current.Start
+			} else {
+				result = append(result, Range[ParagraphStyle]{
+					Item:  lastInStack.Item,
+					Start: lastAdded,
+					End:   lastInStack.End,
+				})
+				lastAdded = lastInStack.End
+				// Pop finished
+				for len(stack) > 0 && lastAdded == stack[len(stack)-1].End {
+					stack = stack[:len(stack)-1]
+				}
+			}
+		}
+
+		if lastAdded < current.Start {
+			result = append(result, Range[ParagraphStyle]{
+				Item:  defaultParagraphStyle,
+				Start: lastAdded,
+				End:   current.Start,
+			})
+			lastAdded = current.Start
+		}
+
+		if len(stack) > 0 {
+			lastInStack := stack[len(stack)-1]
+			if lastInStack.Start == current.Start && lastInStack.End == current.End {
+				// Fully overlapped
+				stack = stack[:len(stack)-1]
+				merged := MergeParagraphStyle(&lastInStack.Item, &current.Item)
+				stack = append(stack, Range[ParagraphStyle]{
+					Item:  *merged,
+					Start: current.Start,
+					End:   current.End,
+				})
+			} else if lastInStack.Start == lastInStack.End {
+				// Zero length
+				result = append(result, Range[ParagraphStyle]{
+					Item:  lastInStack.Item,
+					Start: lastInStack.Start,
+					End:   lastInStack.End,
+				})
+				stack = stack[:len(stack)-1]
+				stack = append(stack, Range[ParagraphStyle]{
+					Item:  current.Item,
+					Start: current.Start,
+					End:   current.End,
+				})
+			} else {
+				merged := MergeParagraphStyle(&lastInStack.Item, &current.Item)
+				stack = append(stack, Range[ParagraphStyle]{
+					Item:  *merged,
+					Start: current.Start,
+					End:   current.End,
+				})
+			}
+		} else {
+			stack = append(stack, Range[ParagraphStyle]{
+				Item:  current.Item,
+				Start: current.Start,
+				End:   current.End,
+			})
+		}
+	}
+
+	for lastAdded <= length && len(stack) > 0 {
+		lastInStack := stack[len(stack)-1]
+		result = append(result, Range[ParagraphStyle]{
+			Item:  lastInStack.Item,
+			Start: lastAdded,
+			End:   lastInStack.End,
+		})
+		lastAdded = lastInStack.End
+		for len(stack) > 0 && lastAdded == stack[len(stack)-1].End {
+			stack = stack[:len(stack)-1]
+		}
+	}
+
+	if lastAdded < length {
+		result = append(result, Range[ParagraphStyle]{
+			Item:  defaultParagraphStyle,
+			Start: lastAdded,
+			End:   length,
+		})
+	}
+
+	if len(result) == 0 {
+		result = append(result, Range[ParagraphStyle]{
+			Item:  defaultParagraphStyle,
+			Start: 0,
+			End:   0,
+		})
+	}
+
+	return result
 }
 
 // validateParagraphStyles ensures no overlapping paragraph ranges.
@@ -338,6 +484,20 @@ func Empty() AnnotatedString {
 	return AnnotatedString{text: ""}
 }
 
+// MapAnnotations returns a new AnnotatedString with annotations transformed.
+func (as AnnotatedString) MapAnnotations(transform func(Range[Annotation]) Range[Annotation]) AnnotatedString {
+	b := NewBuilderFromAnnotatedString(as)
+	b.MapAnnotations(transform)
+	return b.ToAnnotatedString()
+}
+
+// FlatMapAnnotations returns a new AnnotatedString with annotations transformed to multiple annotations.
+func (as AnnotatedString) FlatMapAnnotations(transform func(Range[Annotation]) []Range[Annotation]) AnnotatedString {
+	b := NewBuilderFromAnnotatedString(as)
+	b.FlatMapAnnotations(transform)
+	return b.ToAnnotatedString()
+}
+
 // ============================================================================
 // Builder
 // ============================================================================
@@ -362,13 +522,19 @@ func NewBuilder(capacity ...int) *Builder {
 	if len(capacity) > 0 && capacity[0] > 0 {
 		cap = capacity[0]
 	}
-	var text strings.Builder
-	text.Grow(cap)
-	return &Builder{
-		text:        text,
+	b := &Builder{
 		styleStack:  make([]mutableRange, 0, 8),
 		annotations: make([]mutableRange, 0, 16),
 	}
+	b.text.Grow(cap)
+	return b
+}
+
+// NewBuilderFromAnnotatedString creates a Builder initialized with the given AnnotatedString.
+func NewBuilderFromAnnotatedString(as AnnotatedString) *Builder {
+	b := NewBuilder(as.Len())
+	b.AppendAnnotatedString(as)
+	return b
 }
 
 // Len returns current text length.
@@ -435,6 +601,69 @@ func (b *Builder) PushStyle(style SpanStyle) int {
 	return len(b.styleStack) - 1
 }
 
+// AddTtsAnnotation adds a TtsAnnotation to range [start, end).
+func (b *Builder) AddTtsAnnotation(tts TtsAnnotation, start, end int) {
+	b.annotations = append(b.annotations, mutableRange{
+		item:  tts,
+		start: start,
+		end:   end,
+	})
+}
+
+// AddLink adds a LinkAnnotation to range [start, end).
+func (b *Builder) AddLink(link LinkAnnotation, start, end int) {
+	b.annotations = append(b.annotations, mutableRange{
+		item:  link,
+		start: start,
+		end:   end,
+	})
+}
+
+// AddBullet adds a Bullet annotation to range [start, end).
+func (b *Builder) AddBullet(bullet Bullet, start, end int) {
+	b.annotations = append(b.annotations, mutableRange{
+		item:  bullet,
+		start: start,
+		end:   end,
+	})
+}
+
+// PushTtsAnnotation pushes a TtsAnnotation onto the stack.
+func (b *Builder) PushTtsAnnotation(tts TtsAnnotation) int {
+	mr := mutableRange{
+		item:  tts,
+		start: b.text.Len(),
+		end:   math.MinInt,
+	}
+	b.styleStack = append(b.styleStack, mr)
+	b.annotations = append(b.annotations, mr)
+	return len(b.styleStack) - 1
+}
+
+// PushLink pushes a LinkAnnotation onto the stack.
+func (b *Builder) PushLink(link LinkAnnotation) int {
+	mr := mutableRange{
+		item:  link,
+		start: b.text.Len(),
+		end:   math.MinInt,
+	}
+	b.styleStack = append(b.styleStack, mr)
+	b.annotations = append(b.annotations, mr)
+	return len(b.styleStack) - 1
+}
+
+// PushBullet pushes a Bullet annotation onto the stack.
+func (b *Builder) PushBullet(bullet Bullet) int {
+	mr := mutableRange{
+		item:  bullet,
+		start: b.text.Len(),
+		end:   math.MinInt,
+	}
+	b.styleStack = append(b.styleStack, mr)
+	b.annotations = append(b.annotations, mr)
+	return len(b.styleStack) - 1
+}
+
 // Pop ends the last pushed style/annotation.
 func (b *Builder) Pop() {
 	if len(b.styleStack) == 0 {
@@ -462,6 +691,48 @@ func (b *Builder) ToAnnotatedString() AnnotatedString {
 		}
 	}
 	return newAnnotatedStringWithAnnotations(b.text.String(), mutableToImmutable(b.annotations))
+}
+
+// MapAnnotations transforms annotations in the builder.
+func (b *Builder) MapAnnotations(transform func(Range[Annotation]) Range[Annotation]) {
+	for i, ann := range b.annotations {
+		immutable := Range[Annotation]{
+			Item:  ann.item,
+			Start: ann.start,
+			End:   ann.end,
+			Tag:   ann.tag,
+		}
+		transformed := transform(immutable)
+		b.annotations[i] = mutableRange{
+			item:  transformed.Item,
+			start: transformed.Start,
+			end:   transformed.End,
+			tag:   transformed.Tag,
+		}
+	}
+}
+
+// FlatMapAnnotations transforms annotations into multiple annotations.
+func (b *Builder) FlatMapAnnotations(transform func(Range[Annotation]) []Range[Annotation]) {
+	var newAnnotations []mutableRange
+	for _, ann := range b.annotations {
+		immutable := Range[Annotation]{
+			Item:  ann.item,
+			Start: ann.start,
+			End:   ann.end,
+			Tag:   ann.tag,
+		}
+		transformed := transform(immutable)
+		for _, t := range transformed {
+			newAnnotations = append(newAnnotations, mutableRange{
+				item:  t.Item,
+				start: t.Start,
+				end:   t.End,
+				tag:   t.Tag,
+			})
+		}
+	}
+	b.annotations = newAnnotations
 }
 
 // mutableToImmutable converts mutableRange to Range[Annotation].
@@ -525,4 +796,250 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// GetLocalParagraphStyles finds ParagraphStyles in range and converts them to local range.
+func (as AnnotatedString) GetLocalParagraphStyles(start, end int) []Range[ParagraphStyle] {
+	if start == end {
+		return nil
+	}
+	if as.paragraphStyles == nil {
+		return nil
+	}
+	if start == 0 && end >= len(as.text) {
+		return as.paragraphStyles
+	}
+	var result []Range[ParagraphStyle]
+	for _, ps := range as.paragraphStyles {
+		if intersect(start, end, ps.Start, ps.End) {
+			result = append(result, Range[ParagraphStyle]{
+				Item:  ps.Item,
+				Start: coerceIn(ps.Start, start, end) - start,
+				End:   coerceIn(ps.End, start, end) - start,
+			})
+		}
+	}
+	return result
+}
+
+// GetLocalAnnotations finds annotations in range matching predicate and converts to local range.
+func (as AnnotatedString) GetLocalAnnotations(start, end int, predicate func(Annotation) bool) []Range[Annotation] {
+	if start == end {
+		return nil
+	}
+	annotations := as.annotations
+	if len(annotations) == 0 {
+		return nil
+	}
+	if start == 0 && end >= len(as.text) {
+		if predicate == nil {
+			return annotations
+		}
+		var filtered []Range[Annotation]
+		for _, ann := range annotations {
+			if predicate(ann.Item) {
+				filtered = append(filtered, ann)
+			}
+		}
+		return filtered
+	}
+	var result []Range[Annotation]
+	for _, ann := range annotations {
+		matches := true
+		if predicate != nil {
+			matches = predicate(ann.Item)
+		}
+		if matches && intersect(start, end, ann.Start, ann.End) {
+			result = append(result, Range[Annotation]{
+				Item:  ann.Item,
+				Start: coerceIn(ann.Start, start, end) - start,
+				End:   coerceIn(ann.End, start, end) - start,
+				Tag:   ann.Tag,
+			})
+		}
+	}
+	return result
+}
+
+// SubstringWithoutParagraphStyles returns a substring without paragraph styles.
+func (as AnnotatedString) SubstringWithoutParagraphStyles(start, end int) AnnotatedString {
+	text := ""
+	if start != end {
+		text = as.text[start:end]
+	}
+	return newAnnotatedStringWithAnnotations(
+		text,
+		as.GetLocalAnnotations(start, end, func(a Annotation) bool {
+			_, isPara := a.(ParagraphStyle)
+			return !isPara
+		}),
+	)
+}
+
+// MapEachParagraphStyle iterates normalized paragraph styles.
+func MapEachParagraphStyle[T any](
+	as AnnotatedString,
+	defaultParagraphStyle ParagraphStyle,
+	block func(annotatedString AnnotatedString, paragraphStyle Range[ParagraphStyle]) T,
+) []T {
+	normalized := as.NormalizedParagraphStyles(defaultParagraphStyle)
+	result := make([]T, 0, len(normalized))
+	for _, psRange := range normalized {
+		// Create substring for this paragraph range
+		// Kotlins substringWithoutParagraphStyles is used here
+		subAs := as.SubstringWithoutParagraphStyles(psRange.Start, psRange.End)
+		result = append(result, block(subAs, psRange))
+	}
+	return result
+}
+
+// WithStyle pushes style, executes block, and pops.
+func (b *Builder) WithStyle(style SpanStyle, block func()) {
+	index := b.PushStyle(style)
+	defer b.PopTo(index)
+	block()
+}
+
+// PushParagraphStyle pushes a ParagraphStyle onto the stack.
+func (b *Builder) PushParagraphStyle(style ParagraphStyle) int {
+	mr := mutableRange{
+		item:  style,
+		start: b.text.Len(),
+		end:   math.MinInt,
+	}
+	b.styleStack = append(b.styleStack, mr)
+	b.annotations = append(b.annotations, mr)
+	return len(b.styleStack) - 1
+}
+
+// WithParagraphStyle pushes paragraph style, executes block, and pops.
+func (b *Builder) WithParagraphStyle(style ParagraphStyle, block func()) {
+	index := b.PushParagraphStyle(style)
+	defer b.PopTo(index)
+	block()
+}
+
+// WithAnnotation pushes annotation, executes block, and pops.
+func (b *Builder) WithAnnotation(tag, annotation string, block func()) {
+	index := b.PushStringAnnotation(tag, annotation)
+	defer b.PopTo(index)
+	block()
+}
+
+// WithTtsAnnotation pushes tts annotation, executes block, and pops.
+func (b *Builder) WithTtsAnnotation(tts TtsAnnotation, block func()) {
+	index := b.PushTtsAnnotation(tts)
+	defer b.PopTo(index)
+	block()
+}
+
+// WithLink pushes link annotation, executes block, and pops.
+func (b *Builder) WithLink(link LinkAnnotation, block func()) {
+	index := b.PushLink(link)
+	defer b.PopTo(index)
+	block()
+}
+
+// PushStringAnnotation pushes a string annotation onto the stack.
+func (b *Builder) PushStringAnnotation(tag, annotation string) int {
+	mr := mutableRange{
+		item:  StringAnnotation(annotation),
+		start: b.text.Len(),
+		end:   math.MinInt,
+		tag:   tag,
+	}
+	b.styleStack = append(b.styleStack, mr)
+	b.annotations = append(b.annotations, mr)
+	return len(b.styleStack) - 1
+}
+
+// BulletScope is the scope for a bullet list.
+type BulletScope struct {
+	builder                *Builder
+	bulletListSettingStack []bulletSetting
+}
+
+type bulletSetting struct {
+	indent unit.TextUnit
+	bullet Bullet
+}
+
+// WithBulletList creates a bullet list scope.
+func (b *Builder) WithBulletList(
+	indentation unit.TextUnit,
+	bullet Bullet,
+	block func(*BulletScope),
+) {
+	scope := &BulletScope{
+		builder: b,
+		bulletListSettingStack: []bulletSetting{
+			{indent: indentation, bullet: bullet},
+		},
+	}
+	// Kotlin logic involves pushing a paragraph style for the list container
+	// But for now we just run the block.
+	// The implementation details of nested lists with indentation logic is complex and requires style.TextIndent.
+	// I will simplify for this port to just execute the block to unblock compilation.
+	// TODO: Implement full indentation logic.
+	block(scope)
+}
+
+// WithBulletListItem adds a bullet list item.
+func (s *BulletScope) WithBulletListItem(
+	bullet *Bullet,
+	block func(),
+) {
+	// TODO: Implement bullet logic
+	block()
+}
+
+// Case transformations
+
+// ToUpper returns a new AnnotatedString with text converted to uppercase.
+func (as AnnotatedString) ToUpper() AnnotatedString {
+	return AnnotatedString{
+		text:            strings.ToUpper(as.text),
+		spanStyles:      as.spanStyles,
+		paragraphStyles: as.paragraphStyles,
+		annotations:     as.annotations,
+	}
+}
+
+// ToLower returns a new AnnotatedString with text converted to lowercase.
+func (as AnnotatedString) ToLower() AnnotatedString {
+	return AnnotatedString{
+		text:            strings.ToLower(as.text),
+		spanStyles:      as.spanStyles,
+		paragraphStyles: as.paragraphStyles,
+		annotations:     as.annotations,
+	}
+}
+
+// Capitalize returns a new AnnotatedString with the first character capitalized.
+func (as AnnotatedString) Capitalize() AnnotatedString {
+	if len(as.text) == 0 {
+		return as
+	}
+	// Simple naive capitalization
+	text := strings.ToUpper(as.text[:1]) + as.text[1:]
+	return AnnotatedString{
+		text:            text,
+		spanStyles:      as.spanStyles,
+		paragraphStyles: as.paragraphStyles,
+		annotations:     as.annotations,
+	}
+}
+
+// Decapitalize returns a new AnnotatedString with the first character lowercased.
+func (as AnnotatedString) Decapitalize() AnnotatedString {
+	if len(as.text) == 0 {
+		return as
+	}
+	text := strings.ToLower(as.text[:1]) + as.text[1:]
+	return AnnotatedString{
+		text:            text,
+		spanStyles:      as.spanStyles,
+		paragraphStyles: as.paragraphStyles,
+		annotations:     as.annotations,
+	}
 }
