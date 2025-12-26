@@ -194,3 +194,48 @@ func TestFontFamily_InterfaceImplementation(t *testing.T) {
 	// Ensure file-based families implement FileBasedFontFamily
 	var _ FileBasedFontFamily = &FontListFontFamily{}
 }
+
+func TestStringFontFamily(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    FontFamily
+		expected string
+	}{
+		{
+			name:     "Nil FontFamily",
+			input:    nil,
+			expected: "FontFamily.Default",
+		},
+		{
+			name:     "Default FontFamily",
+			input:    &DefaultFontFamily{},
+			expected: "FontFamily.Default",
+		},
+		{
+			name:     "SansSerif FontFamily",
+			input:    FontFamilySansSerif,
+			expected: "FontFamily.SansSerif",
+		},
+		{
+			name:     "Custom GenericFontFamily",
+			input:    NewGenericFontFamily("foo", "FontFamily.Foo"),
+			expected: "FontFamily.Foo",
+		},
+		{
+			name: "List FontFamily",
+			input: NewFontListFontFamily([]Font{
+				&mockFont{weight: FontWeightNormal, style: FontStyleNormal, loadingStrategy: FontLoadingStrategyBlocking},
+			}),
+			expected: "FontListFontFamily(fonts=[Font(weight=FontWeight(weight=400), style=Normal)])",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := StringFontFamily(tt.input)
+			if got != tt.expected {
+				t.Errorf("StringFontFamily() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}

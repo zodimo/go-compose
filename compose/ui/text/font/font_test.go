@@ -1,6 +1,8 @@
 package font
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestMaximumAsyncTimeoutMillis(t *testing.T) {
 	if MaximumAsyncTimeoutMillis != 15000 {

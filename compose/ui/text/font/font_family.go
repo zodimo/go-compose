@@ -122,7 +122,12 @@ func (f *FontListFontFamily) equal(other *FontListFontFamily) bool {
 
 // String returns a string representation of the FontListFontFamily.
 func (f *FontListFontFamily) String() string {
-	return fmt.Sprintf("FontListFontFamily(fonts=%v)", f.Fonts)
+	//fonts
+	fonts := ""
+	for _, font := range f.Fonts {
+		fonts += StringFont(font)
+	}
+	return fmt.Sprintf("FontListFontFamily(fonts=[%v])", fonts)
 }
 
 // LoadedFontFamily defines a font family that is already a loaded Typeface.
@@ -196,4 +201,23 @@ func TakeOrElseFontFamily(a, b FontFamily) FontFamily {
 		return b
 	}
 	return a
+}
+
+func StringFontFamily(f FontFamily) string {
+	if f == nil {
+		return "FontFamily.Default"
+	}
+
+	switch family := f.(type) {
+	case *DefaultFontFamily:
+		return family.String()
+	case *GenericFontFamily:
+		return family.String()
+	case *FontListFontFamily:
+		return family.String()
+	case *LoadedFontFamily:
+		return family.String()
+	default:
+		panic("unknown font family type")
+	}
 }

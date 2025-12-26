@@ -51,8 +51,19 @@ func (f FontSynthesis) IsStyleOn() bool {
 	return f.value&synthesisStyleFlag != 0
 }
 
-// String returns a string representation of the FontSynthesis.
-func (f FontSynthesis) String() string {
+// FontSynthesisValueOf creates a FontSynthesis from an integer value.
+// Returns an error if the value is not recognized.
+func FontSynthesisValueOf(value int) (*FontSynthesis, error) {
+	if value != 0 && value != synthesisWeightFlag && value != synthesisStyleFlag && value != synthesisAllFlags {
+		return nil, fmt.Errorf("the given value=%d is not recognized by FontSynthesis", value)
+	}
+	return &FontSynthesis{value: value}, nil
+}
+
+func StringFontSynthesis(f *FontSynthesis) string {
+	if f == nil {
+		return "FontSynthesis(nil)"
+	}
 	switch f.value {
 	case -1:
 		return "Unspecified"
@@ -67,15 +78,6 @@ func (f FontSynthesis) String() string {
 	default:
 		return "Invalid"
 	}
-}
-
-// FontSynthesisValueOf creates a FontSynthesis from an integer value.
-// Returns an error if the value is not recognized.
-func FontSynthesisValueOf(value int) (*FontSynthesis, error) {
-	if value != 0 && value != synthesisWeightFlag && value != synthesisStyleFlag && value != synthesisAllFlags {
-		return nil, fmt.Errorf("the given value=%d is not recognized by FontSynthesis", value)
-	}
-	return &FontSynthesis{value: value}, nil
 }
 
 func IsFontSynthesis(f *FontSynthesis) bool {

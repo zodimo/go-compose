@@ -58,8 +58,8 @@ func TestFontSynthesis_String(t *testing.T) {
 		{FontSynthesisAll, "All"},
 	}
 	for _, tt := range tests {
-		if tt.fs.String() != tt.expected {
-			t.Errorf("Expected %s, got %s", tt.expected, tt.fs.String())
+		if StringFontSynthesis(tt.fs) != tt.expected {
+			t.Errorf("Expected %s, got %s", tt.expected, StringFontSynthesis(tt.fs))
 		}
 	}
 }

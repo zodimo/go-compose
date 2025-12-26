@@ -59,7 +59,15 @@ func EqualPlatformTextStyle(a, b *PlatformTextStyle) bool {
 }
 
 func EqualPlatformSpanStyle(a, b *PlatformSpanStyle) bool {
-	panic("EqualPlatformSpanStyle not implemented")
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	// For now it's empty struct, so just true if both not nil.
+	// Later if fields are added, compare them.
+	return *a == *b
 }
 
 func EqualPlatformParagraphStyle(a, b *PlatformParagraphStyle) bool {

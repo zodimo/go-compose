@@ -1,6 +1,8 @@
 package text
 
 import (
+	"fmt"
+
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/compose/ui/text/intl"
@@ -54,13 +56,13 @@ func (s SpanStyle) isAnnotation() {
 
 // Props
 func (s SpanStyle) Color() graphics.Color {
-	return s.textForegroundStyle.Color
+	return style.CoalesceTextForegroundStyle(s.textForegroundStyle, style.TextForegroundStyleUnspecified).Color
 }
 func (s SpanStyle) Brush() graphics.Brush {
-	return s.textForegroundStyle.Brush
+	return style.CoalesceTextForegroundStyle(s.textForegroundStyle, style.TextForegroundStyleUnspecified).Brush
 }
 func (s SpanStyle) Alpha() float32 {
-	return s.textForegroundStyle.Alpha
+	return style.CoalesceTextForegroundStyle(s.textForegroundStyle, style.TextForegroundStyleUnspecified).Alpha
 }
 
 type SpanStyleOptions struct {
@@ -202,7 +204,33 @@ func (s SpanStyle) Copy(options ...SpanStyleOption) *SpanStyle {
 }
 
 func StringSpanStyle(s *SpanStyle) string {
-	panic("SpanStyle ToString not implemented")
+
+	if s == nil {
+		return "SpanStyle(nil)"
+	}
+
+	s = CoalesceSpanStyle(s, SpanStyleUnspecified)
+
+	return "SpanStyle(" +
+		"color=" + s.Color().String() + ", " +
+		"brush=" + fmt.Sprintf("%v", s.Brush()) + ", " +
+		"alpha=" + fmt.Sprintf("%.2f", s.Alpha()) + ", " +
+		"fontSize=" + s.FontSize.String() + ", " +
+		"fontWeight=" + s.FontWeight.String() + ", " +
+		"fontStyle=" + s.FontStyle.String() + ", " +
+		"fontSynthesis=" + font.StringFontSynthesis(s.FontSynthesis) + ", " +
+		"fontFamily=" + font.StringFontFamily(s.FontFamily) + ", " +
+		"fontFeatureSettings=" + s.FontFeatureSettings + ", " +
+		"letterSpacing=" + s.LetterSpacing.String() + ", " +
+		"baselineShift=" + s.BaselineShift.String() + ", " +
+		"textGeometricTransform=" + style.StringTextGeometricTransform(s.TextGeometricTransform) + ", " +
+		"localeList=" + fmt.Sprintf("%v", s.LocaleList) + ", " +
+		"background=" + s.Background.String() + ", " +
+		"textDecoration=" + style.StringTextDecoration(s.TextDecoration) + ", " +
+		"shadow=" + graphics.StringShadow(s.Shadow) + ", " +
+		"platformStyle=" + fmt.Sprintf("%v", s.PlatformStyle) + ", " +
+		"drawStyle=" + fmt.Sprintf("%v", s.DrawStyle) +
+		")"
 }
 
 func IsSpecifiedSpanStyle(s *SpanStyle) bool {
@@ -262,19 +290,34 @@ func EqualSpanStyle(a, b *SpanStyle) bool {
 }
 
 func MergeSpanStyle(a, b *SpanStyle) *SpanStyle {
-	a = CoalesceSpanStyle(a, SpanStyleUnspecified)
-	b = CoalesceSpanStyle(b, SpanStyleUnspecified)
-
-	if a == SpanStyleUnspecified {
-		return b
-	}
-	if b == SpanStyleUnspecified {
+	if b == nil {
 		return a
 	}
+	if a == nil {
+		return b
+	}
 
-	// Both are custom: allocate new merged style
+	a = CoalesceSpanStyle(a, SpanStyleUnspecified)
+	b = CoalesceSpanStyle(b, SpanStyleUnspecified)
+	// b is kept as is because we merge INTO it
+
 	return &SpanStyle{
-		textForegroundStyle: style.MergeTextForegroundStyle(a.textForegroundStyle, b.textForegroundStyle),
+		textForegroundStyle:    style.MergeTextForegroundStyle(a.textForegroundStyle, b.textForegroundStyle),
+		FontSize:               b.FontSize.TakeOrElse(a.FontSize),
+		FontWeight:             b.FontWeight.TakeOrElse(a.FontWeight),
+		FontStyle:              b.FontStyle.TakeOrElse(a.FontStyle),
+		FontSynthesis:          font.TakeOrElseFontSynthesis(b.FontSynthesis, a.FontSynthesis),
+		FontFamily:             font.TakeOrElseFontFamily(b.FontFamily, a.FontFamily),
+		FontFeatureSettings:    sentinel.TakeOrElseString(b.FontFeatureSettings, a.FontFeatureSettings),
+		LetterSpacing:          b.LetterSpacing.TakeOrElse(a.LetterSpacing),
+		BaselineShift:          style.TakeOrElseBaselineShift(b.BaselineShift, a.BaselineShift),
+		TextGeometricTransform: style.TakeOrElseTextGeometricTransform(b.TextGeometricTransform, a.TextGeometricTransform),
+		LocaleList:             intl.TakeOrElseLocaleList(b.LocaleList, a.LocaleList),
+		Background:             b.Background.TakeOrElse(a.Background),
+		TextDecoration:         style.TakeOrElseTextDecoration(b.TextDecoration, a.TextDecoration),
+		Shadow:                 graphics.TakeOrElseShadow(b.Shadow, a.Shadow),
+		PlatformStyle:          TakeOrElsePlatformSpanStyle(b.PlatformStyle, a.PlatformStyle),
+		DrawStyle:              graphics.TakeOrElseDrawStyle(b.DrawStyle, a.DrawStyle),
 	}
 }
 
@@ -283,4 +326,82 @@ func CoalesceSpanStyle(ptr, def *SpanStyle) *SpanStyle {
 		return def
 	}
 	return ptr
+}
+
+func LerpSpanStyle(width, start, stop *SpanStyle, fraction float32) *SpanStyle {
+	start = CoalesceSpanStyle(start, SpanStyleUnspecified)
+	stop = CoalesceSpanStyle(stop, SpanStyleUnspecified)
+
+	return &SpanStyle{
+		textForegroundStyle: style.LerpTextForegroundStyle(start.textForegroundStyle, stop.textForegroundStyle, fraction),
+		FontSize:            LerpTextUnitInheritable(start.FontSize, stop.FontSize, fraction),
+		FontWeight:          font.LerpFontWeight(start.FontWeight, stop.FontWeight, fraction),
+		FontStyle:           lerpDiscrete(start.FontStyle, stop.FontStyle, fraction),
+		FontSynthesis:       lerpDiscrete(start.FontSynthesis, stop.FontSynthesis, fraction),
+		FontFamily:          lerpDiscrete(start.FontFamily, stop.FontFamily, fraction),
+		FontFeatureSettings: lerpDiscrete(start.FontFeatureSettings, stop.FontFeatureSettings, fraction),
+		LetterSpacing:       LerpTextUnitInheritable(start.LetterSpacing, stop.LetterSpacing, fraction),
+		BaselineShift:       style.LerpBaselineShift(start.BaselineShift, stop.BaselineShift, fraction),
+		TextGeometricTransform: ptr(style.LerpGeometricTransform(
+			style.TakeOrElseTextGeometricTransform(start.TextGeometricTransform, style.TextGeometricTransformNone),
+			style.TakeOrElseTextGeometricTransform(stop.TextGeometricTransform, style.TextGeometricTransformNone),
+			fraction)),
+		LocaleList:     lerpDiscrete(start.LocaleList, stop.LocaleList, fraction),
+		Background:     graphics.LerpColor(start.Background, stop.Background, fraction),
+		TextDecoration: lerpDiscrete(start.TextDecoration, stop.TextDecoration, fraction),
+		Shadow:         graphics.LerpShadow(start.Shadow, stop.Shadow, fraction),
+		PlatformStyle:  LerpPlatformSpanStyle(start.PlatformStyle, stop.PlatformStyle, fraction),
+		DrawStyle:      lerpDiscrete(start.DrawStyle, stop.DrawStyle, fraction),
+	}
+
+}
+
+func LerpTextUnitInheritable(a, b unit.TextUnit, t float32) unit.TextUnit {
+	if a.IsUnspecified() || b.IsUnspecified() {
+		return lerpDiscrete(a, b, t)
+	}
+	return unit.LerpTextUnit(a, b, t)
+}
+
+func lerpDiscrete[T any](a, b T, fraction float32) T {
+	if fraction < 0.5 {
+		return a
+	}
+	return b
+}
+
+func ptr[T any](v T) *T {
+	return &v
+}
+
+func LerpPlatformSpanStyle(start, stop *PlatformSpanStyle, fraction float32) *PlatformSpanStyle {
+	if start == nil && stop == nil {
+		return nil
+	}
+	if fraction < 0.5 {
+		return start
+	}
+	return stop
+}
+
+func ResolveSpanStyleDefaults(s *SpanStyle) *SpanStyle {
+	s = CoalesceSpanStyle(s, SpanStyleUnspecified)
+	return &SpanStyle{
+		textForegroundStyle:    style.TakeOrElseTextForegroundStyle(s.textForegroundStyle, DefaultColorForegroundStyle),
+		FontSize:               s.FontSize.TakeOrElse(DefaultFontSize),
+		FontWeight:             s.FontWeight.TakeOrElse(font.FontWeightNormal),
+		FontStyle:              s.FontStyle.TakeOrElse(font.FontStyleNormal),
+		FontSynthesis:          font.TakeOrElseFontSynthesis(s.FontSynthesis, font.FontSynthesisAll),
+		FontFamily:             font.TakeOrElseFontFamily(s.FontFamily, font.FontFamilyDefault),
+		FontFeatureSettings:    sentinel.TakeOrElseString(s.FontFeatureSettings, ""),
+		LetterSpacing:          s.LetterSpacing.TakeOrElse(DefaultLetterSpacing),
+		BaselineShift:          style.TakeOrElseBaselineShift(s.BaselineShift, style.BaselineShiftNone),
+		TextGeometricTransform: style.TakeOrElseTextGeometricTransform(s.TextGeometricTransform, style.TextGeometricTransformNone), // TODO: check sentinel for nil
+		LocaleList:             intl.TakeOrElseLocaleList(s.LocaleList, nil),                                                       // TODO: verify default
+		Background:             s.Background.TakeOrElse(graphics.ColorTransparent),                                                 // Should be transparent?
+		TextDecoration:         style.TakeOrElseTextDecoration(s.TextDecoration, nil),                                              // TODO verify
+		Shadow:                 graphics.TakeOrElseShadow(s.Shadow, graphics.ShadowNone),
+		PlatformStyle:          TakeOrElsePlatformSpanStyle(s.PlatformStyle, nil), // TODO
+		DrawStyle:              graphics.TakeOrElseDrawStyle(s.DrawStyle, nil),
+	}
 }

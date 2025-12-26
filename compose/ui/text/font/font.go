@@ -1,5 +1,7 @@
 package font
 
+import "fmt"
+
 // MaximumAsyncTimeoutMillis is the global timeout for fetching an async font.
 // After this timeout, a font load may no longer trigger text reflow.
 const MaximumAsyncTimeoutMillis = 15_000
@@ -21,4 +23,8 @@ type Font interface {
 // ToFontFamily creates a FontFamily from a single Font.
 func ToFontFamily(f Font) FontFamily {
 	return NewFontListFontFamily([]Font{f})
+}
+
+func StringFont(f Font) string {
+	return fmt.Sprintf("Font(weight=%s, style=%s)", f.Weight(), f.Style())
 }
