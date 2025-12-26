@@ -5,11 +5,11 @@ import (
 	"strings"
 )
 
-type TextDecorationMask int
-
 var TextDecorationUnspecified = &TextDecoration{
 	mask: TextDecorationMaskUnspecified,
 }
+
+type TextDecorationMask int
 
 const (
 	TextDecorationMaskUnspecified TextDecorationMask = -1
@@ -53,26 +53,6 @@ func (t TextDecoration) Contains(other TextDecoration) bool {
 	return (t.mask | other.mask) == t.mask
 }
 
-// String returns a string representation of the TextDecoration.
-func (t TextDecoration) String() string {
-	if t.mask == 0 {
-		return "TextDecoration.None"
-	}
-
-	var values []string
-	if (t.mask & TextDecorationUnderline.mask) != 0 {
-		values = append(values, "Underline")
-	}
-	if (t.mask & TextDecorationLineThrough.mask) != 0 {
-		values = append(values, "LineThrough")
-	}
-
-	if len(values) == 1 {
-		return "TextDecoration." + values[0]
-	}
-	return "TextDecoration[" + strings.Join(values, ", ") + "]"
-}
-
 func (t TextDecoration) Equals(other *TextDecoration) bool {
 	if other == nil {
 		return false
@@ -96,4 +76,93 @@ func NewTextDecoration(mask TextDecorationMask) TextDecoration {
 	}
 
 	return TextDecoration{mask: mask}
+}
+
+func IsSpecifiedTextDecoration(t *TextDecoration) bool {
+	return t != nil && t != TextDecorationUnspecified
+}
+
+func StringTextDecoration(t *TextDecoration) string {
+	t = CoalesceTextDecoration(t, TextDecorationUnspecified)
+
+	if !IsSpecifiedTextDecoration(t) {
+		return "TextDecorationUnspecified"
+	}
+	if t.mask == 0 {
+		return "TextDecoration.None"
+	}
+
+	var values []string
+	if (t.mask & TextDecorationUnderline.mask) != 0 {
+		values = append(values, "Underline")
+	}
+	if (t.mask & TextDecorationLineThrough.mask) != 0 {
+		values = append(values, "LineThrough")
+	}
+
+	if len(values) == 1 {
+		return "TextDecoration." + values[0]
+	}
+	return "TextDecoration[" + strings.Join(values, ", ") + "]"
+}
+
+func TakeOrElseTextDecoration(s, def *TextDecoration) *TextDecoration {
+	if !IsSpecifiedTextDecoration(s) {
+		return def
+	}
+	return s
+}
+
+// Identity (2 ns)
+func SameTextDecoration(a, b *TextDecoration) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil {
+		return b == TextDecorationUnspecified
+	}
+	if b == nil {
+		return a == TextDecorationUnspecified
+	}
+	return a == b
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualTextDecoration(a, b *TextDecoration) bool {
+
+	a = CoalesceTextDecoration(a, TextDecorationUnspecified)
+	b = CoalesceTextDecoration(b, TextDecorationUnspecified)
+
+	return a.mask == b.mask
+}
+
+func EqualTextDecoration(a, b *TextDecoration) bool {
+	if !SameTextDecoration(a, b) {
+		return SemanticEqualTextDecoration(a, b)
+	}
+	return true
+}
+
+func MergeTextDecoration(a, b *TextDecoration) *TextDecoration {
+	a = CoalesceTextDecoration(a, TextDecorationUnspecified)
+	b = CoalesceTextDecoration(b, TextDecorationUnspecified)
+
+	if a == TextDecorationUnspecified {
+		return b
+	}
+	if b == TextDecorationUnspecified {
+		return a
+	}
+
+	// Both are custom: allocate new merged style
+	return &TextDecoration{
+		mask: a.mask | b.mask,
+	}
+}
+
+func CoalesceTextDecoration(ptr, def *TextDecoration) *TextDecoration {
+	if ptr == nil {
+		return def
+	}
+	return ptr
 }
