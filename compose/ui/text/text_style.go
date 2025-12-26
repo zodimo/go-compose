@@ -163,3 +163,7 @@ func (ts TextStyle) LineBreak() style.LineBreak {
 func (ts TextStyle) TextMotion() *style.TextMotion {
 	return ts.paragraphStyle.TextMotion
 }
+
+func (s TextStyle) ToString() string {
+	panic("TextStyle ToString not implemented")
+}
