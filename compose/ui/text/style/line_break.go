@@ -199,3 +199,10 @@ func unpackByte3(mask int32) int32 {
 func (l LineBreak) IsSpecified() bool {
 	return l != LineBreakUnspecified
 }
+
+func (l LineBreak) TakeOrElse(other LineBreak) LineBreak {
+	if l.IsSpecified() {
+		return l
+	}
+	return other
+}
