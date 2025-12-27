@@ -102,15 +102,14 @@ func NewColor(r, g, b, a float32, space colorspace.ColorSpace) Color {
 	}
 	id := uint64(sid)
 
-	// Layout: [ID:6][Alpha:10][Blue:16][Green:16][Red:16] ?
-	// Kotlin docs:
-	// Bits 0-15: Red
-	// Bits 16-31: Green
-	// Bits 32-47: Blue
-	// Bits 48-57: Alpha
-	// Bits 58-63: ColorSpace ID
+	// Kotlin bit layout for non-sRGB:
+	// Bits 48-63: Red (Half-float)
+	// Bits 32-47: Green (Half-float)
+	// Bits 16-31: Blue (Half-float)
+	// Bits 6-15: Alpha (10-bit)
+	// Bits 0-5: ColorSpace ID (6-bit)
 
-	val := r16 | (g16 << 16) | (b16 << 32) | (uint64(a10) << 48) | (id << 58)
+	val := (r16 << 48) | (g16 << 32) | (b16 << 16) | (uint64(a10) << 6) | id
 	return Color(val)
 }
 
@@ -135,33 +134,37 @@ func (c Color) Alpha() float32 {
 	if (c & 0x3F) == 0 {
 		return float32((c>>56)&0xFF) / 255.0
 	}
-	// Other space
-	return float32((c>>48)&0x3FF) / 1023.0
+	// Non-sRGB: Alpha is at bits 6-15
+	return float32((c>>6)&0x3FF) / 1023.0
 }
 
 func (c Color) Red() float32 {
 	if (c & 0x3F) == 0 {
 		return float32((c>>48)&0xFF) / 255.0
 	}
-	return util.HalfToFloat(uint16(c & 0xFFFF))
+	// Non-sRGB: Red is at bits 48-63
+	return util.HalfToFloat(uint16((c >> 48) & 0xFFFF))
 }
 
 func (c Color) Green() float32 {
 	if (c & 0x3F) == 0 {
 		return float32((c>>40)&0xFF) / 255.0
 	}
-	return util.HalfToFloat(uint16((c >> 16) & 0xFFFF))
+	// Non-sRGB: Green is at bits 32-47
+	return util.HalfToFloat(uint16((c >> 32) & 0xFFFF))
 }
 
 func (c Color) Blue() float32 {
 	if (c & 0x3F) == 0 {
 		return float32((c>>32)&0xFF) / 255.0
 	}
-	return util.HalfToFloat(uint16((c >> 32) & 0xFFFF))
+	// Non-sRGB: Blue is at bits 16-31
+	return util.HalfToFloat(uint16((c >> 16) & 0xFFFF))
 }
 
 func (c Color) ColorSpaceId() int {
-	return int((c >> 58) & 0x3F)
+	// ColorSpace ID is at bits 0-5
+	return int(c & 0x3F)
 }
 
 func (c Color) IsSpecified() bool {
@@ -183,71 +186,234 @@ func (c Color) TakeOrElse(block Color) Color {
 
 // Copy creates a new color with modified components.
 func (c Color) Copy(alpha, red, green, blue float32) Color {
-	// If ID is same as current, we repack.
-	// But NewColor needs ColorSpace object.
-	// We have Get(id).
 	id := c.ColorSpaceId()
 	space := colorspace.Get(id)
 	return NewColor(red, green, blue, alpha, space)
 }
 
+// ColorSpace returns the ColorSpace object for this color.
+func (c Color) ColorSpace() colorspace.ColorSpace {
+	return colorspace.Get(c.ColorSpaceId())
+}
+
+// Convert transforms this color to another color space.
+func (c Color) Convert(destColorSpace colorspace.ColorSpace) Color {
+	srcSpace := c.ColorSpace()
+	if srcSpace.Id() == destColorSpace.Id() {
+		return c
+	}
+
+	connector := colorspace.NewConnector(srcSpace, destColorSpace, colorspace.RenderIntentPerceptual)
+	v := []float32{c.Red(), c.Green(), c.Blue()}
+	result := connector.Transform(v)
+	return NewColor(result[0], result[1], result[2], c.Alpha(), destColorSpace)
+}
+
+// GetComponents returns the color components as [red, green, blue, alpha].
+func (c Color) GetComponents() [4]float32 {
+	return [4]float32{c.Red(), c.Green(), c.Blue(), c.Alpha()}
+}
+
+// Component accessors for destructuring
+func (c Color) Component1() float32               { return c.Red() }
+func (c Color) Component2() float32               { return c.Green() }
+func (c Color) Component3() float32               { return c.Blue() }
+func (c Color) Component4() float32               { return c.Alpha() }
+func (c Color) Component5() colorspace.ColorSpace { return c.ColorSpace() }
+
 // ToArgb converts to 32-bit ARGB.
+// For non-sRGB colors, converts to sRGB first.
 func (c Color) ToArgb() uint32 {
 	if (c & 0x3F) == 0 {
 		return uint32(c >> 32)
 	}
 	// Convert to sRGB first
-	// Default conversion
-	// Omit complex conversion logic to sRGB for now if dependencies missing
-	// But normally we'd convert.
-	return 0
+	srgbColor := c.Convert(colorspace.Srgb)
+	return uint32(srgbColor >> 32)
 }
 
 func (c Color) String() string {
-	return fmt.Sprintf("Color(%f, %f, %f, %f)", c.Red(), c.Green(), c.Blue(), c.Alpha())
+	cs := c.ColorSpace()
+	return fmt.Sprintf("Color(%f, %f, %f, %f, %s)", c.Red(), c.Green(), c.Blue(), c.Alpha(), cs.Name())
 }
 
 // CompositeOver composites this color over the background color.
+// The result is in the background's color space.
 func (c Color) CompositeOver(background Color) Color {
-	// Simple alpha blending
-	fgAlpha := c.Alpha()
-	bgAlpha := background.Alpha()
-	a := fgAlpha + (bgAlpha * (1.0 - fgAlpha))
+	// Convert foreground to background's color space
+	fg := c.Convert(background.ColorSpace())
+
+	bgA := background.Alpha()
+	fgA := fg.Alpha()
+	a := fgA + (bgA * (1.0 - fgA))
 
 	if a == 0.0 {
 		return ColorTransparent
 	}
 
-	r := (c.Red()*fgAlpha + background.Red()*bgAlpha*(1.0-fgAlpha)) / a
-	g := (c.Green()*fgAlpha + background.Green()*bgAlpha*(1.0-fgAlpha)) / a
-	b := (c.Blue()*fgAlpha + background.Blue()*bgAlpha*(1.0-fgAlpha)) / a
+	r := compositeComponent(fg.Red(), background.Red(), fgA, bgA, a)
+	g := compositeComponent(fg.Green(), background.Green(), fgA, bgA, a)
+	b := compositeComponent(fg.Blue(), background.Blue(), fgA, bgA, a)
 
-	return NewColor(r, g, b, a, colorspace.Srgb)
+	return UncheckedColor(r, g, b, a, background.ColorSpace())
+}
+
+// compositeComponent performs the Porter-Duff 'source over' calculation for a single component.
+func compositeComponent(fgC, bgC, fgA, bgA, a float32) float32 {
+	if a == 0 {
+		return 0
+	}
+	return ((fgC * fgA) + ((bgC * bgA) * (1.0 - fgA))) / a
 }
 
 // Luminance returns the relative luminance of the color.
+// Based on WCAG 2.0 formula.
 func (c Color) Luminance() float32 {
-	// Assume sRGB for now
-	r := float64(c.Red())
-	g := float64(c.Green())
-	b := float64(c.Blue())
+	cs := c.ColorSpace()
 
-	// Linearize?
-	// sRGB EOTF is needed.
-	// Using simple approx or `colorspace.Srgb.Eotf(r)`?
-	// Since we are in `graphics`, we have access to `colorspace`.
+	// Require RGB color model
+	if cs.Model() != colorspace.ColorModelRgb {
+		panic(fmt.Sprintf("The specified color must be encoded in an RGB color space. The supplied color space is %v", cs.Model()))
+	}
 
-	// Kotlin: `colorSpace.dt(r, g, b)`... relies on ColorSpace specific luminance.
-	// ColorSpace implementation of `getLuminance`? No, `ColorSpace` model?
-	// Detailed implementation: convert to XYZ, take Y.
-	// We haven't implemented `Color.Convert`.
+	// Get EOTF (Electro-Optical Transfer Function) from RGB color space
+	rgb, ok := cs.(*colorspace.Rgb)
+	if !ok {
+		// Fallback for sRGB
+		rgb = colorspace.Srgb
+	}
 
-	// Simple Rec. 709 luminance for now: 0.2126*R + 0.7152*G + 0.0722*B
-	return float32(0.2126*r + 0.7152*g + 0.0722*b)
+	r := rgb.Eotf(float64(c.Red()))
+	g := rgb.Eotf(float64(c.Green()))
+	b := rgb.Eotf(float64(c.Blue()))
+
+	lum := float32((0.2126 * r) + (0.7152 * g) + (0.0722 * b))
+	return util.FastCoerceIn(lum, 0.0, 1.0)
 }
 
-// ColorProducer functional interface?
-// Deprecate or alias.
+// NewColorLong creates a new sRGB Color from a 32-bit ARGB long.
+// Useful for specifying colors with alpha > 0x80 without sign issues.
+func NewColorLong(argb int64) Color {
+	return Color((uint64(argb) & 0xFFFFFFFF) << 32)
+}
+
+// UncheckedColor creates a color without validation.
+// Used for performance-critical code like lerp where values are known to be valid.
+func UncheckedColor(r, g, b, a float32, space colorspace.ColorSpace) Color {
+	if space.IsSrgb() {
+		argb := (int(a*255.0+0.5) << 24) |
+			(int(r*255.0+0.5) << 16) |
+			(int(g*255.0+0.5) << 8) |
+			int(b*255.0+0.5)
+		return Color(uint64(argb) << 32)
+	}
+
+	r16 := uint64(util.FloatToHalf(r))
+	g16 := uint64(util.FloatToHalf(g))
+	b16 := uint64(util.FloatToHalf(b))
+
+	a10 := int(maxf(0.0, minf(a, 1.0))*1023.0 + 0.5)
+	id := uint64(space.Id())
+
+	val := (r16 << 48) | (g16 << 32) | (b16 << 16) | (uint64(a10) << 6) | id
+	return Color(val)
+}
+
+// Lerp linearly interpolates between two colors.
+// Interpolation is done in Oklab color space for perceptually uniform results.
+// The result is converted to the stop color's color space.
+func Lerp(start, stop Color, fraction float32) Color {
+	oklab := colorspace.OklabInstance
+	startColor := start.Convert(oklab)
+	endColor := stop.Convert(oklab)
+
+	startAlpha := startColor.Alpha()
+	startL := startColor.Red()   // L in Oklab
+	startA := startColor.Green() // a in Oklab
+	startB := startColor.Blue()  // b in Oklab
+
+	endAlpha := endColor.Alpha()
+	endL := endColor.Red()
+	endA := endColor.Green()
+	endB := endColor.Blue()
+
+	// Clamp fraction to avoid out-of-range values from easing curves
+	t := util.FastCoerceIn(fraction, 0.0, 1.0)
+
+	interpolated := UncheckedColor(
+		lerpFloat(startL, endL, t),
+		lerpFloat(startA, endA, t),
+		lerpFloat(startB, endB, t),
+		lerpFloat(startAlpha, endAlpha, t),
+		oklab,
+	)
+	return interpolated.Convert(stop.ColorSpace())
+}
+
+// lerpFloat linearly interpolates between two float32 values.
+func lerpFloat(start, stop, fraction float32) float32 {
+	return start + (stop-start)*fraction
+}
+
+// Hsv creates a color from HSV (Hue, Saturation, Value) representation.
+// hue: 0..360, saturation: 0..1, value: 0..1, alpha: 0..1
+func Hsv(hue, saturation, value, alpha float32, colorSpace *colorspace.Rgb) Color {
+	if hue < 0 || hue > 360 || saturation < 0 || saturation > 1 || value < 0 || value > 1 {
+		panic(fmt.Sprintf("HSV (%f, %f, %f) must be in range (0..360, 0..1, 0..1)", hue, saturation, value))
+	}
+	if colorSpace == nil {
+		colorSpace = colorspace.Srgb
+	}
+	red := hsvToRgbComponent(5, hue, saturation, value)
+	green := hsvToRgbComponent(3, hue, saturation, value)
+	blue := hsvToRgbComponent(1, hue, saturation, value)
+	return NewColor(red, green, blue, alpha, colorSpace)
+}
+
+func hsvToRgbComponent(n int, h, s, v float32) float32 {
+	k := float32(int(float32(n)+h/60.0) % 6)
+	return v - (v * s * maxf(0, minf(k, minf(4-k, 1))))
+}
+
+// Hsl creates a color from HSL (Hue, Saturation, Lightness) representation.
+// hue: 0..360, saturation: 0..1, lightness: 0..1, alpha: 0..1
+func Hsl(hue, saturation, lightness, alpha float32, colorSpace *colorspace.Rgb) Color {
+	if hue < 0 || hue > 360 || saturation < 0 || saturation > 1 || lightness < 0 || lightness > 1 {
+		panic(fmt.Sprintf("HSL (%f, %f, %f) must be in range (0..360, 0..1, 0..1)", hue, saturation, lightness))
+	}
+	if colorSpace == nil {
+		colorSpace = colorspace.Srgb
+	}
+	red := hslToRgbComponent(0, hue, saturation, lightness)
+	green := hslToRgbComponent(8, hue, saturation, lightness)
+	blue := hslToRgbComponent(4, hue, saturation, lightness)
+	return NewColor(red, green, blue, alpha, colorSpace)
+}
+
+func hslToRgbComponent(n int, h, s, l float32) float32 {
+	k := float32(int(float32(n)+h/30.0) % 12)
+	a := s * minf(l, 1.0-l)
+	return l - a*maxf(-1, minf(k-3, minf(9-k, 1)))
+}
+
+// minf returns the minimum of two float32 values.
+func minf(a, b float32) float32 {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// maxf returns the maximum of two float32 values.
+func maxf(a, b float32) float32 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+// ColorProducer is a functional interface that produces a Color.
+// Useful for avoiding boxing in performance-critical code.
 type ColorProducer func() Color
 
 func ColorToNRGBA(c Color) color.NRGBA {
