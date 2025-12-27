@@ -3,6 +3,9 @@ package badge
 import (
 	"image"
 
+	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/compose/material3"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/pkg/api"
@@ -31,8 +34,24 @@ func Badge(options ...BadgeOption) api.Composable {
 			return modifier.Then(opts.Modifier)
 		})
 
+		containerColor := theme.TakeOrElseColor(opts.ContainerColor, theme.ColorHelper.ColorSelector().ErrorRoles.Error)
+
+		contentColor := theme.TakeOrElseColor(
+			opts.ContentColor,
+			theme.TakeOrElseColor(
+				material3.ContentColorFor(containerColor),
+				theme.ColorHelper.SpecificColor(graphics.ColorBlack),
+			),
+		)
+
+		opts.ContainerColor = containerColor
+		opts.ContentColor = contentColor
+
 		if opts.Content != nil {
-			c.WithComposable(opts.Content)
+			c.WithComposable(compose.CompositionLocalProvider(
+				[]api.ProvidedValue{material3.LocalContentColor.Provides(contentColor)},
+				opts.Content,
+			))
 		}
 
 		c.SetWidgetConstructor(badgeWidgetConstructor(opts))

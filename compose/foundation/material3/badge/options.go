@@ -31,7 +31,6 @@ func WithText(label string) BadgeOption {
 		o.Content = Text(
 			label,
 			TypestyleLabelSmall,
-		// text.WithTextStyleOptions(text.StyleWithColor(theme.ColorHelper.ColorSelector().ErrorRoles.OnError))
 		)
 	}
 }
@@ -56,8 +55,12 @@ func WithModifier(m Modifier) BadgeOption {
 
 func DefaultBadgeOptions() BadgeOptions {
 	return BadgeOptions{
-		Modifier:       EmptyModifier,
-		ContainerColor: theme.ColorHelper.ColorSelector().ErrorRoles.Error,
-		ContentColor:   theme.ColorHelper.ColorSelector().ErrorRoles.OnError,
+		Modifier: EmptyModifier,
+
+		ContainerColor: theme.ColorHelper.UnspecifiedColor(),
+		ContentColor:   theme.ColorHelper.UnspecifiedColor(),
+
+		// ContainerColor: theme.ColorHelper.ColorSelector().ErrorRoles.Error,
+		// ContentColor:   theme.ColorHelper.ColorSelector().ErrorRoles.OnError,
 	}
 }

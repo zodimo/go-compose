@@ -1,8 +1,8 @@
 package text
 
 import (
-	"github.com/zodimo/go-compose/compose/foundation/material3"
 	"github.com/zodimo/go-compose/compose/foundation/text"
+	"github.com/zodimo/go-compose/compose/material3"
 
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/modifier"
@@ -26,8 +26,7 @@ func Text(value string, style Typestyle, options ...text.TextOption) api.Composa
 			option(&opts)
 		}
 
-		contentColor := material3.LocalContentColor.Current(c)
-		contentColorDescriptor := theme.ColorHelper.SpecificColor(contentColor)
+		contentColorDescriptor := material3.LocalContentColor.Current(c)
 
 		textColor := theme.TakeOrElseColor(
 			opts.TextStyleOptions.Color,
