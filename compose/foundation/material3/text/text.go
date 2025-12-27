@@ -1,6 +1,7 @@
 package text
 
 import (
+	"github.com/zodimo/go-compose/compose/foundation/material3"
 	"github.com/zodimo/go-compose/compose/foundation/text"
 
 	"github.com/zodimo/go-compose/internal/layoutnode"
@@ -25,6 +26,14 @@ func Text(value string, style Typestyle, options ...text.TextOption) api.Composa
 			option(&opts)
 		}
 
+		contentColor := material3.LocalContentColor.Current(c)
+		contentColorDescriptor := theme.ColorHelper.SpecificColor(contentColor)
+
+		textColor := theme.TakeOrElseColor(
+			opts.TextStyleOptions.Color,
+			contentColorDescriptor,
+		)
+
 		c.StartBlock("Material3Text")
 		c.Modifier(func(modifier modifier.Modifier) modifier.Modifier {
 			return modifier.Then(opts.Modifier)
@@ -42,11 +51,9 @@ func Text(value string, style Typestyle, options ...text.TextOption) api.Composa
 				}
 
 				// Resolve ColorDescriptor to NRGBA, then to MatColor
-				if opts.TextStyleOptions != nil && opts.TextStyleOptions.Color != nil {
-					tm := theme.GetThemeManager()
-					resolvedColor := tm.ResolveColorDescriptor(opts.TextStyleOptions.Color).AsNRGBA()
-					labelStyle.Color = token.MatColor(resolvedColor)
-				}
+				tm := theme.GetThemeManager()
+				resolvedColor := tm.ResolveColorDescriptor(textColor).AsNRGBA()
+				labelStyle.Color = token.MatColor(resolvedColor)
 
 				return wdk.LayoutLabel(gtx, labelStyle, value)
 			}
