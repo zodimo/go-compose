@@ -1,12 +1,12 @@
 package icon
 
 import (
-	"github.com/zodimo/go-maybe"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 )
 
 type IconOptions struct {
 	Modifier Modifier
-	Color    maybe.Maybe[ColorDescriptor]
+	Color    graphics.Color
 }
 
 type IconOption func(*IconOptions)
@@ -14,7 +14,7 @@ type IconOption func(*IconOptions)
 func DefaultIconOptions() IconOptions {
 	return IconOptions{
 		Modifier: EmptyModifier,
-		Color:    maybe.Some(colorHelper.ColorSelector().SurfaceRoles.OnSurface),
+		Color:    graphics.ColorUnspecified,
 	}
 }
 
@@ -24,8 +24,8 @@ func WithModifier(m Modifier) IconOption {
 	}
 }
 
-func WithColor(desc ColorDescriptor) IconOption {
+func WithColor(col graphics.Color) IconOption {
 	return func(o *IconOptions) {
-		o.Color = maybe.Some(desc)
+		o.Color = col
 	}
 }

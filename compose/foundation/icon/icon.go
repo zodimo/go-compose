@@ -6,14 +6,14 @@ import (
 	"image/color"
 	"sync"
 
+	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/widget"
 )
-
-var FallbackColorDescriptor = colorHelper.ColorSelector().SurfaceRoles.OnSurface
 
 // iconCacheKey is the key used to store the GlobalIconCache in the Composer's state.
 var iconCacheKey = "icon_global_cache"
@@ -29,6 +29,9 @@ func Icon(iconByte []byte, options ...IconOption) Composable {
 	}
 
 	return func(c Composer) Composer {
+
+		opts.Color = opts.Color.TakeOrElse(compose.LocalContentColor.Current(c))
+
 		c.StartBlock("Icon")
 		c.Modifier(func(modifier Modifier) Modifier {
 			return modifier.Then(opts.Modifier)
@@ -90,13 +93,7 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIc
 
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 
-			colorDescriptor := FallbackColorDescriptor
-			if options.Color.IsSome() {
-				colorDescriptor = options.Color.UnwrapUnsafe()
-			}
-
-			themeColor := themeManager.ResolveColorDescriptor(colorDescriptor)
-			nrgba := themeColor.AsNRGBA()
+			nrgba := graphics.ColorToNRGBA(options.Color)
 
 			key := cacheKey{
 				dataHash:    dataHash,
