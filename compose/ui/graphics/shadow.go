@@ -7,6 +7,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/geometry"
 	"github.com/zodimo/go-compose/pkg/floatutils"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-compose/pkg/sentinel"
 )
 
 // ShadowUnspecified is the singleton sentinel for unspecified/empty Shadow.
@@ -87,13 +88,6 @@ func LerpShadow(start, stop *Shadow, fraction float32) *Shadow {
 	)
 }
 
-func takeOrElse[T comparable](a, b, sentinel T) T {
-	if a != sentinel {
-		return a
-	}
-	return b
-}
-
 // Short for IsSpecifiedShadow
 func IsSpecifiedShadow(s *Shadow) bool {
 	return s != nil && s != ShadowUnspecified
@@ -150,9 +144,9 @@ func MergeShadow(a, b *Shadow) *Shadow {
 
 	// Both are custom: allocate new merged style
 	return &Shadow{
-		Color:      takeOrElse(a.Color, b.Color, ColorUnspecified),
-		Offset:     takeOrElse(a.Offset, b.Offset, geometry.OffsetUnspecified),
-		BlurRadius: takeOrElse(a.BlurRadius, b.BlurRadius, floatutils.Float32Unspecified),
+		Color:      sentinel.TakeOrElse(a.Color, b.Color, ColorUnspecified),
+		Offset:     sentinel.TakeOrElse(a.Offset, b.Offset, geometry.OffsetUnspecified),
+		BlurRadius: sentinel.TakeOrElse(a.BlurRadius, b.BlurRadius, floatutils.Float32Unspecified),
 	}
 }
 
