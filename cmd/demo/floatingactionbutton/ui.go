@@ -9,6 +9,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/floatingactionbutton"
 	"github.com/zodimo/go-compose/compose/foundation/material3/scaffold"
 	"github.com/zodimo/go-compose/compose/foundation/material3/text"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/theme"
@@ -43,8 +44,8 @@ func UI() api.Composable {
 						fmt.Println("FAB Clicked!")
 					},
 					icon.Icon(icons.ContentAdd),
-					floatingactionbutton.WithContainerColor(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0, G: 100, B: 200, A: 255})), // Explicit color for now
-					floatingactionbutton.WithContentColor(theme.ColorHelper.SpecificColor(color.NRGBA{R: 255, G: 255, B: 255, A: 255})),
+					floatingactionbutton.WithContainerColor(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 0, G: 100, B: 200, A: 255}))), // Explicit color for now
+					floatingactionbutton.WithContentColor(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 255, G: 255, B: 255, A: 255}))),
 				),
 			),
 		)(c)
