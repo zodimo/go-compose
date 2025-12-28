@@ -5,10 +5,6 @@ import (
 	"os"
 
 	"github.com/zodimo/go-compose/compose"
-	"github.com/zodimo/go-compose/compose/ui/platform"
-	"github.com/zodimo/go-compose/compose/ui/text/font"
-	"github.com/zodimo/go-compose/compose/ui/unit"
-	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/runtime"
 	"github.com/zodimo/go-compose/state"
 	"github.com/zodimo/go-compose/store"
@@ -55,13 +51,7 @@ func Run(window *app.Window) error {
 			gtx = themeManager.Material3ThemeInit(gtx)
 
 			composer := compose.NewComposer(store)
-			layoutNode := compose.CompositionLocalProvider(
-				[]api.ProvidedValue{
-					platform.LocalFontFamilyResolver.Provides(font.NewDefaultFontFamilyResolver()),
-					platform.LocalLayoutDirection.Provides(unit.LayoutDirectionLtr),
-				},
-				UI(),
-			)(composer).Build()
+			layoutNode := UI()(composer).Build()
 
 			callOp := runtime.Run(gtx, layoutNode)
 			callOp.Add(gtx.Ops)
