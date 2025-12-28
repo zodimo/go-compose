@@ -11,6 +11,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
+	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/unit"
 	"gioui.org/widget"
@@ -84,14 +85,22 @@ func SegmentedButton(
 	shape SegmentShape,
 	options ...SegmentOption,
 ) Composable {
-	return func(c Composer) Composer {
-		opts := DefaultSegmentOptions()
-		for _, option := range options {
-			if option == nil {
-				continue
-			}
-			option(&opts)
+
+	opts := DefaultSegmentOptions()
+	for _, option := range options {
+		if option == nil {
+			continue
 		}
+		option(&opts)
+	}
+
+	opts.SelectedColor = theme.TakeOrElseColor(opts.SelectedColor, theme.ColorHelper.ColorSelector().SecondaryRoles.Container)
+	opts.UnselectedColor = theme.TakeOrElseColor(opts.UnselectedColor, theme.ColorHelper.ColorSelector().SurfaceRoles.Surface)
+	opts.SelectedContentColor = theme.TakeOrElseColor(opts.SelectedContentColor, theme.ColorHelper.ColorSelector().SecondaryRoles.OnContainer)
+	opts.UnselectedContentColor = theme.TakeOrElseColor(opts.UnselectedContentColor, theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface)
+	opts.BorderColor = theme.TakeOrElseColor(opts.BorderColor, theme.ColorHelper.ColorSelector().OutlineRoles.Outline)
+
+	return func(c Composer) Composer {
 
 		// State for clickable
 		key := c.GenerateID()

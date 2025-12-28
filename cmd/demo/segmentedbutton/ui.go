@@ -9,6 +9,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/foundation/material3/segmentedbutton"
 	"github.com/zodimo/go-compose/compose/foundation/material3/text"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/theme"
@@ -63,7 +64,7 @@ func UI() api.Composable {
 							},
 							label,
 							shape,
-							segmentedbutton.WithSelectedColor(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0xE8, G: 0xDE, B: 0xF8, A: 0xFF})),
+							segmentedbutton.WithSelectedColor(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 0xE8, G: 0xDE, B: 0xF8, A: 0xFF}))),
 							segmentedbutton.WithSelectedIcon(checkIcon),
 						)
 					}),
@@ -93,7 +94,7 @@ func UI() api.Composable {
 							},
 							label,
 							shape,
-							segmentedbutton.WithSelectedColor(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0xE8, G: 0xDE, B: 0xF8, A: 0xFF})),
+							segmentedbutton.WithSelectedColor(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 0xE8, G: 0xDE, B: 0xF8, A: 0xFF}))),
 							segmentedbutton.WithSelectedIcon(checkIcon),
 						)
 					}),
