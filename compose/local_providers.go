@@ -1,8 +1,8 @@
 package compose
 
 import (
-	"gioui.org/text"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
+	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/theme"
 )
 
@@ -20,6 +20,6 @@ var LocalContentColor = CompositionLocalOf(func() graphics.Color {
 	return graphics.ColorBlack
 })
 
-var LocalTextShaper = CompositionLocalOf(func() *text.Shaper {
-	return theme.GetThemeManager().MaterialTheme().Shaper
+var LocalTextShaper = CompositionLocalOf(func() *text.TextShaper {
+	return &text.TextShaper{Shaper: theme.GetThemeManager().MaterialTheme().Shaper}
 })
