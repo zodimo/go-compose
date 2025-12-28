@@ -58,9 +58,11 @@ func BasicText(
 				backgroundColor,
 			)
 		}
+		textShaper := compose.LocalTextShaper.Current(c)
 		familyResolver := platform.LocalFontFamilyResolver.Current(c)
-
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
+
+		//content color....
 
 		if !hasInlineContent && !hasLinks {
 
@@ -85,9 +87,11 @@ func BasicText(
 				onPlaceholderLayout: nil,
 				selectionController: selectionController,
 				color:               opts.Color,
-				// onShowTranslation:   nil,
-				autoSize:        opts.AutoSize,
-				layoutDirection: layoutDirection,
+				onShowTranslation:   nil,
+				autoSize:            opts.AutoSize,
+				layoutDirection:     layoutDirection,
+
+				textShaper: textShaper,
 			}))
 
 		} else {
@@ -130,6 +134,8 @@ func BasicText(
 				onShowTranslation:   onShowTranslation,
 				autoSize:            opts.AutoSize,
 				layoutDirection:     layoutDirection,
+
+				textShaper: textShaper,
 			}))
 		}
 
@@ -162,6 +168,8 @@ type BasicTextConstructorArgs struct {
 	onShowTranslation   func(modifiers.TextSubstitutionValue)
 	autoSize            TextAutoSize
 	layoutDirection     unit.LayoutDirection
+
+	textShaper *text.TextShaper
 }
 
 func textWithLinksAndInlineContentConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.LayoutNodeWidgetConstructor {
@@ -183,8 +191,6 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 			// Get theme and shaper
-			materialTheme := GetThemeManager().MaterialTheme()
-			tm := theme.GetThemeManager()
 
 			// Resolve text style with defaults
 			textStyle := text.TextStyleResolveDefaults(constructorArgs.style, constructorArgs.layoutDirection)
@@ -203,7 +209,7 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 			} else {
 				textColorDescriptor = theme.ColorHelper.SpecificColor(textStyle.Color())
 			}
-			resolvedTextColor := tm.ResolveColorDescriptor(textColorDescriptor).AsNRGBA()
+			resolvedTextColor := theme.GetThemeManager().ResolveColorDescriptor(textColorDescriptor).AsNRGBA()
 
 			// Create text color material
 			textColorMacro := op.Record(gtx.Ops)
@@ -211,7 +217,7 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 			textColor := textColorMacro.Stop()
 
 			// Use the controller to layout and paint the text
-			dims := controller.LayoutAndPaint(gtx, materialTheme.Shaper, textColor)
+			dims := controller.LayoutAndPaint(gtx, constructorArgs.textShaper.Shaper, textColor)
 
 			return dims
 		}
