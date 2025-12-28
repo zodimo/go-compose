@@ -110,5 +110,19 @@ func coerceIn(value, minVal, maxVal int) int {
 
 // Substring returns the substring of s corresponding to this TextRange.
 func (r TextRange) Substring(s string) string {
-	return s[r.Min():r.Max()]
+
+	strLen := len(s)
+	clamp := func(value, min, max int) int {
+		if value < min {
+			return min
+		}
+		if value > max {
+			return max
+		}
+		return value
+	}
+	start := clamp(r.Min(), 0, strLen)
+	end := clamp(r.Max(), 0, strLen)
+
+	return s[start:end]
 }
