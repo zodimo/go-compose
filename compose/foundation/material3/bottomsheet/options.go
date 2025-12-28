@@ -25,8 +25,8 @@ type ModalBottomSheetOption func(*ModalBottomSheetOptions)
 func DefaultModalBottomSheetOptions() ModalBottomSheetOptions {
 	return ModalBottomSheetOptions{
 		IsOpen:         false,
-		ContainerColor: theme.ColorHelper.ColorSelector().SurfaceRoles.ContainerLow,
-		ScrimColor:     theme.ColorHelper.ColorSelector().ScrimRoles.Scrim,
+		ContainerColor: theme.ColorHelper.UnspecifiedColor(),
+		ScrimColor:     theme.ColorHelper.UnspecifiedColor(),
 	}
 }
 

@@ -33,11 +33,10 @@ func ModalBottomSheet(
 		opt(&opts)
 	}
 
-	return func(c Composer) Composer {
-		tm := theme.GetThemeManager()
+	opts.ContainerColor = theme.TakeOrElseColor(opts.ContainerColor, theme.ColorHelper.ColorSelector().SurfaceRoles.ContainerLow)
+	opts.ScrimColor = theme.TakeOrElseColor(opts.ScrimColor, theme.ColorHelper.ColorSelector().ScrimRoles.Scrim)
 
-		// defaults
-		containerColor := tm.ResolveColorDescriptor(opts.ContainerColor)
+	return func(c Composer) Composer {
 
 		sheetShape := opts.Shape
 		if sheetShape == (token.CornerShape{}) {
@@ -145,7 +144,7 @@ func ModalBottomSheet(
 									column.WithAlignment(column.Middle),
 								),
 								surface.WithColor(
-									theme.ColorHelper.SpecificColor(containerColor.AsNRGBA()),
+									opts.ContainerColor,
 								),
 								// Use the custom shape. Surface expects Shape type, so we might need adapter or use corner radius if uniform?
 								// M3 sheet usually has only Top corners rounded.
