@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/zodimo/go-compose/compose/foundation/icon"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/material3/button"
+	"github.com/zodimo/go-compose/compose/foundation/material3/icon"
 	"github.com/zodimo/go-compose/compose/foundation/material3/menu"
 	"github.com/zodimo/go-compose/compose/foundation/material3/scaffold"
 	"github.com/zodimo/go-compose/compose/ui"
