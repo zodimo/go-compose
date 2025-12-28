@@ -64,7 +64,7 @@ func (f InputTransformationFunc) Then(other InputTransformation) InputTransforma
 	return ChainTransformations(f, other)
 }
 
-// MaxLengthInputTransformation rejects input that would exceed maxLength.
+// MaxLengthInputTransformation truncates input that exceeds maxLength.
 type MaxLengthInputTransformation struct {
 	MaxLength int
 }
@@ -72,7 +72,8 @@ type MaxLengthInputTransformation struct {
 // TransformInput implements InputTransformation.
 func (m *MaxLengthInputTransformation) TransformInput(buffer *TextFieldBuffer) {
 	if buffer.Length() > m.MaxLength {
-		buffer.RevertAllChanges()
+		// Truncate to max length
+		buffer.Delete(m.MaxLength, buffer.Length())
 	}
 }
 

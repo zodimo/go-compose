@@ -1,6 +1,8 @@
 package text
 
 import (
+	"fmt"
+
 	"gioui.org/op"
 	"gioui.org/op/paint"
 
@@ -33,6 +35,9 @@ const BasicTextFieldNodeID = "BasicTextField"
 // This is a port of androidx.compose.foundation.text.BasicTextField.
 func BasicTextField(
 	state *input.TextFieldState,
+	// OnValueChange is called when the text content changes.
+	// Receives the new text value.
+	onValueChange func(string),
 	options ...TextFieldOption,
 ) Composable {
 
@@ -48,8 +53,26 @@ func BasicTextField(
 
 		c.StartBlock(BasicTextFieldNodeID)
 
+		textShaper := compose.LocalTextShaper.Current(c)
 		familyResolver := platform.LocalFontFamilyResolver.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
+
+		// Generate unique key for state persistence
+		key := c.GenerateID()
+		path := c.GetPath()
+
+		// Store the controller in compose state to persist across frames
+		controllerState := c.State(fmt.Sprintf("%d/%s/textfield_controller", key, path), func() any {
+			return input.NewEditableTextLayoutController(state)
+		})
+		controller := controllerState.Get().(*input.EditableTextLayoutController)
+
+		// Store onValueChange wrapper to avoid closure capture issues
+		handlerState := c.State(fmt.Sprintf("%d/%s/handler", key, path), func() any {
+			return &onValueChangeWrapper{Func: onValueChange}
+		})
+		handler := handlerState.Get().(*onValueChangeWrapper)
+		handler.Func = onValueChange
 
 		// Determine single-line mode from line limits
 		singleLine := input.IsSingleLine(opts.LineLimits)
@@ -67,6 +90,7 @@ func BasicTextField(
 		})
 
 		c.SetWidgetConstructor(textFieldWidgetConstructor(BasicTextFieldConstructorArgs{
+			controller:           controller,
 			state:                state,
 			textStyle:            opts.TextStyle,
 			onTextLayout:         opts.OnTextLayout,
@@ -80,14 +104,22 @@ func BasicTextField(
 			fontFamilyResolver:   familyResolver,
 			cursorColor:          opts.CursorColor,
 			layoutDirection:      layoutDirection,
+			textShaper:           textShaper,
+			onValueChange:        handler,
 		}))
 
 		return c.EndBlock()
 	}
 }
 
+// onValueChangeWrapper wraps the onValueChange callback to avoid closure capture issues.
+type onValueChangeWrapper struct {
+	Func func(string)
+}
+
 // BasicTextFieldConstructorArgs holds the arguments for the text field widget constructor.
 type BasicTextFieldConstructorArgs struct {
+	controller           *input.EditableTextLayoutController
 	state                *input.TextFieldState
 	textStyle            *text.TextStyle
 	onTextLayout         func(text.TextLayoutResult)
@@ -101,29 +133,15 @@ type BasicTextFieldConstructorArgs struct {
 	fontFamilyResolver   interface{} // font.FontFamilyResolver
 	cursorColor          interface{} // graphics.ColorProducer
 	layoutDirection      unit.LayoutDirection
+	textShaper           *text.TextShaper
+	onValueChange        *onValueChangeWrapper
 }
 
 // textFieldWidgetConstructor creates the widget constructor for BasicTextField.
 func textFieldWidgetConstructor(args BasicTextFieldConstructorArgs) layoutnode.LayoutNodeWidgetConstructor {
-	// Create the bridge adapter from the text field state
-	textString := args.state.Text()
-	sourceAdapter := input.NewTextSourceAdapterFromString(textString)
-
-	// Create the layout controller
-	controller := input.NewTextLayoutController(sourceAdapter)
-
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-			// Get theme and shaper
-			materialTheme := GetThemeManager().MaterialTheme()
-			tm := theme.GetThemeManager()
-
-			// Update the source adapter with current text from state
-			currentText := args.state.Text()
-			if sourceAdapter.Text() != currentText {
-				sourceAdapter = input.NewTextSourceAdapterFromString(currentText)
-				controller = input.NewTextLayoutController(sourceAdapter)
-			}
+			controller := args.controller
 
 			// Resolve text style with defaults
 			textStyle := text.TextStyleResolveDefaults(args.textStyle, args.layoutDirection)
@@ -133,21 +151,31 @@ func textFieldWidgetConstructor(args BasicTextFieldConstructorArgs) layoutnode.L
 			controller.ConfigureFromTextStyle(textStyle)
 			controller.SetMaxLines(args.maxLines)
 			controller.SetSingleLine(args.singleLine)
-			controller.SetTruncator("")
+			controller.SetReadOnly(args.readOnly)
 			controller.SetLineHeightScale(1)
+
+			// Set input transformation if present
+			if args.inputTransformation != nil {
+				controller.SetInputTransformation(args.inputTransformation)
+			}
+
+			// Set value change callback if present
+			if args.onValueChange != nil && args.onValueChange.Func != nil {
+				controller.SetOnValueChange(args.onValueChange.Func)
+			}
 
 			// Resolve text color
 			var textColorDescriptor theme.ColorDescriptor
 			textColorDescriptor = theme.ColorHelper.SpecificColor(textStyle.Color())
-			resolvedTextColor := tm.ResolveColorDescriptor(textColorDescriptor).AsNRGBA()
+			resolvedTextColor := theme.GetThemeManager().ResolveColorDescriptor(textColorDescriptor).AsNRGBA()
 
 			// Create text color material
 			textColorMacro := op.Record(gtx.Ops)
 			paint.ColorOp{Color: resolvedTextColor}.Add(gtx.Ops)
-			textColor := textColorMacro.Stop()
+			textMaterial := textColorMacro.Stop()
 
 			// Use the controller to layout and paint the text
-			dims := controller.LayoutAndPaint(gtx, materialTheme.Shaper, textColor)
+			dims := controller.LayoutAndPaint(gtx, args.textShaper.Shaper, textMaterial)
 
 			return dims
 		}
