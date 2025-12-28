@@ -21,8 +21,6 @@ import (
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/theme"
 	"github.com/zodimo/go-ternary"
-
-	gioText "gioui.org/text"
 )
 
 const BasicTextNodeID = "BasicText"
@@ -147,7 +145,7 @@ func BasicText(
 // Text renders a text leaf. The value is stored in a slot for tooling.
 func Text(value string, options ...TextOption) Composable {
 	// return BasicText(stringAnnotation(value), options...)
-	return compose.Id()
+	return BasicText(text.NewAnnotatedString(value, nil, nil), options...)
 }
 
 type BasicTextConstructorArgs struct {
@@ -235,32 +233,4 @@ func validateMinMaxLines(minLines int, maxLines int) {
 
 func textModifier() modifier.Modifier {
 	return modifier.EmptyModifier
-}
-
-func textAlignToGioAlign(textAlign style.TextAlign) gioText.Alignment {
-	switch textAlign {
-	case style.TextAlignLeft:
-		return gioText.Start
-	case style.TextAlignCenter:
-		return gioText.Middle
-	case style.TextAlignRight:
-		return gioText.End
-	case style.TextAlignJustify:
-		panic("TextAlignJustify not supported")
-	default:
-		panic(fmt.Sprintf("unknown TextAlign %s", textAlign))
-	}
-}
-
-func lineBreakToGioWrapPolicy(lineBreak style.LineBreak) gioText.WrapPolicy {
-	switch lineBreak {
-	case style.LineBreakSimple:
-		return gioText.WrapGraphemes
-	case style.LineBreakHeading:
-		return gioText.WrapWords
-	case style.LineBreakParagraph:
-		return gioText.WrapHeuristically
-	default:
-		panic(fmt.Sprintf("unknown TextLineBreak %s", lineBreak))
-	}
 }
