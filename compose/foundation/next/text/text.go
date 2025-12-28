@@ -5,10 +5,11 @@ import (
 
 	"gioui.org/op"
 	"gioui.org/op/paint"
-	"gioui.org/widget"
+
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/next/text/modifiers"
 	"github.com/zodimo/go-compose/compose/foundation/next/text/selection"
+	"github.com/zodimo/go-compose/compose/foundation/next/text/widget"
 	"github.com/zodimo/go-compose/compose/ui/geometry"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/platform"
