@@ -2,11 +2,13 @@ package surface
 
 import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/modifiers/background"
 	"github.com/zodimo/go-compose/modifiers/border"
 	"github.com/zodimo/go-compose/modifiers/clip"
 	"github.com/zodimo/go-compose/modifiers/shadow"
+	"github.com/zodimo/go-compose/theme"
 )
 
 // Surface is a layout composable that represents a Material surface.
@@ -15,14 +17,20 @@ func Surface(
 	content Composable,
 	options ...SurfaceOption,
 ) Composable {
-	return func(c Composer) Composer {
-		opts := DefaultSurfaceOptions()
-		for _, option := range options {
-			if option == nil {
-				continue
-			}
-			option(&opts)
+
+	opts := DefaultSurfaceOptions()
+	for _, option := range options {
+		if option == nil {
+			continue
 		}
+		option(&opts)
+	}
+
+	opts.Color = theme.TakeOrElseColor(opts.Color, theme.ColorHelper.ColorSelector().SurfaceRoles.Surface)
+	opts.ContentColor = theme.TakeOrElseColor(opts.ContentColor, theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface)
+	opts.BorderColor = theme.TakeOrElseColor(opts.BorderColor, theme.ColorHelper.SpecificColor(graphics.ColorTransparent))
+
+	return func(c Composer) Composer {
 
 		// Apply modifiers: Clip then Background.
 		// Shadow should be behind everything.

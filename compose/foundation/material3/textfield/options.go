@@ -2,6 +2,7 @@ package textfield
 
 import (
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/pkg/sentinel"
 	"github.com/zodimo/go-maybe"
 )
 
@@ -10,13 +11,13 @@ type TextFieldOptions struct {
 	Enabled        bool
 	ReadOnly       bool
 	TextStyle      interface{}
-	Label          maybe.Maybe[api.Composable]
-	Placeholder    maybe.Maybe[api.Composable]
+	Label          string //maybe.Maybe[api.Composable]
+	Placeholder    string //maybe.Maybe[api.Composable]
 	LeadingIcon    maybe.Maybe[api.Composable]
 	TrailingIcon   maybe.Maybe[api.Composable]
 	Prefix         maybe.Maybe[api.Composable]
 	Suffix         maybe.Maybe[api.Composable]
-	SupportingText maybe.Maybe[api.Composable]
+	SupportingText string //maybe.Maybe[api.Composable]
 	IsError        bool
 	SingleLine     bool
 	MaxLines       int
@@ -28,7 +29,7 @@ type TextFieldOptions struct {
 	// InteractionSource    interface{}
 
 	Shape  interface{}
-	Colors interface{}
+	Colors TextFieldColors
 
 	OnSubmit func() // Called when Enter is pressed (SingleLine mode)
 
@@ -61,13 +62,13 @@ func DefaultTextFieldOptions() TextFieldOptions {
 		Enabled:        true,
 		ReadOnly:       false,
 		TextStyle:      DefaultTextFieldColors().TextColor,
-		Label:          maybe.None[api.Composable](),
-		Placeholder:    maybe.None[api.Composable](),
+		Label:          sentinel.StringUnspecified, //maybe.None[api.Composable](),
+		Placeholder:    sentinel.StringUnspecified, //maybe.None[api.Composable](),
 		LeadingIcon:    maybe.None[api.Composable](),
 		TrailingIcon:   maybe.None[api.Composable](),
 		Prefix:         maybe.None[api.Composable](),
 		Suffix:         maybe.None[api.Composable](),
-		SupportingText: maybe.None[api.Composable](),
+		SupportingText: sentinel.StringUnspecified, //maybe.None[api.Composable](),
 		IsError:        false,
 		SingleLine:     true,
 		MaxLines:       1,
@@ -103,15 +104,15 @@ func WithTextStyle(textStyle interface{}) TextFieldOption {
 	}
 }
 
-func WithLabel(label Composable) TextFieldOption {
+func WithLabel(label string) TextFieldOption {
 	return func(o *TextFieldOptions) {
-		o.Label = maybe.Some(label)
+		o.Label = label
 	}
 }
 
-func WithPlaceholder(placeholder Composable) TextFieldOption {
+func WithPlaceholder(placeholder string) TextFieldOption {
 	return func(o *TextFieldOptions) {
-		o.Placeholder = maybe.Some(placeholder)
+		o.Placeholder = placeholder
 	}
 }
 
@@ -139,9 +140,9 @@ func WithSuffix(suffix Composable) TextFieldOption {
 	}
 }
 
-func WithSupportingText(text Composable) TextFieldOption {
+func WithSupportingText(text string) TextFieldOption {
 	return func(o *TextFieldOptions) {
-		o.SupportingText = maybe.Some(text)
+		o.SupportingText = text
 	}
 }
 
@@ -175,7 +176,7 @@ func WithShape(shape interface{}) TextFieldOption {
 	}
 }
 
-func WithColors(colors interface{}) TextFieldOption {
+func WithColors(colors TextFieldColors) TextFieldOption {
 	return func(o *TextFieldOptions) {
 		o.Colors = colors
 	}

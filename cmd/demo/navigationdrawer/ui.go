@@ -13,6 +13,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/text"
 	ftext "github.com/zodimo/go-compose/compose/foundation/text"
 	"github.com/zodimo/go-compose/compose/ui"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/modifiers/background"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -154,7 +155,7 @@ func UI() api.Composable {
 			},
 			box.WithModifier(
 				size.FillMax().
-					Then(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{255, 255, 255, 255}))),
+					Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{255, 255, 255, 255})))),
 			),
 		)(c)
 	}

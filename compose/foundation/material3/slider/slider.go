@@ -23,11 +23,15 @@ const SliderNodeID = "Material3Slider"
 // onValueChange is called when the value changes.
 // options provides optional configuration.
 func Slider(value float32, onValueChange func(float32), options ...SliderOption) Composable {
+
+	opts := DefaultSliderOptions()
+	for _, opt := range options {
+		opt(&opts)
+	}
+
+	opts.Colors = resolveSliderColors(opts.Colors)
+
 	return func(c Composer) Composer {
-		opts := DefaultSliderOptions()
-		for _, opt := range options {
-			opt(&opts)
-		}
 
 		// Calculate mapped value [0, 1] for internal widget
 		rangeDiff := opts.ValueRange.Max - opts.ValueRange.Min
@@ -69,6 +73,22 @@ func Slider(value float32, onValueChange func(float32), options ...SliderOption)
 		})
 		c.SetWidgetConstructor(sliderWidgetConstructor(constructorArgs))
 		return c.EndBlock()
+	}
+}
+
+func resolveSliderColors(colors SliderColors) SliderColors {
+	selector := theme.ColorHelper.ColorSelector()
+	return SliderColors{
+		ThumbColor:            theme.TakeOrElseColor(colors.ThumbColor, selector.PrimaryRoles.Primary),
+		ActiveTrackColor:      theme.TakeOrElseColor(colors.ActiveTrackColor, selector.PrimaryRoles.Primary),
+		ActiveTickColor:       theme.TakeOrElseColor(colors.ActiveTickColor, selector.PrimaryRoles.OnPrimary.SetOpacity(0.38)),
+		InactiveTrackColor:    theme.TakeOrElseColor(colors.InactiveTrackColor, selector.SurfaceRoles.ContainerHighest),
+		InactiveTickColor:     theme.TakeOrElseColor(colors.InactiveTickColor, selector.SurfaceRoles.OnVariant.SetOpacity(0.38)),
+		DisabledThumbColor:    theme.TakeOrElseColor(colors.DisabledThumbColor, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
+		DisabledActiveTrack:   theme.TakeOrElseColor(colors.DisabledActiveTrack, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
+		DisabledActiveTick:    theme.TakeOrElseColor(colors.DisabledActiveTick, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
+		DisabledInactiveTrack: theme.TakeOrElseColor(colors.DisabledInactiveTrack, selector.SurfaceRoles.OnSurface.SetOpacity(0.12)),
+		DisabledInactiveTick:  theme.TakeOrElseColor(colors.DisabledInactiveTick, selector.SurfaceRoles.OnSurface.SetOpacity(0.12)),
 	}
 }
 

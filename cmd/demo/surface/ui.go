@@ -10,6 +10,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/material3/surface"
 	m3text "github.com/zodimo/go-compose/compose/foundation/material3/text"
 	"github.com/zodimo/go-compose/compose/foundation/text"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -57,8 +58,8 @@ func UI(c api.Composer) api.LayoutNode {
 						column.WithModifier(padding.All(16)),
 					),
 				),
-				surface.WithColor(theme.ColorHelper.SpecificColor(color.NRGBA{R: 255, G: 251, B: 254, A: 255})), // Surface
-				surface.WithShape(shape.CutCornerShape{Radius: unit.Dp(28)}),                                    // TopEnd chamfer in demo usually, here simplified to all cut
+				surface.WithColor(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 255, G: 251, B: 254, A: 255}))), // Surface
+				surface.WithShape(shape.CutCornerShape{Radius: unit.Dp(28)}),                                                        // TopEnd chamfer in demo usually, here simplified to all cut
 				surface.WithShadowElevation(0), // Root usually flat?
 				surface.WithModifier(size.FillMax()),
 			),

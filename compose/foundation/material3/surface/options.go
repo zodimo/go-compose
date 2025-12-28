@@ -8,7 +8,6 @@ import (
 	// "github.com/zodimo/go-compose/internal/modifier" is still needed for Modifier type.
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
-	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/theme" // Added based on instruction
@@ -33,12 +32,12 @@ func DefaultSurfaceOptions() SurfaceOptions {
 	return SurfaceOptions{
 		Modifier:        modifier.EmptyModifier,
 		Shape:           shape.ShapeRectangle,
-		Color:           colorHelper.ColorSelector().SurfaceRoles.Surface,
-		ContentColor:    colorHelper.ColorSelector().SurfaceRoles.OnSurface,
+		Color:           colorHelper.UnspecifiedColor(),
+		ContentColor:    colorHelper.UnspecifiedColor(),
 		TonalElevation:  0,
 		ShadowElevation: 0,
 		BorderWidth:     0,
-		BorderColor:     colorHelper.SpecificColor(graphics.ColorTransparent), // Transparent
+		BorderColor:     colorHelper.UnspecifiedColor(),
 		Alignment:       box.NW,
 	}
 }

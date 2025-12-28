@@ -16,34 +16,27 @@ func UI(c api.Composer) api.LayoutNode {
 	outlinedText := c.State("outlined_text", func() any { return "" })
 
 	root := column.Column(
-		func(c api.Composer) api.Composer {
-
+		c.Sequence(
 			// Filled
 			textfield.Filled(
 				filledText.Get().(string),
 				func(s string) { filledText.Set(s) },
-				"Filled Text Field",
+				textfield.WithLabel("Filled Text Field"),
 				textfield.WithSingleLine(true),
-			)(c)
-
-			spacer.Height(int(unit.Dp(16)))(c)
-
+			),
+			spacer.Height(int(unit.Dp(16))),
 			// Outlined
 			textfield.Outlined(
 				outlinedText.Get().(string),
 				func(s string) { outlinedText.Set(s) },
-				"Outlined Text Field",
+				textfield.WithLabel("Outlined Text Field"),
 				textfield.WithSingleLine(true),
-			)(c)
-
-			spacer.Height(int(unit.Dp(16)))(c)
-
+			),
+			spacer.Height(int(unit.Dp(16))),
 			// Display values
-			m3text.Text(fmt.Sprintf("Filled value: %s", filledText.Get().(string)), m3text.TypestyleBodyLarge)(c)
-			m3text.Text(fmt.Sprintf("Outlined value: %s", outlinedText.Get().(string)), m3text.TypestyleBodyLarge)(c)
-
-			return c
-		},
+			m3text.Text(fmt.Sprintf("Filled value: %s", filledText.Get().(string)), m3text.TypestyleBodyLarge),
+			m3text.Text(fmt.Sprintf("Outlined value: %s", outlinedText.Get().(string)), m3text.TypestyleBodyLarge),
+		),
 	)
 
 	return root(c).Build()

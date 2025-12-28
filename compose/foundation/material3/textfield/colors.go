@@ -29,30 +29,59 @@ type TextFieldColors struct {
 }
 
 func DefaultTextFieldColors() TextFieldColors {
-	selector := theme.ColorHelper.ColorSelector()
 	return TextFieldColors{
-		TextColor:                   selector.SurfaceRoles.OnSurface,
-		DisabledTextColor:           selector.SurfaceRoles.OnSurface.SetOpacity(0.38),
-		CursorColor:                 selector.PrimaryRoles.Primary,
-		ErrorCursorColor:            selector.ErrorRoles.Error,
-		SelectionColor:              selector.PrimaryRoles.Primary,
-		FocusedIndicatorColor:       selector.PrimaryRoles.Primary, // Active
-		UnfocusedIndicatorColor:     selector.OutlineRoles.Outline, // Inactive
-		DisabledIndicatorColor:      selector.SurfaceRoles.OnSurface.SetOpacity(0.12),
-		ErrorIndicatorColor:         selector.ErrorRoles.Error,
-		HoveredIndicatorColor:       selector.SurfaceRoles.OnSurface, // Actually M3 says OnSurface for Outline variant hovered? Or just Outline token. Let's use OnSurface for high contrast hover.
-		LeadingIconColor:            selector.SurfaceRoles.OnVariant,
-		TrailingIconColor:           selector.SurfaceRoles.OnVariant,
-		DisabledLeadingIconColor:    selector.SurfaceRoles.OnSurface.SetOpacity(0.38),
-		DisabledTrailingIconColor:   selector.SurfaceRoles.OnSurface.SetOpacity(0.38),
-		LabelColor:                  selector.PrimaryRoles.Primary, // Focused Label
-		UnfocusedLabelColor:         selector.SurfaceRoles.OnVariant,
-		DisabledLabelColor:          selector.SurfaceRoles.OnSurface.SetOpacity(0.38),
-		ErrorLabelColor:             selector.ErrorRoles.Error,
-		PlaceholderColor:            selector.SurfaceRoles.OnVariant,
-		DisabledPlaceholderColor:    selector.SurfaceRoles.OnSurface.SetOpacity(0.38),
-		SupportingTextColor:         selector.SurfaceRoles.OnVariant,
-		DisabledSupportingTextColor: selector.SurfaceRoles.OnSurface.SetOpacity(0.38),
-		ErrorSupportingTextColor:    selector.ErrorRoles.Error,
+		TextColor:                   theme.ColorUnspecified,
+		DisabledTextColor:           theme.ColorUnspecified,
+		CursorColor:                 theme.ColorUnspecified,
+		ErrorCursorColor:            theme.ColorUnspecified,
+		SelectionColor:              theme.ColorUnspecified,
+		FocusedIndicatorColor:       theme.ColorUnspecified, // Active
+		UnfocusedIndicatorColor:     theme.ColorUnspecified, // Inactive
+		DisabledIndicatorColor:      theme.ColorUnspecified,
+		ErrorIndicatorColor:         theme.ColorUnspecified,
+		HoveredIndicatorColor:       theme.ColorUnspecified, // Actually M3 says OnSurface for Outline variant hovered? Or just Outline token. Let's use OnSurface for high contrast hover.
+		LeadingIconColor:            theme.ColorUnspecified,
+		TrailingIconColor:           theme.ColorUnspecified,
+		DisabledLeadingIconColor:    theme.ColorUnspecified,
+		DisabledTrailingIconColor:   theme.ColorUnspecified,
+		LabelColor:                  theme.ColorUnspecified, // Focused Label
+		UnfocusedLabelColor:         theme.ColorUnspecified,
+		DisabledLabelColor:          theme.ColorUnspecified,
+		ErrorLabelColor:             theme.ColorUnspecified,
+		PlaceholderColor:            theme.ColorUnspecified,
+		DisabledPlaceholderColor:    theme.ColorUnspecified,
+		SupportingTextColor:         theme.ColorUnspecified,
+		DisabledSupportingTextColor: theme.ColorUnspecified,
+		ErrorSupportingTextColor:    theme.ColorUnspecified,
+	}
+}
+
+func ResolveTextFieldColors(colors TextFieldColors) TextFieldColors {
+	selector := theme.ColorHelper.ColorSelector()
+
+	return TextFieldColors{
+		TextColor:                   theme.TakeOrElseColor(colors.TextColor, selector.SurfaceRoles.OnSurface),
+		DisabledTextColor:           theme.TakeOrElseColor(colors.DisabledTextColor, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
+		CursorColor:                 theme.TakeOrElseColor(colors.CursorColor, selector.PrimaryRoles.Primary),
+		ErrorCursorColor:            theme.TakeOrElseColor(colors.ErrorCursorColor, selector.ErrorRoles.Error),
+		SelectionColor:              theme.TakeOrElseColor(colors.SelectionColor, selector.PrimaryRoles.Primary),
+		FocusedIndicatorColor:       theme.TakeOrElseColor(colors.FocusedIndicatorColor, selector.PrimaryRoles.Primary),   // Active
+		UnfocusedIndicatorColor:     theme.TakeOrElseColor(colors.UnfocusedIndicatorColor, selector.OutlineRoles.Outline), // Inactive
+		DisabledIndicatorColor:      theme.TakeOrElseColor(colors.DisabledIndicatorColor, selector.SurfaceRoles.OnSurface.SetOpacity(0.12)),
+		ErrorIndicatorColor:         theme.TakeOrElseColor(colors.ErrorIndicatorColor, selector.ErrorRoles.Error),
+		HoveredIndicatorColor:       theme.TakeOrElseColor(colors.HoveredIndicatorColor, selector.SurfaceRoles.OnSurface), // Actually M3 says OnSurface for Outline variant hovered? Or just Outline token. Let's use OnSurface for high contrast hover.
+		LeadingIconColor:            theme.TakeOrElseColor(colors.LeadingIconColor, selector.SurfaceRoles.OnVariant),
+		TrailingIconColor:           theme.TakeOrElseColor(colors.TrailingIconColor, selector.SurfaceRoles.OnVariant),
+		DisabledLeadingIconColor:    theme.TakeOrElseColor(colors.DisabledLeadingIconColor, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
+		DisabledTrailingIconColor:   theme.TakeOrElseColor(colors.DisabledTrailingIconColor, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
+		LabelColor:                  theme.TakeOrElseColor(colors.LabelColor, selector.PrimaryRoles.Primary), // Focused Label
+		UnfocusedLabelColor:         theme.TakeOrElseColor(colors.UnfocusedLabelColor, selector.SurfaceRoles.OnVariant),
+		DisabledLabelColor:          theme.TakeOrElseColor(colors.DisabledLabelColor, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
+		ErrorLabelColor:             theme.TakeOrElseColor(colors.ErrorLabelColor, selector.ErrorRoles.Error),
+		PlaceholderColor:            theme.TakeOrElseColor(colors.PlaceholderColor, selector.SurfaceRoles.OnVariant),
+		DisabledPlaceholderColor:    theme.TakeOrElseColor(colors.DisabledPlaceholderColor, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
+		SupportingTextColor:         theme.TakeOrElseColor(colors.SupportingTextColor, selector.SurfaceRoles.OnVariant),
+		DisabledSupportingTextColor: theme.TakeOrElseColor(colors.DisabledSupportingTextColor, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
+		ErrorSupportingTextColor:    theme.TakeOrElseColor(colors.ErrorSupportingTextColor, selector.ErrorRoles.Error),
 	}
 }

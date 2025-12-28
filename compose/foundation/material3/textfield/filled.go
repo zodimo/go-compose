@@ -5,6 +5,7 @@ import (
 
 	"git.sr.ht/~schnwalter/gio-mw/widget/input"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/pkg/sentinel"
 )
 
 const Material3FilledTextFieldNodeID = "Material3FilledTextField"
@@ -16,11 +17,15 @@ func Filled(
 	onValueChange func(string),
 	options ...TextFieldOption,
 ) Composable {
+
+	opts := DefaultTextFieldOptions()
+	for _, opt := range options {
+		opt(&opts)
+	}
+
+	opts.Colors = ResolveTextFieldColors(opts.Colors)
+
 	return func(c Composer) Composer {
-		opts := DefaultTextFieldOptions()
-		for _, opt := range options {
-			opt(&opts)
-		}
 
 		key := c.GenerateID()
 		path := c.GetPath()
@@ -63,10 +68,10 @@ func Filled(
 
 		// Apply properties to the widget
 		// These assignments are cheap and happen during composition
-		inp.LabelText = label
-		inp.SupportingText = opts.SupportingText
+		inp.LabelText = opts.Label
+		inp.SupportingText = sentinel.TakeOrElseString(opts.SupportingText, "")
 		inp.Disabled = !opts.Enabled
-		inp.Error = opts.Error
+		inp.Error = opts.IsError
 
 		c.StartBlock(Material3FilledTextFieldNodeID)
 		c.Modifier(func(m Modifier) Modifier {

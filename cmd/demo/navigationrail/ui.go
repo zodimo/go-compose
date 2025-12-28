@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/zodimo/go-compose/compose/foundation/icon"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
+	"github.com/zodimo/go-compose/compose/foundation/material3/icon"
 	"github.com/zodimo/go-compose/compose/foundation/material3/navigationdrawer"
 	"github.com/zodimo/go-compose/compose/foundation/material3/navigationrail"
 	"github.com/zodimo/go-compose/compose/foundation/material3/text"
 	ftext "github.com/zodimo/go-compose/compose/foundation/text"
 	"github.com/zodimo/go-compose/compose/ui"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -129,7 +130,7 @@ func UI() api.Composable {
 									func(c api.Composer) api.Composer {
 										return icon.Icon(
 											icons.NavigationMenu,
-											icon.WithColor(colorHelper.SpecificColor(color.NRGBA{A: 255})),
+											icon.WithColor(colorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{A: 255}))),
 											icon.WithModifier(size.Size(24, 24)),
 										)(c)
 									},

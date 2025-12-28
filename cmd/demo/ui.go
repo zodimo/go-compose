@@ -9,6 +9,7 @@ import (
 	m3Button "github.com/zodimo/go-compose/compose/foundation/material3/button"
 	m3Card "github.com/zodimo/go-compose/compose/foundation/material3/card"
 	m3Divider "github.com/zodimo/go-compose/compose/foundation/material3/divider"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/theme"
 
@@ -35,7 +36,8 @@ func UI(c api.Composer) api.LayoutNode {
 					c.Sequence(
 						text.Text(fmt.Sprintf("state=%v", counterCell.Get()),
 							text.WithTextStyleOptions(
-								text.StyleWithColor(theme.ColorHelper.SpecificColor(color.NRGBA{R: 255, G: 255, B: 255, A: 255})),
+								text.StyleWithColor(
+									theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 255, G: 255, B: 255, A: 255}))),
 							),
 						),
 					),
@@ -46,9 +48,9 @@ func UI(c api.Composer) api.LayoutNode {
 							counterCell.Set(counterCell.Get().(int) + 1)
 						}).
 							Then(weight.Weight(1)).
-							Then(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0, G: 0, B: 200, A: 200}))).
+							Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 0, G: 0, B: 200, A: 200})))).
 							Then(padding.All(20)).
-							Then(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0, G: 100, B: 200, A: 200}))),
+							Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 0, G: 100, B: 200, A: 200})))),
 					),
 				),
 				column.Column(
@@ -61,14 +63,14 @@ func UI(c api.Composer) api.LayoutNode {
 						),
 					),
 					column.WithModifier(weight.Weight(1).
-						Then(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 150, G: 0, B: 0, A: 200}))),
+						Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 150, G: 0, B: 0, A: 200})))),
 					),
 				),
 				column.Column(
 					c.Sequence(),
 					column.WithModifier(clip.Clip(shape.ShapeCircle).
 						Then(size.Size(100, 50)).
-						Then(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 100, G: 0, B: 0, A: 200}))).
+						Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 100, G: 0, B: 0, A: 200})))).
 						Then(clickable.OnClick(func() {
 							fmt.Println("Last Column clicked!!")
 						})),
@@ -76,15 +78,15 @@ func UI(c api.Composer) api.LayoutNode {
 				),
 			),
 				row.WithModifier(size.Height(300).
-					Then(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0, G: 200, B: 0, A: 200}))),
+					Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 0, G: 200, B: 0, A: 200})))),
 				),
 			),
 			text.Text("hello world",
 				text.Selectable(),
 				text.WithAlignment(text.Middle),
-				text.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 100, G: 0, B: 0, A: 150})).
+				text.WithModifier(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 100, G: 0, B: 0, A: 150}))).
 					Then(padding.All(20)).
-					Then(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 200, G: 0, B: 50, A: 50}))),
+					Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 200, G: 0, B: 50, A: 50})))),
 				),
 			),
 
@@ -111,7 +113,7 @@ func UI(c api.Composer) api.LayoutNode {
 			)),
 		),
 		column.WithModifier(size.FillMax().
-			Then(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 200, G: 0, B: 0, A: 50}))),
+			Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 200, G: 0, B: 0, A: 50})))),
 		),
 
 		column.WithAlignment(column.Middle),

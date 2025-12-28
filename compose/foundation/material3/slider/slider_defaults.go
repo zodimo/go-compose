@@ -13,18 +13,17 @@ type sliderDefaults struct{}
 
 // Colors returns the default SliderColors.
 func (d sliderDefaults) Colors() SliderColors {
-	selector := theme.ColorHelper.ColorSelector()
 	return SliderColors{
-		ThumbColor:            selector.PrimaryRoles.Primary,
-		ActiveTrackColor:      selector.PrimaryRoles.Primary,
-		ActiveTickColor:       selector.PrimaryRoles.OnPrimary.SetOpacity(0.38), // M3 Spec says Outline Variant usually, but let's stick to OnPrimary for contrast on Primary track
-		InactiveTrackColor:    selector.SurfaceRoles.ContainerHighest,           // SurfaceContainerHighest
-		InactiveTickColor:     selector.SurfaceRoles.OnVariant.SetOpacity(0.38),
-		DisabledThumbColor:    selector.SurfaceRoles.OnSurface.SetOpacity(0.38),
-		DisabledActiveTrack:   selector.SurfaceRoles.OnSurface.SetOpacity(0.38),
-		DisabledActiveTick:    selector.SurfaceRoles.OnSurface.SetOpacity(0.38),
-		DisabledInactiveTrack: selector.SurfaceRoles.OnSurface.SetOpacity(0.12),
-		DisabledInactiveTick:  selector.SurfaceRoles.OnSurface.SetOpacity(0.12),
+		ThumbColor:            theme.ColorHelper.UnspecifiedColor(),
+		ActiveTrackColor:      theme.ColorHelper.UnspecifiedColor(),
+		ActiveTickColor:       theme.ColorHelper.UnspecifiedColor(),
+		InactiveTrackColor:    theme.ColorHelper.UnspecifiedColor(),
+		InactiveTickColor:     theme.ColorHelper.UnspecifiedColor(),
+		DisabledThumbColor:    theme.ColorHelper.UnspecifiedColor(),
+		DisabledActiveTrack:   theme.ColorHelper.UnspecifiedColor(),
+		DisabledActiveTick:    theme.ColorHelper.UnspecifiedColor(),
+		DisabledInactiveTrack: theme.ColorHelper.UnspecifiedColor(),
+		DisabledInactiveTick:  theme.ColorHelper.UnspecifiedColor(),
 	}
 }
 

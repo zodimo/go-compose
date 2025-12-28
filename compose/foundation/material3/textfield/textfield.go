@@ -29,7 +29,8 @@ func TextField(
 	label string,
 	options ...TextFieldOption,
 ) Composable {
-	return Filled(value, onValueChange, label, options...)
+	options = append(options, WithLabel(label))
+	return Filled(value, onValueChange, options...)
 }
 
 // TextField implements the Material Design Text Field

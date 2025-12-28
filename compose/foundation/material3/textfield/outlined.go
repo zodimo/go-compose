@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/pkg/sentinel"
 	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/f32"
@@ -32,11 +33,16 @@ func Outlined(
 	onValueChange func(string),
 	options ...TextFieldOption,
 ) Composable {
+
+	opts := DefaultTextFieldOptions()
+	for _, opt := range options {
+		opt(&opts)
+	}
+
+	opts.Colors = ResolveTextFieldColors(opts.Colors)
+	opts.SupportingText = sentinel.TakeOrElseString(opts.SupportingText, "")
+
 	return func(c Composer) Composer {
-		opts := DefaultTextFieldOptions()
-		for _, opt := range options {
-			opt(&opts)
-		}
 
 		key := c.GenerateID()
 		path := c.GetPath()
@@ -80,12 +86,12 @@ func Outlined(
 		// Update static properties
 		outWidget.Editor.SingleLine = opts.SingleLine
 		outWidget.Editor.Submit = opts.OnSubmit != nil
-		outWidget.CharLimit = opts.CharLimit
-		outWidget.Prefix = opts.Prefix
-		outWidget.Suffix = opts.Suffix
+		// outWidget.CharLimit = opts.CharLimit
+		// outWidget.Prefix = opts.Prefix
+		// outWidget.Suffix = opts.Suffix
 		outWidget.Helper = opts.SupportingText
-		outWidget.Colors = opts.Colors
-		outWidget.SetError(opts.Error, opts.SupportingText) // Use SupportingText as error message if Error is true
+		// outWidget.Colors = opts.Colors
+		outWidget.SetError(opts.IsError, opts.SupportingText) // Use SupportingText as error message if Error is true
 
 		c.StartBlock(Material3OutlinedTextFieldNodeID)
 		c.Modifier(func(m Modifier) Modifier {
@@ -93,7 +99,7 @@ func Outlined(
 		})
 
 		// Constructor
-		c.SetWidgetConstructor(outlinedTextFieldWidgetConstructor(outWidget, value, label, opts, handlerWrapper, onSubmitWrapper, tracker))
+		c.SetWidgetConstructor(outlinedTextFieldWidgetConstructor(outWidget, value, opts.Label, opts, handlerWrapper, onSubmitWrapper, tracker))
 
 		return c.EndBlock()
 	}
@@ -141,6 +147,8 @@ func outlinedTextFieldWidgetConstructor(
 					handler.Func(currentText)
 				}
 			}
+
+			w.Colors = opts.Colors
 
 			return w.Layout(gtx, th, label)
 		}
