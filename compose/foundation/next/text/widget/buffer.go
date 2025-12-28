@@ -20,7 +20,7 @@ type editBuffer struct {
 	changed bool
 }
 
-var _ textSource = (*editBuffer)(nil)
+var _ TextSource = (*editBuffer)(nil)
 
 const minSpace = 5
 

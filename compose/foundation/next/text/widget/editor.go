@@ -33,7 +33,7 @@ import (
 type Editor struct {
 	// text manages the text buffer and provides shaping and cursor positioning
 	// services.
-	text textView
+	text TextView
 	// Alignment controls the alignment of text within the editor.
 	Alignment text.Alignment
 	// LineHeight determines the gap between baselines of text. If zero, a sensible
