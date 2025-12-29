@@ -8,6 +8,17 @@ import (
 // Composable represents a composable function type.
 type Composable = compose.Composable
 
+type SectionContainerOptions struct {
+	Modifier modifier.Modifier
+}
+type SectionContainerOption func(*SectionContainerOptions)
+
+func WithModifier(modifier modifier.Modifier) SectionContainerOption {
+	return func(options *SectionContainerOptions) {
+		options.Modifier = modifier
+	}
+}
+
 // SelectionContainer enables text selection for its direct or indirect children.
 //
 // Use of a lazy layout, such as LazyRow or LazyColumn, within a SelectionContainer
@@ -16,7 +27,14 @@ type Composable = compose.Composable
 // expand the selection to include them.
 //
 // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/foundation/foundation/src/commonMain/kotlin/androidx/compose/foundation/text/selection/SelectionContainer.kt
-func SelectionContainer(mod modifier.Modifier, content Composable) Composable {
+func SelectionContainer(content Composable, options ...SectionContainerOption) Composable {
+	opts := &SectionContainerOptions{
+		Modifier: modifier.EmptyModifier,
+	}
+	for _, option := range options {
+		option(opts)
+	}
+
 	return func(c compose.Composer) compose.Composer {
 		// Create a mutable state for selection
 		var selection *Selection
@@ -26,7 +44,7 @@ func SelectionContainer(mod modifier.Modifier, content Composable) Composable {
 		// Call internal selection container with state management
 		internalSelectionContainer(
 			c,
-			mod,
+			opts.Modifier,
 			selection,
 			func(newSelection *Selection) {
 				selection = newSelection
