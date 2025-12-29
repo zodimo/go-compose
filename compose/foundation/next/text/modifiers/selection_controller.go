@@ -56,6 +56,11 @@ func (sc *SelectionController) SelectableId() int64 {
 	return sc.selectableId
 }
 
+// BackgroundSelectionColor returns the background color used for selection highlights.
+func (sc *SelectionController) BackgroundSelectionColor() graphics.Color {
+	return sc.backgroundSelectionColor
+}
+
 // OnRemembered is called when the controller is remembered in composition.
 // It subscribes to the selection registrar.
 func (sc *SelectionController) OnRemembered() {
