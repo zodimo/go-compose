@@ -46,6 +46,14 @@ func (t TextAlign) String() string {
 	}
 }
 
+func (t TextAlign) ToGioTextAlignment(def TextAlign) gioText.Alignment {
+	align := t.TakeOrElse(def)
+	if t.IsSpecified() {
+		return gioText.Alignment(align)
+	}
+	panic("TextAlign is not specified")
+}
+
 // TextAlignValues returns a list containing all possible values of TextAlign.
 func TextAlignValues() []TextAlign {
 	return []TextAlign{

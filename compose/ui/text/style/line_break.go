@@ -42,6 +42,14 @@ func (l LineBreak) String() string {
 	return fmt.Sprintf("LineBreak(strategy=%s)", description)
 }
 
+func (l LineBreak) ToGioWrapPolicy(def LineBreak) gioText.WrapPolicy {
+	linebreak := l.TakeOrElse(def)
+	if linebreak == LineBreakUnspecified {
+		return gioText.WrapPolicy(gioText.WrapGraphemes)
+	}
+	panic("Line break is not specified")
+}
+
 // IsSpecified returns true if it is not [LineBreakUnspecified].
 func (l LineBreak) IsSpecified() bool {
 	return l != LineBreakUnspecified
