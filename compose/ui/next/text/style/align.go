@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/style/TextAlign.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/style/TextAlign.kt
 
 // TextAlign defines how to align text horizontally.
 // TextAlign controls how text aligns in the space it appears.

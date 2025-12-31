@@ -15,7 +15,7 @@ var TextForegroundStyleUnspecified *TextForegroundStyle = &TextForegroundStyle{
 	Alpha: floatutils.Float32Unspecified,
 }
 
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/style/TextForegroundStyle.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/style/TextForegroundStyle.kt
 
 // TextForegroundStyle represents possible ways to draw Text e.g. color, brush.
 // This interface aims to unify unspecified versions of complementary drawing styles.

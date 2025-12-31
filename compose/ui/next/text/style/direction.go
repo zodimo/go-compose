@@ -6,7 +6,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/style/TextDirection.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/style/TextDirection.kt
 
 const (
 	// TextDirectionUnspecified represents an unset value, a usual replacement for "null"

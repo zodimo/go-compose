@@ -5,7 +5,7 @@ package style
 // Unlike TextDirection which specifies the algorithm to determine direction,
 // ResolvedTextDirection represents the final resolved direction.
 //
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/style/ResolvedTextDirection.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/style/ResolvedTextDirection.kt
 type ResolvedTextDirection int
 
 const (

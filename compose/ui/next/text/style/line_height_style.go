@@ -11,7 +11,7 @@ var LineHeightStyleUnspecified *LineHeightStyle = &LineHeightStyle{
 }
 
 // LineHeightStyle configuration for line height.
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/style/LineHeightStyle.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/style/LineHeightStyle.kt
 type LineHeightStyle struct {
 	Alignment *LineHeightStyleAlignment
 	Trim      LineHeightStyleTrim

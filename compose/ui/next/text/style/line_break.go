@@ -3,7 +3,7 @@ package style
 import "fmt"
 
 // LineBreak configuration for line breaking.
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/style/LineBreak.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/style/LineBreak.kt
 type LineBreak int32
 
 // LineBreakStrategy The strategy used for line breaking.

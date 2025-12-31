@@ -8,7 +8,7 @@ import (
 
 // TextMotion defines ways to render and place glyphs to provide readability
 // and smooth animations for text.
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/style/TextMotion.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/style/TextMotion.kt
 
 // Linearity defines the possible valid configurations for text linearity.
 // Both font hinting and Linear text cannot be enabled at the same time.

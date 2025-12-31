@@ -8,7 +8,7 @@ import (
 
 // PlaceholderVerticalAlign specifies how a placeholder is vertically aligned within a text line.
 //
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/Placeholder.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/Placeholder.kt
 type PlaceholderVerticalAlign int
 
 const (
@@ -63,7 +63,7 @@ func (p PlaceholderVerticalAlign) String() string {
 // to leave an empty space. It is typically used to insert inline images, custom emojis,
 // etc. into the text paragraph.
 //
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/Placeholder.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/Placeholder.kt
 type Placeholder struct {
 	// Width of the placeholder, must be specified in sp or em.
 	Width unit.TextUnit

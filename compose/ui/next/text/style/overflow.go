@@ -1,6 +1,6 @@
 package style
 
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/style/TextOverflow.kt;drc=4970f6e96cdb06089723da0ab8ec93ae3f067c7a;l=23
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/style/TextOverflow.kt;drc=4970f6e96cdb06089723da0ab8ec93ae3f067c7a;l=23
 type TextOverFlow int
 
 const (

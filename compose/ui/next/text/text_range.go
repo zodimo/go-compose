@@ -5,7 +5,7 @@ import "fmt"
 // TextRange is an immutable text range, representing a range from Start (inclusive) to End (exclusive).
 // End can be smaller than Start; use Min() and Max() to get ordered values.
 //
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/TextRange.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/TextRange.kt
 type TextRange struct {
 	Start int
 	End   int

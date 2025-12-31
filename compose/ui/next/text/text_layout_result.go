@@ -14,7 +14,7 @@ import (
 // Note: The Kotlin source includes deprecated resourceLoader field and
 // DeprecatedBridgeFontResourceLoader class. These are omitted in the Go port.
 //
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/TextLayoutResult.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/TextLayoutResult.kt
 type TextLayoutInput struct {
 	// Text is the annotated string used for computing text layout.
 	Text AnnotatedString
@@ -113,7 +113,7 @@ func (i TextLayoutInput) String() string {
 
 // MultiParagraph is the interface for multi-paragraph text layout.
 //
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/MultiParagraph.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/MultiParagraph.kt
 type MultiParagraph interface {
 	// LineCount returns the number of lines in the text layout.
 	LineCount() int
@@ -194,7 +194,7 @@ type MultiParagraph interface {
 
 // TextLayoutResult holds the result of text layout computation.
 //
-// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/TextLayoutResult.kt
+// https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/TextLayoutResult.kt
 type TextLayoutResult struct {
 	layoutInput    TextLayoutInput
 	multiParagraph MultiParagraph

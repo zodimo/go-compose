@@ -8,7 +8,7 @@ import (
 
 var TextIndentUnspecified = &TextIndent{FirstLine: unit.TextUnitUnspecified, RestLine: unit.TextUnitUnspecified}
 
-//https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/text/style/TextIndent.kt;drc=4970f6e96cdb06089723da0ab8ec93ae3f067c7a;l=32
+//https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/style/TextIndent.kt;drc=4970f6e96cdb06089723da0ab8ec93ae3f067c7a;l=32
 
 // TextIndent specifies the indentation of a paragraph.
 // FirstLine is the amount of indentation applied to the first line.
