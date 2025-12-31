@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
 )
 
 func TestTextUndoOperation_TextEditType(t *testing.T) {

@@ -15,9 +15,9 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 
-	"github.com/zodimo/go-compose/compose/ui/text"
-	uiFont "github.com/zodimo/go-compose/compose/ui/text/font"
-	"github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
+	uiFont "github.com/zodimo/go-compose/compose/ui/next/text/font"
+	"github.com/zodimo/go-compose/compose/ui/next/text/style"
 )
 
 // EditableTextLayoutController manages editable text layout state and bridges between

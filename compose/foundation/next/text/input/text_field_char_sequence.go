@@ -1,7 +1,7 @@
 package input
 
 import (
-	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
 )
 
 // PlacedAnnotation is an alias for text.Range[text.Annotation].

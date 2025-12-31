@@ -3,7 +3,7 @@ package input
 import (
 	"github.com/zodimo/go-compose/compose/foundation/next/text/input/internal"
 	"github.com/zodimo/go-compose/compose/foundation/next/text/input/internal/undo"
-	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
 )
 
 // TextUndoCapacity is the default undo capacity for text fields.

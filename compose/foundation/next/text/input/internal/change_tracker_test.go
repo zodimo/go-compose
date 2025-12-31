@@ -3,7 +3,7 @@ package internal
 import (
 	"testing"
 
-	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
 )
 
 func TestChangeTracker_Empty(t *testing.T) {

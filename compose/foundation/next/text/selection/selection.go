@@ -7,8 +7,8 @@
 package selection
 
 import (
-	"github.com/zodimo/go-compose/compose/ui/text"
-	"github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
+	"github.com/zodimo/go-compose/compose/ui/next/text/style"
 )
 
 // AnchorInfo contains information about a selection anchor (start/end).

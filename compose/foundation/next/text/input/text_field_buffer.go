@@ -5,7 +5,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/zodimo/go-compose/compose/foundation/next/text/input/internal"
-	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
 )
 
 // TextFieldBuffer is a mutable buffer for text field editing operations.

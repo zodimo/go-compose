@@ -1,7 +1,7 @@
 package selection
 
 import (
-	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
 )
 
 // TextFieldSelectionState manages selection gestures and handles for text fields.

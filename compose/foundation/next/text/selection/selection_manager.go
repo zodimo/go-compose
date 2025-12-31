@@ -5,7 +5,7 @@ import (
 
 	"github.com/zodimo/go-compose/compose/ui/geometry"
 	"github.com/zodimo/go-compose/compose/ui/layout"
-	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
 	"github.com/zodimo/go-compose/internal/modifier"
 )
 

@@ -3,7 +3,7 @@ package input
 import (
 	"testing"
 
-	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
 )
 
 func TestOutputTransformation_Prefix(t *testing.T) {

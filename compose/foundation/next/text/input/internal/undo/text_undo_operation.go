@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
 )
 
 // MergeTimeWindowMs is the maximum time between edits that allows merging.

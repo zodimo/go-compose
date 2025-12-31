@@ -12,9 +12,9 @@ import (
 	"gioui.org/unit"
 
 	"github.com/zodimo/go-compose/compose/foundation/next/text/widget"
-	"github.com/zodimo/go-compose/compose/ui/text"
-	uiFont "github.com/zodimo/go-compose/compose/ui/text/font"
-	"github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
+	uiFont "github.com/zodimo/go-compose/compose/ui/next/text/font"
+	"github.com/zodimo/go-compose/compose/ui/next/text/style"
 )
 
 // TextLayoutController manages text layout state and bridges between

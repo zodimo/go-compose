@@ -1,6 +1,6 @@
 package modifiers
 
-import "github.com/zodimo/go-compose/compose/ui/text"
+import "github.com/zodimo/go-compose/compose/ui/next/text"
 
 type TextSubstitutionValue struct {
 	Original              text.AnnotatedString

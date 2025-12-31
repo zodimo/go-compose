@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
 )
 
 // OffsetMappingCalculator builds bidirectional offset mappings after edit operations.
