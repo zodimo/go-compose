@@ -15,6 +15,8 @@ var TextStyleUnspecified *TextStyle = &TextStyle{
 	platformStyle:  nil,
 }
 
+var _ TextStyleInterface = (*TextStyle)(nil)
+
 type TextStyle struct {
 	spanStyle      *SpanStyle
 	paragraphStyle *ParagraphStyle
