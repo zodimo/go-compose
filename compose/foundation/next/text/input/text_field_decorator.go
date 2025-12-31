@@ -41,18 +41,18 @@ type TextFieldDecorator interface {
 	//
 	// The decorator controls the layout of the inner text field relative to
 	// any decorations (icons, labels, etc.).
-	Decoration(innerTextField func())
+	Decoration(innerTextField Composable) Composable
 }
 
 // TextFieldDecoratorFunc is a function type that implements TextFieldDecorator.
-type TextFieldDecoratorFunc func(innerTextField func())
+type TextFieldDecoratorFunc func(innerTextField Composable) Composable
 
 // Decoration implements TextFieldDecorator.
-func (f TextFieldDecoratorFunc) Decoration(innerTextField func()) {
-	f(innerTextField)
+func (f TextFieldDecoratorFunc) Decoration(innerTextField Composable) Composable {
+	return f(innerTextField)
 }
 
 // NoDecorationDecorator renders only the inner text field with no decorations.
-var NoDecorationDecorator TextFieldDecorator = TextFieldDecoratorFunc(func(innerTextField func()) {
-	innerTextField()
+var NoDecorationDecorator TextFieldDecorator = TextFieldDecoratorFunc(func(innerTextField Composable) Composable {
+	return innerTextField
 })

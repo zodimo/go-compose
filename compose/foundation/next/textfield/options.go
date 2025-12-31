@@ -1,8 +1,7 @@
-package text
+package textfield
 
 import (
 	"github.com/zodimo/go-compose/compose/foundation/next/text/input"
-	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text"
 )
 
@@ -42,15 +41,15 @@ type TextFieldOptions struct {
 	// Decorator allows adding decorations around the text field.
 	Decorator input.TextFieldDecorator
 
-	// CursorColor is the color for the cursor. If nil, uses theme default.
-	CursorColor graphics.ColorProducer
+	// // CursorColor is the color for the cursor. If nil, uses theme default.
+	// CursorColor graphics.ColorProducer
 }
 
 // TextFieldOption is a functional option for configuring BasicTextField.
 type TextFieldOption func(*TextFieldOptions)
 
-// WithTextFieldModifier sets the modifier for the text field.
-func WithTextFieldModifier(m Modifier) TextFieldOption {
+// WithModifier sets the modifier for the text field.
+func WithModifier(m Modifier) TextFieldOption {
 	return func(o *TextFieldOptions) {
 		o.Modifier = m
 	}
@@ -70,8 +69,8 @@ func WithReadOnly(readOnly bool) TextFieldOption {
 	}
 }
 
-// WithTextFieldTextStyle sets the text style.
-func WithTextFieldTextStyle(ts *text.TextStyle) TextFieldOption {
+// WithTextStyle sets the text style.
+func WithTextStyle(ts *text.TextStyle) TextFieldOption {
 	return func(o *TextFieldOptions) {
 		o.TextStyle = ts
 	}
@@ -98,8 +97,8 @@ func WithLineLimits(limits input.TextFieldLineLimits) TextFieldOption {
 	}
 }
 
-// WithOnTextFieldLayout sets the text layout callback.
-func WithOnTextFieldLayout(onLayout func(text.TextLayoutResult)) TextFieldOption {
+// WithOnLayout sets the text layout callback.
+func WithOnLayout(onLayout func(text.TextLayoutResult)) TextFieldOption {
 	return func(o *TextFieldOptions) {
 		o.OnTextLayout = onLayout
 	}
@@ -119,9 +118,9 @@ func WithDecorator(decorator input.TextFieldDecorator) TextFieldOption {
 	}
 }
 
-// WithCursorColor sets the cursor color.
-func WithCursorColor(color graphics.ColorProducer) TextFieldOption {
-	return func(o *TextFieldOptions) {
-		o.CursorColor = color
-	}
-}
+// // WithCursorColor sets the cursor color.
+// func WithCursorColor(color graphics.ColorProducer) TextFieldOption {
+// 	return func(o *TextFieldOptions) {
+// 		o.CursorColor = color
+// 	}
+// }

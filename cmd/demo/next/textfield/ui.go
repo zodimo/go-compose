@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
-	foundationText "github.com/zodimo/go-compose/compose/foundation/next/text"
 	"github.com/zodimo/go-compose/compose/foundation/next/text/input"
+	foundationTextField "github.com/zodimo/go-compose/compose/foundation/next/textfield"
 	"github.com/zodimo/go-compose/compose/material3/text"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/modifiers/background"
@@ -38,51 +38,51 @@ func UI() api.Composable {
 				// Section: Basic Text Field
 				text.Text("Basic TextField", text.TypestyleTitleMedium),
 				spacer.Height(8),
-				foundationText.BasicTextField(
+				foundationTextField.BasicTextField(
 					basicState,
 					func(value string) {
 						basicState.SetTextAndPlaceCursorAtEnd(value)
 					},
-					foundationText.WithTextFieldModifier(modifier),
+					foundationTextField.WithModifier(modifier),
 				),
 				spacer.Height(16),
 
 				// Section: Single Line
 				text.Text("Single Line TextField", text.TypestyleTitleMedium),
 				spacer.Height(8),
-				foundationText.BasicTextField(
+				foundationTextField.BasicTextField(
 					singleLineState,
 					func(value string) {
 						singleLineState.SetTextAndPlaceCursorAtEnd(value)
 					},
-					foundationText.WithLineLimits(input.TextFieldLineLimitsSingleLine),
-					foundationText.WithTextFieldModifier(modifier),
+					foundationTextField.WithLineLimits(input.TextFieldLineLimitsSingleLine),
+					foundationTextField.WithModifier(modifier),
 				),
 				spacer.Height(16),
 
 				// Section: Max Length (10 chars)
 				text.Text("Max Length (10 chars)", text.TypestyleTitleMedium),
 				spacer.Height(8),
-				foundationText.BasicTextField(
+				foundationTextField.BasicTextField(
 					maxLengthState,
 					func(value string) {
 						maxLengthState.SetTextAndPlaceCursorAtEnd(value)
 					},
-					foundationText.WithInputTransformation(input.MaxLengthTransformation(10)),
-					foundationText.WithTextFieldModifier(modifier),
+					foundationTextField.WithInputTransformation(input.MaxLengthTransformation(10)),
+					foundationTextField.WithModifier(modifier),
 				),
 				spacer.Height(16),
 
 				// Section: Digits Only
 				text.Text("Digits Only", text.TypestyleTitleMedium),
 				spacer.Height(8),
-				foundationText.BasicTextField(
+				foundationTextField.BasicTextField(
 					digitsOnlyState,
 					func(value string) {
 						digitsOnlyState.SetTextAndPlaceCursorAtEnd(value)
 					},
-					foundationText.WithInputTransformation(input.DigitsOnlyTransformation()),
-					foundationText.WithTextFieldModifier(modifier),
+					foundationTextField.WithInputTransformation(input.DigitsOnlyTransformation()),
+					foundationTextField.WithModifier(modifier),
 				),
 				spacer.Height(24),
 

@@ -1,4 +1,4 @@
-package text
+package textfield
 
 import (
 	"github.com/zodimo/go-compose/compose/foundation/next/text/input"
@@ -17,6 +17,6 @@ func DefaultTextFieldOptions() TextFieldOptions {
 		OnTextLayout:          nil,
 		KeyboardActionHandler: nil,
 		Decorator:             input.NoDecorationDecorator,
-		CursorColor:           nil,
+		// CursorColor:           nil,
 	}
 }

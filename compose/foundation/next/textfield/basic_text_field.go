@@ -1,4 +1,4 @@
-package text
+package textfield
 
 import (
 	"fmt"
@@ -102,10 +102,10 @@ func BasicTextField(
 			inputTransformation:  opts.InputTransformation,
 			outputTransformation: opts.OutputTransformation,
 			fontFamilyResolver:   familyResolver,
-			cursorColor:          opts.CursorColor,
-			layoutDirection:      layoutDirection,
-			textShaper:           textShaper,
-			onValueChange:        handler,
+			// cursorColor:          opts.CursorColor,
+			layoutDirection: layoutDirection,
+			textShaper:      textShaper,
+			onValueChange:   handler,
 		}))
 
 		return c.EndBlock()
@@ -131,10 +131,10 @@ type BasicTextFieldConstructorArgs struct {
 	inputTransformation  input.InputTransformation
 	outputTransformation input.OutputTransformation
 	fontFamilyResolver   interface{} // font.FontFamilyResolver
-	cursorColor          interface{} // graphics.ColorProducer
-	layoutDirection      unit.LayoutDirection
-	textShaper           *text.TextShaper
-	onValueChange        *onValueChangeWrapper
+	// cursorColor          interface{} // graphics.ColorProducer
+	layoutDirection unit.LayoutDirection
+	textShaper      *text.TextShaper
+	onValueChange   *onValueChangeWrapper
 }
 
 // textFieldWidgetConstructor creates the widget constructor for BasicTextField.
