@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/zodimo/go-compose/compose/material3"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
 	"github.com/zodimo/go-compose/compose/ui/platform"
-	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/pkg/sentinel"
 
