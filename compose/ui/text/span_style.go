@@ -1,6 +1,8 @@
 package text
 
 import (
+	"fmt"
+
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
 	"github.com/zodimo/go-compose/compose/ui/text/font"
@@ -87,7 +89,26 @@ func SpanStyleCopy(s *SpanStyle, options ...SpanStyleOption) *SpanStyle {
 }
 
 func StringSpanStyle(s *SpanStyle) string {
-	panic("StringSpanStyle not implemented")
+	s = CoalesceSpanStyle(s, SpanStyleUnspecified)
+	return fmt.Sprintf("SpanStyle("+
+		"Color=%s, "+
+		"FontSize=%s, "+
+		"FontWeight=%s, "+
+		"FontStyle=%s, "+
+		"FontFamily=%s, "+
+		"LetterSpacing=%s, "+
+		"Background=%s, "+
+		"TextDecoration=%s, "+
+		"Shadow=%s)",
+		s.color.String(),
+		s.fontSize.String(),
+		s.fontWeight.String(),
+		s.fontStyle.String(),
+		font.StringFontFamily(s.fontFamily),
+		s.letterSpacing.String(),
+		s.background.String(),
+		style.StringTextDecoration(s.textDecoration),
+		graphics.StringShadow(s.shadow))
 }
 
 func IsSpecifiedSpanStyle(s *SpanStyle) bool {
