@@ -1,6 +1,34 @@
 package material3
 
-import "time"
+import (
+	"math"
+	"time"
+)
+
+// The default duration used in [VectorizedAnimationSpec]s and [AnimationSpec].
+var DefaultDurationMillis time.Duration = 300 * time.Millisecond
+
+// The value that is used when the animation time is not yet set.
+var UnspecifiedTime time.Duration = math.MinInt64
+
+var MotionSchemeUnspecified = &MotionScheme{
+	DurationShort1:     UnspecifiedTime,
+	DurationShort2:     UnspecifiedTime,
+	DurationShort3:     UnspecifiedTime,
+	DurationShort4:     UnspecifiedTime,
+	DurationMedium1:    UnspecifiedTime,
+	DurationMedium2:    UnspecifiedTime,
+	DurationMedium3:    UnspecifiedTime,
+	DurationMedium4:    UnspecifiedTime,
+	DurationLong1:      UnspecifiedTime,
+	DurationLong2:      UnspecifiedTime,
+	DurationLong3:      UnspecifiedTime,
+	DurationLong4:      UnspecifiedTime,
+	DurationExtraLong1: UnspecifiedTime,
+	DurationExtraLong2: UnspecifiedTime,
+	DurationExtraLong3: UnspecifiedTime,
+	DurationExtraLong4: UnspecifiedTime,
+}
 
 type MotionScheme struct {
 	DurationShort1 time.Duration
@@ -24,7 +52,7 @@ type MotionScheme struct {
 	DurationExtraLong4 time.Duration
 }
 
-var DefaultMotionScheme = MotionScheme{
+var DefaultMotionScheme = &MotionScheme{
 	DurationShort1:     50 * time.Millisecond,
 	DurationShort2:     100 * time.Millisecond,
 	DurationShort3:     150 * time.Millisecond,
