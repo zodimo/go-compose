@@ -4,6 +4,7 @@ import (
 	"gioui.org/unit"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/text/style"
 	"github.com/zodimo/go-maybe"
 
 	gioFont "gioui.org/font"
@@ -72,10 +73,12 @@ func WithTextStyleOptions(options ...text.TextStyleOption) TextOption {
 	}
 }
 
-func WithAlignment(alignment Alignment) TextOption {
-	return func(o *TextOptions) {
-		o.Alignment = maybe.Some(alignment)
-	}
+func WithGioAlignment(alignment Alignment) TextOption {
+	return WithAlignment(style.FromGioTextAlign(alignment))
+}
+
+func WithAlignment(alignment style.TextAlign) TextOption {
+	return WithTextStyleOptions(text.WithTextAlign(alignment))
 }
 
 func WithMaxLines(maxLines int) TextOption {

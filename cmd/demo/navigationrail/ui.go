@@ -17,6 +17,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	uiText "github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/text/style"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -104,9 +105,6 @@ func UI() api.Composable {
 										ftext.WithTextStyleOptions(
 											uiText.WithColor(textColor),
 										),
-										// ftext.WithAlignment(ftext.Middle), // align to the middle horizontally not vertically
-										// ftext.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0, G: 0, B: 200, A: 200})))),
-
 									)(c)
 								},
 								ui.EmptyModifier,
@@ -195,7 +193,7 @@ func UI() api.Composable {
 												ftext.WithTextStyleOptions(
 													uiText.WithColor(textColor),
 												),
-												ftext.WithAlignment(ftext.Middle),
+												ftext.WithAlignment(style.TextAlignMiddle),
 											)(c)
 										},
 										ui.EmptyModifier,

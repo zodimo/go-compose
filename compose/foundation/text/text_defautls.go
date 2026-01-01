@@ -19,7 +19,6 @@ func DefaultTextOptions() TextOptions {
 
 		// BACKWARDS COMPATIBILITY
 		Font:            maybe.None[gioFont.Font](),
-		Alignment:       maybe.None[Alignment](),
 		WrapPolicy:      maybe.None[WrapPolicy](),
 		LineHeight:      maybe.None[unit.Sp](),
 		LineHeightScale: maybe.None[float32](),

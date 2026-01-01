@@ -1,6 +1,12 @@
 package style
 
-import gioText "gioui.org/text"
+import (
+	gioText "gioui.org/text"
+)
+
+func FromGioTextAlign(gioTextAlign gioText.Alignment) TextAlign {
+	return TextAlign(gioTextAlign)
+}
 
 func TextAlignToGioTextAlignment(t TextAlign) gioText.Alignment {
 	align := t.TakeOrElse(TextAlignStart)

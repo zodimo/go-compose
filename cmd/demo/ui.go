@@ -87,7 +87,7 @@ func UI(c api.Composer) api.LayoutNode {
 			),
 			text.Text("hello world",
 				text.Selectable(),
-				text.WithAlignment(text.Middle),
+				text.WithGioAlignment(text.Middle),
 				text.WithModifier(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 100, G: 0, B: 0, A: 150}))).
 					Then(padding.All(20)).
 					Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 200, G: 0, B: 50, A: 50})))),
