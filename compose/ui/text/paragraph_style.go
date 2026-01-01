@@ -46,7 +46,7 @@ func (ps ParagraphStyle) LineBreak() style.LineBreak {
 	return ps.lineBreak
 }
 
-func ParagraphStyleCopy(s *ParagraphStyle, options ...ParagraphStyleOption) *ParagraphStyle {
+func CopyParagraphStyle(s *ParagraphStyle, options ...ParagraphStyleOption) *ParagraphStyle {
 	copy := *s
 	for _, option := range options {
 		option(&copy)

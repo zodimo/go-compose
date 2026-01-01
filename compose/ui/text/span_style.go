@@ -80,7 +80,7 @@ func (s SpanStyle) Shadow() *graphics.Shadow {
 	return s.shadow
 }
 
-func SpanStyleCopy(s *SpanStyle, options ...SpanStyleOption) *SpanStyle {
+func CopySpanStyle(s *SpanStyle, options ...SpanStyleOption) *SpanStyle {
 	copy := *s
 	for _, option := range options {
 		option(&copy)

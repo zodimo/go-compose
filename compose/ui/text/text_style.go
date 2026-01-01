@@ -60,7 +60,7 @@ func (ts TextStyle) TextDirection() style.TextDirection {
 	return ts.paragraphStyle.TextDirection()
 }
 
-func TextStyleCopy(ts *TextStyle, options ...TextStyleOption) *TextStyle {
+func CopyTextStyle(ts *TextStyle, options ...TextStyleOption) *TextStyle {
 	copy := *ts
 	for _, option := range options {
 		option(&copy)
