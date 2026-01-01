@@ -86,28 +86,25 @@ func Chip(onClick func(), label string, options ...ChipOption) api.Composable {
 		// Compose the content
 		content := func(c api.Composer) api.Composer {
 			return row.Row(
-				func(c api.Composer) api.Composer {
-					if opts.LeadingIcon != nil {
+				c.Sequence(
+					c.When(
+						opts.LeadingIcon != nil,
 						// Add end padding to icon
-						iconWrapper := box.Box(
+						box.Box(
 							opts.LeadingIcon,
 							box.WithModifier(padding.Padding(0, 0, 8, 0)),
-						)
-						iconWrapper(c)
-					}
-
-					text.Text(label, text.TypestyleLabelLarge)(c)
-
-					if opts.TrailingIcon != nil {
+						),
+					),
+					text.LabelLarge(label),
+					c.When(
+						opts.TrailingIcon != nil,
 						// Add start padding to icon
-						iconWrapper := box.Box(
+						box.Box(
 							opts.TrailingIcon,
 							box.WithModifier(padding.Padding(8, 0, 0, 0)),
-						)
-						iconWrapper(c)
-					}
-					return c
-				},
+						),
+					),
+				),
 				row.WithModifier(rowModifier),
 				row.WithAlignment(row.Middle),
 				row.WithSpacing(row.SpaceSides),
