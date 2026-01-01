@@ -125,10 +125,7 @@ func UI(c api.Composer) api.LayoutNode {
 
 // SectionTitle is a helper for section headers
 func SectionTitle(title string) api.Composable {
-	return func(c api.Composer) api.Composer {
-		m3text.Text(title, m3text.TypestyleTitleMedium)(c)
-		return c
-	}
+	return m3text.Text(title, m3text.TypestyleTitleMedium)
 }
 
 // DialogState is passed to FeedbackScreen

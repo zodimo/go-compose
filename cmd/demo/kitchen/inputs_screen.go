@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"gioui.org/layout"
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
@@ -18,21 +16,33 @@ import (
 
 // InputsScreen shows text fields and typography
 func InputsScreen(c api.Composer) api.Composable {
-	textValue := c.State("inp_text", func() any { return "" })
+	filledText := c.State("inp_text", func() any { return "" })
+	outlinedText := c.State("outlined_text", func() any { return "" })
 
 	return func(c api.Composer) api.Composer {
 		return column.Column(
 			c.Sequence(
-				SectionTitle("Text Field"),
+				SectionTitle("Text Field Filled"),
 				spacer.Height(8),
-				textfield.TextField(
-					textValue.Get().(string),
-					func(s string) { textValue.Set(s) },
-					"Enter text",
-					textfield.WithSupportingText(fmt.Sprintf("You typed: %s", textValue.Get().(string))),
+
+				textfield.Filled(
+					filledText.Get().(string),
+					func(s string) { filledText.Set(s) },
+					textfield.WithLabel("Filled Text Field"),
+					textfield.WithSingleLine(true),
 				),
 
 				spacer.Height(24),
+
+				SectionTitle("Text Field Outlined"),
+				spacer.Height(8),
+				textfield.Outlined(
+					outlinedText.Get().(string),
+					func(s string) { outlinedText.Set(s) },
+					textfield.WithLabel("Outlined Text Field"),
+					textfield.WithSingleLine(true),
+				),
+
 				SectionTitle("Typography"),
 				spacer.Height(8),
 				m3text.Text("Display Large", m3text.TypestyleDisplayLarge),
