@@ -3,13 +3,14 @@ package material3
 import (
 	"git.sr.ht/~schnwalter/gio-mw/defaults/schemes"
 	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 )
 
 type ThemeInterface interface {
 	ColorScheme() *ColorScheme
 	Typography() *Typography
 	// Shapes() *Shapes
-	// MotionScheme() *MotionScheme
+	MotionScheme() *MotionScheme
 }
 
 func Theme(c compose.Composer) ThemeInterface {
@@ -38,12 +39,16 @@ func (t themeImpl) MotionScheme() *MotionScheme {
 	return LocalMotionScheme.Current(t.composer)
 }
 
+func (t themeImpl) ContentColorFor(backgroundColor graphics.Color) graphics.Color {
+	return t.ColorScheme().ContentColorFor(backgroundColor)
+}
+
 var LocalColorScheme = compose.CompositionLocalOf(func() *ColorScheme {
 	return ColorSchemeFromTokens(schemes.SchemeBaselineLight())
 })
 
 var LocalTypography = compose.CompositionLocalOf(func() *Typography {
-	return nil
+	return TypographyUnspecified
 })
 
 var LocalShapes = compose.CompositionLocalOf(func() *Shapes {
@@ -51,5 +56,5 @@ var LocalShapes = compose.CompositionLocalOf(func() *Shapes {
 })
 
 var LocalMotionScheme = compose.CompositionLocalOf(func() *MotionScheme {
-	return &DefaultMotionScheme
+	return DefaultMotionScheme
 })

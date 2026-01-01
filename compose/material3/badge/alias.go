@@ -14,5 +14,4 @@ type Composable = api.Composable
 type Composer = api.Composer
 
 // Text aliases for convenience
-var Text = text.Text
-var TypestyleLabelSmall = text.TypestyleLabelSmall
+var badgeText = text.LabelSmall

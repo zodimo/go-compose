@@ -36,13 +36,10 @@ func TextWithStyle(value string, tokenStyle Typestyle, options ...text.TextOptio
 		// familyResolver := platform.LocalFontFamilyResolver.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 
+		textColor := theme.ColorHelper.SpecificColor(opts.TextStyle.Color().TakeOrElse(contentColorDescriptor))
+
 		// Resolve text style with defaults
 		opts.TextStyle = uiText.TextStyleResolveDefaults(opts.TextStyle, layoutDirection)
-
-		textColor := theme.TakeOrElseColor(
-			theme.ColorHelper.SpecificColor(opts.TextStyle.Color()),
-			contentColorDescriptor,
-		)
 
 		c.StartBlock("Material3Text")
 		c.Modifier(func(modifier modifier.Modifier) modifier.Modifier {

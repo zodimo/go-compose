@@ -3,7 +3,6 @@ package material3
 import (
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
-	"github.com/zodimo/go-compose/theme"
 )
 
 // LocalContentColor is a CompositionLocal containing the preferred content color for a given
@@ -16,6 +15,6 @@ import (
 // light, and on a light background, text should be dark.
 //
 // Defaults to Color.Black if no color has been explicitly set.
-var LocalContentColor = compose.CompositionLocalOf(func() theme.ColorDescriptor {
-	return theme.ColorHelper.SpecificColor(graphics.ColorBlack)
+var LocalContentColor = compose.CompositionLocalOf(func() graphics.Color {
+	return graphics.ColorBlack
 })

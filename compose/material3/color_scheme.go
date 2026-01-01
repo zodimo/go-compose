@@ -46,6 +46,57 @@ type ColorScheme struct {
 	Shadow Color
 }
 
+func (c *ColorScheme) ContentColorFor(backgroundColor Color) Color {
+	switch {
+	case backgroundColor == c.Primary.Color:
+		return c.Primary.OnColor
+	case backgroundColor == c.Secondary.Color:
+		return c.Secondary.OnColor
+	case backgroundColor == c.Tertiary.Color:
+		return c.Tertiary.OnColor
+	case backgroundColor == c.Background.Color:
+		return c.Background.OnColor
+	case backgroundColor == c.Error.Color:
+		return c.Error.OnColor
+	case backgroundColor == c.PrimaryContainer.Color:
+		return c.PrimaryContainer.OnColor
+	case backgroundColor == c.SecondaryContainer.Color:
+		return c.SecondaryContainer.OnColor
+	case backgroundColor == c.TertiaryContainer.Color:
+		return c.TertiaryContainer.OnColor
+	case backgroundColor == c.ErrorContainer.Color:
+		return c.ErrorContainer.OnColor
+	case backgroundColor == c.InverseSurface.Color:
+		return c.InverseSurface.OnColor
+	case backgroundColor == c.Surface.Color:
+		return c.Surface.OnColor
+	case backgroundColor == c.SurfaceVariant.Color:
+		return c.SurfaceVariant.OnColor
+	case backgroundColor == c.SurfaceBright:
+		return c.Surface.OnColor
+	case backgroundColor == c.SurfaceContainer:
+		return c.Surface.OnColor
+	case backgroundColor == c.SurfaceContainerHigh:
+		return c.Surface.OnColor
+	case backgroundColor == c.SurfaceContainerHighest:
+		return c.Surface.OnColor
+	case backgroundColor == c.SurfaceContainerLow:
+		return c.Surface.OnColor
+	case backgroundColor == c.SurfaceContainerLowest:
+		return c.Surface.OnColor
+	case backgroundColor == c.SurfaceDim:
+		return c.Surface.OnColor
+	case backgroundColor == c.PrimaryFixed.Color:
+		return c.PrimaryFixed.OnColor
+	case backgroundColor == c.SecondaryFixed.Color:
+		return c.SecondaryFixed.OnColor
+	case backgroundColor == c.TertiaryFixed.Color:
+		return c.TertiaryFixed.OnColor
+	default:
+		return graphics.ColorUnspecified
+	}
+}
+
 func (c *ColorScheme) Copy(options ...ColorSchemeOption) *ColorScheme {
 	copy := *c
 	for _, option := range options {

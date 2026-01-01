@@ -31,7 +31,10 @@ func Icon(iconByte []byte, options ...IconOption) Composable {
 	}
 
 	return func(c Composer) Composer {
-		opts.Color = theme.TakeOrElseColor(opts.Color, material3.LocalContentColor.Current(c))
+		opts.Color = theme.TakeOrElseColor(
+			opts.Color,
+			theme.ColorHelper.SpecificColor(material3.LocalContentColor.Current(c)),
+		)
 
 		c.StartBlock(Material3IconNodeID)
 		c.Modifier(func(modifier Modifier) Modifier {

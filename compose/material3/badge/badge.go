@@ -9,7 +9,6 @@ import (
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -34,13 +33,11 @@ func Badge(options ...BadgeOption) api.Composable {
 			return modifier.Then(opts.Modifier)
 		})
 
-		containerColor := theme.TakeOrElseColor(opts.ContainerColor, theme.ColorHelper.ColorSelector().ErrorRoles.Error)
+		containerColor := opts.ContainerColor.TakeOrElse(material3.Theme(c).ColorScheme().Error.Color)
 
-		contentColor := theme.TakeOrElseColor(
-			opts.ContentColor,
-			theme.TakeOrElseColor(
-				material3.ContentColorFor(containerColor),
-				theme.ColorHelper.SpecificColor(graphics.ColorBlack),
+		contentColor := opts.ContentColor.TakeOrElse(
+			material3.Theme(c).ColorScheme().ContentColorFor(containerColor).TakeOrElse(
+				graphics.ColorBlack,
 			),
 		)
 
@@ -63,9 +60,8 @@ func Badge(options ...BadgeOption) api.Composable {
 func badgeWidgetConstructor(opts BadgeOptions) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-			tm := theme.GetThemeManager()
-			containerColor := tm.ResolveColorDescriptor(opts.ContainerColor).AsNRGBA()
-			contentColor := tm.ResolveColorDescriptor(opts.ContentColor).AsNRGBA()
+			containerColor := graphics.ColorToNRGBA(opts.ContainerColor)
+			contentColor := graphics.ColorToNRGBA(opts.ContentColor)
 
 			children := node.Children()
 			hasContent := len(children) > 0
