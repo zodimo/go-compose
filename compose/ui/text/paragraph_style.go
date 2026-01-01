@@ -15,13 +15,6 @@ var ParagraphStyleUnspecified *ParagraphStyle = &ParagraphStyle{
 	lineBreak:     style.LineBreakUnspecified,
 }
 
-type ParaghStyleInterface interface {
-	TextAlign() style.TextAlign
-	TextDirection() style.TextDirection
-	LineHeight() unit.TextUnit
-	LineBreak() style.LineBreak
-}
-
 var _ ParaghStyleInterface = (*ParagraphStyle)(nil)
 
 type ParagraphStyle struct {

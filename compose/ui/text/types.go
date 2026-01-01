@@ -22,3 +22,22 @@ type TextStyleInterface interface {
 	TextDecoration() *style.TextDecoration
 	TextDirection() style.TextDirection
 }
+
+type SpanStyleInterface interface {
+	Color() graphics.Color
+	FontSize() unit.TextUnit
+	FontWeight() font.FontWeight
+	FontStyle() font.FontStyle
+	FontFamily() font.FontFamily
+	LetterSpacing() unit.TextUnit
+	Background() graphics.Color
+	TextDecoration() *style.TextDecoration
+	Shadow() *graphics.Shadow
+}
+
+type ParaghStyleInterface interface {
+	TextAlign() style.TextAlign
+	TextDirection() style.TextDirection
+	LineHeight() unit.TextUnit
+	LineBreak() style.LineBreak
+}

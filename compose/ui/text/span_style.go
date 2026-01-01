@@ -22,18 +22,6 @@ var SpanStyleUnspecified *SpanStyle = &SpanStyle{
 	shadow:         nil,
 }
 
-type SpanStyleInterface interface {
-	Color() graphics.Color
-	FontSize() unit.TextUnit
-	FontWeight() font.FontWeight
-	FontStyle() font.FontStyle
-	FontFamily() font.FontFamily
-	LetterSpacing() unit.TextUnit
-	Background() graphics.Color
-	TextDecoration() *style.TextDecoration
-	Shadow() *graphics.Shadow
-}
-
 var _ SpanStyleInterface = (*SpanStyle)(nil)
 
 type SpanStyle struct {
