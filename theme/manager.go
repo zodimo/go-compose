@@ -127,6 +127,7 @@ func (tm *themeManager) ColorDescriptor(color graphics.Color) ColorDescriptor {
 	return SpecificColor(color)
 }
 
+// @Deprecated, use local providers
 func GetThemeManager() ThemeManager {
 	return themeManagerSingleton
 }

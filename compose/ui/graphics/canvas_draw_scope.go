@@ -412,7 +412,9 @@ func (c *CanvasDrawScope) DrawImage(image ImageBitmap, opts ...DrawImageOption) 
 
 // modulateColorAlpha creates a new color with modulated alpha while keeping RGB.
 func modulateColorAlpha(color Color, alpha float32) Color {
-	return color.Copy(color.Alpha()*alpha, color.Red(), color.Green(), color.Blue())
+	return color.Copy(
+		CopyWithAlpha(color.Alpha() * alpha),
+	)
 }
 
 func (c *CanvasDrawScope) DrawIntoCanvas(block func(Canvas)) {

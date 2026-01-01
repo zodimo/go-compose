@@ -8,9 +8,9 @@ import (
 	fImage "github.com/zodimo/go-compose/compose/foundation/image"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	uilayout "github.com/zodimo/go-compose/compose/ui/layout"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/theme"
 
-	"gioui.org/unit"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/material3/surface"

@@ -17,8 +17,8 @@ import (
 	"github.com/zodimo/go-ternary"
 
 	"gioui.org/layout"
-	"gioui.org/unit"
 	"gioui.org/widget"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // NavigationBarItem represents an item within a NavigationBar.

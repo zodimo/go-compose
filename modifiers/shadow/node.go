@@ -1,6 +1,7 @@
 package shadow
 
 import (
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/theme"
@@ -50,7 +51,7 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 					// Draw Shadow
 					// Adapted from gio-mw wdk.Elevation.Layout
 
-					shadowSize := float32(gtx.Metric.Dp(elevation))
+					shadowSize := float32(gtx.Metric.Dp(unit.DpToGioUnit(elevation)))
 
 					// Resolve ColorDescriptor to NRGBA
 					tm := theme.GetThemeManager()

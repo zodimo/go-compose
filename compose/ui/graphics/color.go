@@ -184,13 +184,6 @@ func (c Color) TakeOrElse(block Color) Color {
 	return block
 }
 
-// Copy creates a new color with modified components.
-func (c Color) Copy(alpha, red, green, blue float32) Color {
-	id := c.ColorSpaceId()
-	space := colorspace.Get(id)
-	return NewColor(red, green, blue, alpha, space)
-}
-
 // ColorSpace returns the ColorSpace object for this color.
 func (c Color) ColorSpace() colorspace.ColorSpace {
 	return colorspace.Get(c.ColorSpaceId())
@@ -413,7 +406,7 @@ func maxf(a, b float32) float32 {
 }
 
 func SetOpacity(c Color, opacity float32) Color {
-	return c.Copy(opacity, c.Red(), c.Green(), c.Blue())
+	return c.Copy(CopyWithAlpha(opacity))
 }
 
 // ColorProducer is a functional interface that produces a Color.

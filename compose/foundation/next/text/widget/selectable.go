@@ -17,7 +17,7 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/text"
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
 )
 
 // stringSource is an immutable textSource with a fixed string
@@ -63,7 +63,7 @@ type Selectable struct {
 	WrapPolicy text.WrapPolicy
 	// LineHeight controls the distance between the baselines of lines of text.
 	// If zero, a sensible default will be used.
-	LineHeight unit.Sp
+	LineHeight gioUnit.Sp
 	// LineHeightScale applies a scaling factor to the LineHeight. If zero, a
 	// sensible default will be used.
 	LineHeightScale float32
@@ -181,7 +181,7 @@ func (l *Selectable) Update(gtx layout.Context) bool {
 // Layout clips to the dimensions of the selectable, updates the shaped text, configures input handling, and paints
 // the text and selection rectangles. The provided textMaterial and selectionMaterial ops are used to set the
 // paint material for the text and selection rectangles, respectively.
-func (l *Selectable) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, size unit.Sp, textMaterial, selectionMaterial op.CallOp) layout.Dimensions {
+func (l *Selectable) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, size gioUnit.Sp, textMaterial, selectionMaterial op.CallOp) layout.Dimensions {
 	l.Update(gtx)
 	l.text.LineHeight = l.LineHeight
 	l.text.LineHeightScale = l.LineHeightScale

@@ -12,8 +12,9 @@ import (
 	gioOp "gioui.org/op"
 	"gioui.org/op/paint"
 	gioText "gioui.org/text"
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
 	"gioui.org/widget"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 
 	"github.com/zodimo/go-compose/compose/ui/next/text"
 	uiFont "github.com/zodimo/go-compose/compose/ui/next/text/font"
@@ -124,7 +125,7 @@ func (c *EditableTextLayoutController) SetWrapPolicy(wrapPolicy gioText.WrapPoli
 }
 
 // SetLineHeight sets the line height.
-func (c *EditableTextLayoutController) SetLineHeight(lineHeight unit.Sp) {
+func (c *EditableTextLayoutController) SetLineHeight(lineHeight gioUnit.Sp) {
 	c.editor.LineHeight = lineHeight
 }
 
@@ -155,7 +156,7 @@ func (c *EditableTextLayoutController) ConfigureFromTextStyle(ts *text.TextStyle
 	}
 	c.textStyle = ts
 	c.SetAlignment(ts.TextAlign())
-	c.SetLineHeight(unit.Sp(ts.LineHeight().Value()))
+	c.SetLineHeight(gioUnit.Sp(ts.LineHeight().Value()))
 	c.SetWrapPolicy(lineBreakToGioWrapPolicy(ts.LineBreak()))
 }
 
@@ -212,7 +213,7 @@ func (c *EditableTextLayoutController) Update(gtx layout.Context) {
 func (c *EditableTextLayoutController) Layout(gtx layout.Context, shaper *gioText.Shaper, textMaterial, selectMaterial gioOp.CallOp) layout.Dimensions {
 	gioFont := c.GetFont()
 	size := c.GetFontSize()
-	return c.editor.Layout(gtx, shaper, gioFont, size, textMaterial, selectMaterial)
+	return c.editor.Layout(gtx, shaper, gioFont, unit.TextUnitToGioSp(size), textMaterial, selectMaterial)
 }
 
 // LayoutAndPaint performs update, layout and paints the text in one call.
@@ -297,9 +298,9 @@ func (c *EditableTextLayoutController) GetFont() font.Font {
 }
 
 // GetFontSize returns the font size in Sp.
-func (c *EditableTextLayoutController) GetFontSize() unit.Sp {
+func (c *EditableTextLayoutController) GetFontSize() unit.TextUnit {
 	if c.textStyle == nil {
-		return 14 // Default font size
+		return unit.Sp(14) // Default font size
 	}
-	return unit.Sp(c.textStyle.FontSize().Value())
+	return c.textStyle.FontSize()
 }

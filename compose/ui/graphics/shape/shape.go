@@ -3,10 +3,12 @@ package shape
 import (
 	"image"
 
+	"github.com/zodimo/go-compose/compose/ui/unit"
+
 	"gioui.org/f32"
 	"gioui.org/op"
 	"gioui.org/op/clip"
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
 )
 
 // https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Shape
@@ -18,13 +20,13 @@ type Outline interface {
 }
 
 type Shape interface {
-	CreateOutline(size image.Point, metric unit.Metric) Outline
+	CreateOutline(size image.Point, metric gioUnit.Metric) Outline
 }
 
 // RectangleShape
 type rectangleShape struct{}
 
-func (r rectangleShape) CreateOutline(size image.Point, metric unit.Metric) Outline {
+func (r rectangleShape) CreateOutline(size image.Point, metric gioUnit.Metric) Outline {
 	return rectOutline{clip.Rect{Max: size}}
 }
 
@@ -49,7 +51,7 @@ var ShapeRectangle Shape = rectangleShape{}
 // CircleShape
 type circleShape struct{}
 
-func (c circleShape) CreateOutline(size image.Point, metric unit.Metric) Outline {
+func (c circleShape) CreateOutline(size image.Point, metric gioUnit.Metric) Outline {
 	return ellipseOutline{clip.Ellipse{Max: size}}
 }
 
@@ -71,7 +73,11 @@ func (e ellipseOutline) Path(ops *op.Ops) clip.PathSpec {
 	return e.Ellipse.Path(ops)
 }
 
+// Deprecated: Use CircleShape instead
 var ShapeCircle Shape = circleShape{}
+
+// CircleShape is a shape describing a circle.
+var CircleShape Shape = circleShape{}
 
 // RoundedCornerShape supports uniform radius via Radius, or per-corner radius
 // via TopStart (NW), TopEnd (NE), BottomEnd (SE), BottomStart (SW).
@@ -90,18 +96,18 @@ type RoundedCornerShape struct {
 	BottomStart unit.Dp
 }
 
-func (r RoundedCornerShape) CreateOutline(size image.Point, metric unit.Metric) Outline {
+func (r RoundedCornerShape) CreateOutline(size image.Point, metric gioUnit.Metric) Outline {
 	// Determine if per-corner radius is being used
 	hasPerCorner := r.TopStart > 0 || r.TopEnd > 0 || r.BottomEnd > 0 || r.BottomStart > 0
 
 	var nw, ne, se, sw int
 	if hasPerCorner {
-		nw = metric.Dp(r.TopStart)
-		ne = metric.Dp(r.TopEnd)
-		se = metric.Dp(r.BottomEnd)
-		sw = metric.Dp(r.BottomStart)
+		nw = metric.Dp(unit.DpToGioUnit(r.TopStart))
+		ne = metric.Dp(unit.DpToGioUnit(r.TopEnd))
+		se = metric.Dp(unit.DpToGioUnit(r.BottomEnd))
+		sw = metric.Dp(unit.DpToGioUnit(r.BottomStart))
 	} else {
-		radius := metric.Dp(r.Radius)
+		radius := metric.Dp(unit.DpToGioUnit(r.Radius))
 		if radius == 0 {
 			return rectOutline{clip.Rect{Max: size}}
 		}
@@ -138,8 +144,8 @@ type CutCornerShape struct {
 	Radius unit.Dp
 }
 
-func (c CutCornerShape) CreateOutline(size image.Point, metric unit.Metric) Outline {
-	radius := float32(metric.Dp(c.Radius))
+func (c CutCornerShape) CreateOutline(size image.Point, metric gioUnit.Metric) Outline {
+	radius := float32(c.Radius) * metric.PxPerDp
 	if radius <= 0 {
 		return rectOutline{clip.Rect{Max: size}}
 	}

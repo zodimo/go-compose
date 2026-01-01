@@ -52,7 +52,7 @@ var LocalTypography = compose.CompositionLocalOf(func() *Typography {
 })
 
 var LocalShapes = compose.CompositionLocalOf(func() *Shapes {
-	return nil
+	return DefaultShapes()
 })
 
 var LocalMotionScheme = compose.CompositionLocalOf(func() *MotionScheme {

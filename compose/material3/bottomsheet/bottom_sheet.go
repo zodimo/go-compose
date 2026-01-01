@@ -16,8 +16,9 @@ import (
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/theme"
 
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
 	"git.sr.ht/~schnwalter/gio-mw/token"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 type Modifier = modifier.Modifier
@@ -43,7 +44,7 @@ func ModalBottomSheet(
 			// Default M3 sheet shape: Top corners rounded 28.dp
 			sheetShape = token.CornerShape{
 				Kind: token.CornerKindRound,
-				Size: unit.Dp(28),
+				Size: gioUnit.Dp(28),
 			}
 		}
 
@@ -154,7 +155,7 @@ func ModalBottomSheet(
 								// Let's use `shape.RoundedCornerShape{Radius: sheetShape.Size}` assuming uniform for now,
 								// or better, make a Custom shape if possible.
 								// The `drawer.go` used `unit.Dp(16)`.
-								surface.WithShape(shape.RoundedCornerShape{Radius: sheetShape.Size}),
+								surface.WithShape(shape.RoundedCornerShape{Radius: unit.Dp(sheetShape.Size)}),
 								surface.WithModifier(
 									animMod.AnimatedHeight(anim, 0). // Animate height from 0 (or slide up)
 														Then(size.FillMaxWidth()),

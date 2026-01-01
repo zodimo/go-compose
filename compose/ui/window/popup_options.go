@@ -1,7 +1,7 @@
 package window
 
 import (
-	"gioui.org/unit"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 type PopupOptions struct {

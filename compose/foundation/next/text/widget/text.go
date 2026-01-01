@@ -17,7 +17,7 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/text"
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -46,7 +46,7 @@ type TextView struct {
 	Alignment text.Alignment
 	// LineHeight controls the distance between the baselines of lines of text.
 	// If zero, a sensible default will be used.
-	LineHeight unit.Sp
+	LineHeight gioUnit.Sp
 	// LineHeightScale applies a scaling factor to the LineHeight. If zero, a
 	// sensible default will be used.
 	LineHeightScale float32
@@ -232,7 +232,7 @@ func (e *TextView) calculateViewSize(gtx layout.Context) image.Point {
 }
 
 // Layout the text, reshaping it as necessary.
-func (e *TextView) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, size unit.Sp) {
+func (e *TextView) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, size gioUnit.Sp) {
 	if e.params.Locale != gtx.Locale {
 		e.params.Locale = gtx.Locale
 		e.invalidate()

@@ -26,7 +26,7 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/text"
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
 )
 
 // Editor implements an editable and scrollable text area.
@@ -38,7 +38,7 @@ type Editor struct {
 	Alignment text.Alignment
 	// LineHeight determines the gap between baselines of text. If zero, a sensible
 	// default will be used.
-	LineHeight unit.Sp
+	LineHeight gioUnit.Sp
 	// LineHeightScale is multiplied by LineHeight to determine the final gap
 	// between baselines. If zero, a sensible default will be used.
 	LineHeightScale float32
@@ -645,7 +645,7 @@ func (e *Editor) Update(gtx layout.Context) (EditorEvent, bool) {
 // Layout lays out the editor using the provided textMaterial as the paint material
 // for the text glyphs+caret and the selectMaterial as the paint material for the
 // selection rectangle.
-func (e *Editor) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, size unit.Sp, textMaterial, selectMaterial op.CallOp) layout.Dimensions {
+func (e *Editor) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, size gioUnit.Sp, textMaterial, selectMaterial op.CallOp) layout.Dimensions {
 	for {
 		_, ok := e.Update(gtx)
 		if !ok {

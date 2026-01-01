@@ -14,7 +14,7 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
 )
 
 // Badge is a Material 3 badge component.
@@ -68,9 +68,9 @@ func badgeWidgetConstructor(opts BadgeOptions) layoutnode.LayoutNodeWidgetConstr
 
 			// M3 Specs
 			var (
-				heightDp     unit.Dp
-				maxWidthDp   unit.Dp
-				cornerRadius unit.Dp
+				heightDp     gioUnit.Dp
+				maxWidthDp   gioUnit.Dp
+				cornerRadius gioUnit.Dp
 			)
 
 			if hasContent {
@@ -101,7 +101,7 @@ func badgeWidgetConstructor(opts BadgeOptions) layoutnode.LayoutNodeWidgetConstr
 			if hasContent {
 				// Inset layout
 				dims = layout.Inset{
-					Left: unit.Dp(4), Right: unit.Dp(4),
+					Left: gioUnit.Dp(4), Right: gioUnit.Dp(4),
 				}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 					childCoords := children[0].(layoutnode.NodeCoordinator)
 					return childCoords.Layout(gtx)

@@ -3,6 +3,7 @@ package offset
 import (
 	"image"
 
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 
@@ -27,8 +28,8 @@ func NewOffsetNode(data OffsetData) *OffsetNode {
 			no.AttachLayoutModifier(func(widget layoutnode.LayoutWidget) layoutnode.LayoutWidget {
 				return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 					// Convert dp to pixels
-					offsetX := gtx.Dp(n.data.X)
-					offsetY := gtx.Dp(n.data.Y)
+					offsetX := gtx.Dp(unit.DpToGioUnit(n.data.X))
+					offsetY := gtx.Dp(unit.DpToGioUnit(n.data.Y))
 
 					// Apply translation offset using op.Offset
 					stack := op.Offset(image.Point{X: offsetX, Y: offsetY}).Push(gtx.Ops)

@@ -13,8 +13,8 @@ import (
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/theme"
 
-	"gioui.org/unit"
 	"gioui.org/widget"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 const SegmentedButtonRowNodeID = "Material3SegmentedButtonRow"

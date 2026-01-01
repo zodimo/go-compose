@@ -3,7 +3,7 @@ package navigationbar
 import (
 	"github.com/zodimo/go-compose/theme"
 
-	"gioui.org/unit"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // NavigationBarColors represents the colors used by a NavigationBar.

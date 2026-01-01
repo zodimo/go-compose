@@ -114,7 +114,7 @@ func ModulateColor(color graphics.Color, alpha float32) graphics.Color {
 	if math.IsNaN(float64(alpha)) || alpha >= 1.0 {
 		return color
 	}
-	return color.Copy(color.Alpha()*alpha, color.Red(), color.Green(), color.Blue())
+	return color.Copy(graphics.CopyWithAlpha(color.Alpha() * alpha))
 }
 
 // isColorSpecified checks if a color is specified (not the Unspecified sentinel).

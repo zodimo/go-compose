@@ -9,7 +9,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
 
-	"gioui.org/unit"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // DropdownMenu Composable

@@ -4,7 +4,7 @@ import (
 	"math"
 
 	gioFont "gioui.org/font"
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-maybe"
@@ -20,11 +20,11 @@ func DefaultTextOptions() TextOptions {
 		// BACKWARDS COMPATIBILITY
 		Font:            maybe.None[gioFont.Font](),
 		WrapPolicy:      maybe.None[WrapPolicy](),
-		LineHeight:      maybe.None[unit.Sp](),
+		LineHeight:      maybe.None[gioUnit.Sp](),
 		LineHeightScale: maybe.None[float32](),
 		Selectable:      maybe.None[bool](),
 		SelectionColor:  graphics.ColorUnspecified,
-		TextSize:        maybe.None[unit.Sp](),
+		TextSize:        maybe.None[gioUnit.Sp](),
 		Strikethrough:   maybe.None[bool](),
 	}
 }

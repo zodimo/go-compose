@@ -17,7 +17,7 @@ import (
 	"github.com/zodimo/go-compose/compose/material3/surface"
 	"github.com/zodimo/go-ternary"
 
-	"gioui.org/unit"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 
 	"gioui.org/widget"
 )

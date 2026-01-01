@@ -182,7 +182,12 @@ func TestToArgb(t *testing.T) {
 
 func TestCopy(t *testing.T) {
 	original := graphics.ColorRed
-	copied := original.Copy(0.5, 0.1, 0.2, 0.3)
+	copied := original.Copy(
+		graphics.CopyWithAlpha(0.5),
+		graphics.CopyWithRed(0.1),
+		graphics.CopyWithGreen(0.2),
+		graphics.CopyWithBlue(0.3),
+	)
 
 	if abs(copied.Alpha()-0.5) > 0.01 {
 		t.Errorf("Copied Alpha = %f, want 0.5", copied.Alpha())

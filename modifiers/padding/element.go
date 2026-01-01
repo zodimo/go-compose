@@ -5,7 +5,7 @@ import (
 	"github.com/zodimo/go-compose/internal/layoutnode"
 
 	"gioui.org/layout"
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
 )
 
 func ComparePadding(a, b PaddingData) bool {
@@ -36,20 +36,20 @@ func (pe paddingElement) Create() Node {
 				no.AttachLayoutModifier(func(widget layoutnode.LayoutWidget) layoutnode.LayoutWidget {
 					return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 						// Default is LTR
-						left := unit.Dp(pe.padding.Start)
-						right := unit.Dp(pe.padding.End)
+						left := gioUnit.Dp(pe.padding.Start)
+						right := gioUnit.Dp(pe.padding.End)
 
 						if pe.padding.RtlAware {
 							// if RTL then we should swap left and right
 							if gtx.Locale.Direction == RTL {
-								left = unit.Dp(pe.padding.End)
-								right = unit.Dp(pe.padding.Start)
+								left = gioUnit.Dp(pe.padding.End)
+								right = gioUnit.Dp(pe.padding.Start)
 							}
 						}
 
 						return layout.Inset{
-							Top:    unit.Dp(pe.padding.Top),
-							Bottom: unit.Dp(pe.padding.Bottom),
+							Top:    gioUnit.Dp(pe.padding.Top),
+							Bottom: gioUnit.Dp(pe.padding.Bottom),
 							Left:   left,
 							Right:  right,
 						}.Layout(gtx, widget.Layout)

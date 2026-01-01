@@ -14,8 +14,8 @@ import (
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/theme"
 
-	"gioui.org/unit"
 	"git.sr.ht/~schnwalter/gio-mw/token"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 type Modifier = modifier.Modifier

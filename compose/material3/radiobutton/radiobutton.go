@@ -9,8 +9,9 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"gioui.org/unit"
 	"gioui.org/widget"
+
+	gioUnit "gioui.org/unit"
 
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/theme"
@@ -106,11 +107,11 @@ func radioButtonWidgetConstructor(
 				strokeWidth    = 2
 			)
 
-			sizeDp := unit.Dp(stateLayerSize)
+			sizeDp := gioUnit.Dp(stateLayerSize)
 			sizePx := gtx.Dp(sizeDp)
 
 			// Center the icon within the state layer
-			iconSizePx := gtx.Dp(unit.Dp(iconSize))
+			iconSizePx := gtx.Dp(gioUnit.Dp(iconSize))
 			iconOffset := (sizePx - iconSizePx) / 2
 
 			return layout.Stack{}.Layout(gtx,
@@ -152,7 +153,7 @@ func radioButtonWidgetConstructor(
 					// Draw Radio Icon
 					defer op.Offset(image.Pt(iconOffset, iconOffset)).Push(gtx.Ops).Pop()
 
-					strokeWidthPx := gtx.Dp(unit.Dp(strokeWidth))
+					strokeWidthPx := gtx.Dp(gioUnit.Dp(strokeWidth))
 
 					// Outer constant circle
 					outerCircle := clip.Ellipse{

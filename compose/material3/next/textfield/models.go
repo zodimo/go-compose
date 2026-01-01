@@ -14,11 +14,12 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
-	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 	"github.com/zodimo/go-compose/theme"
+
+	gioUnit "gioui.org/unit"
 )
 
 type helper struct {
@@ -27,13 +28,13 @@ type helper struct {
 }
 
 type label struct {
-	TextSize unit.Sp
+	TextSize gioUnit.Sp
 	Inset    layout.Inset
 	Smallest layout.Dimensions
 }
 
 type border struct {
-	Thickness unit.Dp
+	Thickness gioUnit.Dp
 	Color     color.NRGBA
 }
 
@@ -139,8 +140,8 @@ func (in *TextFieldWidget) Layout(gtx layout.Context, th *material.Theme, hint s
 		gtx,
 		func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{
-				Left:  unit.Dp(4),
-				Right: unit.Dp(4),
+				Left:  gioUnit.Dp(4),
+				Right: gioUnit.Dp(4),
 			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				label := material.Label(th, in.label.TextSize, hint)
 				label.Color = in.border.Color
@@ -156,7 +157,7 @@ func (in *TextFieldWidget) Layout(gtx layout.Context, th *material.Theme, hint s
 			return layout.Stack{}.Layout(
 				gtx,
 				layout.Expanded(func(gtx layout.Context) layout.Dimensions {
-					cornerRadius := unit.Dp(4)
+					cornerRadius := gioUnit.Dp(4)
 					dimsFunc := func(gtx layout.Context) layout.Dimensions {
 						return layout.Dimensions{Size: image.Point{
 							X: gtx.Constraints.Max.X,
@@ -207,7 +208,7 @@ func (in *TextFieldWidget) Layout(gtx layout.Context, th *material.Theme, hint s
 					return border.Layout(gtx, dimsFunc)
 				}),
 				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-					return layout.UniformInset(unit.Dp(12)).Layout(
+					return layout.UniformInset(gioUnit.Dp(12)).Layout(
 						gtx,
 						func(gtx layout.Context) layout.Dimensions {
 							gtx.Constraints.Min.X = gtx.Constraints.Max.X
@@ -270,12 +271,12 @@ func (in *TextFieldWidget) Layout(gtx layout.Context, th *material.Theme, hint s
 						return layout.Dimensions{}
 					}
 					return layout.Inset{
-						Top:  unit.Dp(4),
-						Left: unit.Dp(10),
+						Top:  gioUnit.Dp(4),
+						Left: gioUnit.Dp(10),
 					}.Layout(
 						gtx,
 						func(gtx layout.Context) layout.Dimensions {
-							helper := material.Label(th, unit.Sp(12), in.helper.Text)
+							helper := material.Label(th, gioUnit.Sp(12), in.helper.Text)
 							helper.Color = in.helper.Color
 							return helper.Layout(gtx)
 						},
@@ -286,14 +287,14 @@ func (in *TextFieldWidget) Layout(gtx layout.Context, th *material.Theme, hint s
 						return layout.Dimensions{}
 					}
 					return layout.Inset{
-						Top:   unit.Dp(4),
-						Right: unit.Dp(10),
+						Top:   gioUnit.Dp(4),
+						Right: gioUnit.Dp(10),
 					}.Layout(
 						gtx,
 						func(gtx layout.Context) layout.Dimensions {
 							count := material.Label(
 								th,
-								unit.Sp(12),
+								gioUnit.Sp(12),
 								strconv.Itoa(in.Editor.Len())+"/"+strconv.Itoa(int(in.CharLimit)),
 							)
 							count.Color = in.helper.Color
@@ -369,8 +370,8 @@ func (in *TextFieldWidget) update(gtx layout.Context, th *material.Theme, hint s
 		borderColorError    = m.ResolveColorDescriptor(in.Colors.ErrorIndicatorColor).AsNRGBA()
 		borderColorDisabled = m.ResolveColorDescriptor(in.Colors.DisabledIndicatorColor).AsNRGBA()
 
-		borderThickness       = unit.Dp(1)
-		borderThicknessActive = unit.Dp(2)
+		borderThickness       = gioUnit.Dp(1)
+		borderThicknessActive = gioUnit.Dp(2)
 
 		helperColor         = m.ResolveColorDescriptor(in.Colors.SupportingTextColor).AsNRGBA()
 		helperColorError    = m.ResolveColorDescriptor(in.Colors.ErrorSupportingTextColor).AsNRGBA()
@@ -386,7 +387,7 @@ func (in *TextFieldWidget) update(gtx layout.Context, th *material.Theme, hint s
 		helperColorError = helperColorDisabled
 	}
 
-	in.label.TextSize = unit.Sp(lerp.Between32(float32(textSmall), float32(textNormal), 1.0-in.anim.Progress()))
+	in.label.TextSize = gioUnit.Sp(lerp.Between32(float32(textSmall), float32(textNormal), 1.0-in.anim.Progress()))
 	switch in.state {
 	case inactive:
 		in.border.Thickness = borderThickness
@@ -410,7 +411,7 @@ func (in *TextFieldWidget) update(gtx layout.Context, th *material.Theme, hint s
 	// Calculate smallest label for cutout
 	gtx.Constraints.Min.X = 0
 	macro := op.Record(gtx.Ops)
-	var spacing unit.Dp
+	var spacing gioUnit.Dp
 	if len(hint) > 0 {
 		spacing = 4
 	}
@@ -425,10 +426,10 @@ func (in *TextFieldWidget) update(gtx layout.Context, th *material.Theme, hint s
 	macro.Stop()
 
 	labelTopInsetNormal := float32(in.label.Smallest.Size.Y) - float32(in.label.Smallest.Size.Y/4)
-	topInsetDP := unit.Dp(labelTopInsetNormal / gtx.Metric.PxPerDp)
-	topInsetActiveDP := (topInsetDP / 2 * -1) - unit.Dp(in.border.Thickness)
+	topInsetDP := gioUnit.Dp(labelTopInsetNormal / gtx.Metric.PxPerDp)
+	topInsetActiveDP := (topInsetDP / 2 * -1) - gioUnit.Dp(in.border.Thickness)
 	in.label.Inset = layout.Inset{
-		Top:  unit.Dp(lerp.Between32(float32(topInsetDP), float32(topInsetActiveDP), in.anim.Progress())),
-		Left: unit.Dp(10),
+		Top:  gioUnit.Dp(lerp.Between32(float32(topInsetDP), float32(topInsetActiveDP), in.anim.Progress())),
+		Left: gioUnit.Dp(10),
 	}
 }

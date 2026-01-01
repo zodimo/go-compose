@@ -1,7 +1,7 @@
 package offset
 
 import (
-	"gioui.org/unit"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/modifier"
 )
 

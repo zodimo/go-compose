@@ -8,7 +8,7 @@ import (
 
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
 )
 
 const Material3DivideNodeID = "Material3Divider"
@@ -37,7 +37,7 @@ func Divider(options ...DividerOption) Composable {
 func widgetConstructor(options DividerOptions) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-			thickness := gtx.Dp(unit.Dp(options.Thickness))
+			thickness := gtx.Dp(gioUnit.Dp(options.Thickness))
 			if thickness < 1 {
 				thickness = 1
 			}

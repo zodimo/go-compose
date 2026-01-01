@@ -12,7 +12,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/theme"
 
-	"gioui.org/unit"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // DismissibleNavigationDrawer uses a drawer that is usually visible but can be dismissed.

@@ -11,8 +11,9 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"gioui.org/unit"
 	"gioui.org/widget"
+
+	gioUnit "gioui.org/unit"
 )
 
 const SliderNodeID = "Material3Slider"
@@ -141,7 +142,7 @@ func sliderWidgetConstructor(args sliderConstructorArgs) layoutnode.LayoutNodeWi
 			// Cross Axis: Thumb size
 
 			// Minimum touch target size (48dp usually)
-			minTouchSize := gtx.Dp(unit.Dp(48))
+			minTouchSize := gtx.Dp(gioUnit.Dp(48))
 			height := max(thumbSize, minTouchSize)
 
 			size := image.Pt(gtx.Constraints.Max.X, height)
@@ -274,7 +275,7 @@ func sliderWidgetConstructor(args sliderConstructorArgs) layoutnode.LayoutNodeWi
 				// We need to ensure it processes input over the full 'size'
 				// The widget.Float implementation uses axis.Convert(size) for length calculation.
 				wasDragging := wFloat.Dragging()
-				wFloat.Layout(gtx, layout.Horizontal, unit.Dp(0))
+				wFloat.Layout(gtx, layout.Horizontal, gioUnit.Dp(0))
 				if wasDragging && !wFloat.Dragging() && args.OnValueChangeFinished != nil {
 					args.OnValueChangeFinished()
 				}

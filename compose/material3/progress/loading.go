@@ -11,11 +11,12 @@ import (
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
-	"gioui.org/unit"
 
 	"git.sr.ht/~schnwalter/gio-mw/wdk"
 	"git.sr.ht/~schnwalter/gio-mw/widget/indicator"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+
+	gioUnit "gioui.org/unit"
 )
 
 // LoadingIndicator displays a circular indeterminate progress indicator.
@@ -68,7 +69,7 @@ func drawLoadingIndicator(gtx layout.Context, state *loadingState, opts Indicato
 	elapsed := gtx.Now.Sub(state.startTime)
 
 	// Default size matching gio-mw
-	diameter := unit.Dp(48)
+	diameter := gioUnit.Dp(48)
 
 	// Get theme defaults using gio-mw's BuildTheme if possible, or fallback manually
 	th := indicator.BuildTheme(gtx)

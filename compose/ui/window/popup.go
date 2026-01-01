@@ -3,6 +3,7 @@ package window
 import (
 	"image"
 
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/pkg/api"
 
@@ -60,8 +61,8 @@ func popupWidgetConstructor(opts PopupOptions) layoutnode.LayoutNodeWidgetConstr
 			// Apply offset if needed
 			// Converting DpOffset to pixels requires metric, but unit.DpOffset doesn't have a conversion method directly in older gio?
 			// Let's check unit.DpOffset usage. It's usually X, Y unit.Dp.
-			xPx := pGtx.Dp(opts.OffsetX)
-			yPx := pGtx.Dp(opts.OffsetY)
+			xPx := pGtx.Dp(unit.DpToGioUnit(opts.OffsetX))
+			yPx := pGtx.Dp(unit.DpToGioUnit(opts.OffsetY))
 
 			op.Offset(image.Pt(xPx, yPx)).Add(pGtx.Ops)
 

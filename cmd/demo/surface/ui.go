@@ -19,7 +19,7 @@ import (
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/theme"
 
-	"gioui.org/unit"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 func UI(c api.Composer) api.LayoutNode {

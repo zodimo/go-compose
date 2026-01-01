@@ -14,10 +14,11 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
-	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+
+	gioUnit "gioui.org/unit"
 )
 
 type C = layout.Context
@@ -148,10 +149,10 @@ func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
 		// TODO: derive from Theme.Error or Theme.Danger
 		dangerColor = color.NRGBA{R: 200, A: 255}
 		// Border thickness transitions.
-		borderThickness       = unit.Dp(0.5)
-		borderThicknessActive = unit.Dp(2.0)
+		borderThickness       = gioUnit.Dp(0.5)
+		borderThicknessActive = gioUnit.Dp(2.0)
 	)
-	in.label.TextSize = unit.Sp(lerp.Between32(float32(textSmall), float32(textNormal), 1.0-in.anim.Progress()))
+	in.label.TextSize = gioUnit.Sp(lerp.Between32(float32(textSmall), float32(textNormal), 1.0-in.anim.Progress()))
 	switch in.state {
 	case inactive:
 		in.border.Thickness = borderThickness
@@ -175,7 +176,7 @@ func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
 	// Hack: Reset min constraint to 0 to avoid min == max.
 	gtx.Constraints.Min.X = 0
 	macro := op.Record(gtx.Ops)
-	var spacing unit.Dp
+	var spacing gioUnit.Dp
 	if len(hint) > 0 {
 		spacing = 4
 	}
@@ -187,11 +188,11 @@ func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
 	})
 	macro.Stop()
 	labelTopInsetNormal := float32(in.label.Smallest.Size.Y) - float32(in.label.Smallest.Size.Y/4)
-	topInsetDP := unit.Dp(labelTopInsetNormal / gtx.Metric.PxPerDp)
-	topInsetActiveDP := (topInsetDP / 2 * -1) - unit.Dp(in.border.Thickness)
+	topInsetDP := gioUnit.Dp(labelTopInsetNormal / gtx.Metric.PxPerDp)
+	topInsetActiveDP := (topInsetDP / 2 * -1) - gioUnit.Dp(in.border.Thickness)
 	in.label.Inset = layout.Inset{
-		Top:  unit.Dp(lerp.Between32(float32(topInsetDP), float32(topInsetActiveDP), in.anim.Progress())),
-		Left: unit.Dp(10),
+		Top:  gioUnit.Dp(lerp.Between32(float32(topInsetDP), float32(topInsetActiveDP), in.anim.Progress())),
+		Left: gioUnit.Dp(10),
 	}
 }
 
@@ -203,10 +204,10 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 		gtx,
 		func(gtx C) D {
 			return layout.Inset{
-				Left:  unit.Dp(4),
-				Right: unit.Dp(4),
+				Left:  gioUnit.Dp(4),
+				Right: gioUnit.Dp(4),
 			}.Layout(gtx, func(gtx C) D {
-				label := material.Label(th, unit.Sp(in.label.TextSize), hint)
+				label := material.Label(th, gioUnit.Sp(in.label.TextSize), hint)
 				label.Color = in.border.Color
 				return label.Layout(gtx)
 			})
@@ -220,7 +221,7 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 			return layout.Stack{}.Layout(
 				gtx,
 				layout.Expanded(func(gtx C) D {
-					cornerRadius := unit.Dp(4)
+					cornerRadius := gioUnit.Dp(4)
 					dimsFunc := func(gtx C) D {
 						return D{Size: image.Point{
 							X: gtx.Constraints.Max.X,
@@ -229,7 +230,7 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 					}
 					border := widget.Border{
 						Color:        in.border.Color,
-						Width:        unit.Dp(in.border.Thickness),
+						Width:        gioUnit.Dp(in.border.Thickness),
 						CornerRadius: cornerRadius,
 					}
 					if gtx.Source.Focused(&in.Editor) || in.Editor.Len() > 0 {
@@ -272,7 +273,7 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 					return border.Layout(gtx, dimsFunc)
 				}),
 				layout.Stacked(func(gtx C) D {
-					return layout.UniformInset(unit.Dp(12)).Layout(
+					return layout.UniformInset(gioUnit.Dp(12)).Layout(
 						gtx,
 						func(gtx C) D {
 							gtx.Constraints.Min.X = gtx.Constraints.Max.X
@@ -322,12 +323,12 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 						return D{}
 					}
 					return layout.Inset{
-						Top:  unit.Dp(4),
-						Left: unit.Dp(10),
+						Top:  gioUnit.Dp(4),
+						Left: gioUnit.Dp(10),
 					}.Layout(
 						gtx,
 						func(gtx C) D {
-							helper := material.Label(th, unit.Sp(12), in.helper.Text)
+							helper := material.Label(th, gioUnit.Sp(12), in.helper.Text)
 							helper.Color = in.helper.Color
 							return helper.Layout(gtx)
 						},
@@ -338,14 +339,14 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 						return D{}
 					}
 					return layout.Inset{
-						Top:   unit.Dp(4),
-						Right: unit.Dp(10),
+						Top:   gioUnit.Dp(4),
+						Right: gioUnit.Dp(10),
 					}.Layout(
 						gtx,
 						func(gtx C) D {
 							count := material.Label(
 								th,
-								unit.Sp(12),
+								gioUnit.Sp(12),
 								strconv.Itoa(in.Editor.Len())+"/"+strconv.Itoa(int(in.CharLimit)),
 							)
 							count.Color = in.helper.Color

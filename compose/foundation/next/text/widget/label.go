@@ -13,7 +13,7 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/text"
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
 
 	"golang.org/x/image/math/fixed"
 )
@@ -32,14 +32,14 @@ type Label struct {
 	WrapPolicy text.WrapPolicy
 	// LineHeight controls the distance between the baselines of lines of text.
 	// If zero, a sensible default will be used.
-	LineHeight unit.Sp
+	LineHeight gioUnit.Sp
 	// LineHeightScale applies a scaling factor to the LineHeight. If zero, a
 	// sensible default will be used.
 	LineHeightScale float32
 }
 
 // Layout the label with the given shaper, font, size, text, and material.
-func (l Label) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, size unit.Sp, txt string, textMaterial op.CallOp) layout.Dimensions {
+func (l Label) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, size gioUnit.Sp, txt string, textMaterial op.CallOp) layout.Dimensions {
 	dims, _ := l.LayoutDetailed(gtx, lt, font, size, txt, textMaterial)
 	return dims
 }
@@ -52,7 +52,7 @@ type TextInfo struct {
 }
 
 // Layout the label with the given shaper, font, size, text, and material, returning metadata about the shaped text.
-func (l Label) LayoutDetailed(gtx layout.Context, lt *text.Shaper, font font.Font, size unit.Sp, txt string, textMaterial op.CallOp) (layout.Dimensions, TextInfo) {
+func (l Label) LayoutDetailed(gtx layout.Context, lt *text.Shaper, font font.Font, size gioUnit.Sp, txt string, textMaterial op.CallOp) (layout.Dimensions, TextInfo) {
 	cs := gtx.Constraints
 	textSize := fixed.I(gtx.Sp(size))
 	lineHeight := fixed.I(gtx.Sp(l.LineHeight))

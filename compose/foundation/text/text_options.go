@@ -1,13 +1,13 @@
 package text
 
 import (
-	"gioui.org/unit"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
 	"github.com/zodimo/go-maybe"
 
 	gioFont "gioui.org/font"
+	gioUnit "gioui.org/unit"
 )
 
 type TextOptions struct {
@@ -29,7 +29,7 @@ type TextOptions struct {
 	WrapPolicy maybe.Maybe[WrapPolicy]
 	// LineHeight controls the distance between the baselines of lines of text.
 	// If zero, a sensible default will be used.
-	LineHeight maybe.Maybe[unit.Sp]
+	LineHeight maybe.Maybe[gioUnit.Sp]
 	// LineHeightScale applies a scaling factor to the LineHeight. If zero, a
 	// sensible default will be used.
 	LineHeightScale maybe.Maybe[float32]
@@ -43,7 +43,7 @@ type TextOptions struct {
 	// SelectionColor is the color of the background for selected text.
 	SelectionColor graphics.Color
 	// TextSize determines the size of the text glyphs.
-	TextSize maybe.Maybe[unit.Sp]
+	TextSize maybe.Maybe[gioUnit.Sp]
 	// Strikethrough draws a line through the text when true.
 	Strikethrough maybe.Maybe[bool]
 }
@@ -103,7 +103,7 @@ func WithWrapPolicy(wrapPolicy WrapPolicy) TextOption {
 // @deprecated use TextStyle
 func WithLineHeight(lineHeightInSP float32) TextOption {
 	return func(o *TextOptions) {
-		o.LineHeight = maybe.Some(unit.Sp(lineHeightInSP))
+		o.LineHeight = maybe.Some(gioUnit.Sp(lineHeightInSP))
 	}
 }
 
@@ -150,7 +150,7 @@ func StyleWithSelectionColor(color graphics.Color) TextOption {
 // @deprecated use TextStyle
 func StyleWithTextSize(sizeInSP float32) TextOption {
 	return func(o *TextOptions) {
-		o.TextSize = maybe.Some(unit.Sp(sizeInSP))
+		o.TextSize = maybe.Some(gioUnit.Sp(sizeInSP))
 	}
 }
 

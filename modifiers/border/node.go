@@ -1,6 +1,7 @@
 package border
 
 import (
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/theme"
@@ -48,7 +49,7 @@ func NewBorderNode(element BorderElement) *BorderNode {
 
 					macro := op.Record(gtx.Ops)
 
-					strokeWidth := float32(gtx.Metric.Dp(width))
+					strokeWidth := float32(gtx.Metric.Dp(unit.DpToGioUnit(width)))
 
 					pathSpec := outline.Path(gtx.Ops)
 

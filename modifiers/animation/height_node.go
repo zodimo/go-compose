@@ -8,7 +8,7 @@ import (
 
 	"gioui.org/op"
 	"gioui.org/op/clip"
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
 )
 
 var _ node.ChainNode = (*AnimatedHeightNode)(nil)
@@ -38,7 +38,7 @@ func NewAnimatedHeightNode(element AnimatedHeightElement) node.ChainNode {
 					// Apply max height constraint constraint
 					childConstraints := gtx.Constraints
 					if n.element.MaxHeight > 0 {
-						childConstraints.Max.Y = gtx.Dp(unit.Dp(n.element.MaxHeight))
+						childConstraints.Max.Y = gtx.Dp(gioUnit.Dp(n.element.MaxHeight))
 					}
 					// Pass modified constraints
 					gtxChild := gtx

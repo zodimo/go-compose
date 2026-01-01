@@ -11,9 +11,9 @@ import (
 	"github.com/zodimo/go-compose/pkg/api"
 
 	"gioui.org/layout"
-	"gioui.org/unit"
 	"gioui.org/widget"
 	"git.sr.ht/~schnwalter/gio-mw/token"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // FloatingActionButton is a Material 3 Floating Action Button.

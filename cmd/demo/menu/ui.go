@@ -10,11 +10,11 @@ import (
 	"github.com/zodimo/go-compose/compose/material3/menu"
 	"github.com/zodimo/go-compose/compose/material3/scaffold"
 	"github.com/zodimo/go-compose/compose/ui"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/theme"
 
-	"gioui.org/unit"
 	mdicons "golang.org/x/exp/shiny/materialdesign/icons"
 )
 

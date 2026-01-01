@@ -9,7 +9,8 @@ import (
 	"gioui.org/layout"
 	gioOp "gioui.org/op"
 	gioText "gioui.org/text"
-	"gioui.org/unit"
+	gioUnit "gioui.org/unit"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 
 	"github.com/zodimo/go-compose/compose/foundation/next/text/widget"
 	"github.com/zodimo/go-compose/compose/ui/next/text"
@@ -102,7 +103,7 @@ func (c *TextLayoutController) SetWrapPolicy(wrapPolicy gioText.WrapPolicy) {
 }
 
 // SetLineHeight sets the line height.
-func (c *TextLayoutController) SetLineHeight(lineHeight unit.Sp) {
+func (c *TextLayoutController) SetLineHeight(lineHeight gioUnit.Sp) {
 	c.view.LineHeight = lineHeight
 }
 
@@ -112,7 +113,7 @@ func (c *TextLayoutController) SetLineHeightScale(scale float32) {
 }
 
 // Layout performs text layout and returns dimensions.
-func (c *TextLayoutController) Layout(gtx layout.Context, shaper *gioText.Shaper, gioFont font.Font, size unit.Sp) layout.Dimensions {
+func (c *TextLayoutController) Layout(gtx layout.Context, shaper *gioText.Shaper, gioFont font.Font, size gioUnit.Sp) layout.Dimensions {
 	c.view.Layout(gtx, shaper, gioFont, size)
 	return c.view.Dimensions()
 }
@@ -127,7 +128,7 @@ func (c *TextLayoutController) PaintText(gtx layout.Context, textMaterial gioOp.
 func (c *TextLayoutController) LayoutAndPaint(gtx layout.Context, shaper *gioText.Shaper, textMaterial gioOp.CallOp) layout.Dimensions {
 	gioFont := c.GetFont()
 	size := c.GetFontSize()
-	c.view.Layout(gtx, shaper, gioFont, size)
+	c.view.Layout(gtx, shaper, gioFont, unit.TextUnitToGioSp(size))
 	c.PaintText(gtx, textMaterial)
 	return c.view.Dimensions()
 }
@@ -186,7 +187,7 @@ func (c *TextLayoutController) ConfigureFromTextStyle(ts *text.TextStyle) {
 	}
 	c.textStyle = ts
 	c.SetAlignment(ts.TextAlign())
-	c.SetLineHeight(unit.Sp(ts.LineHeight().Value()))
+	c.SetLineHeight(gioUnit.Sp(ts.LineHeight().Value()))
 	c.SetWrapPolicy(lineBreakToGioWrapPolicy(ts.LineBreak()))
 }
 
@@ -217,9 +218,9 @@ func (c *TextLayoutController) GetFont() font.Font {
 }
 
 // GetFontSize returns the font size in Sp.
-func (c *TextLayoutController) GetFontSize() unit.Sp {
+func (c *TextLayoutController) GetFontSize() unit.TextUnit {
 	if c.textStyle == nil {
-		return 14 // Default font size
+		return unit.Sp(14) // Default font size
 	}
-	return unit.Sp(c.textStyle.FontSize().Value())
+	return c.textStyle.FontSize()
 }
