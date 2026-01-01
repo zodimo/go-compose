@@ -119,3 +119,7 @@ func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle {
 	}
 	return ptr
 }
+
+func TextStyleFromOptions(options ...TextStyleOption) *TextStyle {
+	return CopyTextStyle(TextStyleUnspecified, options...)
+}
