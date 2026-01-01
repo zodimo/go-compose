@@ -44,10 +44,10 @@ type Typography struct {
 	LabelLargeEmphasized  *text.TextStyle
 }
 
-func (t *Typography) Copy() *Typography {
-	return &Typography{}
+func (t *Typography) Copy(options ...TypographyOption) *Typography {
+	copy := *t
+	for _, option := range options {
+		option(&copy)
+	}
+	return &copy
 }
-
-// func TypographyFromTokens(tokens Tokens) *Typography {
-// 	return &Typography{}
-// }
