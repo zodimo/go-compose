@@ -28,17 +28,17 @@ func LerpGeometricTransform(
 	start *TextGeometricTransform,
 	stop *TextGeometricTransform,
 	fraction float32,
-) TextGeometricTransform {
+) *TextGeometricTransform {
 	if start == nil || stop == nil {
 		panic("TextGeometricTransform must be specified")
 	}
 	if fraction == 0 {
-		return *start
+		return start
 	}
 	if fraction == 1 {
-		return *stop
+		return stop
 	}
-	return TextGeometricTransform{
+	return &TextGeometricTransform{
 		ScaleX: lerp.Between32(start.ScaleX, stop.ScaleX, fraction),
 		SkewX:  lerp.Between32(start.SkewX, stop.SkewX, fraction),
 	}

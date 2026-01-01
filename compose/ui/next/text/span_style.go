@@ -8,6 +8,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/next/text/intl"
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
 	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 	"github.com/zodimo/go-compose/pkg/sentinel"
 )
 
@@ -334,44 +335,26 @@ func LerpSpanStyle(width, start, stop *SpanStyle, fraction float32) *SpanStyle {
 
 	return &SpanStyle{
 		textForegroundStyle: style.LerpTextForegroundStyle(start.textForegroundStyle, stop.textForegroundStyle, fraction),
-		FontSize:            LerpTextUnitInheritable(start.FontSize, stop.FontSize, fraction),
+		FontSize:            unit.LerpTextUnitInheritable(start.FontSize, stop.FontSize, fraction),
 		FontWeight:          font.LerpFontWeight(start.FontWeight, stop.FontWeight, fraction),
-		FontStyle:           lerpDiscrete(start.FontStyle, stop.FontStyle, fraction),
-		FontSynthesis:       lerpDiscrete(start.FontSynthesis, stop.FontSynthesis, fraction),
-		FontFamily:          lerpDiscrete(start.FontFamily, stop.FontFamily, fraction),
-		FontFeatureSettings: lerpDiscrete(start.FontFeatureSettings, stop.FontFeatureSettings, fraction),
-		LetterSpacing:       LerpTextUnitInheritable(start.LetterSpacing, stop.LetterSpacing, fraction),
+		FontStyle:           lerp.LerpDiscrete(start.FontStyle, stop.FontStyle, fraction),
+		FontSynthesis:       lerp.LerpDiscrete(start.FontSynthesis, stop.FontSynthesis, fraction),
+		FontFamily:          lerp.LerpDiscrete(start.FontFamily, stop.FontFamily, fraction),
+		FontFeatureSettings: lerp.LerpDiscrete(start.FontFeatureSettings, stop.FontFeatureSettings, fraction),
+		LetterSpacing:       unit.LerpTextUnitInheritable(start.LetterSpacing, stop.LetterSpacing, fraction),
 		BaselineShift:       style.LerpBaselineShift(start.BaselineShift, stop.BaselineShift, fraction),
-		TextGeometricTransform: ptr(style.LerpGeometricTransform(
+		TextGeometricTransform: style.LerpGeometricTransform(
 			style.TakeOrElseTextGeometricTransform(start.TextGeometricTransform, style.TextGeometricTransformNone),
 			style.TakeOrElseTextGeometricTransform(stop.TextGeometricTransform, style.TextGeometricTransformNone),
-			fraction)),
-		LocaleList:     lerpDiscrete(start.LocaleList, stop.LocaleList, fraction),
+			fraction),
+		LocaleList:     lerp.LerpDiscrete(start.LocaleList, stop.LocaleList, fraction),
 		Background:     graphics.LerpColor(start.Background, stop.Background, fraction),
-		TextDecoration: lerpDiscrete(start.TextDecoration, stop.TextDecoration, fraction),
+		TextDecoration: lerp.LerpDiscrete(start.TextDecoration, stop.TextDecoration, fraction),
 		Shadow:         graphics.LerpShadow(start.Shadow, stop.Shadow, fraction),
 		PlatformStyle:  LerpPlatformSpanStyle(start.PlatformStyle, stop.PlatformStyle, fraction),
-		DrawStyle:      lerpDiscrete(start.DrawStyle, stop.DrawStyle, fraction),
+		DrawStyle:      lerp.LerpDiscrete(start.DrawStyle, stop.DrawStyle, fraction),
 	}
 
-}
-
-func LerpTextUnitInheritable(a, b unit.TextUnit, t float32) unit.TextUnit {
-	if a.IsUnspecified() || b.IsUnspecified() {
-		return lerpDiscrete(a, b, t)
-	}
-	return unit.LerpTextUnit(a, b, t)
-}
-
-func lerpDiscrete[T any](a, b T, fraction float32) T {
-	if fraction < 0.5 {
-		return a
-	}
-	return b
-}
-
-func ptr[T any](v T) *T {
-	return &v
 }
 
 func LerpPlatformSpanStyle(start, stop *PlatformSpanStyle, fraction float32) *PlatformSpanStyle {

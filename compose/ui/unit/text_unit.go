@@ -205,6 +205,13 @@ func LerpTextUnit(start, stop TextUnit, fraction float32) TextUnit {
 	return pack(start.rawType(), val)
 }
 
+func LerpTextUnitInheritable(a, b TextUnit, t float32) TextUnit {
+	if a.IsUnspecified() || b.IsUnspecified() {
+		return lerp.LerpDiscrete(a, b, t)
+	}
+	return LerpTextUnit(a, b, t)
+}
+
 func checkArithmetic(a TextUnit) {
 	requirePrecondition(!a.IsUnspecified(), "Cannot perform operation for Unspecified type.")
 }
