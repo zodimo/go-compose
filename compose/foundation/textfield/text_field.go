@@ -54,7 +54,6 @@ func BasicTextField(
 		c.StartBlock(BasicTextFieldNodeID)
 
 		textShaper := compose.LocalTextShaper.Current(c)
-		familyResolver := platform.LocalFontFamilyResolver.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 
 		// Generate unique key for state persistence
@@ -90,10 +89,9 @@ func BasicTextField(
 		})
 
 		c.SetWidgetConstructor(textFieldWidgetConstructor(BasicTextFieldConstructorArgs{
-			controller: controller,
-			state:      state,
-			textStyle:  opts.TextStyle,
-			// onTextLayout:         opts.OnTextLayout,
+			controller:           controller,
+			state:                state,
+			textStyle:            opts.TextStyle,
 			singleLine:           singleLine,
 			maxLines:             maxLines,
 			minLines:             minLines,
@@ -101,11 +99,9 @@ func BasicTextField(
 			readOnly:             opts.ReadOnly,
 			inputTransformation:  opts.InputTransformation,
 			outputTransformation: opts.OutputTransformation,
-			fontFamilyResolver:   familyResolver,
-			// cursorColor:          opts.CursorColor,
-			layoutDirection: layoutDirection,
-			textShaper:      textShaper,
-			onValueChange:   handler,
+			layoutDirection:      layoutDirection,
+			textShaper:           textShaper,
+			onValueChange:        handler,
 		}))
 
 		return c.EndBlock()
@@ -119,10 +115,9 @@ type onValueChangeWrapper struct {
 
 // BasicTextFieldConstructorArgs holds the arguments for the text field widget constructor.
 type BasicTextFieldConstructorArgs struct {
-	controller *input.EditableTextLayoutController
-	state      *input.TextFieldState
-	textStyle  *text.TextStyle
-	// onTextLayout         func(text.TextLayoutResult)
+	controller           *input.EditableTextLayoutController
+	state                *input.TextFieldState
+	textStyle            *text.TextStyle
 	singleLine           bool
 	maxLines             int
 	minLines             int
@@ -130,11 +125,9 @@ type BasicTextFieldConstructorArgs struct {
 	readOnly             bool
 	inputTransformation  input.InputTransformation
 	outputTransformation input.OutputTransformation
-	fontFamilyResolver   interface{} // font.FontFamilyResolver
-	// cursorColor          interface{} // graphics.ColorProducer
-	layoutDirection unit.LayoutDirection
-	textShaper      *text.TextShaper
-	onValueChange   *onValueChangeWrapper
+	layoutDirection      unit.LayoutDirection
+	textShaper           *text.TextShaper
+	onValueChange        *onValueChangeWrapper
 }
 
 // textFieldWidgetConstructor creates the widget constructor for BasicTextField.
