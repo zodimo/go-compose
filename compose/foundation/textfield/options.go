@@ -32,17 +32,8 @@ type TextFieldOptions struct {
 	// LineLimits specifies text wrapping and height behavior.
 	LineLimits input.TextFieldLineLimits
 
-	// OnTextLayout is called when the text layout becomes queryable.
-	// OnTextLayout func(text.TextLayoutResult)
-
-	// KeyboardActionHandler handles IME action events.
-	// KeyboardActionHandler input.KeyboardActionHandler
-
 	// Decorator allows adding decorations around the text field.
 	Decorator input.TextFieldDecorator
-
-	// // CursorColor is the color for the cursor. If nil, uses theme default.
-	// CursorColor graphics.ColorProducer
 }
 
 // TextFieldOption is a functional option for configuring BasicTextField.
@@ -97,30 +88,9 @@ func WithLineLimits(limits input.TextFieldLineLimits) TextFieldOption {
 	}
 }
 
-// // WithOnLayout sets the text layout callback.
-// func WithOnLayout(onLayout func(text.TextLayoutResult)) TextFieldOption {
-// 	return func(o *TextFieldOptions) {
-// 		o.OnTextLayout = onLayout
-// 	}
-// }
-
-// // WithKeyboardActionHandler sets the keyboard action handler.
-// func WithKeyboardActionHandler(handler input.KeyboardActionHandler) TextFieldOption {
-// 	return func(o *TextFieldOptions) {
-// 		o.KeyboardActionHandler = handler
-// 	}
-// }
-
 // WithDecorator sets the text field decorator.
 func WithDecorator(decorator input.TextFieldDecorator) TextFieldOption {
 	return func(o *TextFieldOptions) {
 		o.Decorator = decorator
 	}
 }
-
-// // WithCursorColor sets the cursor color.
-// func WithCursorColor(color graphics.ColorProducer) TextFieldOption {
-// 	return func(o *TextFieldOptions) {
-// 		o.CursorColor = color
-// 	}
-// }
