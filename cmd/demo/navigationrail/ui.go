@@ -9,12 +9,14 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	ftext "github.com/zodimo/go-compose/compose/foundation/text"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/material3/icon"
 	"github.com/zodimo/go-compose/compose/material3/navigationdrawer"
 	"github.com/zodimo/go-compose/compose/material3/navigationrail"
 	"github.com/zodimo/go-compose/compose/material3/text"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
+	uiText "github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -51,7 +53,7 @@ func UI() api.Composable {
 				return column.Column(
 					func(c api.Composer) api.Composer {
 						// Drawer Header / Headline
-						text.Text("GoCompose", text.TypestyleHeadlineSmall,
+						text.TextWithStyle("GoCompose", text.TypestyleHeadlineSmall,
 							ftext.WithModifier(padding.Padding(28, 24, 16, 24)),
 						)(c)
 
@@ -90,18 +92,17 @@ func UI() api.Composable {
 								),
 
 								func(c api.Composer) api.Composer {
-									var textColor theme.ColorDescriptor
+									var textColor graphics.Color
 									if isSelected {
-										textColor = theme.ColorHelper.ColorSelector().SecondaryRoles.OnContainer
+										textColor = material3.Theme(c).ColorScheme().SecondaryContainer.OnColor
 									} else {
-										textColor = theme.ColorHelper.ColorSelector().SurfaceRoles.OnVariant
+										textColor = material3.Theme(c).ColorScheme().SurfaceVariant.OnColor
 									}
 
-									return text.Text(
+									return text.LabelMedium(
 										item.Label,
-										text.TypestyleLabelMedium,
 										ftext.WithTextStyleOptions(
-											ftext.StyleWithColor(textColor),
+											uiText.WithColor(textColor),
 										),
 										// ftext.WithAlignment(ftext.Middle), // align to the middle horizontally not vertically
 										// ftext.WithModifier(background.Background(theme.ColorHelper.SpecificColor(color.NRGBA{R: 0, G: 0, B: 200, A: 200})))),
@@ -166,29 +167,33 @@ func UI() api.Composable {
 											isSelected,
 											icon.Icon(
 												item.Icon,
-												icon.WithColor(colorHelper.ColorSelector().SecondaryRoles.OnContainer),
+												icon.WithColor(colorHelper.SpecificColor(
+													material3.Theme(c).ColorScheme().SecondaryContainer.OnColor,
+												)),
 												icon.WithModifier(size.Size(24, 24)),
 											),
 											icon.Icon(
 												item.Icon,
-												icon.WithColor(colorHelper.ColorSelector().SurfaceRoles.OnVariant),
+												icon.WithColor(colorHelper.SpecificColor(
+													material3.Theme(c).ColorScheme().SurfaceVariant.OnColor,
+												)),
 												icon.WithModifier(size.Size(24, 24)),
 											),
 										),
 										//label
 										func(c api.Composer) api.Composer {
-											var textColor theme.ColorDescriptor
+											var textColor graphics.Color
 											if isSelected {
-												textColor = theme.ColorHelper.ColorSelector().SecondaryRoles.OnContainer
+												textColor = material3.Theme(c).ColorScheme().SecondaryContainer.OnColor // theme.ColorHelper.ColorSelector().SecondaryRoles.OnContainer
 											} else {
-												textColor = theme.ColorHelper.ColorSelector().SurfaceRoles.OnVariant
+												textColor = material3.Theme(c).ColorScheme().SurfaceVariant.OnColor // theme.ColorHelper.ColorSelector().SurfaceRoles.OnVariant
 											}
 
-											return text.Text(
+											return text.TextWithStyle(
 												item.Label,
 												text.TypestyleLabelMedium,
 												ftext.WithTextStyleOptions(
-													ftext.StyleWithColor(textColor),
+													uiText.WithColor(textColor),
 												),
 												ftext.WithAlignment(ftext.Middle),
 											)(c)
@@ -204,7 +209,7 @@ func UI() api.Composable {
 						// Main Content Body
 						column.Column(
 							func(c api.Composer) api.Composer {
-								text.Text(fmt.Sprintf("Selected Page: %d", selectedIndex), text.TypestyleHeadlineMedium)(c)
+								text.TextWithStyle(fmt.Sprintf("Selected Page: %d", selectedIndex), text.TypestyleHeadlineMedium)(c)
 								return c
 							},
 							column.WithModifier(size.FillMax()),
