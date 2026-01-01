@@ -2,10 +2,7 @@ package material3
 
 import (
 	"github.com/zodimo/go-compose/compose/foundation/next/text/selection"
-	"github.com/zodimo/go-compose/compose/ui/graphics"
 )
-
-type Color = graphics.Color
 
 type TextFieldColors struct {
 	FocusedTextColor             Color
