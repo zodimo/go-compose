@@ -1,6 +1,8 @@
 package text
 
 import (
+	"fmt"
+
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
@@ -58,6 +60,13 @@ func (ts TextStyle) TextDecoration() *style.TextDecoration {
 }
 func (ts TextStyle) TextDirection() style.TextDirection {
 	return ts.paragraphStyle.TextDirection()
+}
+
+func StringTextStyle(ts *TextStyle) string {
+	return fmt.Sprintf("TextStyle{spanStyle: %s, paragraphStyle: %s}",
+		StringSpanStyle(ts.spanStyle),
+		StringParagraphStyle(ts.paragraphStyle),
+	)
 }
 
 func CopyTextStyle(ts *TextStyle, options ...TextStyleOption) *TextStyle {
