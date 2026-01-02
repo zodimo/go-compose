@@ -63,6 +63,9 @@ func (ts TextStyle) TextDirection() style.TextDirection {
 }
 
 func StringTextStyle(ts *TextStyle) string {
+	if !IsSpecifiedTextStyle(ts) {
+		return "TextStyle{Unspecified}"
+	}
 	return fmt.Sprintf("TextStyle{spanStyle: %s, paragraphStyle: %s}",
 		StringSpanStyle(ts.spanStyle),
 		StringParagraphStyle(ts.paragraphStyle),
@@ -75,22 +78,6 @@ func ensureMutableTextStyle(ts *TextStyle) {
 	if !IsSpecifiedTextStyle(ts) {
 		panic("attempt to mutate sentinel TextStyleUnspecified; use CopyTextStyle first")
 	}
-}
-
-func CopyTextStyle(ts *TextStyle, options ...TextStyleOption) *TextStyle {
-	// Deep copy to protect sentinel values from mutation.
-	// We copy the nested styles so that later option applications
-	// don't mutate the original spanStyle/paragraphStyle pointers.
-	spanCopy := *ts.spanStyle
-	paraCopy := *ts.paragraphStyle
-	copy := TextStyle{
-		spanStyle:      &spanCopy,
-		paragraphStyle: &paraCopy,
-	}
-	for _, option := range options {
-		option(&copy)
-	}
-	return &copy
 }
 
 func TextStyleResolveDefaults(ts *TextStyle, direction unit.LayoutDirection) *TextStyle {
@@ -138,4 +125,47 @@ func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle {
 
 func TextStyleFromOptions(options ...TextStyleOption) *TextStyle {
 	return CopyTextStyle(TextStyleUnspecified, options...)
+}
+
+// Identity (2 ns)
+func SameTextStyle(a, b *TextStyle) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil {
+		return b == TextStyleUnspecified
+	}
+	if b == nil {
+		return a == TextStyleUnspecified
+	}
+	return a == b
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualTextStyle(a, b *TextStyle) bool {
+
+	a = CoalesceTextStyle(a, TextStyleUnspecified)
+	b = CoalesceTextStyle(b, TextStyleUnspecified)
+
+	return EqualSpanStyle(a.spanStyle, b.spanStyle) &&
+		EqualParagraphStyle(a.paragraphStyle, b.paragraphStyle)
+}
+
+func EqualTextStyle(a, b *TextStyle) bool {
+	if !SameTextStyle(a, b) {
+		return SemanticEqualTextStyle(a, b)
+	}
+	return true
+}
+
+func CopyTextStyle(ts *TextStyle, options ...TextStyleOption) *TextStyle {
+	opt := *TextStyleUnspecified
+
+	for _, option := range options {
+		option(&opt)
+	}
+	return &TextStyle{
+		spanStyle:      TakeOrElseSpanStyle(ts.spanStyle, opt.spanStyle),
+		paragraphStyle: TakeOrElseParagraphStyle(ts.paragraphStyle, opt.paragraphStyle),
+	}
 }
