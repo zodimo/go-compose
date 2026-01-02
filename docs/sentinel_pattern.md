@@ -5,14 +5,14 @@
 
 > **AGENT CONTRACT**: This is a single-file, copy-paste-ready reference. Every exported type `T` must provide exactly **4 symbols**:  
 > 1. `TUnspecified` – sentinel (constant for values, singleton for structs)  
-> 2. `IsT` – predicate, package-level function  
+> 2. `IsSpecifiedT` – predicate, package-level function  
 > 3. `TakeOrElseT` – 2-param fallback, package-level function  
 > 4. `MergeT` – composition merge, package-level function
 > 5. `StringT` – stringification, package-level function  
 > 6. `CoalesceT` – nil coalescing, package-level function
 > 7. `SameT` – identity, package-level function
-> 8. `EqualT` – semantic equality, package-level function
-> 9. `SemanticEqualT` – semantic equality, package-level function
+> 8. `SemanticEqualT` – semantic equality, package-level function
+> 9. `EqualT` – semantic equality, package-level function
 > 10. `CopyT` – copy, package-level function
 
 > No other public symbols are required. All verification commands are in Section 8.
@@ -35,60 +35,163 @@ Choose **once per type**—never mix.
 ### 1-A Primitive / Value Types (zero-allocation sentinel)
 
 ```go
-// 1. Declare the value type
-type Color uint64
+// unit.Dp
 
-// 2. Pick a sentinel bit-pattern that is never a valid explicit value
-const ColorUnspecified Color = 0          // transparent black
-const ColorRed       Color = 0xFFFF0000   // normal colours
+import "github.com/zodimo/go-compose/pkg/floatutils"
 
-// 3. Zero-defensive method (value receiver → never nil)
-func (c Color) IsColor() bool {
-	return c != ColorUnspecified
+
+// The value is stored as a float32.
+type Dp float32
+
+// 1. `TUnspecified` – sentinel 
+var DpUnspecified = Dp(floatutils.Float32Unspecified)
+
+// 2. `IsSpecified` – predicate
+func (d Dp) IsUnspecified() bool {
+	return floatutils.IsSpecified(d)
 }
 
-// 4. Zero-allocation fallback
-func (c Color) TakeOrElseColor(defaultColor Color) Color {
-	if c.IsColor() {
-		return c
+// 3. `TakeOrElse` – 2-param fallback
+func (d Dp) TakeOrElse(def Dp) Dp {
+	if d.IsSpecified() {
+		return d
 	}
-	return defaultColor
+	return def
+}
+
+// 4. `Merge` – composition merge
+func MergeDp(a, b Dp) Dp {
+	if b.IsSpecified() {
+		return b
+	}
+	return a
+}
+
+// 5. `String` – stringification
+func (d Dp) String() string {
+	if d.IsUnspecified() {
+		return "Dp{Unspecified}"
+	}
+	return fmt.Sprintf("Dp{%.1f}", d)
+}
+
+// 6. `Coalesce` – nil coalescing
+// Not applicable
+
+// 7. `Same` – identity
+// Not applicable
+
+// 8. `SemanticEqual` – semantic equality
+// Not applicable
+
+// 9. `Equal` – semantic equality
+func (d Dp) Equal(other Dp) bool {
+	return d == other
+}
+
+// 10. `Copy` – copy
+func (d Dp) Copy() Dp {
+	return d
 }
 ```
 
 **Sentinel choice guide**  
-- `0` → OK when 0 is rare (Color)  
-- `NaN` → use when 0 is common (Dp, TextUnit)  
-- `MinInt32` → for packed structs (IntOffset)  
-- `iota 0` → for enums (Alignment, FontWeight)
+- `0` → OK when 0 is rare   
+- `floatutils.Float32Unspecified, floatutils.Float64Unspecified` for floats → use when 0 is common
+- `math.MinInt,math.MaxInt,` for integers →   
+- `iota + sentinel` → for enums
 
 **Guarantees**: lives in `.rodata`, copied into register/stack → **zero heap bytes**.
 
 ---
 
-### 1-B Complex Object Types (nullable pointer + singleton)
+### 1-B Packed Primitive / Packed Value Types (zero-allocation sentinel)
 
 ```go
-// 1. Multi-field struct
+//Same as 1-A, but with a different Copy method
+
+type ColorCopyOptions struct {
+	Alpha, Red, Green, Blue float32
+}
+type ColorCopyOption func(*ColorCopyOptions) ColorCopyOptions
+
+func CopyWithAlpha(alpha float32) ColorCopyOption {
+	return func(o *ColorCopyOptions) ColorCopyOptions {
+		o.Alpha = alpha
+		return *o
+	}
+}
+
+func CopyWithRed(red float32) ColorCopyOption {
+	return func(o *ColorCopyOptions) ColorCopyOptions {
+		o.Red = red
+		return *o
+	}
+}
+
+func CopyWithGreen(green float32) ColorCopyOption {
+	return func(o *ColorCopyOptions) ColorCopyOptions {
+		o.Green = green
+		return *o
+	}
+}
+
+func CopyWithBlue(blue float32) ColorCopyOption {
+	return func(o *ColorCopyOptions) ColorCopyOptions {
+		o.Blue = blue
+		return *o
+	}
+}
+
+// Copy creates a new color with modified components.
+func (c Color) Copy(opts ...ColorCopyOption) Color {
+	var o ColorCopyOptions = ColorCopyOptions{
+		Alpha: floatutils.Float32Unspecified,
+		Red:   floatutils.Float32Unspecified,
+		Green: floatutils.Float32Unspecified,
+		Blue:  floatutils.Float32Unspecified,
+	}
+	for _, opt := range opts {
+		opt(&o)
+	}
+
+	id := c.ColorSpaceId()
+	space := colorspace.Get(id)
+	return NewColor(
+		floatutils.TakeOrElse(o.Alpha, c.Alpha()),
+		floatutils.TakeOrElse(o.Red, c.Red()),
+		floatutils.TakeOrElse(o.Green, c.Green()),
+		floatutils.TakeOrElse(o.Blue, c.Blue()),
+		space,
+	)
+}
+
+```
+
+
+
+### 1-C Complex Object Types (nullable pointer + singleton)
+
+```go
 type TextStyle struct {
 	color      Color
 	fontSize   Dp
 	fontWeight FontWeight
 }
 
-// 2. ONE global singleton (static data segment)
+// 1. `TUnspecified` – sentinel is a singleton
 var TextStyleUnspecified = &TextStyle{
 	color:      ColorUnspecified,
 	fontSize:   DpUnspecified,
 	fontWeight: FontWeightUnspecified,
 }
 
-// 3. Package-level helpers (NO methods on *TextStyle)
-func IsTextStyle(style *TextStyle) bool {
+// 2. `IsSpecifiedT` Package-level helpers (NO methods on *TextStyle)
+func IsSpecifiedTextStyle(style *TextStyle) bool {
 	return style != nil && style != TextStyleUnspecified
 }
 
-// 4. Package-level helpers (NO methods on *TextStyle)
+// 3. `TakeOrElseT` Package-level helpers (NO methods on *TextStyle)
 func TakeOrElseTextStyle(style, defaultStyle *TextStyle) *TextStyle {
 	if style == nil || style == TextStyleUnspecified {
 		return defaultStyle
@@ -96,15 +199,7 @@ func TakeOrElseTextStyle(style, defaultStyle *TextStyle) *TextStyle {
 	return style
 }
 
-// 5. Generic 3-param helper (used inside helpers)
-func takeOrElse[T comparable](a, b, sentinel T) T {
-	if a != sentinel {
-		return a
-	}
-	return b
-}
-
-// 6. Merge / equality helpers
+// 4. `MergeT` – composition merge, package-level function
 func MergeTextStyle(a, b *TextStyle) *TextStyle {
 	a = CoalesceTextStyle(a, TextStyleUnspecified)
 	b = CoalesceTextStyle(b, TextStyleUnspecified)
@@ -114,18 +209,78 @@ func MergeTextStyle(a, b *TextStyle) *TextStyle {
 
 	// Both are custom: allocate new merged style
 	return &TextStyle{
-		color:      takeOrElse(a.color, b.color, ColorUnspecified),
-		fontSize:   takeOrElse(a.fontSize, b.fontSize, DpUnspecified),
-		fontWeight: takeOrElse(a.fontWeight, b.fontWeight, FontWeightUnspecified),
+		color:      b.color.TakeOrElse(a.color), // primitive struct
+		fontSize:   b.fontSize.TakeOrElse(a.fontSize), // primitive struct
+		fontWeight: b.fontWeight.TakeOrElse(a.fontWeight), // primitive struct
 	}
 }
+// 5. `StringT` – stringification, package-level function  
+func StringTextStyle(style *TextStyle) string {
+	if !IsSpecifiedTextStyle(style) {
+		return "TextStyle{Unspecified}"
+	}
 
+	return fmt.Sprintf(
+		"TextStyle{color: %s, fontSize: %s, fontWeight: %s}",
+		style.color,
+		style.fontSize,
+		style.fontWeight,
+	)
+}
+// 6. `CoalesceT` – nil coalescing, package-level function
 func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle {
 	if ptr == nil {
 		return def
 	}
 	return ptr
 }
+
+// 7. `SameT` – identity, package-level function
+func SameTextStyle(a, b *TextStyle) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil {
+		return b == TextStyleUnspecified
+	}
+	if b == nil {
+		return a == TextStyleUnspecified
+	}
+	return a == b
+}
+
+// 8. `SemanticEqualT` – semantic equality, package-level function
+func SemanticEqualTextStyle(a, b *TextStyle) bool {
+
+	a = CoalesceTextStyle(a, TextStyleUnspecified)
+	b = CoalesceTextStyle(b, TextStyleUnspecified)
+
+	return EqualColor(a.spanStyle, b.spanStyle) &&
+		EqualParagraphStyle(a.paragraphStyle, b.paragraphStyle)
+}
+
+// 9. `EqualT` – semantic equality, package-level function
+func EqualTextStyle(a, b *TextStyle) bool {
+	if !SameTextStyle(a, b) {
+		return SemanticEqualTextStyle(a, b)
+	}
+	return true
+}
+
+// 10. `CopyT` – copy, package-level function
+func CopyTextStyle(ts *TextStyle, options ...TextStyleOption) *TextStyle {
+	opt := *TextStyleUnspecified
+
+	for _, option := range options {
+		option(&opt)
+	}
+	return &TextStyle{
+		color:      TakeOrElseColor(ts.color, opt.color),
+		fontSize:   TakeOrElseDp(ts.fontSize, opt.fontSize),
+		fontWeight: TakeOrElseFontWeight(ts.fontWeight, opt.fontWeight),
+	}
+}
+
 ```
 
 **Memory layout**: pointer on stack (8 B) → singleton in `.data` → **zero heap bytes at call site**.
@@ -138,36 +293,55 @@ func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle {
 |-------|-------|---------|-------------|
 | **Object absent** | `nil` | "No style provided" | function parameter default , will be coalesced to unspecified |
 | **Object present, all fields deferred** | `TextStyleUnspecified` | "Use theme for everything" | partial merge base |
-| **Field absent** | `ColorUnspecified` (inside struct) | "Use ambient for this field" | field-level override |
+| **Field absent** | `DpUnspecified` (inside struct) | "Use ambient for this field" | field-level override |
 
 **Example**:
 ```go
-Text("hi", nil)                                    // nil → use theme 100 %
-Text("hi", TextStyleUnspecified)                   // singleton → use theme 100 %
-Text("hi", &TextStyle{fontSize: 20})               // partial → theme color + 20 sp
+Text("hi")                                    					// nil → use theme 100 %
+Text("hi", WithTextStyle(TextStyleUnspecified))                 // singleton → use theme 100 %
+Text("hi", WithTextStyle(&TextStyle{fontSize: 20}))             // partial → theme color + 20 sp
 ```
 
 ---
 
 ## 3. Public API for Complex Types (Nil-Safe, No Scattered Checks)
 
-Expose **only** these four functions for complex types—**never** methods on `*T`:
+Expose **only** these four functions for complex types—**never** methods on `*T` (pointer receiver):
 
 ```go
-// Identity (2 ns)
-func SameStyle(a, b *TextStyle) bool
 
-// Semantic equality (field-by-field, 20 ns)
-func EqualStyle(a, b *TextStyle) bool
+// 2. `IsSpecifiedT`
+func IsSpecifiedTextStyle(style *TextStyle) bool
 
-// Merge (0 or 1 alloc)
+// 3. `TakeOrElseT`
+func TakeOrElseTextStyle(style, defaultStyle *TextStyle) *TextStyle
+
+// 4. `MergeT`
 func MergeTextStyle(a, b *TextStyle) *TextStyle
 
-// Coalesce nil → singleton
-func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle
+// 5. `StringT`
+func StringTextStyle(style *TextStyle) string
 
-// Stringification
-func StringTextStyle(s *TextStyle) string
+// 6. `CoalesceT`
+func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle 
+
+// 7. `SameT`
+func SameTextStyle(a, b *TextStyle) bool 
+
+// 8. `SemanticEqualT`
+func SemanticEqualTextStyle(a, b *TextStyle) bool 
+
+// 9. `EqualT`
+func EqualTextStyle(a, b *TextStyle) bool
+
+// Identity (2 ns)
+func SameTextStyle(a, b *TextStyle) bool
+
+// Semantic equality (field-by-field, 20 ns)
+func EqualTextStyle(a, b *TextStyle) bool
+
+// 10. `CopyT`
+func CopyTextStyle(ts *TextStyle, options ...TextStyleOption) *TextStyle 
 ```
 
 Business code **never writes `== nil`** outside these four helpers.
@@ -183,20 +357,13 @@ Use **functional options** backed by sentinel values to implement strictly typed
 
 ```go
 // 1. Options Struct (fields match the type, initialized to Unspecified)
-type ShadowOptions struct {
+type Shadow struct {
 	Color      Color
 	Offset     Offset
 	BlurRadius float32
 }
-
-var ShadowOptionsDefault = ShadowOptions{
-	Color:      ColorUnspecified,
-	Offset:     OffsetUnspecified,
-	BlurRadius: Float32Unspecified,
-}
-
 // 2. Functional Option
-type ShadowOption func(*ShadowOptions)
+type ShadowOption func(*Shadow)
 
 func WithBlurRadius(r float32) ShadowOption {
 	return func(o *ShadowOptions) {
@@ -205,15 +372,14 @@ func WithBlurRadius(r float32) ShadowOption {
 }
 
 // 3. Copy Method
-func (s *Shadow) Copy(options ...ShadowOption) *Shadow {
-	// Start with defaults (all Unspecified)
-	opt := ShadowOptionsDefault
+func CopyShadow(s *Shadow, options ...ShadowOption) *Shadow {
+	opt := *ShadowUnspecified // dereference unspecified
+
 	for _, option := range options {
 		option(&opt)
 	}
 
 	return &Shadow{
-		// TakeOrElse: if opt.Color is Unspecified, keep s.Color
 		Color:      opt.Color.TakeOrElse(s.Color),
 		Offset:     opt.Offset.TakeOrElse(s.Offset),
 		BlurRadius: floatutils.TakeOrElse(opt.BlurRadius, s.BlurRadius),
@@ -221,23 +387,7 @@ func (s *Shadow) Copy(options ...ShadowOption) *Shadow {
 }
 ```
 
----
-
-## 4. Sentinel Choice Reference
-
-
-| Domain | Sentinel | Reason |
-|--------|----------|--------|
-| `Color` | `0` | transparent black is rare |
-| `Dp` | `math.NaN()` | 0 dp is common |
-| `TextUnit` | `math.NaN()` | 0 sp is valid |
-| `IntOffset` | `(math.MinInt32, math.MinInt32)` | extremes unused |
-| `FontWeight` | `0` (iota) | zero = unspecified |
-| `Alignment` | `0` (iota) | zero = unspecified |
-
----
-
-## 5. Sentinel Patterns for `int`, `string`, `bool`
+## 4. Sentinel Patterns for `int`, `string`, `bool`
 
 When the type cannot hold an actual `NaN`, reserve a **valid bit-pattern** that is **semantically impossible** in your domain.
 
@@ -289,7 +439,7 @@ const (
 
 ---
 
-## 6. Copy-Paste Templates
+## 5. Copy-Paste Templates
 
 ```go
 // Primitive type
@@ -312,7 +462,7 @@ func TakeOrElseMyStyle(s, def *MyStyle) *MyStyle {
 
 ---
 
-## 7. Performance Contract
+## 6. Performance Contract
 
 - **Primitive sentinel**: 0 heap bytes, 2 ns, inlined by compiler
 - **Complex nil**: 0 heap bytes, 5 ns
@@ -325,20 +475,20 @@ go test -bench=. -gcflags="-m" 2>&1 | grep -E "does not escape|inlined"
 
 ---
 
-## 8. Anti-Patterns (reject on sight)
+## 7. Anti-Patterns (reject on sight)
 
 ```go
 ❌ type Color interface { IsSpecified() bool }        // interface forces alloc
 ❌ var UnspecifiedColor *Color = nil                  // nil interface → panic
 ❌ func (ts *TextStyle) IsSpecified() bool            // method on nil receiver
-❌ func (ts *TextStyle) TakeOrElse(block *TextStyle) *TextStyle // REJECT: method on nil receiver
+❌ func (ts *TextStyle) TakeOrElse(def *TextStyle) *TextStyle // REJECT: method on nil receiver
 ❌ func TakeOrElseColor(block func() Color) Color // lambda escapes in Go
 ❌ type T struct { isSpecified bool }                 // flag field = double mem
 ```
 
 ---
 
-## 9. Function Signatures (Principle of Least Parameters)
+## 8. Function Signatures (Principle of Least Parameters)
 
 ### Public API (2-parameter fallback)
 ```go
@@ -366,21 +516,22 @@ func takeOrElse[T comparable](a, b, sentinel T) T {
 
 ---
 
-## 10. Package-Level Contract (Machine-Readable)
+## 9. Package-Level Contract (Machine-Readable)
 
 ```go
 // UI_PACKAGE_CONTRACT
-// For every exported type T in package ui, the following symbols MUST exist:
+// For every exported type T in package, the following symbols MUST exist:
 //   const/var TUnspecified  // Sentinel value or singleton pointer
 //   func IsSpecifiedT(v *T) bool      // Package-level predicate (never method on *T)
 //   func TakeOrElseT(a, b *T) *T // Package-level fallback (never method on *T)
 //   func MergeT(a, b *T) *T      // Package-level composition (never method on *T)
+//   func StringT(s *T) string      // Package-level predicate (never method on *T)
 //   func CoalesceT(ptr, def *T) *T // Package-level fallback (never method on *T)
 //   func SameT(a, b *T) bool      // Package-level predicate (never method on *T)
-//   func EqualT(a, b *T) bool      // Package-level predicate (never method on *T)
 //   func SemanticEqualT(a, b *T) bool      // Package-level predicate (never method on *T)
+//   func EqualT(a, b *T) bool      // Package-level predicate (never method on *T)
 //   func CopyT(a, b *T) *T      // Package-level predicate (never method on *T)
-//   func StringT(s *T) string      // Package-level predicate (never method on *T)
+
 // Additional symbols (abbreviations, helpers) are allowed but must be documented.
 // All sentinel values must be compile-time constants or package-level variables.
 // No function may accept func() parameters in hot paths (forces heap escape).
@@ -390,7 +541,7 @@ func takeOrElse[T comparable](a, b, sentinel T) T {
 
 ---
 
-## 11. Verification Commands
+## 10. Verification Commands
 
 ```bash
 # Check for heap escapes (must show "does not escape")
