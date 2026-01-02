@@ -28,12 +28,14 @@
 
 | Type Family | Go Declaration | Sentinel | Is-Specified Check | Alloc/Cost | Use-Case |
 |-------------|----------------|----------|--------------------|------------|----------|
-| **Primitive** | `type Color uint64` | `const ColorUnspecified = 0` | `c != ColorUnspecified` | **0 B / 2 ns** | color, dp, unit |
-| **Complex** | `type TextStyle struct{ ... }` | `var TextStyleUnspecified = &TextStyle{ ... }` | `IsTextStyle(style)` | **0 B if nil / 24 B if custom** | style, modifier |
+| **1-A Primitive** | `type Dp float32` | `var DpUnspecified = Dp(NaN)` | `d.IsSpecified()` | **0 B / 2 ns** | dp, simple units |
+| **1-B Packed Primitive** | `type Color uint64` | `const ColorUnspecified = 0` | `c != ColorUnspecified` | **0 B / 2 ns** | color with copy options |
+| **1-C Complex** | `type TextStyle struct{ ... }` | `var TextStyleUnspecified = &TextStyle{ ... }` | `IsSpecifiedTextStyle(s)` | **0 B if nil / 24 B if custom** | style, modifier |
+| **1-D Type-Safe Wrapper** | `type TextUnit struct{ packed int64 }` | `var TextUnitUnspecified = TextUnit{...}` | `tu.IsSpecified()` | **0 B / 2 ns** | packed unit with type safety |
 
 ---
 
-## 1. The Two Mutually Exclusive Patterns
+## 1. The Four Sentinel Patterns
 
 Choose **once per type**—never mix.
 
@@ -176,6 +178,117 @@ func (c Color) Copy(opts ...ColorCopyOption) Color {
 
 
 ### 1-C Complex Object Types (nullable pointer + singleton)
+
+See section below for full example.
+
+---
+
+### 1-D Type-Safe Struct Wrappers (zero-allocation, compile-time safety)
+
+Use this pattern when you need to **prevent implicit type conversions** while maintaining **zero-allocation value semantics**. This is for single-field struct wrappers around packed primitives.
+
+**When to use**:
+- The underlying type is a primitive (`int64`, `uint64`) but allows unwanted implicit conversions
+- You want `Foo(24)` to be a compile error, forcing users to use `NewFoo(24)`
+- The type is semantically atomic (not a collection of optional fields)
+- Zero-allocation is critical
+
+**Example: TextUnit**
+
+```go
+// TextUnit packs unit type (Sp/Em) and float value into 64 bits.
+// Struct wrapper prevents `TextUnit(24)` - must use `Sp(24)` or `Em(1.5)`.
+type TextUnit struct {
+	packed int64
+}
+
+// 1. `TUnspecified` – sentinel (value, not pointer)
+var TextUnitUnspecified = TextUnit{packed: packRaw(int64(TextUnitTypeUnspecified), float32(math.NaN()))}
+
+// Internal packing function
+func packRaw(unitType int64, v float32) int64 {
+	valBits := int64(math.Float32bits(v)) & 0xFFFFFFFF
+	return unitType | valBits
+}
+
+// Constructors (the ONLY way to create valid TextUnits)
+func Sp(value float32) TextUnit {
+	return TextUnit{packed: packRaw(int64(TextUnitTypeSp), value)}
+}
+
+func Em(value float32) TextUnit {
+	return TextUnit{packed: packRaw(int64(TextUnitTypeEm), value)}
+}
+
+// 2. `IsSpecified` – predicate (method is OK for value types)
+func (tu TextUnit) IsSpecified() bool {
+	return tu.rawType() != int64(TextUnitTypeUnspecified)
+}
+
+// 3. `TakeOrElse` – 2-param fallback (method is OK for value types)
+func (tu TextUnit) TakeOrElse(def TextUnit) TextUnit {
+	if tu.IsSpecified() {
+		return tu
+	}
+	return def
+}
+
+// 4. `Merge` – composition merge
+func MergeTextUnit(a, b TextUnit) TextUnit {
+	if b.IsSpecified() {
+		return b
+	}
+	return a
+}
+
+// 5. `String` – stringification
+func (tu TextUnit) String() string {
+	if !tu.IsSpecified() {
+		return "TextUnit{Unspecified}"
+	}
+	return fmt.Sprintf("TextUnit{%v %s}", tu.Value(), tu.Type())
+}
+
+// 6. `Coalesce` – N/A for value types (no nil possible)
+
+// 7. `Same` – identity (bit-exact comparison)
+func SameTextUnit(a, b TextUnit) bool {
+	return a.packed == b.packed
+}
+
+// 8. `SemanticEqual` – semantic equality
+func SemanticEqualTextUnit(a, b TextUnit) bool {
+	return a.Equals(b)
+}
+
+// 9. `Equal` – equality (identity first, then semantic)
+func EqualTextUnit(a, b TextUnit) bool {
+	if SameTextUnit(a, b) {
+		return true
+	}
+	return SemanticEqualTextUnit(a, b)
+}
+
+// 10. `Copy` – copy (identity for immutable value types)
+func CopyTextUnit(tu TextUnit) TextUnit {
+	return tu
+}
+```
+
+**Key differences from Pattern 1-A/1-B**:
+- Uses `struct { packed T }` instead of `type T primitive`
+- Constructors are **mandatory** - no implicit conversion from primitives
+- Sentinel is a struct value, not a primitive constant
+
+**Key differences from Pattern 1-C**:
+- Passed by **value**, not pointer
+- Sentinel is a **value**, not a pointer singleton
+- Methods on value receiver are OK (no nil receiver issue)
+- `Coalesce` is not needed (no nil possible)
+
+**Guarantees**: Same as Pattern 1-A - lives in registers/stack → **zero heap bytes**.
+
+---
 
 ```go
 type TextStyle struct {
