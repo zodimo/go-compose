@@ -41,8 +41,8 @@ func TestShadow_SentinelPattern(t *testing.T) {
 
 	// Test String()
 	t.Run("String", func(t *testing.T) {
-		if StringShadow(ShadowUnspecified) != "EmptyShadow" {
-			t.Errorf("Expected 'EmptyShadow', got '%s'", StringShadow(ShadowUnspecified))
+		if StringShadow(ShadowUnspecified) != "Shadow{Unspecified}" {
+			t.Errorf("Expected 'Shadow{Unspecified}', got '%s'", StringShadow(ShadowUnspecified))
 		}
 	})
 }
@@ -55,7 +55,7 @@ func TestShadow_Copy(t *testing.T) {
 	original := NewShadow(initialColor, initialOffset, initialBlur)
 
 	t.Run("Identity Copy", func(t *testing.T) {
-		copy := original.Copy()
+		copy := CopyShadow(original)
 		if !EqualShadow(copy, original) {
 			t.Errorf("Identity copy failed. Expected %v, got %v", original, copy)
 		}
@@ -63,7 +63,7 @@ func TestShadow_Copy(t *testing.T) {
 
 	t.Run("Copy WithColor", func(t *testing.T) {
 		newColor := ColorBlue
-		copy := original.Copy(WithColor(newColor))
+		copy := CopyShadow(original, WithColor(newColor))
 
 		expected := NewShadow(newColor, initialOffset, initialBlur)
 		if !EqualShadow(copy, expected) {
@@ -77,7 +77,7 @@ func TestShadow_Copy(t *testing.T) {
 
 	t.Run("Copy WithOffset", func(t *testing.T) {
 		newOffset := geometry.NewOffset(30, 40)
-		copy := original.Copy(WithOffset(newOffset))
+		copy := CopyShadow(original, WithOffset(newOffset))
 
 		expected := NewShadow(initialColor, newOffset, initialBlur)
 		if !EqualShadow(copy, expected) {
@@ -87,7 +87,7 @@ func TestShadow_Copy(t *testing.T) {
 
 	t.Run("Copy WithBlurRadius", func(t *testing.T) {
 		newBlur := float32(8.0)
-		copy := original.Copy(WithBlurRadius(newBlur))
+		copy := CopyShadow(original, WithBlurRadius(newBlur))
 
 		expected := NewShadow(initialColor, initialOffset, newBlur)
 		if !EqualShadow(copy, expected) {
@@ -100,7 +100,7 @@ func TestShadow_Copy(t *testing.T) {
 		newOffset := geometry.NewOffset(50, 60)
 		newBlur := float32(12.0)
 
-		copy := original.Copy(
+		copy := CopyShadow(original,
 			WithColor(newColor),
 			WithOffset(newOffset),
 			WithBlurRadius(newBlur),

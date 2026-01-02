@@ -41,9 +41,12 @@ func NewShadow(color Color, offset geometry.Offset, blurRadius float32) *Shadow 
 	}
 }
 
+// Helper functions
+
 // Copy creates a new Shadow with optional field overrides.
-func (s Shadow) Copy(options ...ShadowOption) *Shadow {
-	opt := ShadowOptionsDefault
+func CopyShadow(s *Shadow, options ...ShadowOption) *Shadow {
+	opt := *ShadowUnspecified // dereference unspecified
+
 	for _, option := range options {
 		option(&opt)
 	}
@@ -55,13 +58,11 @@ func (s Shadow) Copy(options ...ShadowOption) *Shadow {
 	}
 }
 
-// Helper functions
-
 func StringShadow(s *Shadow) string {
 	if !IsSpecifiedShadow(s) {
-		return "EmptyShadow"
+		return "Shadow{Unspecified}"
 	}
-	return fmt.Sprintf("Shadow(color=%v, offset=%v, blurRadius=%.2f)",
+	return fmt.Sprintf("Shadow{color=%v, offset=%v, blurRadius=%.2f}",
 		s.Color, s.Offset, s.BlurRadius)
 }
 

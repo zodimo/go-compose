@@ -2,37 +2,24 @@ package graphics
 
 import (
 	"github.com/zodimo/go-compose/compose/ui/geometry"
-	"github.com/zodimo/go-compose/pkg/floatutils"
 )
 
-var ShadowOptionsDefault = ShadowOptions{
-	Color:      ColorUnspecified,
-	Offset:     geometry.OffsetUnspecified,
-	BlurRadius: floatutils.Float32Unspecified,
-}
-
-type ShadowOptions struct {
-	Color      Color
-	Offset     geometry.Offset
-	BlurRadius float32
-}
-
-type ShadowOption func(*ShadowOptions)
+type ShadowOption func(*Shadow)
 
 func WithColor(color Color) ShadowOption {
-	return func(o *ShadowOptions) {
-		o.Color = color
+	return func(s *Shadow) {
+		s.Color = color
 	}
 }
 
 func WithOffset(offset geometry.Offset) ShadowOption {
-	return func(o *ShadowOptions) {
-		o.Offset = offset
+	return func(s *Shadow) {
+		s.Offset = offset
 	}
 }
 
 func WithBlurRadius(blurRadius float32) ShadowOption {
-	return func(o *ShadowOptions) {
-		o.BlurRadius = blurRadius
+	return func(s *Shadow) {
+		s.BlurRadius = blurRadius
 	}
 }

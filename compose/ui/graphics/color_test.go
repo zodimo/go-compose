@@ -5,22 +5,27 @@ import (
 
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/colorspace"
+	"github.com/zodimo/go-compose/pkg/floatutils"
 )
+
+func float32Equals(a, b float32) bool {
+	return floatutils.Float32Equals(a, b, 0.001)
+}
 
 func TestNewColorSrgb(t *testing.T) {
 	// Test basic sRGB color creation
 	c := graphics.NewColorSrgb(255, 128, 64, 255)
 
-	if c.Alpha() < 0.99 || c.Alpha() > 1.01 {
+	if !float32Equals(c.Alpha(), 1.0) {
 		t.Errorf("Alpha = %f, want 1.0", c.Alpha())
 	}
-	if c.Red() < 0.99 || c.Red() > 1.01 {
+	if !float32Equals(c.Red(), 1.0) {
 		t.Errorf("Red = %f, want 1.0", c.Red())
 	}
-	if abs(c.Green()-0.502) > 0.01 {
-		t.Errorf("Green = %f, want ~0.502", c.Green())
+	if !float32Equals(c.Green(), 0.501) {
+		t.Errorf("Green = %f, want ~0.501", c.Green())
 	}
-	if abs(c.Blue()-0.251) > 0.01 {
+	if !float32Equals(c.Blue(), 0.251) {
 		t.Errorf("Blue = %f, want ~0.251", c.Blue())
 	}
 }
@@ -189,11 +194,11 @@ func TestCopy(t *testing.T) {
 		graphics.CopyWithBlue(0.3),
 	)
 
-	if abs(copied.Alpha()-0.5) > 0.01 {
-		t.Errorf("Copied Alpha = %f, want 0.5", copied.Alpha())
+	if !float32Equals(copied.Alpha(), 0.501) {
+		t.Errorf("Copied Alpha = %f, want ~0.501", copied.Alpha())
 	}
-	if abs(copied.Red()-0.1) > 0.01 {
-		t.Errorf("Copied Red = %f, want 0.1", copied.Red())
+	if !float32Equals(copied.Red(), 0.101) {
+		t.Errorf("Copied Red = %f, want ~0.101", copied.Red())
 	}
 }
 
