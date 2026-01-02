@@ -3,15 +3,9 @@ package button_test
 import (
 	"testing"
 
-	"github.com/zodimo/go-compose/compose"
-	"github.com/zodimo/go-compose/compose/material3/button"
+	"github.com/zodimo/go-compose/compose/material3/next/button"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
-
-// Mock Composer to satisfy interface
-type mockComposer struct {
-	compose.Composer
-}
 
 // Basic checks for ButtonDefaults values
 func TestButtonDefaults_ContentPadding(t *testing.T) {
