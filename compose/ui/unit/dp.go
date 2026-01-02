@@ -13,7 +13,7 @@ import (
 type Dp float32
 
 // DpUnspecified is the constant for an unspecified Dp.
-var DpUnspecified = Dp(math.NaN())
+var DpUnspecified = Dp(floatutils.Float32Unspecified)
 
 // DpInfinity represents infinite dp dimension.
 var DpInfinity = Dp(float32(math.Inf(1)))
@@ -94,9 +94,9 @@ func (d Dp) CompareTo(other Dp) int {
 // String returns the string representation.
 func (d Dp) String() string {
 	if d.IsUnspecified() {
-		return "Dp.Unspecified"
+		return "Dp{Unspecified}"
 	}
-	return fmt.Sprintf("%.1f.dp", float32(d))
+	return fmt.Sprintf("Dp{%.1f}", d)
 }
 
 // IsSpecified checks if the Dp is specified (not NaN).
@@ -106,7 +106,7 @@ func (d Dp) IsSpecified() bool {
 
 // IsUnspecified checks if the Dp is unspecified (NaN).
 func (d Dp) IsUnspecified() bool {
-	return math.IsNaN(float64(d))
+	return floatutils.IsSpecified(d)
 }
 
 // IsFinite returns true when it is finite.
@@ -115,11 +115,11 @@ func (d Dp) IsFinite() bool {
 }
 
 // TakeOrElse returns this Dp if Specified, otherwise executes the block.
-func (d Dp) TakeOrElse(block Dp) Dp {
+func (d Dp) TakeOrElse(def Dp) Dp {
 	if d.IsSpecified() {
 		return d
 	}
-	return block
+	return def
 }
 
 // MinDp returns the smaller of two Dps.
