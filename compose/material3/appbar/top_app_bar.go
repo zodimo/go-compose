@@ -10,7 +10,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/modifiers/weight"
-	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/layout"
 )
@@ -35,7 +34,7 @@ func SingleRowTopAppBar(
 							surface.Surface(
 								navigationIcon,
 								surface.WithContentColor(colors.NavigationIconContentColor),
-								surface.WithColor(theme.ColorHelper.SpecificColor(graphics.ColorTransparent)), // Transparent background
+								surface.WithColor(graphics.ColorTransparent), // Transparent background
 							),
 							box.WithAlignment(layout.W),
 							box.WithModifier(padding.Padding(4, 0, 0, 0)), // Start(4)
@@ -49,7 +48,7 @@ func SingleRowTopAppBar(
 								return surface.Surface(
 									title,
 									surface.WithContentColor(colors.TitleContentColor),
-									surface.WithColor(theme.ColorHelper.SpecificColor(graphics.ColorTransparent)), // Transparent
+									surface.WithColor(graphics.ColorTransparent), // Transparent
 								)(c)
 							}
 							return c
@@ -90,7 +89,7 @@ func TopAppBar(
 	options ...TopAppBarOption,
 ) Composable {
 	return func(c Composer) Composer {
-		opts := DefaultTopAppBarOptions()
+		opts := DefaultTopAppBarOptions(c)
 		for _, option := range options {
 			if option == nil {
 				continue
@@ -115,7 +114,7 @@ func CenterAlignedTopAppBar(
 	options ...TopAppBarOption,
 ) Composable {
 	return func(c Composer) Composer {
-		opts := DefaultTopAppBarOptions()
+		opts := DefaultTopAppBarOptions(c)
 		for _, option := range options {
 			if option == nil {
 				continue
@@ -135,7 +134,7 @@ func CenterAlignedTopAppBar(
 									surface.Surface(
 										opts.NavigationIcon,
 										surface.WithContentColor(opts.Colors.NavigationIconContentColor),
-										surface.WithColor(theme.ColorHelper.SpecificColor(graphics.ColorTransparent)),
+										surface.WithColor(graphics.ColorTransparent),
 									),
 									box.WithAlignment(layout.W),
 									box.WithModifier(padding.Padding(4, 0, 0, 0)),
@@ -166,7 +165,7 @@ func CenterAlignedTopAppBar(
 								surface.Surface(
 									title,
 									surface.WithContentColor(opts.Colors.TitleContentColor),
-									surface.WithColor(theme.ColorHelper.SpecificColor(graphics.ColorTransparent)),
+									surface.WithColor(graphics.ColorTransparent),
 								),
 							),
 						),
@@ -205,7 +204,7 @@ func TwoRowsTopAppBar(
 						TopAppBarColors{
 							// Use transparent container for nested app bar to avoid layering issues?
 							// Or use same colors. SingleRowTopAppBar sets container color.
-							ContainerColor:             theme.ColorHelper.SpecificColor(graphics.ColorTransparent), // Transparent, let parent surface color show
+							ContainerColor:             graphics.ColorTransparent, // Transparent, let parent surface color show
 							NavigationIconContentColor: colors.NavigationIconContentColor,
 							ActionIconContentColor:     colors.ActionIconContentColor,
 						},
@@ -228,7 +227,7 @@ func TwoRowsTopAppBar(
 										return title(c)
 									},
 									surface.WithContentColor(colors.TitleContentColor),
-									surface.WithColor(theme.ColorHelper.SpecificColor(graphics.ColorTransparent)),
+									surface.WithColor(graphics.ColorTransparent),
 								),
 							),
 						),
@@ -255,7 +254,7 @@ func MediumTopAppBar(
 	options ...TopAppBarOption,
 ) Composable {
 	return func(c Composer) Composer {
-		opts := DefaultTopAppBarOptions()
+		opts := DefaultTopAppBarOptions(c)
 		for _, option := range options {
 			if option == nil {
 				continue
@@ -282,7 +281,7 @@ func LargeTopAppBar(
 	options ...TopAppBarOption,
 ) Composable {
 	return func(c Composer) Composer {
-		opts := DefaultTopAppBarOptions()
+		opts := DefaultTopAppBarOptions(c)
 		for _, option := range options {
 			if option == nil {
 				continue

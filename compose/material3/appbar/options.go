@@ -11,10 +11,10 @@ type TopAppBarOptions struct {
 
 type TopAppBarOption func(*TopAppBarOptions)
 
-func DefaultTopAppBarOptions() TopAppBarOptions {
+func DefaultTopAppBarOptions(c Composer) TopAppBarOptions {
 	return TopAppBarOptions{
 		Modifier: EmptyModifier,
-		Colors:   TopAppBarDefaults.Colors(),
+		Colors:   TopAppBarDefaults.Colors(c),
 	}
 }
 
