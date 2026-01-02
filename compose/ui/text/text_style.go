@@ -165,7 +165,7 @@ func CopyTextStyle(ts *TextStyle, options ...TextStyleOption) *TextStyle {
 		option(&opt)
 	}
 	return &TextStyle{
-		spanStyle:      TakeOrElseSpanStyle(ts.spanStyle, opt.spanStyle),
-		paragraphStyle: TakeOrElseParagraphStyle(ts.paragraphStyle, opt.paragraphStyle),
+		spanStyle:      MergeSpanStyle(ts.spanStyle, opt.spanStyle),
+		paragraphStyle: MergeParagraphStyle(ts.paragraphStyle, opt.paragraphStyle),
 	}
 }
