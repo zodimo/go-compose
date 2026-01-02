@@ -202,11 +202,11 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 			controller.SetLineHeightScale(1)
 
 			// Resolve text color
-			resolvedTextColor := constructorArgs.color.TakeOrElse(textStyle.Color())
+			resolvedTextColor := graphics.ColorToNRGBA(constructorArgs.color.TakeOrElse(textStyle.Color()))
 
 			// Create text color material
 			textColorMacro := op.Record(gtx.Ops)
-			paint.ColorOp{Color: graphics.ColorToNRGBA(resolvedTextColor)}.Add(gtx.Ops)
+			paint.ColorOp{Color: resolvedTextColor}.Add(gtx.Ops)
 			textColor := textColorMacro.Stop()
 
 			// Use the controller to layout and paint the text

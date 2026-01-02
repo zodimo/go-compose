@@ -8,12 +8,12 @@ import (
 
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/text/input"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/platform"
 	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/theme"
 )
 
 const BasicTextFieldNodeID = "BasicTextField"
@@ -158,9 +158,7 @@ func textFieldWidgetConstructor(args BasicTextFieldConstructorArgs) layoutnode.L
 			}
 
 			// Resolve text color
-			var textColorDescriptor theme.ColorDescriptor
-			textColorDescriptor = theme.ColorHelper.SpecificColor(textStyle.Color())
-			resolvedTextColor := theme.GetThemeManager().ResolveColorDescriptor(textColorDescriptor).AsNRGBA()
+			resolvedTextColor := graphics.ColorToNRGBA(textStyle.Color())
 
 			// Create text color material
 			textColorMacro := op.Record(gtx.Ops)
