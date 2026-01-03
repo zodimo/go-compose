@@ -11,7 +11,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/theme"
 )
 
 // Create text field states at package level for persistence across frames
@@ -25,7 +24,7 @@ var (
 func UI() api.Composable {
 	return func(c api.Composer) api.Composer {
 
-		modifier := background.Background(theme.ColorHelper.SpecificColor(graphics.ColorLightGray)).
+		modifier := background.Background(graphics.ColorLightGray).
 			Then(size.FillMaxWidth()).
 			Then(padding.All(16))
 

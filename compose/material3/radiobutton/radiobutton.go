@@ -13,8 +13,8 @@ import (
 
 	gioUnit "gioui.org/unit"
 
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/layoutnode"
-	"github.com/zodimo/go-compose/theme"
 )
 
 const Material3RadioButtonNodeID = "Material3RadioButton"
@@ -28,7 +28,7 @@ func RadioButton(
 ) Composable {
 	return func(c Composer) Composer {
 		// Resolve options
-		opts := DefaultRadioButtonOptions()
+		opts := DefaultRadioButtonOptions(c)
 		for _, option := range options {
 			if option == nil {
 				continue
@@ -87,13 +87,10 @@ func radioButtonWidgetConstructor(
 				}
 			}
 
-			// Resolve colors from theme if not provided
-			tm := theme.GetThemeManager()
-
 			// Resolve ColorDescriptors to NRGBA
-			unselectedColorVal := tm.ResolveColorDescriptor(colors.UnselectedColor).AsNRGBA()
-			selectedColorVal := tm.ResolveColorDescriptor(colors.SelectedColor).AsNRGBA()
-			disabledColorVal := tm.ResolveColorDescriptor(colors.DisabledColor).AsNRGBA()
+			unselectedColorVal := graphics.ColorToNRGBA(colors.UnselectedColor)
+			selectedColorVal := graphics.ColorToNRGBA(colors.SelectedColor)
+			disabledColorVal := graphics.ColorToNRGBA(colors.DisabledColor)
 
 			// Helper to keep code compatible (no-op, values already NRGBA)
 			asNRGBA := func(c color.NRGBA) color.NRGBA {

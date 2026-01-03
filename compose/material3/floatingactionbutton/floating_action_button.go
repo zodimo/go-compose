@@ -24,7 +24,7 @@ func FloatingActionButton(
 	options ...FloatingActionButtonOption,
 ) api.Composable {
 	return func(c api.Composer) api.Composer {
-		opts := DefaultFloatingActionButtonOptions()
+		opts := DefaultFloatingActionButtonOptions(c)
 		for _, option := range options {
 			if option == nil {
 				continue

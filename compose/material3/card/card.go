@@ -4,6 +4,7 @@ import (
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/modifiers/background"
@@ -12,7 +13,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/shadow"
 	"github.com/zodimo/go-compose/modifiers/size"
-	"github.com/zodimo/go-compose/theme"
 
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
@@ -34,69 +34,71 @@ func Outlined(contents CardContentContainer, options ...CardOption) Composable {
 
 func cardComposable(kind cardKind, contents CardContentContainer, options ...CardOption) Composable {
 
-	// Get card colors from theme
-	colorRoles := theme.ColorHelper.ColorSelector()
+	return func(c Composer) Composer {
 
-	opts := DefaultCardOptions()
-	for _, option := range options {
-		if option == nil {
-			continue
+		theme := material3.Theme(c)
+
+		opts := DefaultCardOptions()
+		for _, option := range options {
+			if option == nil {
+				continue
+			}
+			option(&opts)
+
 		}
-		option(&opts)
 
-	}
+		// Build modifier chain:
+		// We split user modifiers into two groups:
+		// 1. Outer (Layout, Sizing): Wraps the card's style (background/border) to constrain it.
+		// 2. Inner (Interaction/Clickable): Wrapped BY the card's style so overlay draws ON TOP.
+		//    Also wrapped by Clip so overlay is clipped.
 
-	// Build modifier chain:
-	// We split user modifiers into two groups:
-	// 1. Outer (Layout, Sizing): Wraps the card's style (background/border) to constrain it.
-	// 2. Inner (Interaction/Clickable): Wrapped BY the card's style so overlay draws ON TOP.
-	//    Also wrapped by Clip so overlay is clipped.
+		userOuter, userInner := partitionModifiers(opts.Modifier)
 
-	userOuter, userInner := partitionModifiers(opts.Modifier)
+		// 1. Outer Chain (User Layout + Card Shadow + Card Clip)
+		// Order: UserOuter -> Shadow -> Clip
+		cardModifier := modifier.EmptyModifier
+		cardModifier = cardModifier.Then(userOuter)
 
-	// 1. Outer Chain (User Layout + Card Shadow + Card Clip)
-	// Order: UserOuter -> Shadow -> Clip
-	cardModifier := modifier.EmptyModifier
-	cardModifier = cardModifier.Then(userOuter)
-
-	if kind == cardElevated {
-		cardModifier = cardModifier.Then(shadow.Simple(unit.Dp(2), cardCornerShape))
-	}
-
-	// Always apply clip (Outlined/Filled/Elevated all use rounded corners)
-	cardModifier = cardModifier.Then(clip.Clip(cardCornerShape))
-
-	// 2. Inner Styling (Background, Border)
-	// Applied inside Clip, but outside Inner User Modifiers
-	styleModifier := modifier.EmptyModifier
-
-	switch kind {
-	case cardElevated:
-		styleModifier = styleModifier.Then(background.Background(colorRoles.SurfaceRoles.ContainerLow, background.WithShape(cardCornerShape)))
-	case cardOutlined:
-		styleModifier = styleModifier.Then(background.Background(colorRoles.SurfaceRoles.Surface, background.WithShape(cardCornerShape)))
-		styleModifier = styleModifier.Then(border.Border(unit.Dp(1), colorRoles.OutlineRoles.OutlineVariant, cardCornerShape))
-	default: // Filled
-		styleModifier = styleModifier.Then(background.Background(colorRoles.SurfaceRoles.ContainerHighest, background.WithShape(cardCornerShape)))
-	}
-
-	// 3. Assemble: Outer -> Style -> Inner
-	finalModifier := cardModifier.Then(styleModifier).Then(userInner)
-
-	// Apply user modifier AFTER clip so that clickable hover effect is clipped to rounded corners
-	composables := []Composable{}
-
-	for _, child := range contents.children {
-		if child.cover {
-			// ContentCover items should be full width by default
-			composables = append(composables, box.Box(child.composable, box.WithModifier(size.FillMaxWidth())))
-		} else {
-			// add padding
-			composables = append(composables, box.Box(child.composable, box.WithModifier(padding.All(16))))
+		if kind == cardElevated {
+			cardModifier = cardModifier.Then(shadow.Simple(unit.Dp(2), cardCornerShape))
 		}
-	}
 
-	return column.Column(compose.Sequence(composables...), column.WithModifier(finalModifier))
+		// Always apply clip (Outlined/Filled/Elevated all use rounded corners)
+		cardModifier = cardModifier.Then(clip.Clip(cardCornerShape))
+
+		// 2. Inner Styling (Background, Border)
+		// Applied inside Clip, but outside Inner User Modifiers
+		styleModifier := modifier.EmptyModifier
+
+		switch kind {
+		case cardElevated:
+			styleModifier = styleModifier.Then(background.Background(theme.ColorScheme().SurfaceContainerLow, background.WithShape(cardCornerShape)))
+		case cardOutlined:
+			styleModifier = styleModifier.Then(background.Background(theme.ColorScheme().Surface.Color, background.WithShape(cardCornerShape)))
+			styleModifier = styleModifier.Then(border.Border(unit.Dp(1), theme.ColorScheme().OutlineVariant, cardCornerShape))
+		default: // Filled
+			styleModifier = styleModifier.Then(background.Background(theme.ColorScheme().SurfaceContainerHighest, background.WithShape(cardCornerShape)))
+		}
+
+		// 3. Assemble: Outer -> Style -> Inner
+		finalModifier := cardModifier.Then(styleModifier).Then(userInner)
+
+		// Apply user modifier AFTER clip so that clickable hover effect is clipped to rounded corners
+		composables := []Composable{}
+
+		for _, child := range contents.children {
+			if child.cover {
+				// ContentCover items should be full width by default
+				composables = append(composables, box.Box(child.composable, box.WithModifier(size.FillMaxWidth())))
+			} else {
+				// add padding
+				composables = append(composables, box.Box(child.composable, box.WithModifier(padding.All(16))))
+			}
+		}
+
+		return column.Column(compose.Sequence(composables...), column.WithModifier(finalModifier))(c)
+	}
 }
 
 // partitionModifiers splits the modifier chain into outer (layout/constraints)

@@ -1,10 +1,10 @@
 package segmentedbutton
 
 import (
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/theme"
 
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
@@ -51,11 +51,11 @@ type SegmentOptions struct {
 	SelectedIcon           Composable // Icon shown when selected (default: checkmark)
 	ShowSelectedIcon       bool       // Whether to show selected icon
 	Enabled                bool
-	SelectedColor          theme.ColorDescriptor // Background color when selected
-	UnselectedColor        theme.ColorDescriptor // Background color when unselected
-	SelectedContentColor   theme.ColorDescriptor // Content color when selected
-	UnselectedContentColor theme.ColorDescriptor // Content color when unselected
-	BorderColor            theme.ColorDescriptor
+	SelectedColor          graphics.Color // Background color when selected
+	UnselectedColor        graphics.Color // Background color when unselected
+	SelectedContentColor   graphics.Color // Content color when selected
+	UnselectedContentColor graphics.Color // Content color when unselected
+	BorderColor            graphics.Color
 	BorderWidth            unit.Dp
 }
 
@@ -68,11 +68,11 @@ func DefaultSegmentOptions() SegmentOptions {
 		ShowSelectedIcon: true,
 		Enabled:          true,
 		// Colors will be resolved from theme at render time
-		SelectedColor:          theme.ColorHelper.UnspecifiedColor(),
-		UnselectedColor:        theme.ColorHelper.UnspecifiedColor(),
-		SelectedContentColor:   theme.ColorHelper.UnspecifiedColor(),
-		UnselectedContentColor: theme.ColorHelper.UnspecifiedColor(),
-		BorderColor:            theme.ColorHelper.UnspecifiedColor(),
+		SelectedColor:          graphics.ColorUnspecified,
+		UnselectedColor:        graphics.ColorUnspecified,
+		SelectedContentColor:   graphics.ColorUnspecified,
+		UnselectedContentColor: graphics.ColorUnspecified,
+		BorderColor:            graphics.ColorUnspecified,
 		BorderWidth:            unit.Dp(1),
 	}
 }
@@ -113,24 +113,24 @@ func WithEnabled(enabled bool) SegmentOption {
 }
 
 // WithSelectedColor sets the background color when selected.
-func WithSelectedColor(c theme.ColorDescriptor) SegmentOption {
+func WithSelectedColor(col graphics.Color) SegmentOption {
 	return func(o *SegmentOptions) {
-		o.SelectedColor = c
+		o.SelectedColor = col
 	}
 }
 
 // WithUnselectedColor sets the background color when unselected.
-func WithUnselectedColor(c theme.ColorDescriptor) SegmentOption {
+func WithUnselectedColor(col graphics.Color) SegmentOption {
 	return func(o *SegmentOptions) {
-		o.UnselectedColor = c
+		o.UnselectedColor = col
 	}
 }
 
 // WithBorder sets the border width and color.
-func WithBorder(width unit.Dp, c theme.ColorDescriptor) SegmentOption {
+func WithBorder(width unit.Dp, col graphics.Color) SegmentOption {
 	return func(o *SegmentOptions) {
 		o.BorderWidth = width
-		o.BorderColor = c
+		o.BorderColor = col
 	}
 }
 

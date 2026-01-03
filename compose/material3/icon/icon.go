@@ -7,8 +7,8 @@ import (
 	"sync"
 
 	"github.com/zodimo/go-compose/compose/material3"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/layoutnode"
-	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -31,10 +31,7 @@ func Icon(iconByte []byte, options ...IconOption) Composable {
 	}
 
 	return func(c Composer) Composer {
-		opts.Color = theme.TakeOrElseColor(
-			opts.Color,
-			theme.ColorHelper.SpecificColor(material3.LocalContentColor.Current(c)),
-		)
+		opts.Color = opts.Color.TakeOrElse(material3.LocalContentColor.Current(c))
 
 		c.StartBlock(Material3IconNodeID)
 		c.Modifier(func(modifier Modifier) Modifier {
@@ -98,7 +95,7 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIc
 
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 
-			nrgba := theme.GetThemeManager().ResolveColorDescriptor(options.Color).AsNRGBA()
+			nrgba := graphics.ColorToNRGBA(options.Color)
 
 			key := cacheKey{
 				dataHash:    dataHash,

@@ -4,6 +4,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/material3/surface"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
@@ -11,7 +12,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clip"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
-	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/widget"
 	"github.com/zodimo/go-compose/compose/ui/unit"
@@ -30,12 +30,13 @@ func NavigationDrawerItem(
 	m Modifier,
 ) Composable {
 	return func(c Composer) Composer {
+		theme := material3.Theme(c)
 		// Colors - use theme role selectors
-		var containerColor theme.ColorDescriptor
+		var containerColor graphics.Color
 		if selected {
-			containerColor = theme.ColorHelper.ColorSelector().SecondaryRoles.Container
+			containerColor = theme.ColorScheme().SecondaryContainer.Color
 		} else {
-			containerColor = theme.ColorHelper.SpecificColor(graphics.ColorTransparent) // Transparent
+			containerColor = graphics.ColorTransparent
 		}
 
 		// Click interaction state

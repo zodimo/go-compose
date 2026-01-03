@@ -3,10 +3,10 @@ package navigationdrawer
 import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/material3/surface"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/modifiers/size"
-	"github.com/zodimo/go-compose/theme"
 
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
@@ -20,7 +20,8 @@ func PermanentNavigationDrawer(
 	modifier Modifier,
 ) Composable {
 	return func(c Composer) Composer {
-		drawerContainerColor := theme.ColorHelper.ColorSelector().SurfaceRoles.ContainerLow
+		theme := material3.Theme(c)
+		drawerContainerColor := theme.ColorScheme().SurfaceContainerLow
 
 		return row.Row(
 			func(c Composer) Composer {

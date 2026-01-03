@@ -10,7 +10,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
-	"github.com/zodimo/go-compose/theme"
 )
 
 // TabRow contains a row of Tabs and displays an indicator underneath the currently selected Tab.
@@ -43,11 +42,11 @@ func TabRow(
 
 		SurfaceOptions := []surface.SurfaceOption{}
 		// Surface Options
-		if opts.ContainerColor.IsSome() {
-			SurfaceOptions = append(SurfaceOptions, surface.WithColor(opts.ContainerColor.UnwrapUnsafe()))
+		if opts.ContainerColor.IsSpecified() {
+			SurfaceOptions = append(SurfaceOptions, surface.WithColor(opts.ContainerColor))
 		}
-		if opts.ContentColor.IsSome() {
-			SurfaceOptions = append(SurfaceOptions, surface.WithContentColor(opts.ContentColor.UnwrapUnsafe()))
+		if opts.ContentColor.IsSpecified() {
+			SurfaceOptions = append(SurfaceOptions, surface.WithContentColor(opts.ContentColor))
 		}
 
 		SurfaceOptions = append(SurfaceOptions, surface.WithModifier(opts.Modifier.Then(size.FillMaxWidth())))
@@ -104,7 +103,7 @@ func Tab(
 	options ...TabOption,
 ) Composable {
 	return func(c Composer) Composer {
-		opts := DefaultTabOptions()
+		opts := DefaultTabOptions(c)
 		for _, option := range options {
 			if option == nil {
 				continue
@@ -154,7 +153,7 @@ func Tab(
 								box.WithModifier(
 									size.FillMaxWidth().
 										Then(size.Height(3)). // 3dp
-										Then(background.Background(TabRowDefaults.IndicatorColor())),
+										Then(background.Background(TabRowDefaults.IndicatorColor(c))),
 								),
 							)(c)
 						} else {
@@ -165,23 +164,22 @@ func Tab(
 								box.WithModifier(
 									size.FillMaxWidth().
 										Then(size.Height(3)).
-										Then(background.Background(theme.ColorHelper.SpecificColor(graphics.ColorTransparent))), // Transparent
+										Then(background.Background(graphics.ColorTransparent)), // Transparent
 								),
 							)(c)
 						}
 						return c
 					},
-					column.WithAlignment(column.Middle),                             // Center content
-					column.WithSpacing(column.SpaceBetween),                         // Push content up, indicator down?
-					column.WithModifier(size.FillMaxHeight().Then(padding.All(12))), // Padding
+					column.WithAlignment(column.Middle),     // Center content
+					column.WithSpacing(column.SpaceBetween), // Push content up, indicator down?
+					column.WithModifier(padding.All(12)),    // Padding
 				)(c)
 			},
 			surface.WithModifier(
 				opts.Modifier.
-					Then(size.FillMaxHeight()).       // Fill row height
 					Then(clickable.OnClick(onClick)), // Use clickable package
 			),
-			surface.WithColor(theme.ColorHelper.SpecificColor(graphics.ColorTransparent)), // Transparent container
+			surface.WithColor(graphics.ColorTransparent), // Transparent container
 			surface.WithContentColor(contentColor),
 		)(c)
 	}

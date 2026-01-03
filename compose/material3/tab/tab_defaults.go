@@ -1,8 +1,9 @@
 package tab
 
 import (
+	"github.com/zodimo/go-compose/compose/material3"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/unit"
-	"github.com/zodimo/go-compose/theme"
 )
 
 // TabRowDefaults holds default values for the TabRow and Tab components.
@@ -12,16 +13,16 @@ var TabDefaults = tabDefaults{}
 type tabRowDefaults struct{}
 type tabDefaults struct{}
 
-func (tabRowDefaults) ContainerColor() theme.ColorDescriptor {
-	return theme.ColorHelper.ColorSelector().SurfaceRoles.Surface
+func (tabRowDefaults) ContainerColor(c Composer) graphics.Color {
+	return material3.Theme(c).ColorScheme().Surface.Color
 }
 
-func (tabRowDefaults) ContentColor() theme.ColorDescriptor {
-	return theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface
+func (tabRowDefaults) ContentColor(c Composer) graphics.Color {
+	return material3.Theme(c).ColorScheme().Surface.OnColor
 }
 
-func (tabRowDefaults) IndicatorColor() theme.ColorDescriptor {
-	return theme.ColorHelper.ColorSelector().PrimaryRoles.Primary
+func (tabRowDefaults) IndicatorColor(c Composer) graphics.Color {
+	return material3.Theme(c).ColorScheme().Primary.Color
 }
 
 func (tabRowDefaults) IndicatorHeight() unit.Dp {
@@ -34,10 +35,10 @@ func (tabRowDefaults) Indicator() Composable {
 	return nil // Default handled in Tab or TabRow if nil
 }
 
-func (tabDefaults) SelectedContentColor() theme.ColorDescriptor {
-	return theme.ColorHelper.ColorSelector().PrimaryRoles.Primary
+func (tabDefaults) SelectedContentColor(c Composer) graphics.Color {
+	return material3.Theme(c).ColorScheme().Primary.Color
 }
 
-func (tabDefaults) UnselectedContentColor() theme.ColorDescriptor {
-	return theme.ColorHelper.ColorSelector().SurfaceRoles.OnVariant
+func (tabDefaults) UnselectedContentColor(c Composer) graphics.Color {
+	return material3.Theme(c).ColorScheme().Surface.OnColor
 }

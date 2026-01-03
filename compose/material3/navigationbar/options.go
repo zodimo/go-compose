@@ -1,16 +1,15 @@
 package navigationbar
 
 import (
-	"github.com/zodimo/go-compose/theme"
-
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // NavigationBarOptions configuration
 type NavigationBarOptions struct {
 	Modifier       Modifier
-	ContainerColor theme.ColorDescriptor
-	ContentColor   theme.ColorDescriptor
+	ContainerColor graphics.Color
+	ContentColor   graphics.Color
 	TonalElevation unit.Dp
 	Height         unit.Dp
 }
@@ -19,11 +18,11 @@ type NavigationBarOptions struct {
 type NavigationBarOption func(*NavigationBarOptions)
 
 // DefaultNavigationBarOptions returns the default options.
-func DefaultNavigationBarOptions() NavigationBarOptions {
+func DefaultNavigationBarOptions(c Composer) NavigationBarOptions {
 	return NavigationBarOptions{
 		Modifier:       EmptyModifier,
-		ContainerColor: NavigationBarDefaults.Colors().ContainerColor,
-		ContentColor:   NavigationBarDefaults.Colors().ContentColor,
+		ContainerColor: NavigationBarDefaults.Colors(c).ContainerColor,
+		ContentColor:   NavigationBarDefaults.Colors(c).ContentColor,
 		TonalElevation: NavigationBarDefaults.ContainerElevation(),
 		Height:         NavigationBarDefaults.Height(),
 	}
@@ -35,15 +34,15 @@ func WithModifier(m Modifier) NavigationBarOption {
 	}
 }
 
-func WithContainerColor(c theme.ColorDescriptor) NavigationBarOption {
+func WithContainerColor(col graphics.Color) NavigationBarOption {
 	return func(o *NavigationBarOptions) {
-		o.ContainerColor = c
+		o.ContainerColor = col
 	}
 }
 
-func WithContentColor(c theme.ColorDescriptor) NavigationBarOption {
+func WithContentColor(col graphics.Color) NavigationBarOption {
 	return func(o *NavigationBarOptions) {
-		o.ContentColor = c
+		o.ContentColor = col
 	}
 }
 

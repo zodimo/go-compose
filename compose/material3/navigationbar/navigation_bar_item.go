@@ -6,6 +6,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/material3/surface"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
@@ -13,7 +14,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clip"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/modifiers/weight"
-	"github.com/zodimo/go-compose/theme"
 	"github.com/zodimo/go-ternary"
 
 	"gioui.org/layout"
@@ -36,6 +36,8 @@ func NavigationBarItem(
 ) Composable {
 	return func(c Composer) Composer {
 
+		theme := material3.Theme(c)
+
 		opts := DefaultNavigationBarItemOptions()
 		for _, option := range options {
 			if option == nil {
@@ -52,7 +54,7 @@ func NavigationBarItem(
 		clickWidget := clickValue.Get().(*widget.Clickable)
 
 		// Defaults
-		colors := NavigationBarDefaults.Colors()
+		colors := NavigationBarDefaults.Colors(c)
 
 		return box.Box(
 			column.Column(
@@ -70,11 +72,11 @@ func NavigationBarItem(
 						surface.WithColor(ternary.Ternary(
 							selected,
 							colors.IndicatorColor,
-							theme.ColorHelper.SpecificColor(graphics.ColorTransparent), // Transparent
+							graphics.ColorTransparent,
 						)),
 						surface.WithContentColor(ternary.Ternary(
 							selected,
-							theme.ColorHelper.ColorSelector().SecondaryRoles.OnContainer,
+							theme.ColorScheme().SecondaryContainer.OnColor,
 							colors.ContentColor,
 						)),
 						surface.WithShape(&shape.RoundedCornerShape{Radius: unit.Dp(16)}),

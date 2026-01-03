@@ -1,9 +1,11 @@
 package floatingactionbutton
 
 import (
+	"github.com/zodimo/go-compose/compose/material3"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/theme"
+	"github.com/zodimo/go-compose/pkg/api"
 
 	// "github.com/zodimo/go-compose/pkg/api" // Removed unused api import
 
@@ -25,8 +27,8 @@ const (
 )
 
 type FloatingActionButtonOptions struct {
-	ContainerColor theme.ColorDescriptor
-	ContentColor   theme.ColorDescriptor
+	ContainerColor graphics.Color
+	ContentColor   graphics.Color
 	Elevation      token.ElevationLevel
 	Modifier       modifier.Modifier
 	Shape          shape.Shape
@@ -38,10 +40,11 @@ type FloatingActionButtonOption func(*FloatingActionButtonOptions)
 // DefaultFABElevation is the default elevation for a FAB (Level 3).
 var DefaultFABElevation = token.ElevationLevel3
 
-func DefaultFloatingActionButtonOptions() FloatingActionButtonOptions {
+func DefaultFloatingActionButtonOptions(c api.Composer) FloatingActionButtonOptions {
+	theme := material3.Theme(c)
 	return FloatingActionButtonOptions{
-		ContainerColor: theme.ColorHelper.ColorSelector().PrimaryRoles.Container,
-		ContentColor:   theme.ColorHelper.ColorSelector().PrimaryRoles.OnContainer,
+		ContainerColor: theme.ColorScheme().PrimaryContainer.Color,
+		ContentColor:   theme.ColorScheme().PrimaryContainer.OnColor,
 		Elevation:      DefaultFABElevation,
 		Modifier:       modifier.EmptyModifier,
 		Shape:          shape.ShapeCircle,
@@ -49,15 +52,15 @@ func DefaultFloatingActionButtonOptions() FloatingActionButtonOptions {
 	}
 }
 
-func WithContainerColor(colorDesc theme.ColorDescriptor) FloatingActionButtonOption {
+func WithContainerColor(col graphics.Color) FloatingActionButtonOption {
 	return func(o *FloatingActionButtonOptions) {
-		o.ContainerColor = colorDesc
+		o.ContainerColor = col
 	}
 }
 
-func WithContentColor(colorDesc theme.ColorDescriptor) FloatingActionButtonOption {
+func WithContentColor(col graphics.Color) FloatingActionButtonOption {
 	return func(o *FloatingActionButtonOptions) {
-		o.ContentColor = colorDesc
+		o.ContentColor = col
 	}
 }
 

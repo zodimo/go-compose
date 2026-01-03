@@ -1,10 +1,10 @@
 package bottomsheet
 
 import (
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/pkg/api"
 
 	"git.sr.ht/~schnwalter/gio-mw/token"
-	"github.com/zodimo/go-compose/theme"
 )
 
 type Composable = api.Composable
@@ -13,10 +13,10 @@ type ModalBottomSheetOptions struct {
 	IsOpen           bool // Controlled by parent usually, or we can use visible state?
 	OnDismissRequest func()
 	SheetState       *SheetState
-	ContainerColor   theme.ColorDescriptor // Will use default if not set
-	ScrimColor       theme.ColorDescriptor // Will use default if not set
-	Shape            token.CornerShape     // Will use default if not set
-	DragHandle       Composable            // Optional custom drag handle
+	ContainerColor   graphics.Color    // Will use default if not set
+	ScrimColor       graphics.Color    // Will use default if not set
+	Shape            token.CornerShape // Will use default if not set
+	DragHandle       Composable        // Optional custom drag handle
 	// WindowInsets     column.WindowInsets // For handling safe areas if needed - Removed for compilation
 }
 
@@ -25,8 +25,8 @@ type ModalBottomSheetOption func(*ModalBottomSheetOptions)
 func DefaultModalBottomSheetOptions() ModalBottomSheetOptions {
 	return ModalBottomSheetOptions{
 		IsOpen:         false,
-		ContainerColor: theme.ColorHelper.UnspecifiedColor(),
-		ScrimColor:     theme.ColorHelper.UnspecifiedColor(),
+		ContainerColor: graphics.ColorUnspecified,
+		ScrimColor:     graphics.ColorUnspecified,
 	}
 }
 
@@ -51,15 +51,15 @@ func WithOnDismissRequest(onDismiss func()) ModalBottomSheetOption {
 	}
 }
 
-func WithContainerColor(color theme.ColorDescriptor) ModalBottomSheetOption {
+func WithContainerColor(col graphics.Color) ModalBottomSheetOption {
 	return func(o *ModalBottomSheetOptions) {
-		o.ContainerColor = color
+		o.ContainerColor = col
 	}
 }
 
-func WithScrimColor(color theme.ColorDescriptor) ModalBottomSheetOption {
+func WithScrimColor(col graphics.Color) ModalBottomSheetOption {
 	return func(o *ModalBottomSheetOptions) {
-		o.ScrimColor = color
+		o.ScrimColor = col
 	}
 }
 

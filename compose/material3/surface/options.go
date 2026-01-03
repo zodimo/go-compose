@@ -8,36 +8,36 @@ import (
 	// "github.com/zodimo/go-compose/internal/modifier" is still needed for Modifier type.
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/theme" // Added based on instruction
+	// Added based on instruction
 )
 
 type SurfaceOptions struct {
 	Modifier        Modifier
 	Shape           Shape
-	Color           theme.ColorDescriptor // Changed from color.Color
-	ContentColor    theme.ColorDescriptor // Changed from color.Color
+	Color           graphics.Color
+	ContentColor    graphics.Color
 	TonalElevation  Dp
 	ShadowElevation Dp
 	BorderWidth     Dp
-	BorderColor     theme.ColorDescriptor // Changed from color.Color
-	Alignment       box.Direction         // Optional alignment for content inside surface
+	BorderColor     graphics.Color
+	Alignment       box.Direction // Optional alignment for content inside surface
 }
 
 type SurfaceOption func(*SurfaceOptions)
 
 func DefaultSurfaceOptions() SurfaceOptions {
-	colorHelper := theme.ColorHelper
 	return SurfaceOptions{
 		Modifier:        modifier.EmptyModifier,
 		Shape:           shape.ShapeRectangle,
-		Color:           colorHelper.UnspecifiedColor(),
-		ContentColor:    colorHelper.UnspecifiedColor(),
+		Color:           graphics.ColorUnspecified,
+		ContentColor:    graphics.ColorUnspecified,
 		TonalElevation:  0,
 		ShadowElevation: 0,
 		BorderWidth:     0,
-		BorderColor:     colorHelper.UnspecifiedColor(),
+		BorderColor:     graphics.ColorUnspecified,
 		Alignment:       box.NW,
 	}
 }
@@ -54,15 +54,15 @@ func WithShape(s Shape) SurfaceOption {
 	}
 }
 
-func WithColor(colorDesc theme.ColorDescriptor) SurfaceOption {
+func WithColor(col graphics.Color) SurfaceOption {
 	return func(o *SurfaceOptions) {
-		o.Color = colorDesc
+		o.Color = col
 	}
 }
 
-func WithContentColor(colorDesc theme.ColorDescriptor) SurfaceOption {
+func WithContentColor(col graphics.Color) SurfaceOption {
 	return func(o *SurfaceOptions) {
-		o.ContentColor = colorDesc
+		o.ContentColor = col
 	}
 }
 
@@ -78,10 +78,10 @@ func WithShadowElevation(elevation Dp) SurfaceOption {
 	}
 }
 
-func WithBorder(width Dp, colorDesc theme.ColorDescriptor) SurfaceOption {
+func WithBorder(width Dp, color graphics.Color) SurfaceOption {
 	return func(o *SurfaceOptions) {
 		o.BorderWidth = width
-		o.BorderColor = colorDesc
+		o.BorderColor = color
 	}
 }
 

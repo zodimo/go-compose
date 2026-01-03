@@ -9,7 +9,6 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	uilayout "github.com/zodimo/go-compose/compose/ui/layout"
 	"github.com/zodimo/go-compose/compose/ui/unit"
-	"github.com/zodimo/go-compose/theme"
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
@@ -45,7 +44,7 @@ func UI() api.Composable {
 							Then(
 								border.Border(
 									unit.Dp(1),
-									theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{0, 0, 0, 255})),
+									graphics.FromNRGBA(color.NRGBA{0, 0, 0, 255}),
 									shape.ShapeRectangle,
 								),
 							),
@@ -65,7 +64,7 @@ func UI() api.Composable {
 						size.Size(150, 100, size.SizeRequired()).Then(
 							border.Border(
 								unit.Dp(1),
-								theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{0, 0, 0, 255})),
+								graphics.FromNRGBA(color.NRGBA{0, 0, 0, 255}),
 								shape.ShapeRectangle,
 							),
 						),
@@ -88,7 +87,7 @@ func UI() api.Composable {
 						size.Size(150, 100, size.SizeRequired()).Then(
 							border.Border(
 								unit.Dp(1),
-								theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{0, 0, 0, 255})),
+								graphics.FromNRGBA(color.NRGBA{0, 0, 0, 255}),
 								shape.ShapeRectangle,
 							),
 						),

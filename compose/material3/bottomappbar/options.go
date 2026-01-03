@@ -1,8 +1,8 @@
 package bottomappbar
 
 import (
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/unit"
-	"github.com/zodimo/go-compose/theme"
 )
 
 // PaddingValues describes the padding to be applied to the content.
@@ -13,8 +13,8 @@ type PaddingValues struct {
 // BottomAppBarOptions configuration
 type BottomAppBarOptions struct {
 	Modifier             Modifier
-	ContainerColor       theme.ColorDescriptor
-	ContentColor         theme.ColorDescriptor
+	ContainerColor       graphics.Color
+	ContentColor         graphics.Color
 	TonalElevation       unit.Dp
 	ContentPadding       PaddingValues
 	FloatingActionButton Composable
@@ -24,12 +24,13 @@ type BottomAppBarOptions struct {
 type BottomAppBarOption func(*BottomAppBarOptions)
 
 // DefaultBottomAppBarOptions returns the default options.
-func DefaultBottomAppBarOptions() BottomAppBarOptions {
+func DefaultBottomAppBarOptions(c Composer) BottomAppBarOptions {
+
 	s, t, e, b := BottomAppBarDefaults.ContentPadding()
 	return BottomAppBarOptions{
 		Modifier:       EmptyModifier,
-		ContainerColor: BottomAppBarDefaults.Colors().ContainerColor,
-		ContentColor:   BottomAppBarDefaults.Colors().ContentColor,
+		ContainerColor: BottomAppBarDefaults.Colors(c).ContainerColor,
+		ContentColor:   BottomAppBarDefaults.Colors(c).ContentColor,
 		TonalElevation: BottomAppBarDefaults.ContainerElevation(),
 		ContentPadding: PaddingValues{
 			Start:  s,
@@ -46,15 +47,15 @@ func WithModifier(m Modifier) BottomAppBarOption {
 	}
 }
 
-func WithContainerColor(colorDesc theme.ColorDescriptor) BottomAppBarOption {
+func WithContainerColor(col graphics.Color) BottomAppBarOption {
 	return func(o *BottomAppBarOptions) {
-		o.ContainerColor = colorDesc
+		o.ContainerColor = col
 	}
 }
 
-func WithContentColor(colorDesc theme.ColorDescriptor) BottomAppBarOption {
+func WithContentColor(col graphics.Color) BottomAppBarOption {
 	return func(o *BottomAppBarOptions) {
-		o.ContentColor = colorDesc
+		o.ContentColor = col
 	}
 }
 

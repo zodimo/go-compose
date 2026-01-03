@@ -1,11 +1,11 @@
 package border
 
 import (
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
-	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/op"
 	"gioui.org/op/clip"
@@ -62,10 +62,7 @@ func NewBorderNode(element BorderElement) *BorderNode {
 						Width: strokeWidth,
 					}.Op()
 
-					// Resolve ColorDescriptor at layout time
-					themeManager := theme.GetThemeManager()
-					themeColor := themeManager.ResolveColorDescriptor(n.borderData.Color)
-					nrgba := themeColor.AsNRGBA()
+					nrgba := graphics.ColorToNRGBA(n.borderData.Color)
 
 					// Paint the stroke
 					paint.FillShape(gtx.Ops, nrgba, strokeOp)

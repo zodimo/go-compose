@@ -8,11 +8,11 @@ type RadioButtonOptions struct {
 
 type RadioButtonOption func(*RadioButtonOptions)
 
-func DefaultRadioButtonOptions() RadioButtonOptions {
+func DefaultRadioButtonOptions(c Composer) RadioButtonOptions {
 	return RadioButtonOptions{
 		Modifier: EmptyModifier,
 		Enabled:  true,
-		Colors:   Defaults.Colors(), // Use nil/defaults
+		Colors:   Defaults.Colors(c), // Use nil/defaults
 	}
 }
 

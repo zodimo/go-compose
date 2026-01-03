@@ -16,7 +16,7 @@ func NavigationBar(
 	options ...NavigationBarOption,
 ) Composable {
 	return func(c Composer) Composer {
-		opts := DefaultNavigationBarOptions()
+		opts := DefaultNavigationBarOptions(c)
 		for _, option := range options {
 			if option == nil {
 				continue

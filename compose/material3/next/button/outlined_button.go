@@ -15,7 +15,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/theme"
 )
 
 func OutlinedButton(onClick func(), content Composable, options ...ButtonOption) Composable {
@@ -185,10 +184,10 @@ func OutlinedButton(onClick func(), content Composable, options ...ButtonOption)
 					Then(clickable.OnClick(onClick, clickable.WithClickable(clickState))),
 			),
 			surface.WithShape(activeShape),
-			surface.WithColor(theme.ColorHelper.SpecificColor(containerColor)),
+			surface.WithColor(containerColor),
 			surface.WithBorder(
 				border.Width,
-				theme.ColorHelper.SpecificColor(graphics.AsSolidColor(border.Brush).Value),
+				graphics.AsSolidColor(border.Brush).Value,
 			),
 		)(c)
 	}

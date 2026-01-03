@@ -8,7 +8,6 @@ import (
 	padding_modifier "github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/modifiers/weight"
-	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/layout"
 )
@@ -19,7 +18,7 @@ func BottomAppBar(
 	options ...BottomAppBarOption,
 ) Composable {
 	return func(c Composer) Composer {
-		opts := DefaultBottomAppBarOptions()
+		opts := DefaultBottomAppBarOptions(c)
 		for _, option := range options {
 			if option == nil {
 				continue
@@ -38,7 +37,7 @@ func BottomAppBar(
 									return surface.Surface(
 										actions,
 										surface.WithContentColor(opts.ContentColor),
-										surface.WithColor(theme.ColorHelper.SpecificColor(graphics.ColorTransparent)), // Transparent background
+										surface.WithColor(graphics.ColorTransparent), // Transparent background
 									)(c)
 								}
 								return c

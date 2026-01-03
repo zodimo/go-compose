@@ -51,7 +51,7 @@ func UI() Composable {
 					// Spacing
 					spacer.Height(24),
 
-					// Tab Row 2: Custom theme colors using ColorDescriptor
+					// Tab Row 2: Custom theme colors
 					text.TextWithStyle("Custom Theme Colors (Secondary)", text.TypestyleLabelLarge),
 					tab.TabRow(
 						selectedTabIndex2.Get().(int),
@@ -80,7 +80,7 @@ func UI() Composable {
 
 					// Explanatory text
 					text.TextWithStyle(
-						"Tab colors now use ColorDescriptor for theme-aware styling. "+
+						"Tab colors now use theme-aware styling. "+
 							"They automatically adapt to light/dark themes.",
 						text.TypestyleBodyMedium,
 					),

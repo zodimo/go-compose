@@ -2,9 +2,9 @@ package navigationrail
 
 import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
-	"github.com/zodimo/go-compose/theme"
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/material3/surface"
@@ -21,9 +21,10 @@ func NavigationRail(
 	content Composable,
 ) Composable {
 	return func(c Composer) Composer {
+		theme := material3.Theme(c)
 		// Use theme role selectors directly
-		containerColor := theme.ColorHelper.ColorSelector().SurfaceRoles.Surface
-		contentColor := theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface
+		containerColor := theme.ColorScheme().Surface.Color //theme.ColorHelper.ColorSelector().SurfaceRoles.Surface
+		contentColor := theme.ColorScheme().Surface.OnColor //theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface
 
 		return surface.Surface(
 			func(c Composer) Composer {

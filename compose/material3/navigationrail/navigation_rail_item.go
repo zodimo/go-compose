@@ -5,13 +5,13 @@ import (
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/clip"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
-	"github.com/zodimo/go-compose/theme"
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/material3/surface"
@@ -37,15 +37,13 @@ func NavigationRailItem(
 	// colors, enabled, interactionSource... omitted for brevity
 ) Composable {
 	return func(c Composer) Composer {
+		theme := material3.Theme(c)
 		// State for click interaction
 		key := c.GenerateID()
 		path := c.GetPath()
 		clickStatePath := fmt.Sprintf("%d/%s/railitem_click", key, path)
 		clickValue := c.State(clickStatePath, func() any { return &widget.Clickable{} })
 		clickWidget := clickValue.Get().(*widget.Clickable)
-
-		colors := theme.ColorHelper.ColorSelector()
-		specificColor := theme.ColorHelper.SpecificColor
 
 		// Define indicator styling (pill shape)
 		// Usually 56x32dp or similar for indicator.
@@ -58,8 +56,8 @@ func NavigationRailItem(
 					icon,
 					surface.WithColor(ternary.Ternary(
 						selected,
-						colors.SecondaryRoles.Container,
-						specificColor(graphics.ColorTransparent), // Transparent
+						theme.ColorScheme().SecondaryContainer.Color,
+						graphics.ColorTransparent,
 					)),
 					surface.WithShape(&shape.RoundedCornerShape{Radius: unit.Dp(12)}), // Pill shape (approx)
 					surface.WithModifier(

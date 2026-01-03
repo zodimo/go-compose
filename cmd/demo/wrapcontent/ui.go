@@ -11,7 +11,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/background"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/theme"
 )
 
 func UI(c api.Composer) api.LayoutNode {
@@ -30,7 +29,7 @@ func UI(c api.Composer) api.LayoutNode {
 								),
 							),
 						),
-						column.WithModifier(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 0, G: 0, B: 200, A: 255}))).
+						column.WithModifier(background.Background(graphics.FromNRGBA(color.NRGBA{R: 0, G: 0, B: 200, A: 255})).
 							Then(
 								// This should wrap the text size
 								size.WrapContentSize()),
@@ -46,7 +45,7 @@ func UI(c api.Composer) api.LayoutNode {
 								),
 							),
 						),
-						column.WithModifier(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 0, G: 100, B: 0, A: 255}))).
+						column.WithModifier(background.Background(graphics.FromNRGBA(color.NRGBA{R: 0, G: 100, B: 0, A: 255})).
 							Then(
 								// Wrapped but parent forces size? No, we are in a row.
 								// Let's create a fixed size container and put a wrapped item inside it to test alignment.
@@ -56,7 +55,7 @@ func UI(c api.Composer) api.LayoutNode {
 				),
 				row.WithModifier(size.FillMaxWidth().
 					Then(size.Height(100)). // Fixed height for row
-					Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 50, G: 50, B: 50, A: 255})))),
+					Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 50, G: 50, B: 50, A: 255}))),
 				),
 			),
 
@@ -72,7 +71,7 @@ func UI(c api.Composer) api.LayoutNode {
 								),
 							),
 						),
-						column.WithModifier(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 200, G: 200, B: 0, A: 255}))).
+						column.WithModifier(background.Background(graphics.FromNRGBA(color.NRGBA{R: 200, G: 200, B: 0, A: 255})).
 							Then(
 								// This container wraps its text content
 								size.WrapContentSize()),
@@ -81,7 +80,7 @@ func UI(c api.Composer) api.LayoutNode {
 				),
 				// Parent is fixed size
 				column.WithModifier(size.Size(300, 200).
-					Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 100, G: 0, B: 0, A: 255})))).
+					Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 100, G: 0, B: 0, A: 255}))).
 					// We want the inner column to be aligned BottomEnd within this parent?
 					// Actually, size.WrapContentSize(Align) on the CHILD modifier essentially says:
 					// "My size should be my content size, but fail: WrapContentSize on a node dictates how IT behaves."
@@ -123,7 +122,7 @@ func UI(c api.Composer) api.LayoutNode {
 			),
 		),
 		column.WithModifier(size.FillMax().
-			Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 30, G: 30, B: 30, A: 255})))),
+			Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 30, G: 30, B: 30, A: 255}))),
 		),
 	)(c)
 

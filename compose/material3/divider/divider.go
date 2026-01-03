@@ -3,8 +3,9 @@ package divider
 import (
 	"image"
 
+	"github.com/zodimo/go-compose/compose/material3"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/layoutnode"
-	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
@@ -23,6 +24,9 @@ func Divider(options ...DividerOption) Composable {
 			}
 			option(&opts)
 		}
+
+		theme := material3.Theme(c)
+		opts.Color = opts.Color.TakeOrElse(theme.ColorScheme().OutlineVariant)
 
 		c.StartBlock(Material3DivideNodeID)
 		c.Modifier(func(modifier Modifier) Modifier {
@@ -52,12 +56,11 @@ func widgetConstructor(options DividerOptions) layoutnode.LayoutNodeWidgetConstr
 			size := image.Pt(width, thickness)
 
 			// Resolve Color
-			tm := theme.GetThemeManager()
-			resolvedColor := tm.ResolveColorDescriptor(options.Color)
+			resolvedColor := graphics.ColorToNRGBA(options.Color)
 
 			// Draw
 			shape := clip.Rect{Max: size}.Push(gtx.Ops)
-			paint.ColorOp{Color: resolvedColor.AsNRGBA()}.Add(gtx.Ops)
+			paint.ColorOp{Color: resolvedColor}.Add(gtx.Ops)
 			paint.PaintOp{}.Add(gtx.Ops)
 			shape.Pop()
 

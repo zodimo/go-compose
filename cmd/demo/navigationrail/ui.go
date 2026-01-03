@@ -29,12 +29,11 @@ import (
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
-type ColorDescriptor = theme.ColorDescriptor
-
 var colorHelper = theme.ColorHelper
 
 func UI() api.Composable {
 	return func(c api.Composer) api.Composer {
+
 		// State
 		key := c.GenerateID()
 		path := c.GetPath()
@@ -51,6 +50,8 @@ func UI() api.Composable {
 		return navigationdrawer.ModalNavigationDrawer(
 			// Drawer Content
 			func(c api.Composer) api.Composer {
+				theme := material3.Theme(c)
+
 				return column.Column(
 					func(c api.Composer) api.Composer {
 						// Drawer Header / Headline
@@ -82,12 +83,12 @@ func UI() api.Composable {
 									isSelected,
 									icon.Icon(
 										item.Icon,
-										icon.WithColor(colorHelper.ColorSelector().SecondaryRoles.OnContainer),
+										icon.WithColor(theme.ColorScheme().SecondaryContainer.OnColor),
 										icon.WithModifier(size.Size(24, 24)),
 									),
 									icon.Icon(
 										item.Icon,
-										icon.WithColor(colorHelper.ColorSelector().SurfaceRoles.OnVariant),
+										icon.WithColor(theme.ColorScheme().SurfaceVariant.OnColor),
 										icon.WithModifier(size.Size(24, 24)),
 									),
 								),
@@ -95,9 +96,9 @@ func UI() api.Composable {
 								func(c api.Composer) api.Composer {
 									var textColor graphics.Color
 									if isSelected {
-										textColor = material3.Theme(c).ColorScheme().SecondaryContainer.OnColor
+										textColor = theme.ColorScheme().SecondaryContainer.OnColor
 									} else {
-										textColor = material3.Theme(c).ColorScheme().SurfaceVariant.OnColor
+										textColor = theme.ColorScheme().SurfaceVariant.OnColor
 									}
 
 									return text.LabelMedium(
@@ -129,7 +130,7 @@ func UI() api.Composable {
 									func(c api.Composer) api.Composer {
 										return icon.Icon(
 											icons.NavigationMenu,
-											icon.WithColor(colorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{A: 255}))),
+											icon.WithColor(graphics.FromNRGBA(color.NRGBA{A: 255})),
 											icon.WithModifier(size.Size(24, 24)),
 										)(c)
 									},
@@ -144,6 +145,7 @@ func UI() api.Composable {
 								)(c)
 							},
 							func(c api.Composer) api.Composer {
+								theme := material3.Theme(c)
 								items := []struct {
 									Label string
 									Icon  []byte
@@ -165,16 +167,12 @@ func UI() api.Composable {
 											isSelected,
 											icon.Icon(
 												item.Icon,
-												icon.WithColor(colorHelper.SpecificColor(
-													material3.Theme(c).ColorScheme().SecondaryContainer.OnColor,
-												)),
+												icon.WithColor(theme.ColorScheme().SecondaryContainer.OnColor),
 												icon.WithModifier(size.Size(24, 24)),
 											),
 											icon.Icon(
 												item.Icon,
-												icon.WithColor(colorHelper.SpecificColor(
-													material3.Theme(c).ColorScheme().SurfaceVariant.OnColor,
-												)),
+												icon.WithColor(theme.ColorScheme().SurfaceVariant.OnColor),
 												icon.WithModifier(size.Size(24, 24)),
 											),
 										),

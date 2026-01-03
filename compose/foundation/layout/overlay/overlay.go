@@ -1,8 +1,9 @@
 package overlay
 
 import (
+	"github.com/zodimo/go-compose/compose/material3"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/layoutnode"
-	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/layout"
 	"gioui.org/op/paint"
@@ -18,6 +19,10 @@ func Overlay(content Composable, options ...OverlayOption) Composable {
 		option(&opts)
 	}
 	return func(c Composer) Composer {
+
+		theme := material3.Theme(c)
+		opts.ScrimColor = opts.ScrimColor.TakeOrElse(graphics.SetOpacity(theme.ColorScheme().Scrim, 0.32))
+
 		c.StartBlock("Overlay")
 		c.Modifier(func(modifier Modifier) Modifier {
 			return modifier.Then(opts.Modifier)
@@ -43,8 +48,7 @@ func overlayWidgetConstructor(options OverlayOptions) layoutnode.LayoutNodeWidge
 			}
 
 			// Resolve ScrimColor to NRGBA
-			tm := theme.GetThemeManager()
-			scrimColor := tm.ResolveColorDescriptor(options.ScrimColor).AsNRGBA()
+			scrimColor := graphics.ColorToNRGBA(options.ScrimColor)
 
 			// 1. Draw Scrim
 			// We use a Stack to draw scrim behind content

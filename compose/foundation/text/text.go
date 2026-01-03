@@ -95,8 +95,6 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 			// local alias
 			textStyle := textOptions.TextStyle
 
-			// Resolve ColorDescriptors to NRGBA
-
 			resolvedTextColor := graphics.ColorToNRGBA(textStyle.Color())
 			resolvedSelectColor := graphics.ColorToNRGBA(constructorArgs.textSelectionColor)
 

@@ -1,8 +1,9 @@
 package scaffold
 
 import (
+	"github.com/zodimo/go-compose/compose/material3"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/theme"
 )
 
 type ScaffoldOptions struct {
@@ -12,14 +13,15 @@ type ScaffoldOptions struct {
 	SnackbarHost                 Composable
 	FloatingActionButton         Composable
 	FloatingActionButtonPosition FabPosition
-	ContainerColor               theme.ColorDescriptor
-	ContentColor                 theme.ColorDescriptor
+	ContainerColor               graphics.Color
+	ContentColor                 graphics.Color
 }
 
 type ScaffoldOption func(*ScaffoldOptions)
 
 // DefaultScaffoldOptions returns the default options for a Scaffold.
-func DefaultScaffoldOptions() ScaffoldOptions {
+func DefaultScaffoldOptions(c Composer) ScaffoldOptions {
+	theme := material3.Theme(c)
 	return ScaffoldOptions{
 		Modifier:                     modifier.EmptyModifier,
 		TopBar:                       nil,
@@ -27,8 +29,8 @@ func DefaultScaffoldOptions() ScaffoldOptions {
 		SnackbarHost:                 nil,
 		FloatingActionButton:         nil,
 		FloatingActionButtonPosition: FabPositionEnd,
-		ContainerColor:               theme.ColorHelper.ColorSelector().SurfaceRoles.Surface,
-		ContentColor:                 theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface,
+		ContainerColor:               theme.ColorScheme().Surface.Color,   //theme.ColorHelper.ColorSelector().SurfaceRoles.Surface,
+		ContentColor:                 theme.ColorScheme().Surface.OnColor, //theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface,
 	}
 }
 
@@ -69,11 +71,11 @@ func WithFloatingActionButtonPosition(pos FabPosition) ScaffoldOption {
 }
 
 // WithContainerColor sets the background color of the scaffold.
-func WithContainerColor(colorDesc theme.ColorDescriptor) ScaffoldOption {
-	return func(o *ScaffoldOptions) { o.ContainerColor = colorDesc }
+func WithContainerColor(col graphics.Color) ScaffoldOption {
+	return func(o *ScaffoldOptions) { o.ContainerColor = col }
 }
 
 // WithContentColor sets the content color of the scaffold.
-func WithContentColor(colorDesc theme.ColorDescriptor) ScaffoldOption {
-	return func(o *ScaffoldOptions) { o.ContentColor = colorDesc }
+func WithContentColor(col graphics.Color) ScaffoldOption {
+	return func(o *ScaffoldOptions) { o.ContentColor = col }
 }

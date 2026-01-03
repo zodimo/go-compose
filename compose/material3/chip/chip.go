@@ -51,7 +51,7 @@ func SuggestionChip(onClick func(), label string, options ...ChipOption) api.Com
 // Chip is the internal generic implementation.
 func Chip(onClick func(), label string, options ...ChipOption) api.Composable {
 	return func(c api.Composer) api.Composer {
-		opts := DefaultChipOptions()
+		opts := DefaultChipOptions(c)
 		for _, option := range options {
 			if option == nil {
 				continue

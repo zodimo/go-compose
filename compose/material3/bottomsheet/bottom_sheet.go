@@ -6,7 +6,9 @@ import (
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/material3/surface"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/animation"
 	"github.com/zodimo/go-compose/internal/modifier"
@@ -14,7 +16,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/theme"
 
 	gioUnit "gioui.org/unit"
 	"git.sr.ht/~schnwalter/gio-mw/token"
@@ -34,10 +35,11 @@ func ModalBottomSheet(
 		opt(&opts)
 	}
 
-	opts.ContainerColor = theme.TakeOrElseColor(opts.ContainerColor, theme.ColorHelper.ColorSelector().SurfaceRoles.ContainerLow)
-	opts.ScrimColor = theme.TakeOrElseColor(opts.ScrimColor, theme.ColorHelper.ColorSelector().ScrimRoles.Scrim)
-
 	return func(c Composer) Composer {
+
+		theme := material3.Theme(c)
+		opts.ContainerColor = opts.ContainerColor.TakeOrElse(theme.ColorScheme().SurfaceContainerLow)
+		opts.ScrimColor = opts.ScrimColor.TakeOrElse(theme.ColorScheme().Scrim)
 
 		sheetShape := opts.Shape
 		if sheetShape == (token.CornerShape{}) {
@@ -80,7 +82,7 @@ func ModalBottomSheet(
 			anim.Disappear(time.Now())
 		}
 
-		baseScrim := opts.ScrimColor.SetOpacity(token.OpacityLevel8)
+		baseScrim := graphics.SetOpacity(opts.ScrimColor, float32(token.OpacityLevel8))
 
 		return box.Box(
 
@@ -123,10 +125,7 @@ func ModalBottomSheet(
 														Then(size.Height(4)).
 														Then(animMod.AnimatedBackground(
 															anim,
-															theme.ColorHelper.ColorSelector().
-																SurfaceRoles.
-																OnVariant.
-																SetOpacity(token.OpacityLevel(0.4)),
+															graphics.SetOpacity(theme.ColorScheme().SurfaceVariant.OnColor, 0.4),
 															&shape.RoundedCornerShape{Radius: unit.Dp(2)},
 														),
 														),

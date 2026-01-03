@@ -1,16 +1,16 @@
 package navigationbar
 
 import (
-	"github.com/zodimo/go-compose/theme"
-
+	"github.com/zodimo/go-compose/compose/material3"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // NavigationBarColors represents the colors used by a NavigationBar.
 type NavigationBarColors struct {
-	ContainerColor theme.ColorDescriptor
-	ContentColor   theme.ColorDescriptor
-	IndicatorColor theme.ColorDescriptor
+	ContainerColor graphics.Color
+	ContentColor   graphics.Color
+	IndicatorColor graphics.Color
 }
 
 // NavigationBarDefaults holds the default values for NavigationBar.
@@ -19,14 +19,15 @@ var NavigationBarDefaults = navigationBarDefaults{}
 type navigationBarDefaults struct{}
 
 // Colors returns the default colors for a NavigationBar.
-func (d navigationBarDefaults) Colors() NavigationBarColors {
+func (d navigationBarDefaults) Colors(c Composer) NavigationBarColors {
+	theme := material3.Theme(c)
 	return NavigationBarColors{
 		// Surface Container
-		ContainerColor: theme.ColorHelper.ColorSelector().SurfaceRoles.Container,
+		ContainerColor: theme.ColorScheme().SurfaceContainer, //theme.ColorHelper.ColorSelector().SurfaceRoles.Container,
 		// On Surface Variant
-		ContentColor: theme.ColorHelper.ColorSelector().SurfaceRoles.OnVariant,
+		ContentColor: theme.ColorScheme().SurfaceVariant.OnColor, //theme.ColorHelper.ColorSelector().SurfaceRoles.OnVariant,
 		// Secondary Container
-		IndicatorColor: theme.ColorHelper.ColorSelector().SecondaryRoles.Container,
+		IndicatorColor: theme.ColorScheme().SecondaryContainer.Color, //theme.ColorHelper.ColorSelector().SecondaryRoles.Container,
 	}
 }
 

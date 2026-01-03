@@ -18,7 +18,6 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/theme"
 
 	mdicons "golang.org/x/exp/shiny/materialdesign/icons"
 )
@@ -102,7 +101,7 @@ func SelectionScreen(c api.Composer) api.Composable {
 							},
 							options[i],
 							getShapeForIndex(i, len(options)),
-							segmentedbutton.WithSelectedColor(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{R: 0xE8, G: 0xDE, B: 0xF8, A: 0xFF}))),
+							segmentedbutton.WithSelectedColor(graphics.FromNRGBA(color.NRGBA{R: 0xE8, G: 0xDE, B: 0xF8, A: 0xFF})),
 							segmentedbutton.WithSelectedIcon(checkIcon),
 						)
 					}),

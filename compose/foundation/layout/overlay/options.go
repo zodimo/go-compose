@@ -1,13 +1,13 @@
 package overlay
 
 import (
-	"github.com/zodimo/go-compose/theme"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 )
 
 type OverlayOptions struct {
 	Modifier   Modifier
 	OnDismiss  func()
-	ScrimColor theme.ColorDescriptor
+	ScrimColor graphics.Color
 }
 
 type OverlayOption func(*OverlayOptions)
@@ -15,7 +15,7 @@ type OverlayOption func(*OverlayOptions)
 func DefaultOverlayOptions() OverlayOptions {
 	return OverlayOptions{
 		Modifier:   EmptyModifier,
-		ScrimColor: theme.ColorHelper.ColorSelector().ScrimRoles.Scrim.SetOpacity(0.32),
+		ScrimColor: graphics.ColorUnspecified,
 	}
 }
 
@@ -31,7 +31,7 @@ func WithOnDismiss(f func()) OverlayOption {
 	}
 }
 
-func WithScrimColor(c theme.ColorDescriptor) OverlayOption {
+func WithScrimColor(c graphics.Color) OverlayOption {
 	return func(o *OverlayOptions) {
 		o.ScrimColor = c
 	}

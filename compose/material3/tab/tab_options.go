@@ -1,17 +1,15 @@
 package tab
 
 import (
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/theme"
-
-	"github.com/zodimo/go-maybe"
 )
 
 // TabRowOptions holds the configuration for TabRow.
 type TabRowOptions struct {
 	Modifier       modifier.Modifier
-	ContainerColor maybe.Maybe[theme.ColorDescriptor]
-	ContentColor   maybe.Maybe[theme.ColorDescriptor]
+	ContainerColor graphics.Color
+	ContentColor   graphics.Color
 	Indicator      Composable
 }
 
@@ -27,8 +25,8 @@ func WithTabRowModifier(modifier modifier.Modifier) TabRowOption {
 func DefaultTabRowOptions() TabRowOptions {
 	return TabRowOptions{
 		Modifier:       modifier.EmptyModifier,
-		ContainerColor: maybe.None[theme.ColorDescriptor](),
-		ContentColor:   maybe.None[theme.ColorDescriptor](),
+		ContainerColor: graphics.ColorUnspecified,
+		ContentColor:   graphics.ColorUnspecified,
 		Indicator:      TabRowDefaults.Indicator(),
 	}
 }
@@ -39,8 +37,8 @@ type TabOptions struct {
 	Selected               bool
 	OnClick                func()
 	Enabled                bool
-	SelectedContentColor   theme.ColorDescriptor
-	UnselectedContentColor theme.ColorDescriptor
+	SelectedContentColor   graphics.Color
+	UnselectedContentColor graphics.Color
 }
 
 type TabOption func(options *TabOptions)
@@ -52,11 +50,11 @@ func WithModifier(m modifier.Modifier) TabOption {
 }
 
 // DefaultTabOptions returns the default options for Tab.
-func DefaultTabOptions() TabOptions {
+func DefaultTabOptions(c Composer) TabOptions {
 	return TabOptions{
 		Modifier:               modifier.EmptyModifier,
 		Enabled:                true,
-		SelectedContentColor:   TabDefaults.SelectedContentColor(),
-		UnselectedContentColor: TabDefaults.UnselectedContentColor(),
+		SelectedContentColor:   TabDefaults.SelectedContentColor(c),
+		UnselectedContentColor: TabDefaults.UnselectedContentColor(c),
 	}
 }

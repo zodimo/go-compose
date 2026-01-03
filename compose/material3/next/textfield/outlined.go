@@ -28,10 +28,10 @@ func Outlined(
 		opt(&opts)
 	}
 
-	opts.Colors = ResolveTextFieldColors(opts.Colors)
-	opts.SupportingText = sentinel.TakeOrElseString(opts.SupportingText, "")
-
 	return func(c Composer) Composer {
+
+		opts.Colors = ResolveTextFieldColors(c, opts.Colors)
+		opts.SupportingText = sentinel.TakeOrElseString(opts.SupportingText, "")
 
 		textStyle := material3.LocalTextStyle.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)

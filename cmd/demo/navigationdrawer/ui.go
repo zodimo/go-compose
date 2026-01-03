@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"image/color"
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
@@ -13,12 +12,9 @@ import (
 	"github.com/zodimo/go-compose/compose/material3/navigationdrawer"
 	"github.com/zodimo/go-compose/compose/material3/text"
 	"github.com/zodimo/go-compose/compose/ui"
-	"github.com/zodimo/go-compose/compose/ui/graphics"
-	"github.com/zodimo/go-compose/modifiers/background"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/theme"
 )
 
 func UI() api.Composable {
@@ -154,8 +150,7 @@ func UI() api.Composable {
 				return c
 			},
 			box.WithModifier(
-				size.FillMax().
-					Then(background.Background(theme.ColorHelper.SpecificColor(graphics.FromNRGBA(color.NRGBA{255, 255, 255, 255})))),
+				size.FillMax(),
 			),
 		)(c)
 	}

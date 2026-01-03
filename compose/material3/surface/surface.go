@@ -2,13 +2,13 @@ package surface
 
 import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/modifiers/background"
 	"github.com/zodimo/go-compose/modifiers/border"
 	"github.com/zodimo/go-compose/modifiers/clip"
 	"github.com/zodimo/go-compose/modifiers/shadow"
-	"github.com/zodimo/go-compose/theme"
 )
 
 // Surface is a layout composable that represents a Material surface.
@@ -26,11 +26,12 @@ func Surface(
 		option(&opts)
 	}
 
-	opts.Color = theme.TakeOrElseColor(opts.Color, theme.ColorHelper.ColorSelector().SurfaceRoles.Surface)
-	opts.ContentColor = theme.TakeOrElseColor(opts.ContentColor, theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface)
-	opts.BorderColor = theme.TakeOrElseColor(opts.BorderColor, theme.ColorHelper.SpecificColor(graphics.ColorTransparent))
-
 	return func(c Composer) Composer {
+
+		theme := material3.Theme(c)
+		opts.Color = opts.Color.TakeOrElse(theme.ColorScheme().Surface.Color)                 //theme.ColorHelper.ColorSelector().SurfaceRoles.Surface)
+		opts.ContentColor = opts.ContentColor.TakeOrElse(theme.ColorScheme().Surface.OnColor) // theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface)
+		opts.BorderColor = opts.BorderColor.TakeOrElse(graphics.ColorTransparent)             // theme.ColorHelper.SpecificColor(graphics.ColorTransparent))
 
 		// Apply modifiers: Clip then Background.
 		// Shadow should be behind everything.

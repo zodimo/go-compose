@@ -3,8 +3,11 @@ package navigationdrawer
 import (
 	"time"
 
+	"git.sr.ht/~schnwalter/gio-mw/token"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/material3/surface"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/animation"
 	"github.com/zodimo/go-compose/internal/modifier"
@@ -12,9 +15,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/theme"
 
-	"git.sr.ht/~schnwalter/gio-mw/token"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
@@ -36,7 +37,8 @@ func ModalNavigationDrawer(
 	}
 
 	return func(c Composer) Composer {
-		drawerContainerColor := theme.ColorHelper.ColorSelector().SurfaceRoles.ContainerLow
+		theme := material3.Theme(c)
+		drawerContainerColor := theme.ColorScheme().SurfaceContainerLow //theme.ColorHelper.ColorSelector().SurfaceRoles.ContainerLow
 
 		// Animation state
 		anim := c.State(c.GenerateID().String()+"/anim", func() any {
@@ -53,7 +55,7 @@ func ModalNavigationDrawer(
 			anim.Disappear(time.Now())
 		}
 
-		baseScrim := theme.ColorHelper.ColorSelector().ScrimRoles.Scrim.SetOpacity(token.OpacityLevel8)
+		baseScrim := graphics.SetOpacity(theme.ColorScheme().Scrim, float32(token.OpacityLevel8))
 		// We use AnimatedBackground for scrim opacity
 
 		return box.Box(

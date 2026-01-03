@@ -1,14 +1,15 @@
 package bottomappbar
 
 import (
+	"github.com/zodimo/go-compose/compose/material3"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/unit"
-	"github.com/zodimo/go-compose/theme"
 )
 
 // BottomAppBarColors represents the colors used by a BottomAppBar.
 type BottomAppBarColors struct {
-	ContainerColor theme.ColorDescriptor
-	ContentColor   theme.ColorDescriptor
+	ContainerColor graphics.Color
+	ContentColor   graphics.Color
 }
 
 // BottomAppBarDefaults holds the default values for BottomAppBar.
@@ -17,10 +18,11 @@ var BottomAppBarDefaults = bottomAppBarDefaults{}
 type bottomAppBarDefaults struct{}
 
 // Colors returns the default colors for a BottomAppBar.
-func (d bottomAppBarDefaults) Colors() BottomAppBarColors {
+func (d bottomAppBarDefaults) Colors(c Composer) BottomAppBarColors {
+	theme := material3.Theme(c)
 	return BottomAppBarColors{
-		ContainerColor: theme.ColorHelper.ColorSelector().SurfaceRoles.Container,
-		ContentColor:   theme.ColorHelper.ColorSelector().SurfaceRoles.OnVariant,
+		ContainerColor: theme.ColorScheme().SurfaceContainer,
+		ContentColor:   theme.ColorScheme().SurfaceVariant.OnColor,
 	}
 }
 

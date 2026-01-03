@@ -1,15 +1,15 @@
 package border
 
 import (
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/theme"
 )
 
 type BorderData struct {
 	Width Dp
 	Shape Shape
-	Color theme.ColorDescriptor
+	Color graphics.Color
 }
 
 type BorderElement struct {
@@ -29,28 +29,28 @@ func (e *BorderElement) Equals(other Element) bool {
 	if otherEle, ok := other.(*BorderElement); ok {
 		return e.borderData.Width == otherEle.borderData.Width &&
 			e.borderData.Shape == otherEle.borderData.Shape &&
-			e.borderData.Color.Compare(otherEle.borderData.Color)
+			e.borderData.Color == otherEle.borderData.Color
 	}
 	return false
 }
 
-func Border(width Dp, colorDesc theme.ColorDescriptor, shape Shape) Modifier {
+func Border(width Dp, col graphics.Color, shape Shape) Modifier {
 	return modifier.NewInspectableModifier(
 		modifier.NewModifier(
 			&BorderElement{
 				borderData: BorderData{
 					Width: width,
 					Shape: shape,
-					Color: colorDesc,
+					Color: col,
 				},
 			},
 		),
 		modifier.NewInspectorInfo(
 			"border",
 			map[string]any{
-				"width":     width,
-				"shape":     shape,
-				"colorDesc": colorDesc,
+				"width": width,
+				"shape": shape,
+				"color": col,
 			},
 		),
 	)
@@ -59,6 +59,6 @@ func Border(width Dp, colorDesc theme.ColorDescriptor, shape Shape) Modifier {
 // Border with defaults usually needs width and color at least?
 // For Shape, default to Rectangle if nil? Or caller handles it.
 // Default to Rectangle if nil.
-func Simple(width Dp, colorDesc theme.ColorDescriptor) Modifier {
-	return Border(width, colorDesc, shape.ShapeRectangle)
+func Simple(width Dp, col graphics.Color) Modifier {
+	return Border(width, col, shape.ShapeRectangle)
 }

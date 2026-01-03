@@ -5,6 +5,7 @@ import (
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/material3/button"
 	"github.com/zodimo/go-compose/compose/material3/icon"
 	"github.com/zodimo/go-compose/compose/material3/menu"
@@ -22,6 +23,8 @@ var colorHelper = theme.ColorHelper
 
 func UI() api.Composable {
 	return func(c api.Composer) api.Composer {
+
+		theme := material3.Theme(c)
 		// State for menus
 		expanded1 := c.State("menu1", func() any { return false })
 		expanded2 := c.State("menu2", func() any { return false })
@@ -54,7 +57,7 @@ func UI() api.Composable {
 											menu.WithLeadingIcon(func(c api.Composer) api.Composer {
 												return icon.Icon(
 													mdicons.ActionDone,
-													icon.WithColor(colorHelper.ColorSelector().PrimaryRoles.Primary),
+													icon.WithColor(theme.ColorScheme().Primary.Color),
 												)(c)
 											}),
 										)(c)
@@ -103,7 +106,7 @@ func UI() api.Composable {
 											menu.WithLeadingIcon(func(c api.Composer) api.Composer {
 												return icon.Icon(
 													mdicons.ContentCreate,
-													icon.WithColor(colorHelper.ColorSelector().SurfaceRoles.OnSurface),
+													icon.WithColor(theme.ColorScheme().Surface.OnColor),
 												)(c)
 											}),
 										)(c)
@@ -113,7 +116,7 @@ func UI() api.Composable {
 											menu.WithLeadingIcon(func(c api.Composer) api.Composer {
 												return icon.Icon(
 													mdicons.ActionSettings,
-													icon.WithColor(colorHelper.ColorSelector().SurfaceRoles.OnSurface),
+													icon.WithColor(theme.ColorScheme().Surface.OnColor),
 												)(c)
 											}),
 										)(c)
@@ -123,7 +126,7 @@ func UI() api.Composable {
 											menu.WithLeadingIcon(func(c api.Composer) api.Composer {
 												return icon.Icon(
 													mdicons.SocialShare,
-													icon.WithColor(colorHelper.ColorSelector().SurfaceRoles.OnSurface),
+													icon.WithColor(theme.ColorScheme().Surface.OnColor),
 												)(c)
 											}),
 										)(c)

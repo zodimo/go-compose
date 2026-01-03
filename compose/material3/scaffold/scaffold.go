@@ -25,7 +25,7 @@ const (
 // components will work together correctly.
 func Scaffold(content Composable, options ...ScaffoldOption) Composable {
 	return func(c Composer) Composer {
-		opts := DefaultScaffoldOptions()
+		opts := DefaultScaffoldOptions(c)
 		for _, option := range options {
 			if option == nil {
 				continue

@@ -14,6 +14,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/foundation/lazy"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/material3/button"
 	"github.com/zodimo/go-compose/compose/material3/card"
 	m3text "github.com/zodimo/go-compose/compose/material3/text"
@@ -25,7 +26,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/theme"
 )
 
 func UI(c api.Composer) api.LayoutNode {
@@ -337,6 +337,7 @@ func InteractiveCardContent(inputValue api.MutableValue) api.Composable {
 // CoverBanner creates a full-bleed colored banner for ContentCover
 func CoverBanner(title, subtitle string) api.Composable {
 	return func(c api.Composer) api.Composer {
+		theme := material3.Theme(c)
 		// Apply internal modifiers: Background -> Padding
 		// Card now enforces FillMaxWidth for ContentCover, so we just need styling.
 
@@ -346,9 +347,9 @@ func CoverBanner(title, subtitle string) api.Composable {
 				m3text.TextWithStyle(subtitle, m3text.TypestyleBodySmall),
 			),
 			column.WithModifier(
-				background.Background(theme.ColorHelper.ColorSelector().PrimaryRoles.Container).
-					Then(size.FillMaxWidth()).
-					Then(padding.All(24)),
+				background.Background(theme.ColorScheme().PrimaryContainer.Color). //theme.ColorHelper.ColorSelector().PrimaryRoles.Container).
+													Then(size.FillMaxWidth()).
+													Then(padding.All(24)),
 			),
 		)(c)
 	}
