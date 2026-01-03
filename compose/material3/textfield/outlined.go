@@ -101,6 +101,14 @@ func Outlined(
 			return m.Then(opts.Modifier)
 		})
 
+		// Compose slots
+		if opts.LeadingIcon != nil {
+			c.WithComposable(opts.LeadingIcon)
+		}
+		if opts.TrailingIcon != nil {
+			c.WithComposable(opts.TrailingIcon)
+		}
+
 		// Constructor
 		c.SetWidgetConstructor(outlinedTextFieldWidgetConstructor(outWidget, value, opts, handlerWrapper, onSubmitWrapper, tracker, theme))
 
@@ -118,7 +126,35 @@ func outlinedTextFieldWidgetConstructor(
 	theme material.ThemeInterface,
 ) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
+
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+			// Map children to slots (Must be done here, after WrapChildren)
+			children := node.Children()
+			childIdx := 0
+
+			w.Prefix = nil
+			if opts.LeadingIcon != nil && childIdx < len(children) {
+				child := children[childIdx]
+				if coord, ok := child.(layoutnode.NodeCoordinator); ok {
+					w.Prefix = func(gtx layout.Context) layout.Dimensions {
+						return coord.Layout(gtx)
+					}
+				}
+				childIdx++
+			}
+
+			w.Suffix = nil
+			if opts.TrailingIcon != nil && childIdx < len(children) {
+				child := children[childIdx]
+				if coord, ok := child.(layoutnode.NodeCoordinator); ok {
+					w.Suffix = func(gtx layout.Context) layout.Dimensions {
+						return coord.Layout(gtx)
+					}
+				}
+				childIdx++
+			}
+
+			// 1. Sync External Change
 			// 1. Sync External Change
 			if value != tracker.LastValue {
 				if w.Editor.Text() != value {
@@ -320,7 +356,10 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Th
 					return border.Layout(gtx, dimsFunc)
 				}),
 				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-					return layout.UniformInset(gioUnit.Dp(12)).Layout(
+					return layout.Inset{
+						Left:  gioUnit.Dp(12),
+						Right: gioUnit.Dp(12),
+					}.Layout(
 						gtx,
 						func(gtx layout.Context) layout.Dimensions {
 							gtx.Constraints.Min.X = gtx.Constraints.Max.X
@@ -330,28 +369,33 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Th
 							}.Layout(
 								gtx,
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-									if in.IsActive() && in.Prefix != nil {
+									if in.Prefix != nil {
 										return in.Prefix(gtx)
 									}
 									return layout.Dimensions{}
 								}),
 								// Prefix would go here
 								layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-									// Resolve editor colors
-									textColor := graphics.ColorToNRGBA(in.Colors.TextColor)
-									if !gtx.Enabled() {
-										textColor = graphics.ColorToNRGBA(in.Colors.DisabledTextColor)
-									}
-									selectionColor := graphics.ColorToNRGBA(in.Colors.SelectionColor)
+									return layout.Inset{
+										Top:    gioUnit.Dp(12),
+										Bottom: gioUnit.Dp(12),
+									}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+										// Resolve editor colors
+										textColor := graphics.ColorToNRGBA(in.Colors.TextColor)
+										if !gtx.Enabled() {
+											textColor = graphics.ColorToNRGBA(in.Colors.DisabledTextColor)
+										}
+										selectionColor := graphics.ColorToNRGBA(in.Colors.SelectionColor)
 
-									ed := gioMaterial.Editor(th, &in.Editor, "")
-									ed.Color = textColor
-									ed.SelectionColor = selectionColor
+										ed := gioMaterial.Editor(th, &in.Editor, "")
+										ed.Color = textColor
+										ed.SelectionColor = selectionColor
 
-									return ed.Layout(gtx)
+										return ed.Layout(gtx)
+									})
 								}),
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-									if in.IsActive() && in.Suffix != nil {
+									if in.Suffix != nil {
 										return in.Suffix(gtx)
 									}
 									return layout.Dimensions{}
