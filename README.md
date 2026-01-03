@@ -11,3 +11,4 @@ To provide a feature-complete, idiomatic Go implementation of Jetpack Compose's 
 This is a non exhaustive list of known issues:
 - the custom colors does not always propagate to the children
 - package level typography is not implemented
+- limit custom font support
