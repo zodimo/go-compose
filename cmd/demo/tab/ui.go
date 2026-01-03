@@ -71,7 +71,6 @@ func UI() Composable {
 							}
 							return c
 						},
-						// Demonstrate ColorDescriptor customization with theme roles
 						tab.WithTabRowModifier(size.FillMaxWidth()),
 					),
 

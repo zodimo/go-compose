@@ -87,7 +87,6 @@ func radioButtonWidgetConstructor(
 				}
 			}
 
-			// Resolve ColorDescriptors to NRGBA
 			unselectedColorVal := graphics.ColorToNRGBA(colors.UnselectedColor)
 			selectedColorVal := graphics.ColorToNRGBA(colors.SelectedColor)
 			disabledColorVal := graphics.ColorToNRGBA(colors.DisabledColor)
