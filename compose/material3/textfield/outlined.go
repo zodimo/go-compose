@@ -21,7 +21,8 @@ import (
 	"gioui.org/op/clip"
 	gioUnit "gioui.org/unit"
 	"gioui.org/widget"
-	"gioui.org/widget/material"
+	gioMaterial "gioui.org/widget/material"
+	"github.com/zodimo/go-compose/compose/material"
 )
 
 const Material3OutlinedTextFieldNodeID = "Material3OutlinedTextField"
@@ -40,6 +41,8 @@ func Outlined(
 	}
 
 	return func(c Composer) Composer {
+
+		theme := material.Theme(c)
 
 		opts.Colors = ResolveTextFieldColors(c, opts.Colors)
 		opts.SupportingText = sentinel.TakeOrElseString(opts.SupportingText, "")
@@ -98,7 +101,7 @@ func Outlined(
 		})
 
 		// Constructor
-		c.SetWidgetConstructor(outlinedTextFieldWidgetConstructor(outWidget, value, opts, handlerWrapper, onSubmitWrapper, tracker))
+		c.SetWidgetConstructor(outlinedTextFieldWidgetConstructor(outWidget, value, opts, handlerWrapper, onSubmitWrapper, tracker, theme))
 
 		return c.EndBlock()
 	}
@@ -111,6 +114,7 @@ func outlinedTextFieldWidgetConstructor(
 	handler *HandlerWrapper,
 	onSubmitHandler *OnSubmitWrapper,
 	tracker *TextFieldStateTracker,
+	theme material.ThemeInterface,
 ) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
@@ -123,8 +127,7 @@ func outlinedTextFieldWidgetConstructor(
 			}
 
 			// 2. Events & Layout
-			th := material.NewTheme() // Fallback TODO: real theme
-
+			th := theme.GioMaterialTheme()
 			// Check for submit events
 			for {
 				ev, ok := w.Editor.Update(gtx)
@@ -236,7 +239,7 @@ func (in *OutlinedTextFieldWidget) TextTooLong() bool {
 	return !(in.CharLimit == 0 || uint(len(in.Editor.Text())) < in.CharLimit)
 }
 
-func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *material.Theme, hint string) layout.Dimensions {
+func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Theme, hint string) layout.Dimensions {
 	// Logic from gio-x Update + Layout
 	in.update(gtx, th, hint)
 
@@ -251,7 +254,7 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *material.Theme
 				Left:  gioUnit.Dp(4),
 				Right: gioUnit.Dp(4),
 			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				label := material.Label(th, in.label.TextSize, hint)
+				label := gioMaterial.Label(th, in.label.TextSize, hint)
 				label.Color = in.border.Color
 				return label.Layout(gtx)
 			})
@@ -340,7 +343,7 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *material.Theme
 									}
 									selectionColor := graphics.ColorToNRGBA(in.Colors.SelectionColor)
 
-									ed := material.Editor(th, &in.Editor, "")
+									ed := gioMaterial.Editor(th, &in.Editor, "")
 									ed.Color = textColor
 									ed.SelectionColor = selectionColor
 
@@ -383,7 +386,7 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *material.Theme
 					}.Layout(
 						gtx,
 						func(gtx layout.Context) layout.Dimensions {
-							helper := material.Label(th, gioUnit.Sp(12), in.helper.Text)
+							helper := gioMaterial.Label(th, gioUnit.Sp(12), in.helper.Text)
 							helper.Color = in.helper.Color
 							return helper.Layout(gtx)
 						},
@@ -399,7 +402,7 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *material.Theme
 					}.Layout(
 						gtx,
 						func(gtx layout.Context) layout.Dimensions {
-							count := material.Label(
+							count := gioMaterial.Label(
 								th,
 								gioUnit.Sp(12),
 								strconv.Itoa(in.Editor.Len())+"/"+strconv.Itoa(int(in.CharLimit)),
@@ -421,7 +424,7 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *material.Theme
 	}
 }
 
-func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *material.Theme, hint string) {
+func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *gioMaterial.Theme, hint string) {
 
 	disabled := gtx.Source == (input.Source{})
 	for {
@@ -524,7 +527,7 @@ func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *material.Theme
 		Left:  spacing,
 		Right: spacing,
 	}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		l := material.Label(th, textSmall, hint)
+		l := gioMaterial.Label(th, textSmall, hint)
 		l.Color = in.border.Color
 		return l.Layout(gtx)
 	})
