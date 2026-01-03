@@ -1,15 +1,15 @@
 package shadow
 
 import (
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/theme"
 )
 
 type ShadowData struct {
 	Elevation    Dp
 	Shape        Shape
-	AmbientColor theme.ColorDescriptor
-	SpotColor    theme.ColorDescriptor
+	AmbientColor graphics.Color
+	SpotColor    graphics.Color
 }
 
 type ShadowElement struct {
@@ -33,7 +33,7 @@ func (e *ShadowElement) Equals(other Element) bool {
 	return false
 }
 
-func Shadow(elevation Dp, shape Shape, ambientColor, spotColor theme.ColorDescriptor) Modifier {
+func Shadow(elevation Dp, shape Shape, ambientColor, spotColor graphics.Color) Modifier {
 	return modifier.NewInspectableModifier(
 		modifier.NewModifier(
 			&ShadowElement{
@@ -59,7 +59,7 @@ func Shadow(elevation Dp, shape Shape, ambientColor, spotColor theme.ColorDescri
 
 // Simple Shadow with defaults using theme Shadow role
 func Simple(elevation Dp, shape Shape) Modifier {
-	// Use theme shadow color for defaults
-	shadowColor := theme.ColorHelper.ColorSelector().ScrimRoles.Shadow
-	return Shadow(elevation, shape, shadowColor, shadowColor)
+	// unspecified allow for theme defaults
+	unspecifiedColor := graphics.ColorUnspecified
+	return Shadow(elevation, shape, unspecifiedColor, unspecifiedColor)
 }

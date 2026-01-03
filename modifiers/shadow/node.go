@@ -1,10 +1,10 @@
 package shadow
 
 import (
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
-	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/f32"
 	"gioui.org/op"
@@ -53,9 +53,8 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 
 					shadowSize := float32(gtx.Metric.Dp(unit.DpToGioUnit(elevation)))
 
-					// Resolve ColorDescriptor to NRGBA
-					tm := theme.GetThemeManager()
-					col := tm.ResolveColorDescriptor(n.shadowData.AmbientColor).AsNRGBA()
+					//@TODO get shadow from theme, for now default to black
+					col := graphics.ColorToNRGBA(n.shadowData.AmbientColor.TakeOrElse(graphics.ColorBlack))
 					// Apply some opacity if it's fully opaque?
 					// gio-mw uses 0.12*255 approx 30 alpha.
 					if col.A == 255 {
