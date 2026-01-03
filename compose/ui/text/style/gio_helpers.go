@@ -17,3 +17,7 @@ func LineBreakToGioWrapPolicy(l LineBreak) gioText.WrapPolicy {
 	linebreak := l.TakeOrElse(LineBreakParagraph)
 	return gioText.WrapPolicy(linebreak)
 }
+
+func GioWrapPolicyToLineBreak(gioWrapPolicy gioText.WrapPolicy) LineBreak {
+	return LineBreak(gioWrapPolicy)
+}

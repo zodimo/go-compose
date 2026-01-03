@@ -75,3 +75,63 @@ func ResolveGioTypeface(f FontFamily) string {
 		return ""
 	}
 }
+
+// FromGioFont converts a gio font.Font to go-compose font attributes.
+func FromGioFont(gf giofont.Font) (FontFamily, FontWeight, FontStyle) {
+	return FromGioTypeface(gf.Typeface), FromGioWeight(gf.Weight), FromGioStyle(gf.Style)
+}
+
+// FromGioWeight converts a gio font.Weight to a go-compose FontWeight.
+// Gio weights are offset from 0 (Normal/400), so we add 400 to get CSS weight.
+// -300 (Thin) -> 100
+// 0 (Normal) -> 400
+// 300 (Bold) -> 700
+func FromGioWeight(w giofont.Weight) FontWeight {
+	// Gio weight is (CSS weight - 400), so add 400 back
+	cssWeight := int(w) + 400
+	// Clamp to valid CSS range [1, 1000]
+	if cssWeight < 1 {
+		cssWeight = 1
+	} else if cssWeight > 1000 {
+		cssWeight = 1000
+	}
+	return FontWeight(cssWeight)
+}
+
+// FromGioStyle converts a gio font.Style to a go-compose FontStyle.
+func FromGioStyle(s giofont.Style) FontStyle {
+	switch s {
+	case giofont.Regular:
+		return FontStyleNormal
+	case giofont.Italic:
+		return FontStyleItalic
+	default:
+		// Unknown style, default to normal
+		return FontStyleNormal
+	}
+}
+
+// FromGioTypeface converts a gio font.Typeface to a go-compose FontFamily.
+// For named typefaces, this creates a GenericFontFamily.
+// For empty typefaces, this returns FontFamilyDefault.
+func FromGioTypeface(t giofont.Typeface) FontFamily {
+	name := string(t)
+	if name == "" {
+		return FontFamilyDefault
+	}
+
+	// Check for known generic font families
+	switch name {
+	case "sans-serif":
+		return FontFamilySansSerif
+	case "serif":
+		return FontFamilySerif
+	case "monospace":
+		return FontFamilyMonospace
+	case "cursive":
+		return FontFamilyCursive
+	default:
+		// Treat as a generic named font family
+		return NewGenericFontFamily(name, name)
+	}
+}
