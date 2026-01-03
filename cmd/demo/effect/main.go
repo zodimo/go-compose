@@ -16,7 +16,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/text"
-	"github.com/zodimo/go-compose/compose/material/button"
+	"github.com/zodimo/go-compose/compose/material3/button"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/runtime"
@@ -104,7 +104,7 @@ func UI(c api.Composer) api.LayoutNode {
 				c.Sequence(
 					text.Text(fmt.Sprintf("Counter: %d", counter.Get()), text.WithModifier(padding.All(10))),
 					text.Text(fmt.Sprintf("Status: %v", effectStatus.Get()), text.WithModifier(padding.All(10))),
-					button.Button(func() {
+					button.Filled(func() {
 						counter.Set(counter.Get().(int) + 1)
 					}, "Increment Counter (Restarts Effect)",
 						button.WithModifier(padding.All(20)),

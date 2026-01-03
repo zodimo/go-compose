@@ -14,6 +14,7 @@ func UI(c api.Composer) api.LayoutNode {
 			fText.Text(
 				"Hello World",
 			),
+			fText.Text("🚦 Traffic Light"),
 			fText.Text(
 				"Hello World",
 				fText.WithTextStyleOptions(

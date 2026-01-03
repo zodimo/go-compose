@@ -5,7 +5,6 @@ import (
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
-	"github.com/zodimo/go-compose/compose/material/button"
 	m3Button "github.com/zodimo/go-compose/compose/material3/button"
 	m3Card "github.com/zodimo/go-compose/compose/material3/card"
 	m3Divider "github.com/zodimo/go-compose/compose/material3/divider"
@@ -58,7 +57,7 @@ func UI(c api.Composer) api.LayoutNode {
 				),
 				column.Column(
 					c.Sequence(
-						button.Button(func() {
+						m3Button.FilledTonal(func() {
 							counterCell.Set(counterCell.Get().(int) + 1)
 							fmt.Println("Button clicked!")
 						}, "click me",

@@ -1,9 +1,10 @@
 package compose
 
 import (
+	"gioui.org/font/gofont"
+	gioText "gioui.org/text"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text"
-	"github.com/zodimo/go-compose/theme"
 )
 
 // LocalContentColor is a CompositionLocal containing the preferred content color for a given
@@ -21,5 +22,6 @@ var LocalContentColor = CompositionLocalOf(func() graphics.Color {
 })
 
 var LocalTextShaper = CompositionLocalOf(func() *text.TextShaper {
-	return &text.TextShaper{Shaper: theme.GetThemeManager().MaterialTheme().Shaper}
+	shaper := gioText.NewShaper(gioText.WithCollection(gofont.Collection()))
+	return &text.TextShaper{Shaper: shaper}
 })

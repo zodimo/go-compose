@@ -47,12 +47,12 @@ func newTheColorHelper() ThemeColorHelper {
 
 // Runtime
 type ThemeManager interface {
-	MaterialTheme() *material.Theme
-	SetMaterialTheme(theme *material.Theme)
+	materialTheme() *material.Theme
+	setMaterialTheme(theme *material.Theme)
 
 	Material3ThemeInit(gtx layout.Context) layout.Context
-	SetMaterial3Theme(gtx layout.Context, theme *token.Theme)
-	GetMaterial3Theme() *token.Theme
+	setMaterial3Theme(gtx layout.Context, theme *token.Theme)
+	getMaterial3Theme() *token.Theme
 
 	ThemeColorResolver
 }
@@ -76,13 +76,13 @@ func newThemeManager(theme *BasicTheme) ThemeManager {
 	return tm
 }
 
-func (tm *themeManager) MaterialTheme() *material.Theme {
+func (tm *themeManager) materialTheme() *material.Theme {
 	tm.mu.RLock()
 	defer tm.mu.RUnlock()
 	return tm.basicTheme
 
 }
-func (tm *themeManager) SetMaterialTheme(theme *material.Theme) {
+func (tm *themeManager) setMaterialTheme(theme *material.Theme) {
 	tm.mu.Lock()
 	defer tm.mu.Unlock()
 	tm.basicTheme = theme
@@ -100,13 +100,13 @@ func (tm *themeManager) Material3ThemeInit(gtx layout.Context) layout.Context {
 	return gtx
 
 }
-func (tm *themeManager) SetMaterial3Theme(gtx layout.Context, theme *token.Theme) {
+func (tm *themeManager) setMaterial3Theme(gtx layout.Context, theme *token.Theme) {
 	tm.mu.Lock()
 	defer tm.mu.Unlock()
 	tm.theme = theme
 }
 
-func (tm *themeManager) GetMaterial3Theme() *token.Theme {
+func (tm *themeManager) getMaterial3Theme() *token.Theme {
 	tm.mu.RLock()
 	defer tm.mu.RUnlock()
 	if tm.theme == nil {

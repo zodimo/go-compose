@@ -1,14 +1,12 @@
 package material
 
 import (
-	"gioui.org/font/gofont"
-	"gioui.org/text"
-	"gioui.org/widget/material"
+	gioMaterial "gioui.org/widget/material"
 	"github.com/zodimo/go-compose/compose"
 )
 
 type ThemeInterface interface {
-	GioMaterialTheme() *material.Theme
+	GioMaterialTheme() *gioMaterial.Theme
 }
 
 func Theme(c compose.Composer) ThemeInterface {
@@ -21,17 +19,18 @@ type themeImpl struct {
 	composer compose.Composer
 }
 
-func (t themeImpl) GioMaterialTheme() *material.Theme {
-	return LocalGioMaterialTheme.Current(t.composer)
+func (t themeImpl) GioMaterialTheme() *gioMaterial.Theme {
+	shaper := compose.LocalTextShaper.Current(t.composer)
+	theme := LocalGioMaterialTheme.Current(t.composer)
+	theme.Shaper = shaper.Shaper
+	return theme
 }
 
-var LocalGioMaterialTheme = compose.CompositionLocalOf(func() *material.Theme {
+var LocalGioMaterialTheme = compose.CompositionLocalOf(func() *gioMaterial.Theme {
 	return defaultMaterialTheme()
 })
 
-func defaultMaterialTheme() *material.Theme {
-	materialTheme := material.NewTheme()
-	materialTheme.Shaper = text.NewShaper(text.WithCollection(gofont.Collection()))
-
+func defaultMaterialTheme() *gioMaterial.Theme {
+	materialTheme := gioMaterial.NewTheme()
 	return materialTheme
 }
