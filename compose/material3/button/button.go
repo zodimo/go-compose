@@ -49,6 +49,10 @@ func buttonComposable(material3Button *button.Button, onClick func(), label stri
 			opts.Button = buttonValue.Get().(*button.Button)
 		}
 
+		if !opts.Enabled {
+			opts.Button.Disable()
+		}
+
 		constructorArgs := ButtonConstructorArgs{
 			Button:       opts.Button,
 			OnClick:      onClick,
