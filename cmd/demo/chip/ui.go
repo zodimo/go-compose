@@ -18,15 +18,12 @@ func UI() api.Composable {
 		selected := selectedState.Get().(bool)
 
 		return column.Column(
-			func(c api.Composer) api.Composer {
+			c.Sequence(
 				// Title
-				text.TextWithStyle(
+				text.HeadlineMedium(
 					"Chip Components",
-					text.TypestyleHeadlineMedium,
-				)(c)
-
-				spacer.Height(16)(c)
-
+				),
+				spacer.Height(16),
 				// Assist Chip Row
 				row.Row(
 					func(c api.Composer) api.Composer {
@@ -39,10 +36,8 @@ func UI() api.Composable {
 						)(c)
 						return c
 					},
-				)(c)
-
-				spacer.Height(16)(c)
-
+				),
+				spacer.Height(16),
 				// Filter Chip Row
 				row.Row(
 					func(c api.Composer) api.Composer {
@@ -64,10 +59,8 @@ func UI() api.Composable {
 						)(c)
 						return c
 					},
-				)(c)
-
-				spacer.Height(16)(c)
-
+				),
+				spacer.Height(16),
 				// Input Chip
 				row.Row(
 					func(c api.Composer) api.Composer {
@@ -78,10 +71,8 @@ func UI() api.Composable {
 						)(c)
 						return c
 					},
-				)(c)
-
-				spacer.Height(16)(c)
-
+				),
+				spacer.Height(16),
 				// Suggestion Chip
 				row.Row(
 					func(c api.Composer) api.Composer {
@@ -90,10 +81,8 @@ func UI() api.Composable {
 						chip.SuggestionChip(func() { fmt.Println("Suggestion 2") }, "Suggestion 2")(c)
 						return c
 					},
-				)(c)
-
-				return c
-			},
+				),
+			),
 		)(c)
 	}
 }
