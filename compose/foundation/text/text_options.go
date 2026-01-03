@@ -4,10 +4,10 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-maybe"
 
 	gioFont "gioui.org/font"
-	gioUnit "gioui.org/unit"
 )
 
 type TextOptions struct {
@@ -22,14 +22,6 @@ type TextOptions struct {
 
 	//BACKWARDS COMPATIBILITY
 
-	// Alignment specifies the text alignment.
-	Alignment maybe.Maybe[Alignment]
-
-	// WrapPolicy configures how displayed text will be broken into lines.
-	WrapPolicy maybe.Maybe[WrapPolicy]
-	// LineHeight controls the distance between the baselines of lines of text.
-	// If zero, a sensible default will be used.
-	LineHeight maybe.Maybe[gioUnit.Sp]
 	// LineHeightScale applies a scaling factor to the LineHeight. If zero, a
 	// sensible default will be used.
 	LineHeightScale maybe.Maybe[float32]
@@ -38,12 +30,8 @@ type TextOptions struct {
 	// be selected or copied interactively.
 	Selectable maybe.Maybe[bool]
 
-	// Face defines the text style.
-	Font maybe.Maybe[gioFont.Font]
 	// SelectionColor is the color of the background for selected text.
 	SelectionColor graphics.Color
-	// TextSize determines the size of the text glyphs.
-	TextSize maybe.Maybe[gioUnit.Sp]
 }
 
 type TextOption func(*TextOptions)
@@ -54,9 +42,21 @@ func WithModifier(m Modifier) TextOption {
 	}
 }
 
+// replace TextStyle
 func WithTextStyle(ts *text.TextStyle) TextOption {
 	return func(o *TextOptions) {
 		o.TextStyle = ts
+	}
+}
+
+// merge TextStyle
+func WithAdditionalTextStyle(ts *text.TextStyle) TextOption {
+	return func(o *TextOptions) {
+		textStyle := text.MergeTextStyle(
+			o.TextStyle,
+			ts,
+		)
+		o.TextStyle = textStyle
 	}
 }
 
@@ -93,20 +93,17 @@ func WithTruncator(truncator string) TextOption {
 
 // Deprecated use TextStyle
 func WithWrapPolicy(wrapPolicy WrapPolicy) TextOption {
-	return func(o *TextOptions) {
-		o.WrapPolicy = maybe.Some(wrapPolicy)
-	}
+	return WithTextStyleOptions(text.WithLineBreak(style.GioWrapPolicyToLineBreak(wrapPolicy)))
 }
 
 // Deprecated use TextStyle
 func WithLineHeight(lineHeightInSP float32) TextOption {
-	return func(o *TextOptions) {
-		o.LineHeight = maybe.Some(gioUnit.Sp(lineHeightInSP))
-	}
+	return WithTextStyleOptions(text.WithLineHeight(unit.Sp(lineHeightInSP)))
+
 }
 
+// Deprecated
 func WithLineHeightScale(lineHeightScale float32) TextOption {
-
 	return func(o *TextOptions) {
 		o.LineHeightScale = maybe.Some(lineHeightScale)
 	}
@@ -126,10 +123,9 @@ func Selectable() TextOption {
 	}
 }
 
+// Deprecated use TextStyle
 func StyleWithFont(font gioFont.Font) TextOption {
-	return func(o *TextOptions) {
-		o.Font = maybe.Some(font)
-	}
+	return WithAdditionalTextStyle(text.TextStyleFromGioFont(font))
 }
 
 // Deprecated use TextStyle
@@ -147,9 +143,7 @@ func StyleWithSelectionColor(color graphics.Color) TextOption {
 
 // Deprecated use TextStyle
 func StyleWithTextSize(sizeInSP float32) TextOption {
-	return func(o *TextOptions) {
-		o.TextSize = maybe.Some(gioUnit.Sp(sizeInSP))
-	}
+	return WithTextStyleOptions(text.WithFontSize(unit.Sp(sizeInSP)))
 }
 
 // StyleWithStrikethrough enables strikethrough text decoration.
