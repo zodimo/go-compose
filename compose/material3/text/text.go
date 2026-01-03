@@ -3,6 +3,7 @@ package text
 import (
 	"github.com/zodimo/go-compose/compose/foundation/text"
 	"github.com/zodimo/go-compose/compose/material3"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/platform"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/theme"
 
 	"git.sr.ht/~schnwalter/gio-mw/token"
 	"git.sr.ht/~schnwalter/gio-mw/wdk"
@@ -30,13 +30,13 @@ func TextWithStyle(value string, tokenStyle Typestyle, options ...text.TextOptio
 			option(&opts)
 		}
 
-		contentColorDescriptor := material3.LocalContentColor.Current(c)
+		contentColor := material3.LocalContentColor.Current(c)
 
 		// textShaper := compose.LocalTextShaper.Current(c)
 		// familyResolver := platform.LocalFontFamilyResolver.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 
-		textColor := theme.ColorHelper.SpecificColor(opts.TextStyle.Color().TakeOrElse(contentColorDescriptor))
+		textColor := graphics.ColorToNRGBA(opts.TextStyle.Color().TakeOrElse(contentColor))
 
 		// Resolve text style with defaults
 		opts.TextStyle = uiText.TextStyleResolveDefaults(opts.TextStyle, layoutDirection)
@@ -57,10 +57,7 @@ func TextWithStyle(value string, tokenStyle Typestyle, options ...text.TextOptio
 					WrapPolicy: style.LineBreakToGioWrapPolicy(opts.TextStyle.LineBreak()),
 				}
 
-				// Resolve ColorDescriptor to NRGBA, then to MatColor
-				tm := theme.GetThemeManager()
-				resolvedColor := tm.ResolveColorDescriptor(textColor).AsNRGBA()
-				labelStyle.Color = token.MatColor(resolvedColor)
+				labelStyle.Color = token.MatColor(textColor)
 
 				return wdk.LayoutLabel(gtx, labelStyle, value)
 			}

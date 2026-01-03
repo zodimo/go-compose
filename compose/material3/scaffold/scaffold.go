@@ -33,7 +33,6 @@ func Scaffold(content Composable, options ...ScaffoldOption) Composable {
 			option(&opts)
 		}
 
-		// Prepare surface options - ColorDescriptor values are always valid
 		surfaceOpts := []surface.SurfaceOption{
 			surface.WithColor(opts.ContainerColor),
 			surface.WithContentColor(opts.ContentColor),

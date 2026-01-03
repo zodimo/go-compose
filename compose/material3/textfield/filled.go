@@ -23,9 +23,9 @@ func Filled(
 		opt(&opts)
 	}
 
-	opts.Colors = ResolveTextFieldColors(opts.Colors)
-
 	return func(c Composer) Composer {
+
+		opts.Colors = ResolveTextFieldColors(c, opts.Colors)
 
 		key := c.GenerateID()
 		path := c.GetPath()

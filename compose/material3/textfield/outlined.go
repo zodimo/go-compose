@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/pkg/sentinel"
-	"github.com/zodimo/go-compose/theme"
 
 	"gioui.org/f32"
 	"gioui.org/gesture"
@@ -39,10 +39,10 @@ func Outlined(
 		opt(&opts)
 	}
 
-	opts.Colors = ResolveTextFieldColors(opts.Colors)
-	opts.SupportingText = sentinel.TakeOrElseString(opts.SupportingText, "")
-
 	return func(c Composer) Composer {
+
+		opts.Colors = ResolveTextFieldColors(c, opts.Colors)
+		opts.SupportingText = sentinel.TakeOrElseString(opts.SupportingText, "")
 
 		key := c.GenerateID()
 		path := c.GetPath()
@@ -334,12 +334,11 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *material.Theme
 								// Prefix would go here
 								layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 									// Resolve editor colors
-									m := theme.GetThemeManager()
-									textColor := m.ResolveColorDescriptor(in.Colors.TextColor).AsNRGBA()
+									textColor := graphics.ColorToNRGBA(in.Colors.TextColor)
 									if !gtx.Enabled() {
-										textColor = m.ResolveColorDescriptor(in.Colors.DisabledTextColor).AsNRGBA()
+										textColor = graphics.ColorToNRGBA(in.Colors.DisabledTextColor)
 									}
-									selectionColor := m.ResolveColorDescriptor(in.Colors.SelectionColor).AsNRGBA()
+									selectionColor := graphics.ColorToNRGBA(in.Colors.SelectionColor)
 
 									ed := material.Editor(th, &in.Editor, "")
 									ed.Color = textColor
@@ -423,8 +422,6 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *material.Theme
 }
 
 func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *material.Theme, hint string) {
-	// Resolve colors
-	m := theme.GetThemeManager()
 
 	disabled := gtx.Source == (input.Source{})
 	for {
@@ -472,18 +469,18 @@ func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *material.Theme
 		textNormal = th.TextSize
 		textSmall  = th.TextSize * 0.8
 
-		borderColor         = m.ResolveColorDescriptor(in.Colors.UnfocusedIndicatorColor).AsNRGBA()
-		borderColorHovered  = m.ResolveColorDescriptor(in.Colors.HoveredIndicatorColor).AsNRGBA()
-		borderColorActive   = m.ResolveColorDescriptor(in.Colors.FocusedIndicatorColor).AsNRGBA()
-		borderColorError    = m.ResolveColorDescriptor(in.Colors.ErrorIndicatorColor).AsNRGBA()
-		borderColorDisabled = m.ResolveColorDescriptor(in.Colors.DisabledIndicatorColor).AsNRGBA()
+		borderColor         = graphics.ColorToNRGBA(in.Colors.UnfocusedIndicatorColor)
+		borderColorHovered  = graphics.ColorToNRGBA(in.Colors.HoveredIndicatorColor)
+		borderColorActive   = graphics.ColorToNRGBA(in.Colors.FocusedIndicatorColor)
+		borderColorError    = graphics.ColorToNRGBA(in.Colors.ErrorIndicatorColor)
+		borderColorDisabled = graphics.ColorToNRGBA(in.Colors.DisabledIndicatorColor)
 
 		borderThickness       = gioUnit.Dp(1)
 		borderThicknessActive = gioUnit.Dp(2)
 
-		helperColor         = m.ResolveColorDescriptor(in.Colors.SupportingTextColor).AsNRGBA()
-		helperColorError    = m.ResolveColorDescriptor(in.Colors.ErrorSupportingTextColor).AsNRGBA()
-		helperColorDisabled = m.ResolveColorDescriptor(in.Colors.DisabledSupportingTextColor).AsNRGBA()
+		helperColor         = graphics.ColorToNRGBA(in.Colors.SupportingTextColor)
+		helperColorError    = graphics.ColorToNRGBA(in.Colors.ErrorSupportingTextColor)
+		helperColorDisabled = graphics.ColorToNRGBA(in.Colors.DisabledSupportingTextColor)
 	)
 
 	if disabled {
