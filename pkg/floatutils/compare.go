@@ -27,7 +27,7 @@ func IsUnspecified[T Float](f T) bool {
 	return math.IsNaN(float64(f))
 }
 
-// @deprecated
+// Deprecated
 func IsNaN[T Float](f T) bool {
 	return math.IsNaN(float64(f))
 }

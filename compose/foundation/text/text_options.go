@@ -91,14 +91,14 @@ func WithTruncator(truncator string) TextOption {
 	}
 }
 
-// @deprecated use TextStyle
+// Deprecated use TextStyle
 func WithWrapPolicy(wrapPolicy WrapPolicy) TextOption {
 	return func(o *TextOptions) {
 		o.WrapPolicy = maybe.Some(wrapPolicy)
 	}
 }
 
-// @deprecated use TextStyle
+// Deprecated use TextStyle
 func WithLineHeight(lineHeightInSP float32) TextOption {
 	return func(o *TextOptions) {
 		o.LineHeight = maybe.Some(gioUnit.Sp(lineHeightInSP))
@@ -132,20 +132,20 @@ func StyleWithFont(font gioFont.Font) TextOption {
 	}
 }
 
-// @deprecated use TextStyle
+// Deprecated use TextStyle
 func StyleWithColor(color graphics.Color) TextOption {
 	return WithTextStyleOptions(text.WithColor(color))
 }
 
 // StyleWithSelectionColor sets the selection highlight color.
-// @deprecated use TextStyle
+// Deprecated use TextStyle
 func StyleWithSelectionColor(color graphics.Color) TextOption {
 	return func(o *TextOptions) {
 		o.SelectionColor = color
 	}
 }
 
-// @deprecated use TextStyle
+// Deprecated use TextStyle
 func StyleWithTextSize(sizeInSP float32) TextOption {
 	return func(o *TextOptions) {
 		o.TextSize = maybe.Some(gioUnit.Sp(sizeInSP))
@@ -153,7 +153,7 @@ func StyleWithTextSize(sizeInSP float32) TextOption {
 }
 
 // StyleWithStrikethrough enables strikethrough text decoration.
-// @deprecated use TextStyle
+// Deprecated use TextStyle
 func StyleWithStrikethrough() TextOption {
 	return WithTextStyleOptions(text.WithTextDecoration(style.TextDecorationLineThrough))
 }
