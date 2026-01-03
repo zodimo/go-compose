@@ -1,8 +1,8 @@
 package compose
 
 import (
-	"gioui.org/font/gofont"
 	gioText "gioui.org/text"
+	"github.com/zodimo/go-compose/assets/fonts"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text"
 )
@@ -22,6 +22,8 @@ var LocalContentColor = CompositionLocalOf(func() graphics.Color {
 })
 
 var LocalTextShaper = CompositionLocalOf(func() *text.TextShaper {
-	shaper := gioText.NewShaper(gioText.WithCollection(gofont.Collection()))
+	// Use bundled fonts collection which includes Go fonts + Noto Color Emoji
+	// for portable emoji support without relying on system fonts
+	shaper := gioText.NewShaper(gioText.NoSystemFonts(), gioText.WithCollection(fonts.Collection()))
 	return &text.TextShaper{Shaper: shaper}
 })
