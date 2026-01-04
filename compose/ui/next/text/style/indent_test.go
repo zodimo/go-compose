@@ -76,7 +76,7 @@ func TestTextIndent_Equals(t *testing.T) {
 func TestTextIndent_String(t *testing.T) {
 	ti := NewTextIndent(unit.Sp(10), unit.Sp(5))
 	str := StringTextIndent(ti)
-	expected := "TextIndent(firstLine=10.sp, restLine=5.sp)"
+	expected := "TextIndent(firstLine=TextUnit{10 Sp}, restLine=TextUnit{5 Sp})"
 	if str != expected {
 		t.Errorf("String() = %q, want %q", str, expected)
 	}
