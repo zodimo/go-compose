@@ -17,31 +17,31 @@ func MapError[T any](resource Resource[T], fn func(error) error) Resource[T] {
 func FlatMapData[T, U any](resource Resource[T], fn func(T) Resource[U]) Resource[U] {
 	return &wrappedResource[U]{
 		isLoadingFunc: func() bool {
-			if resource.IsLoading() {
+			if resource.isLoading() {
 				return true
 			}
-			if resource.HasData() {
-				return fn(resource.Data()).IsLoading()
+			if resource.hasData() {
+				return fn(resource.getData()).isLoading()
 			}
 			return false
 		},
 		errorFunc: func() error {
-			if resource.Error() != nil {
-				return resource.Error()
+			if resource.hasError() {
+				return resource.getError()
 			}
-			if resource.HasData() {
-				return fn(resource.Data()).Error()
+			if resource.hasData() {
+				return fn(resource.getData()).getError()
 			}
 			return nil
 		},
 		dataFunc: func() U {
-			return fn(resource.Data()).Data()
+			return fn(resource.getData()).getData()
 		},
 		hasDataFunc: func() bool {
-			if !resource.HasData() {
+			if !resource.hasData() {
 				return false
 			}
-			return fn(resource.Data()).HasData()
+			return fn(resource.getData()).hasData()
 		},
 	}
 }

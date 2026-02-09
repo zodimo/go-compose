@@ -3,13 +3,13 @@ package resource
 import "github.com/zodimo/go-maybe"
 
 func Match[T, U any](resource Resource[T], onLoading func() U, onError func(error) U, onData func(T) U) U {
-	if resource.IsLoading() {
+	if resource.isLoading() {
 		return onLoading()
 	}
-	if resource.HasData() {
-		return onData(resource.Data())
+	if resource.hasData() {
+		return onData(resource.getData())
 	}
-	return onError(resource.Error())
+	return onError(resource.getError())
 }
 
 type MatchOptions[T, U any] struct {
@@ -67,15 +67,15 @@ func MatchPartial[T, U any](resource Resource[T], options ...MatchOption[T, U]) 
 		opt(&opts)
 	}
 	defaultFunc := opts.onDefault
-	if resource.IsLoading() {
+	if resource.isLoading() {
 		return opts.onLoading.OrElse(defaultFunc)()
 	}
-	if resource.HasData() {
+	if resource.hasData() {
 		return opts.onData.OrElse(func(T) maybe.Maybe[U] {
 			return defaultFunc()
-		})(resource.Data())
+		})(resource.getData())
 	}
 	return opts.onError.OrElse(func(error) maybe.Maybe[U] {
 		return defaultFunc()
-	})(resource.Error())
+	})(resource.getError())
 }

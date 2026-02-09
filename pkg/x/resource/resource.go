@@ -1,10 +1,11 @@
 package resource
 
 type Resource[T any] interface {
-	IsLoading() bool
-	Error() error
-	Data() T
-	HasData() bool
+	isLoading() bool
+	getError() error
+	hasError() bool
+	getData() T
+	hasData() bool
 	isResource()
 }
 
@@ -15,9 +16,7 @@ func ResourceError[T any](err error) Resource[T] {
 }
 
 func ResourceLoading[T any]() Resource[T] {
-	return &resourceLoading[T]{
-		isLoading: true,
-	}
+	return &resourceLoading[T]{}
 }
 
 func ResourceSuccess[T any](data T) Resource[T] {

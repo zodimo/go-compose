@@ -40,29 +40,33 @@ func newWrappedResource[T, U any](resource Resource[T], mapDataFunc func(T) U, o
 	}
 	return &wrappedResource[U]{
 		isLoadingFunc: func() bool {
-			return resource.IsLoading()
+			return resource.isLoading()
 		},
 		errorFunc: func() error {
-			return opts.mapErrorFunc(resource.Error())
+			return opts.mapErrorFunc(resource.getError())
 		},
 		dataFunc: func() U {
-			return mapDataFunc(resource.Data())
+			return mapDataFunc(resource.getData())
 		},
 		hasDataFunc: func() bool {
-			return resource.HasData()
+			return resource.hasData()
 		},
 	}
 }
 
-func (w *wrappedResource[T]) IsLoading() bool {
+func (w *wrappedResource[T]) isLoading() bool {
 	return w.isLoadingFunc()
 }
 
-func (w *wrappedResource[T]) Error() error {
+func (w *wrappedResource[T]) getError() error {
 	return w.errorFunc()
 }
 
-func (w *wrappedResource[T]) Data() T {
+func (w *wrappedResource[T]) hasError() bool {
+	return w.errorFunc() != nil
+}
+
+func (w *wrappedResource[T]) getData() T {
 	w.once.Do(func() {
 		val := w.dataFunc()
 		w.cachedData = &val
@@ -70,7 +74,7 @@ func (w *wrappedResource[T]) Data() T {
 	return *w.cachedData
 }
 
-func (w *wrappedResource[T]) HasData() bool {
+func (w *wrappedResource[T]) hasData() bool {
 	return w.hasDataFunc()
 }
 

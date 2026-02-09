@@ -8,29 +8,29 @@ import (
 func TestResourceFactories(t *testing.T) {
 	t.Run("ResourceSuccess", func(t *testing.T) {
 		r := ResourceSuccess("test")
-		if r.IsLoading() {
+		if r.isLoading() {
 			t.Errorf("expected not loading")
 		}
-		if r.Error() != nil {
-			t.Errorf("expected no error, got %v", r.Error())
+		if r.getError() != nil {
+			t.Errorf("expected no error, got %v", r.getError())
 		}
-		if !r.HasData() {
+		if !r.hasData() {
 			t.Errorf("expected data")
 		}
-		if r.Data() != "test" {
-			t.Errorf("expected 'test', got %v", r.Data())
+		if r.getData() != "test" {
+			t.Errorf("expected 'test', got %v", r.getData())
 		}
 	})
 
 	t.Run("ResourceLoading", func(t *testing.T) {
 		r := ResourceLoading[string]()
-		if !r.IsLoading() {
+		if !r.isLoading() {
 			t.Errorf("expected loading")
 		}
-		if r.Error() != nil {
-			t.Errorf("expected no error, got %v", r.Error())
+		if r.getError() != nil {
+			t.Errorf("expected no error, got %v", r.getError())
 		}
-		if r.HasData() {
+		if r.hasData() {
 			t.Errorf("expected no data")
 		}
 
@@ -39,19 +39,19 @@ func TestResourceFactories(t *testing.T) {
 				t.Errorf("expected panic when calling Data() on loading resource")
 			}
 		}()
-		r.Data()
+		r.getData()
 	})
 
 	t.Run("ResourceError", func(t *testing.T) {
 		err := errors.New("fail")
 		r := ResourceError[string](err)
-		if r.IsLoading() {
+		if r.isLoading() {
 			t.Errorf("expected not loading")
 		}
-		if r.Error() != err {
-			t.Errorf("expected error %v, got %v", err, r.Error())
+		if r.getError() != err {
+			t.Errorf("expected error %v, got %v", err, r.getError())
 		}
-		if r.HasData() {
+		if r.hasData() {
 			t.Errorf("expected no data")
 		}
 
@@ -60,7 +60,7 @@ func TestResourceFactories(t *testing.T) {
 				t.Errorf("expected panic when calling Data() on error resource")
 			}
 		}()
-		r.Data()
+		r.getData()
 	})
 }
 
@@ -68,8 +68,8 @@ func TestMapData(t *testing.T) {
 	t.Run("Success to Success", func(t *testing.T) {
 		r := ResourceSuccess("test")
 		mapped := MapData(r, func(s string) int { return len(s) })
-		if mapped.Data() != 4 {
-			t.Errorf("expected 4, got %d", mapped.Data())
+		if mapped.getData() != 4 {
+			t.Errorf("expected 4, got %d", mapped.getData())
 		}
 	})
 }
@@ -80,11 +80,11 @@ func TestFlatMapData(t *testing.T) {
 		mapped := FlatMapData(r, func(s string) Resource[int] {
 			return ResourceSuccess(len(s))
 		})
-		if !mapped.HasData() {
+		if !mapped.hasData() {
 			t.Errorf("expected data")
 		}
-		if mapped.Data() != 4 {
-			t.Errorf("expected 4, got %d", mapped.Data())
+		if mapped.getData() != 4 {
+			t.Errorf("expected 4, got %d", mapped.getData())
 		}
 	})
 
@@ -94,10 +94,10 @@ func TestFlatMapData(t *testing.T) {
 			return ResourceLoading[int]()
 		})
 
-		if !mapped.IsLoading() {
+		if !mapped.isLoading() {
 			t.Errorf("expected loading")
 		}
-		if mapped.HasData() {
+		if mapped.hasData() {
 			t.Errorf("expected no data")
 		}
 
@@ -106,7 +106,7 @@ func TestFlatMapData(t *testing.T) {
 				t.Errorf("Should panic because it is loading, not because of bug")
 			}
 		}()
-		mapped.Data()
+		mapped.getData()
 	})
 }
 
@@ -119,7 +119,7 @@ func TestMapDataCaching(t *testing.T) {
 	})
 
 	// First call triggers mapping
-	if got := mapped.Data(); got != 4 {
+	if got := mapped.getData(); got != 4 {
 		t.Errorf("expected 4, got %d", got)
 	}
 	if count != 1 {
@@ -127,7 +127,7 @@ func TestMapDataCaching(t *testing.T) {
 	}
 
 	// Second call should return cached value without incrementing count
-	if got := mapped.Data(); got != 4 {
+	if got := mapped.getData(); got != 4 {
 		t.Errorf("expected 4, got %d", got)
 	}
 	if count != 1 {
@@ -145,7 +145,7 @@ func TestMapDataCachingWithPointer(t *testing.T) {
 	})
 
 	// First call triggers mapping
-	res1 := mapped.Data()
+	res1 := mapped.getData()
 	if *res1 != 4 {
 		t.Errorf("expected 4, got %d", *res1)
 	}
@@ -154,7 +154,7 @@ func TestMapDataCachingWithPointer(t *testing.T) {
 	}
 
 	// Second call should return cached value (same pointer) without incrementing count
-	res2 := mapped.Data()
+	res2 := mapped.getData()
 	if *res2 != 4 {
 		t.Errorf("expected 4, got %d", *res2)
 	}

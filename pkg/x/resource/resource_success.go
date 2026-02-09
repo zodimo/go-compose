@@ -6,19 +6,23 @@ type resourceSuccess[T any] struct {
 	data T
 }
 
-func (r *resourceSuccess[T]) IsLoading() bool {
+func (r *resourceSuccess[T]) isLoading() bool {
 	return false
 }
 
-func (r *resourceSuccess[T]) Error() error {
+func (r *resourceSuccess[T]) getError() error {
 	return nil
 }
 
-func (r *resourceSuccess[T]) Data() T {
+func (r *resourceSuccess[T]) hasError() bool {
+	return false
+}
+
+func (r *resourceSuccess[T]) getData() T {
 	return r.data
 }
 
-func (r *resourceSuccess[T]) HasData() bool {
+func (r *resourceSuccess[T]) hasData() bool {
 	return true
 }
 
