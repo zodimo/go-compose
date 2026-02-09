@@ -203,3 +203,194 @@ func TestMatch(t *testing.T) {
 		}
 	})
 }
+
+func TestMatchPartial(t *testing.T) {
+	t.Run("Loading with no options returns None", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		result := MatchPartial[string, string](r)
+		if result.IsSome() {
+			t.Errorf("expected None, got Some(%v)", result.OrElse(""))
+		}
+	})
+
+	t.Run("Success with no options returns None", func(t *testing.T) {
+		r := ResourceSuccess("data")
+		result := MatchPartial[string, string](r)
+		if result.IsSome() {
+			t.Errorf("expected None, got Some(%v)", result.OrElse(""))
+		}
+	})
+
+	t.Run("Error with no options returns None", func(t *testing.T) {
+		r := ResourceError[string](errors.New("fail"))
+		result := MatchPartial[string, string](r)
+		if result.IsSome() {
+			t.Errorf("expected None, got Some(%v)", result.OrElse(""))
+		}
+	})
+
+	t.Run("Loading with OnLoading handler", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		result := MatchPartial[string, string](r,
+			WithOnLoading[string, string](func() string { return "loading" }),
+		)
+		if !result.IsSome() {
+			t.Errorf("expected Some, got None")
+		}
+		if result.OrElse("") != "loading" {
+			t.Errorf("expected 'loading', got %s", result.OrElse(""))
+		}
+	})
+
+	t.Run("Success with OnData handler", func(t *testing.T) {
+		r := ResourceSuccess("hello")
+		result := MatchPartial[string, string](r,
+			WithOnData[string, string](func(data string) string { return "got: " + data }),
+		)
+		if !result.IsSome() {
+			t.Errorf("expected Some, got None")
+		}
+		if result.OrElse("") != "got: hello" {
+			t.Errorf("expected 'got: hello', got %s", result.OrElse(""))
+		}
+	})
+
+	t.Run("Error with OnError handler", func(t *testing.T) {
+		r := ResourceError[string](errors.New("fail"))
+		result := MatchPartial[string, string](r,
+			WithOnError[string, string](func(err error) string { return "error: " + err.Error() }),
+		)
+		if !result.IsSome() {
+			t.Errorf("expected Some, got None")
+		}
+		if result.OrElse("") != "error: fail" {
+			t.Errorf("expected 'error: fail', got %s", result.OrElse(""))
+		}
+	})
+
+	t.Run("Loading uses default when no OnLoading", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		result := MatchPartial[string, string](r,
+			WithDefault[string, string](func() string { return "default" }),
+		)
+		if !result.IsSome() {
+			t.Errorf("expected Some, got None")
+		}
+		if result.OrElse("") != "default" {
+			t.Errorf("expected 'default', got %s", result.OrElse(""))
+		}
+	})
+
+	t.Run("Success uses default when no OnData", func(t *testing.T) {
+		r := ResourceSuccess("data")
+		result := MatchPartial[string, string](r,
+			WithDefault[string, string](func() string { return "default" }),
+		)
+		if !result.IsSome() {
+			t.Errorf("expected Some, got None")
+		}
+		if result.OrElse("") != "default" {
+			t.Errorf("expected 'default', got %s", result.OrElse(""))
+		}
+	})
+
+	t.Run("Error uses default when no OnError", func(t *testing.T) {
+		r := ResourceError[string](errors.New("fail"))
+		result := MatchPartial[string, string](r,
+			WithDefault[string, string](func() string { return "default" }),
+		)
+		if !result.IsSome() {
+			t.Errorf("expected Some, got None")
+		}
+		if result.OrElse("") != "default" {
+			t.Errorf("expected 'default', got %s", result.OrElse(""))
+		}
+	})
+
+	t.Run("OnLoading takes precedence over default", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		result := MatchPartial[string, string](r,
+			WithOnLoading[string, string](func() string { return "loading" }),
+			WithDefault[string, string](func() string { return "default" }),
+		)
+		if !result.IsSome() {
+			t.Errorf("expected Some, got None")
+		}
+		if result.OrElse("") != "loading" {
+			t.Errorf("expected 'loading', got %s", result.OrElse(""))
+		}
+	})
+
+	t.Run("OnData takes precedence over default", func(t *testing.T) {
+		r := ResourceSuccess("data")
+		result := MatchPartial[string, string](r,
+			WithOnData[string, string](func(d string) string { return d }),
+			WithDefault[string, string](func() string { return "default" }),
+		)
+		if !result.IsSome() {
+			t.Errorf("expected Some, got None")
+		}
+		if result.OrElse("") != "data" {
+			t.Errorf("expected 'data', got %s", result.OrElse(""))
+		}
+	})
+
+	t.Run("OnError takes precedence over default", func(t *testing.T) {
+		r := ResourceError[string](errors.New("fail"))
+		result := MatchPartial[string, string](r,
+			WithOnError[string, string](func(err error) string { return "err" }),
+			WithDefault[string, string](func() string { return "default" }),
+		)
+		if !result.IsSome() {
+			t.Errorf("expected Some, got None")
+		}
+		if result.OrElse("") != "err" {
+			t.Errorf("expected 'err', got %s", result.OrElse(""))
+		}
+	})
+
+	t.Run("All handlers with Success", func(t *testing.T) {
+		r := ResourceSuccess("success")
+		result := MatchPartial[string, string](r,
+			WithOnLoading[string, string](func() string { return "loading" }),
+			WithOnError[string, string](func(err error) string { return "error" }),
+			WithOnData[string, string](func(d string) string { return d }),
+		)
+		if !result.IsSome() {
+			t.Errorf("expected Some, got None")
+		}
+		if result.OrElse("") != "success" {
+			t.Errorf("expected 'success', got %s", result.OrElse(""))
+		}
+	})
+
+	t.Run("All handlers with Loading", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		result := MatchPartial[string, string](r,
+			WithOnLoading[string, string](func() string { return "loading" }),
+			WithOnError[string, string](func(err error) string { return "error" }),
+			WithOnData[string, string](func(d string) string { return d }),
+		)
+		if !result.IsSome() {
+			t.Errorf("expected Some, got None")
+		}
+		if result.OrElse("") != "loading" {
+			t.Errorf("expected 'loading', got %s", result.OrElse(""))
+		}
+	})
+
+	t.Run("All handlers with Error", func(t *testing.T) {
+		r := ResourceError[string](errors.New("fail"))
+		result := MatchPartial[string, string](r,
+			WithOnLoading[string, string](func() string { return "loading" }),
+			WithOnError[string, string](func(err error) string { return "error" }),
+			WithOnData[string, string](func(d string) string { return d }),
+		)
+		if !result.IsSome() {
+			t.Errorf("expected Some, got None")
+		}
+		if result.OrElse("") != "error" {
+			t.Errorf("expected 'error', got %s", result.OrElse(""))
+		}
+	})
+}

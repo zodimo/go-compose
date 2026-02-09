@@ -45,13 +45,3 @@ func FlatMapData[T, U any](resource Resource[T], fn func(T) Resource[U]) Resourc
 		},
 	}
 }
-
-func Match[T, U any](resource Resource[T], onLoading func() U, onError func(error) U, onData func(T) U) U {
-	if resource.IsLoading() {
-		return onLoading()
-	}
-	if resource.HasData() {
-		return onData(resource.Data())
-	}
-	return onError(resource.Error())
-}
