@@ -7,11 +7,10 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/overlay"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
+	"github.com/zodimo/go-compose/compose/foundation/stopclickthru"
 	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/material3/surface"
-	mBox "github.com/zodimo/go-compose/modifiers/box"
 	"github.com/zodimo/go-compose/modifiers/padding"
-	"github.com/zodimo/go-compose/modifiers/pointer"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
 )
@@ -132,27 +131,13 @@ func DialogSurface(content api.Composable, onDismiss func()) api.Composable {
 
 		return overlay.Overlay(
 			surface.Surface(
-				c.Sequence(
+				stopclickthru.StopClickThru(
+					//content with padding
 					box.Box(
-						c.Sequence(
-							//box to block pointer events passing though the content
-							box.Box(
-								compose.Id(),
-								box.WithModifier(
-									mBox.MatchParentSize().Then(pointer.BlockPointer()),
-								),
-							),
-							//content with padding
-							box.Box(
-								content,
-								box.WithModifier(
-									padding.All(int(DialogPadding.All)).
-										Then(size.WidthIn(int(DialogDefaults.MinWidth), int(DialogDefaults.MaxWidth))),
-								),
-							),
-						),
+						content,
 						box.WithModifier(
-							size.WrapContentSize(),
+							padding.All(int(DialogPadding.All)).
+								Then(size.WidthIn(int(DialogDefaults.MinWidth), int(DialogDefaults.MaxWidth))),
 						),
 					),
 				),

@@ -6,6 +6,7 @@ import (
 	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 
+	"gioui.org/layout"
 	"gioui.org/widget/material"
 )
 
@@ -47,7 +48,16 @@ func NewClickableNode(element ClickableElement) ChainNode {
 						if clickable.Clicked(gtx) {
 							onClick()
 						}
-						return material.Clickable(gtx, clickable, widget.Layout)
+
+						return layout.Background{}.Layout(gtx,
+							func(gtx layout.Context) layout.Dimensions {
+								backgroundWidget := func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+									return layout.Dimensions{Size: gtx.Constraints.Min}
+								}
+								return material.Clickable(gtx, clickable, backgroundWidget)
+							},
+							widget.Layout,
+						)
 					})
 				})
 
