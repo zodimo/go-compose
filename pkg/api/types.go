@@ -45,8 +45,13 @@ type Composer interface {
 	WithComposable(composable Composable) Composer
 
 	If(condition bool, ifTrue Composable, ifFalse Composable) Composable
+	IfLazy(condition bool, ifTrue func() Composable, ifFalse func() Composable) Composable
+
 	When(condition bool, ifTrue Composable) Composable
+	WhenLazy(condition bool, ifTrue func() Composable) Composable
+
 	Else(condition bool, ifFalse Composable) Composable
+	ElseLazy(condition bool, ifFalse func() Composable) Composable
 
 	Sequence(contents ...Composable) Composable
 

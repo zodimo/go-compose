@@ -181,9 +181,24 @@ func (c *composer) If(condition bool, ifTrue Composable, ifFalse Composable) Com
 	return c.Key("if_false", ifFalse)
 }
 
+func (c *composer) IfLazy(condition bool, ifTrue func() Composable, ifFalse func() Composable) Composable {
+	// Use stable string keys for branches - the prefix stack handles scoping
+	if condition {
+		return c.Key("if_true", ifTrue())
+	}
+	return c.Key("if_false", ifFalse())
+}
+
 func (c *composer) When(condition bool, ifTrue Composable) Composable {
 	if condition {
 		return c.Key("when_true", ifTrue)
+	}
+	return c.Key("when_false", emptyComposable())
+}
+
+func (c *composer) WhenLazy(condition bool, ifTrue func() Composable) Composable {
+	if condition {
+		return c.Key("when_true", ifTrue())
 	}
 	return c.Key("when_false", emptyComposable())
 }
@@ -193,6 +208,13 @@ func (c *composer) Else(condition bool, ifFalse Composable) Composable {
 		return c.Key("else_true", emptyComposable())
 	}
 	return c.Key("else_false", ifFalse)
+}
+
+func (c *composer) ElseLazy(condition bool, ifFalse func() Composable) Composable {
+	if condition {
+		return c.Key("else_true", emptyComposable())
+	}
+	return c.Key("else_false", ifFalse())
 }
 
 func (c *composer) Sequence(contents ...Composable) Composable {
