@@ -3,6 +3,7 @@ package zipper
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/zodimo/go-compose/compose/ui"
 	node "github.com/zodimo/go-compose/internal/Node"
@@ -27,6 +28,11 @@ type composer struct {
 	idPrefixStack  []string    // stack of ID prefixes for scoped identity (used by c.Key)
 	locals         map[interface{}]interface{}
 	providersStack []map[interface{}]interface{}
+	timeNowFunc    func() time.Time
+}
+
+func (c *composer) TimeNow() time.Time {
+	return c.timeNowFunc()
 }
 
 // Tree Builder operations

@@ -1,6 +1,8 @@
 package api
 
 import (
+	"time"
+
 	"github.com/zodimo/go-compose/compose/ui"
 	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
@@ -21,6 +23,9 @@ type NodePath = node.NodePath
 
 // Public API of the composer
 type Composer interface {
+	// frame time
+	TimeNow() time.Time
+
 	// --
 	GetID() Identifier
 	GetPath() NodePath
