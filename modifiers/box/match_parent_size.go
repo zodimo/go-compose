@@ -2,9 +2,9 @@ package box
 
 import (
 	"github.com/zodimo/go-compose/compose/ui"
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/modifier"
+	node "github.com/zodimo/go-compose/internal/node"
 )
 
 const MatchParentSizeKey = "box_match_parent_size"

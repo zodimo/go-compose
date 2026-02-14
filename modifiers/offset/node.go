@@ -4,8 +4,8 @@ import (
 	"image"
 
 	"github.com/zodimo/go-compose/compose/ui/unit"
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	node "github.com/zodimo/go-compose/internal/node"
 
 	"gioui.org/op"
 )

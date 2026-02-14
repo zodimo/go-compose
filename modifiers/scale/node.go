@@ -1,8 +1,8 @@
 package scale
 
 import (
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	node "github.com/zodimo/go-compose/internal/node"
 
 	"gioui.org/f32"
 	"gioui.org/op"

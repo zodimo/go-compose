@@ -1,10 +1,10 @@
 package zipper
 
 import (
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/identity"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/modifier"
+	node "github.com/zodimo/go-compose/internal/node"
 	"github.com/zodimo/go-compose/internal/sequence"
 	"github.com/zodimo/go-compose/pkg/api"
 	idApi "github.com/zodimo/go-compose/pkg/compose-identifier/api"

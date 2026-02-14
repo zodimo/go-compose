@@ -4,8 +4,8 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/compose/ui/unit"
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	node "github.com/zodimo/go-compose/internal/node"
 
 	"gioui.org/op"
 	"gioui.org/op/clip"

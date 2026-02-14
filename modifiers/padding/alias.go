@@ -1,9 +1,9 @@
 package padding
 
 import (
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/modifier"
+	node "github.com/zodimo/go-compose/internal/node"
 )
 
 type Element = modifier.Element

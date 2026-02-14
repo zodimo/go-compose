@@ -1,9 +1,9 @@
 package weight
 
 import (
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/modifier"
+	node "github.com/zodimo/go-compose/internal/node"
 	"github.com/zodimo/go-compose/modifiers/helpers"
 )
 

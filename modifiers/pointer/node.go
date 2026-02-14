@@ -4,8 +4,8 @@ import (
 	"gioui.org/io/event"
 	"gioui.org/io/pointer"
 	"gioui.org/op/clip"
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	node "github.com/zodimo/go-compose/internal/node"
 )
 
 var _ node.ChainNode = (*InputBlockerNode)(nil)

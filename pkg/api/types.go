@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/zodimo/go-compose/compose/ui"
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/modifier"
+	node "github.com/zodimo/go-compose/internal/node"
 	idApi "github.com/zodimo/go-compose/pkg/compose-identifier/api"
 	"github.com/zodimo/go-compose/state"
 )

@@ -1,10 +1,10 @@
 package layoutnode
 
 import (
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/identity"
 	"github.com/zodimo/go-compose/internal/immap"
 	"github.com/zodimo/go-compose/internal/modifier"
+	node "github.com/zodimo/go-compose/internal/node"
 	"github.com/zodimo/go-compose/state"
 
 	"gioui.org/layout"

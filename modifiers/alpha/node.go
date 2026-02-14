@@ -2,8 +2,8 @@ package alpha
 
 import (
 	"gioui.org/op/paint"
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	node "github.com/zodimo/go-compose/internal/node"
 )
 
 type AlphaState struct {

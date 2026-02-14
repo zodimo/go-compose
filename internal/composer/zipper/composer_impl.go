@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/zodimo/go-compose/compose/ui"
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	node "github.com/zodimo/go-compose/internal/node"
 )
 
 var _ Composer = (*composer)(nil)

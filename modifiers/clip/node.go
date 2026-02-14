@@ -2,8 +2,8 @@ package clip
 
 import (
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	node "github.com/zodimo/go-compose/internal/node"
 
 	"gioui.org/layout"
 	"gioui.org/op"

@@ -3,8 +3,8 @@ package clickable
 import (
 	"fmt"
 
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	node "github.com/zodimo/go-compose/internal/node"
 
 	"gioui.org/layout"
 	"gioui.org/widget/material"

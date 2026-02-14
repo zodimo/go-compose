@@ -1,8 +1,8 @@
 package padding
 
 import (
-	node "github.com/zodimo/go-compose/internal/Node"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	node "github.com/zodimo/go-compose/internal/node"
 
 	"gioui.org/layout"
 	gioUnit "gioui.org/unit"
