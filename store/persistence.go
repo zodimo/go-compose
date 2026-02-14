@@ -9,16 +9,24 @@ import (
 type PersistentStateInterface = state.PersistentState
 
 type PersistentState struct {
-	scopes        map[string]state.MutableValue
-	onStateChange func()
+	scopes      map[string]state.MutableValue
+	subscribers *state.SubscriptionManager
 }
 
 func NewPersistentState(scopes map[string]state.MutableValue) PersistentStateInterface {
-	return &PersistentState{scopes: scopes}
+	return &PersistentState{
+		scopes:      scopes,
+		subscribers: state.NewSubscriptionManager(),
+	}
 }
 
+// Deprecated: use Subscribe instead
 func (ps *PersistentState) SetOnStateChange(callback func()) {
-	ps.onStateChange = callback
+	ps.subscribers.Subscribe(callback)
+}
+
+func (ps *PersistentState) Subscribe(callback func()) state.Subscription {
+	return ps.subscribers.Subscribe(callback)
 }
 
 func (ps *PersistentState) GetState(id string, initial func() any, options ...state.StateOption) state.MutableValue {
@@ -35,9 +43,7 @@ func (ps *PersistentState) GetState(id string, initial func() any, options ...st
 	}
 
 	ps.scopes[id] = state.NewMutableValue(initial(), func(any) {
-		if ps.onStateChange != nil {
-			ps.onStateChange()
-		}
+		ps.subscribers.NotifyAll()
 	}, opts.Compare)
 	return ps.scopes[id]
 }
