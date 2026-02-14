@@ -15,6 +15,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/state"
 
 	gioUnit "gioui.org/unit"
 	"git.sr.ht/~schnwalter/gio-mw/token"
@@ -48,36 +49,17 @@ func ModalBottomSheet(
 			}
 		}
 
-		// Animation state
-		// If SheetState provided, use it. Otherwise create internal one.
-		// Usually we want persistent state to control close.
-
-		var anim *animation.VisibilityAnimation
-		if opts.SheetState != nil {
-			anim = opts.SheetState.visibleAnim
-		} else {
-			// Internal state sync with IsOpen
-			state := c.State(c.GenerateID().String()+"/anim", func() any {
-				return &animation.VisibilityAnimation{
-					Duration: time.Millisecond * 300,
-					State:    animation.Invisible,
-				}
-			}).Get().(*animation.VisibilityAnimation)
-			anim = state
-		}
+		anim := state.MustState(c, c.GenerateID().String()+"/anim", func() *animation.VisibilityAnimation {
+			return animation.NewVisibilityAnimation(time.Millisecond*300, animation.Invisible)
+		}).Get()
 
 		// Sync animation state with IsOpen if no external SheetState manipulation is expected
 		// OR if IsOpen is the driver.
 		// Simplest: Check IsOpen.
 		if opts.IsOpen {
-			anim.Appear(time.Now())
+			anim.Appear(c.TimeNow())
 		} else {
-			// Only hide if not managed by SheetState manually?
-			// If opts.SheetState is set, the caller calls Show/Hide.
-			// But IsOpen is also an option.
-			// Let's assume IsOpen drives it if it changes.
-			// But since we are declarative, IsOpen IS the truth.
-			anim.Disappear(time.Now())
+			anim.Disappear(c.TimeNow())
 		}
 
 		baseScrim := graphics.SetOpacity(opts.ScrimColor, float32(token.OpacityLevel8))

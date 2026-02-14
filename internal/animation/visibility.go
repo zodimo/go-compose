@@ -12,9 +12,15 @@ import (
 // "visible" and "invisible" state for a fixed duration of time.
 type VisibilityAnimation struct {
 	// How long does the animation last
-	Duration time.Duration
-	State    VisibilityAnimationState
-	Started  time.Time
+	State     VisibilityAnimationState
+	Animation Animation
+}
+
+func NewVisibilityAnimation(duration time.Duration, visibilityState VisibilityAnimationState) *VisibilityAnimation {
+	return &VisibilityAnimation{
+		Animation: NewAnimation(duration),
+		State:     visibilityState,
+	}
 }
 
 // Revealed returns the fraction of the animated entity that should be revealed at the current
@@ -32,14 +38,15 @@ func (v *VisibilityAnimation) Revealed(gtx layout.Context) float32 {
 	if v.Animating() {
 		gtx.Execute(op.InvalidateCmd{})
 	}
-	if v.Duration == time.Duration(0) {
-		v.Duration = time.Second
+	if v.Animation.Duration() == time.Duration(0) {
+		v.Animation.SetDuration(time.Second)
 	}
-	progress := float32(gtx.Now.Sub(v.Started).Milliseconds()) / float32(v.Duration.Milliseconds())
+	progress := float32(gtx.Now.Sub(v.Animation.StartTime()).Milliseconds()) / float32(v.Animation.Duration().Milliseconds())
 	if progress >= 1 {
-		if v.State == Appearing {
+		switch v.State {
+		case Appearing:
 			v.State = Visible
-		} else if v.State == Disappearing {
+		case Disappearing:
 			v.State = Invisible
 		}
 	}
@@ -73,7 +80,7 @@ func (v VisibilityAnimation) Animating() bool {
 func (v *VisibilityAnimation) Appear(now time.Time) {
 	if !v.Visible() && !v.Animating() {
 		v.State = Appearing
-		v.Started = now
+		v.Animation.Start(now)
 	}
 }
 
@@ -82,7 +89,7 @@ func (v *VisibilityAnimation) Appear(now time.Time) {
 func (v *VisibilityAnimation) Disappear(now time.Time) {
 	if v.Visible() && !v.Animating() {
 		v.State = Disappearing
-		v.Started = now
+		v.Animation.Start(now)
 	}
 }
 
@@ -101,8 +108,8 @@ func (v *VisibilityAnimation) String(gtx layout.Context) string {
 		"State: %v, Revealed: %f, Duration: %v, Started: %v",
 		v.State,
 		v.Revealed(gtx),
-		v.Duration,
-		v.Started.Local(),
+		v.Animation.Duration(),
+		v.Animation.StartTime().Local(),
 	)
 }
 

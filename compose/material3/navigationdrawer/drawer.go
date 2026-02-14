@@ -14,6 +14,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/state"
 
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
@@ -39,18 +40,15 @@ func ModalNavigationDrawer(
 		drawerContainerColor := theme.ColorScheme().SurfaceContainerLow //theme.ColorHelper.ColorSelector().SurfaceRoles.ContainerLow
 
 		// Animation state
-		anim := c.State(c.GenerateID().String()+"/anim", func() any {
-			return &animation.VisibilityAnimation{
-				Duration: time.Millisecond * 300,
-				State:    animation.Invisible,
-			}
-		}).Get().(*animation.VisibilityAnimation)
+		anim := state.MustState(c, c.GenerateID().String()+"/anim", func() *animation.VisibilityAnimation {
+			return animation.NewVisibilityAnimation(time.Millisecond*300, animation.Invisible)
+		}).Get()
 
 		// Sync animation state
 		if opts.IsOpen {
-			anim.Appear(time.Now())
+			anim.Appear(c.TimeNow())
 		} else {
-			anim.Disappear(time.Now())
+			anim.Disappear(c.TimeNow())
 		}
 
 		baseScrim := graphics.SetOpacity(theme.ColorScheme().Scrim, float32(token.OpacityLevel8))

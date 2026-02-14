@@ -12,7 +12,6 @@ type Composable = api.Composable
 type ModalBottomSheetOptions struct {
 	IsOpen           bool // Controlled by parent usually, or we can use visible state?
 	OnDismissRequest func()
-	SheetState       *SheetState
 	ContainerColor   graphics.Color    // Will use default if not set
 	ScrimColor       graphics.Color    // Will use default if not set
 	Shape            token.CornerShape // Will use default if not set
@@ -30,15 +29,6 @@ func DefaultModalBottomSheetOptions() ModalBottomSheetOptions {
 	}
 }
 
-func WithSheetState(state *SheetState) ModalBottomSheetOption {
-	return func(o *ModalBottomSheetOptions) {
-		o.SheetState = state
-	}
-}
-
-// WithIsOpen is useful if the parent controls the state specifically without a SheetState object,
-// but usually SheetState is preferred for imperative show/hide.
-// Let's align with Drawer: it uses `IsOpen` and `OnClose`.
 func WithIsOpen(isOpen bool) ModalBottomSheetOption {
 	return func(o *ModalBottomSheetOptions) {
 		o.IsOpen = isOpen

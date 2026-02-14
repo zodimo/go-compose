@@ -11,6 +11,7 @@ import (
 	"github.com/zodimo/go-compose/internal/animation"
 	animMod "github.com/zodimo/go-compose/modifiers/animation"
 	"github.com/zodimo/go-compose/modifiers/size"
+	"github.com/zodimo/go-compose/state"
 
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
@@ -33,19 +34,15 @@ func DismissibleNavigationDrawer(
 		drawerContainerColor := theme.ColorScheme().SurfaceContainerLow //theme.ColorHelper.ColorSelector().SurfaceRoles.ContainerLow
 
 		// Animation state
-		// We use a persistent pointer for the animation state
-		anim := c.State(c.GenerateID().String()+"/anim", func() any {
-			return &animation.VisibilityAnimation{
-				Duration: time.Millisecond * 250,
-				State:    animation.Invisible,
-			}
-		}).Get().(*animation.VisibilityAnimation)
+		anim := state.MustState(c, c.GenerateID().String()+"/anim", func() *animation.VisibilityAnimation {
+			return animation.NewVisibilityAnimation(time.Millisecond*250, animation.Invisible)
+		}).Get()
 
 		// Sync animation state with props
 		if opts.IsOpen {
-			anim.Appear(time.Now())
+			anim.Appear(c.TimeNow())
 		} else {
-			anim.Disappear(time.Now())
+			anim.Disappear(c.TimeNow())
 		}
 
 		return row.Row(
