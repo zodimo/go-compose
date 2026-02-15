@@ -35,7 +35,7 @@ func main() {
 			app.Size(unit.Dp(1024), unit.Dp(768)),
 		)
 
-		if err := Run(w, rootContext); err != nil {
+		if err := Run(rootContext, w); err != nil {
 			log.Fatal(err)
 		}
 
@@ -51,7 +51,7 @@ func main() {
 
 }
 
-func Run(window *app.Window, rootContext context.Context) error {
+func Run(rootContext context.Context, window *app.Window) error {
 
 	enLocale := system.Locale{Language: "en", Direction: system.LTR}
 
