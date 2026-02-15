@@ -8,6 +8,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	node "github.com/zodimo/go-compose/internal/node"
+	"github.com/zodimo/go-compose/state"
 )
 
 var _ Composer = (*composer)(nil)
@@ -21,7 +22,6 @@ type pathItem struct {
 type composer struct {
 	focus          LayoutNode // group we are currently inside
 	path           []pathItem // how to climb back to root
-	memo           Memo       // remember cache for this composition run
 	state          PersistentState
 	idManager      IdentityManager
 	overrideID     *Identifier // single override ID for c.Key (one Key affects one component)
@@ -29,16 +29,36 @@ type composer struct {
 	locals         map[interface{}]interface{}
 	providersStack []map[interface{}]interface{}
 	timeNowFunc    func() time.Time
+
+	//lifecycle hooks
+	frameStarted     bool
+	onStartFrameFunc func()
+	onEndFrameFunc   func()
 }
 
 func (c *composer) TimeNow() time.Time {
 	return c.timeNowFunc()
 }
 
+func (c *composer) startFrame() {
+	c.frameStarted = true
+	c.onStartFrameFunc()
+}
+
+func (c *composer) endFrame() {
+	c.frameStarted = false
+	c.onEndFrameFunc()
+}
+
 // Tree Builder operations
 func (c *composer) StartBlock(key string) Composer {
 
-	newNode := layoutnode.NewLayoutNode(c.GenerateID(), key, EmptyMemo, EmptyMemo, c.state)
+	newNode := layoutnode.NewLayoutNode(
+		c.GenerateID(),
+		key,
+		state.EmptySlotStore[any](),
+		c.state,
+	)
 
 	if c.focus == nil {
 		//The Root Node
@@ -71,7 +91,16 @@ func (c *composer) Build() LayoutNode {
 	if c.focus == nil {
 		panic("No root layout node found")
 	}
-	return c.focus
+
+	focus := c.focus
+
+	if c.frameStarted {
+		c.endFrame()
+	}
+	// the will allow you to only call build once
+	c.focus = nil
+
+	return focus
 }
 
 func (c *composer) EmitSlot(k string, v any) Composer {
@@ -140,25 +169,16 @@ func (c *composer) ModifierThen(modifier ui.Modifier) Composer {
 	return c
 }
 
-// Remember caches a value for the current composition run.
-// The cache lives in Composer.memo and is discarded on recompose.
-func (c *composer) Remember(key string, calc func() any) any {
-	// Apply prefix stack to the key for proper scoping
-	scopedKey := c.scopeKey(key)
-	if v, ok := c.memo.Find(scopedKey); ok {
-		return v
-	}
-	v := calc()
-	c.memo = c.memo.Assoc(scopedKey, v)
-	return v
-}
-
 // State creates a MutableValue from the persistent state.
-// In a real runtime this would be a Snapshot with observers.
-func (c *composer) State(key string, initial func() any, options ...StateOption) MutableValue {
+func (c *composer) Remember(key string, initial func() any, options ...StateOption) MutableValue {
 	// Apply prefix stack to the key for proper scoping
 	scopedKey := c.scopeKey(key)
 	return c.state.GetState(scopedKey, initial, options...)
+}
+
+// Deprecated: use Remember instead
+func (c *composer) State(key string, initial func() any, options ...StateOption) MutableValue {
+	return c.Remember(key, initial, options...)
 }
 
 // scopeKey prefixes the given key with the current ID prefix stack.

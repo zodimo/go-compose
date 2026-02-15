@@ -9,14 +9,13 @@ import (
 	"github.com/zodimo/go-maybe"
 )
 
-func NewLayoutNode(id NodeID, key string, slotStore immap.ImmutableMap[any], memo Memo, persistentState PersistentState) LayoutNode {
+func NewLayoutNode(id NodeID, key string, slotStore immap.ImmutableMap[any], persistentState PersistentState) LayoutNode {
 	return &layoutNode{
 		id:           id,
 		key:          key,
 		children:     []LayoutNode{},
 		modifier:     ui.EmptyModifier,
 		slots:        slotStore,
-		memo:         memo,
 		state:        persistentState,
 		layoutResult: maybe.None[LayoutResult](),
 		idManager:    GetScopedIdentityManager("layout_nodes"),

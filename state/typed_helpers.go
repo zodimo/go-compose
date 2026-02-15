@@ -5,34 +5,39 @@ import (
 	"reflect"
 )
 
-func Remember[T any](c SupportState, key string, calc func() T) (T, error) {
-	anyCalc := func() any { return calc() }
-	anyValue := c.Remember(key, anyCalc)
-
-	tValue, ok := anyValue.(T)
-	if !ok {
-		var zero T
-		return zero, fmt.Errorf("value is not of type %T", zero)
+func Remember[T any](c SupportState, key string, initial func() T, options ...StateTypedOption[T]) (MutableValueTyped[T], error) {
+	opts := StateTypedOptions[T]{
+		Compare: func(t1, t2 T) bool {
+			return reflect.DeepEqual(t1, t2)
+		},
 	}
-	return tValue, nil
-}
-
-func RememberUnsafe[T any](c SupportState, key string, calc func() T) T {
-	anyCalc := func() any { return calc() }
-	anyValue := c.Remember(key, anyCalc)
-
-	tValue, ok := anyValue.(T)
-	if !ok {
-		var zero T
-		panic(fmt.Errorf("value is not of type %T", zero))
+	for _, option := range options {
+		option(&opts)
 	}
-	return tValue
+
+	mv := c.State(key, func() any { return initial() }, WithCompare(func(a, b any) bool {
+		return opts.Compare(a.(T), b.(T))
+	}))
+	anyMv, ok := mv.(*mutableValue)
+	if !ok {
+		return nil, fmt.Errorf("mutable value is not of type %T", mutableValue{})
+	}
+	return MutableValueToTyped[T](anyMv)
 }
 
-func MustRemember[T any](c SupportState, key string, calc func() T) T {
-	return RememberUnsafe[T](c, key, calc)
+func RememberUnsafe[T any](c SupportState, key string, initial func() T, options ...StateTypedOption[T]) MutableValueTyped[T] {
+	mv, err := Remember[T](c, key, initial, options...)
+	if err != nil {
+		panic(err)
+	}
+	return mv
 }
 
+func MustRemember[T any](c SupportState, key string, initial func() T, options ...StateTypedOption[T]) MutableValueTyped[T] {
+	return RememberUnsafe[T](c, key, initial, options...)
+}
+
+// Deprecated: use Remember instead
 func State[T any](c SupportState, key string, initial func() T, options ...StateTypedOption[T]) (MutableValueTyped[T], error) {
 	opts := StateTypedOptions[T]{
 		Compare: func(t1, t2 T) bool {
@@ -53,6 +58,7 @@ func State[T any](c SupportState, key string, initial func() T, options ...State
 	return MutableValueToTyped[T](anyMv)
 }
 
+// Deprecated: use RememberUnsafe instead
 func StateUnsafe[T any](c SupportState, key string, initial func() T, options ...StateTypedOption[T]) MutableValueTyped[T] {
 	mv, err := State[T](c, key, initial, options...)
 	if err != nil {
@@ -61,6 +67,7 @@ func StateUnsafe[T any](c SupportState, key string, initial func() T, options ..
 	return mv
 }
 
+// Deprecated: use MustState instead
 func MustState[T any](c SupportState, key string, initial func() T, options ...StateTypedOption[T]) MutableValueTyped[T] {
 	return StateUnsafe[T](c, key, initial, options...)
 }

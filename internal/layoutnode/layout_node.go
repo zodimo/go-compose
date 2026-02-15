@@ -2,6 +2,7 @@ package layoutnode
 
 import (
 	"github.com/zodimo/go-compose/compose/ui"
+	"github.com/zodimo/go-compose/state"
 	"github.com/zodimo/go-maybe"
 )
 
@@ -25,7 +26,8 @@ type LayoutNode interface {
 
 	GenerateID() Identifier
 	ResetIdentifierKeyCounter()
-	SupportState
+
+	state.SupportState
 
 	GetWidget() GioLayoutWidget
 

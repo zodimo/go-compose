@@ -12,14 +12,7 @@ import (
 )
 
 type LayoutNode = layoutnode.LayoutNode
-type Memo = state.MemoTyped[any]
-type ElementMemo = state.MemoTyped[Element]
-
 type PersistentState = state.PersistentState
-
-var EmptyMemo = state.EmptyMemo[any]()
-var EmptyElementMemo = state.EmptyMemo[Element]()
-
 type IdentityManager = identity.IdentityManager
 
 var GetScopedIdentityManager = identity.GetScopedIdentityManager

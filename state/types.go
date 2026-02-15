@@ -22,7 +22,11 @@ func WithTypedCompare[T any](compare func(T, T) bool) StateTypedOption[T] {
 }
 
 type SupportState interface {
-	Remember(key string, calc func() any) any                                  // transient state
+	Remember(key string, initial func() any, options ...StateOption) MutableValue // persistent state
+
+	// deprecate this one to get closer to jetpack compose
+	// alias for Remember
+	// Deprecated: use Remember instead
 	State(key string, initial func() any, options ...StateOption) MutableValue // persistent state
 }
 
