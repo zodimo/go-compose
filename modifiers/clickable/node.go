@@ -5,6 +5,7 @@ import (
 
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	node "github.com/zodimo/go-compose/internal/node"
+	"github.com/zodimo/go-compose/state"
 
 	"gioui.org/layout"
 	"gioui.org/widget/material"
@@ -30,12 +31,9 @@ func NewClickableNode(element ClickableElement) ChainNode {
 					lno := n.(layoutnode.LayoutNode)
 					key := lno.GenerateID()
 
-					// fmt.Printf("Clickable Key : %s", key)
-					// path := lno.GetPath()
-
 					clickablePath := fmt.Sprintf("%d/clickable", key)
-					clickableValue := lno.State(clickablePath, func() any { return &GioClickable{} })
-					clickable := clickableValue.Get().(*GioClickable)
+					clickableValue := state.MustRemember(lno, clickablePath, func() *GioClickable { return &GioClickable{} })
+					clickable := clickableValue.Get()
 					element.clickableData.Clickable = clickable
 				}
 
