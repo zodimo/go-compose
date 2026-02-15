@@ -59,6 +59,7 @@ func UI(c api.Composer) api.LayoutNode {
 				func(scope lazy.LazyListScope) {
 					scope.Item(nil, func(c api.Composer) api.Composer {
 						return c.Sequence(
+							//use Lazy to not invoke the composlable and keep it in memory
 							c.WhenLazy(currentCategory == CategoryActions, func() api.Composable { return ActionsScreen(c) }),
 							c.WhenLazy(currentCategory == CategorySelection, func() api.Composable { return SelectionScreen(c) }),
 							c.WhenLazy(currentCategory == CategoryFeedback, func() api.Composable { return FeedbackScreen(c, showDialog, snackbarHostState) }),
