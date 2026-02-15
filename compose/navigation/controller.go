@@ -50,12 +50,7 @@ func RememberNavController(c api.Composer) *NavController {
 	backStack := state.MustState(c, "nav_backstack", func() []BackStackEntry {
 		return []BackStackEntry{}
 	})
-
-	nc := c.Remember("nav_controller", func() any {
-		return NewNavController(backStack)
-	})
-
-	return nc.(*NavController)
+	return NewNavController(backStack)
 }
 
 // Navigate to a route. Arguments are extracted in NavHost via pattern matching.
