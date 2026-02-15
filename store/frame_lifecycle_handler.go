@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/zodimo/go-compose/lifecycle"
+	"github.com/zodimo/go-compose/state"
 )
 
 type FrameLifecycleHandler struct {
@@ -62,7 +63,7 @@ func (flh *FrameLifecycleHandler) StartFrame() {
 	flh.accessedKeys = make(map[string]struct{})
 }
 
-func (flh *FrameLifecycleHandler) AttachValueToLifecycle(key string, value any) {
+func (flh *FrameLifecycleHandler) AttachValueToLifecycle(key string, value state.MutableValue) {
 	if flh.debugMode {
 		log.Printf("FrameLifecycleHandler: AttachValueToLifecycle %s\n", key)
 	}
@@ -123,15 +124,17 @@ func (flh *FrameLifecycleHandler) EndFrame() []string {
 	return keysToRemove
 }
 
-func initScopedValue(initialValue any, rootContext context.Context) ScopedValue {
+func initScopedValue(mutableValue state.MutableValue, rootContext context.Context) ScopedValue {
 
 	scopedCancelFunc := func() {}
 	onForgotten := func() {}
 	onCleared := func() {}
 
-	if observer, ok := initialValue.(lifecycle.RememberObserver); ok {
+	if observer, ok := mutableValue.(lifecycle.RememberObserver); ok {
 		onForgotten = observer.OnForgotten
 	}
+
+	initialValue := mutableValue.Get()
 
 	// If implements HasViewModelScope, create and provide a cancellable context
 	if scopeHolder, ok := initialValue.(lifecycle.HasViewModelScope); ok {

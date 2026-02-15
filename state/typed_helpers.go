@@ -10,14 +10,20 @@ func Remember[T any](c SupportState, key string, initial func() T, options ...St
 		Compare: func(t1, t2 T) bool {
 			return reflect.DeepEqual(t1, t2)
 		},
+		OnForgotten: func() {},
 	}
 	for _, option := range options {
 		option(&opts)
 	}
 
-	mv := c.State(key, func() any { return initial() }, WithCompare(func(a, b any) bool {
-		return opts.Compare(a.(T), b.(T))
-	}))
+	mv := c.State(
+		key,
+		func() any { return initial() },
+		WithCompare(func(a, b any) bool {
+			return opts.Compare(a.(T), b.(T))
+		}),
+		WithOnForgotten(opts.OnForgotten),
+	)
 	anyMv, ok := mv.(*mutableValue)
 	if !ok {
 		return nil, fmt.Errorf("mutable value is not of type %T", mutableValue{})
@@ -43,14 +49,20 @@ func State[T any](c SupportState, key string, initial func() T, options ...State
 		Compare: func(t1, t2 T) bool {
 			return reflect.DeepEqual(t1, t2)
 		},
+		OnForgotten: func() {},
 	}
 	for _, option := range options {
 		option(&opts)
 	}
 
-	mv := c.State(key, func() any { return initial() }, WithCompare(func(a, b any) bool {
-		return opts.Compare(a.(T), b.(T))
-	}))
+	mv := c.State(
+		key,
+		func() any { return initial() },
+		WithCompare(func(a, b any) bool {
+			return opts.Compare(a.(T), b.(T))
+		}),
+		WithOnForgotten(opts.OnForgotten),
+	)
 	anyMv, ok := mv.(*mutableValue)
 	if !ok {
 		return nil, fmt.Errorf("mutable value is not of type %T", mutableValue{})

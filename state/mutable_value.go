@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+
+	"github.com/zodimo/go-compose/lifecycle"
 )
 
 var _ MutableValue = &mutableValue{}
@@ -11,6 +13,23 @@ var _ StateChangeNotifier = &mutableValue{}
 
 var _ MutableValue = &MutableValueWrapper[any]{}
 var _ StateChangeNotifier = &MutableValueWrapper[any]{}
+
+var _ lifecycle.RememberObserver = (*mutableValue)(nil)
+
+type MutableValueOptions struct {
+	OnForgotten func()
+}
+
+type MutableValueOption func(*MutableValueOptions)
+
+func MutableValueWithOnForgotten(onForgotten func()) MutableValueOption {
+	if onForgotten == nil {
+		panic("onForgotten cannot be nil")
+	}
+	return func(o *MutableValueOptions) {
+		o.OnForgotten = onForgotten
+	}
+}
 
 // MutableValue is a state container that notifies subscribers when its value changes.
 type mutableValue struct {
@@ -21,9 +40,19 @@ type mutableValue struct {
 
 	// Subscription support for push-based invalidation
 	subscribers *SubscriptionManager
+
+	onForgotten func()
 }
 
-func NewMutableValue(initial any, changeNotifier func(any), compare func(any, any) bool) MutableValue {
+func NewMutableValue(initial any, changeNotifier func(any), compare func(any, any) bool, options ...MutableValueOption) MutableValue {
+	opts := MutableValueOptions{
+		OnForgotten: func() {},
+	}
+	for _, option := range options {
+		if option != nil {
+			option(&opts)
+		}
+	}
 
 	if changeNotifier == nil {
 		changeNotifier = func(any) {}
@@ -40,6 +69,13 @@ func NewMutableValue(initial any, changeNotifier func(any), compare func(any, an
 		changeNotifier: changeNotifier,
 		compare:        compare,
 		subscribers:    NewSubscriptionManager(),
+		onForgotten:    opts.OnForgotten,
+	}
+}
+
+func (mv *mutableValue) OnForgotten() {
+	if mv.onForgotten != nil {
+		mv.onForgotten()
 	}
 }
 

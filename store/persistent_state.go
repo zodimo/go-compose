@@ -61,7 +61,8 @@ func (ps *PersistentState) Subscribe(callback func()) state.Subscription {
 func (ps *PersistentState) GetState(id string, initial func() any, options ...state.StateOption) state.MutableValue {
 
 	opts := state.StateOptions{
-		Compare: reflect.DeepEqual,
+		Compare:     reflect.DeepEqual,
+		OnForgotten: func() {},
 	}
 	for _, option := range options {
 		option(&opts)
@@ -73,12 +74,18 @@ func (ps *PersistentState) GetState(id string, initial func() any, options ...st
 	}
 
 	initialValue := initial()
-	// Mark this key as accessed for GC tracking
-	ps.frameLifecycleHandler.AttachValueToLifecycle(id, initialValue)
 
-	ps.scopes[id] = state.NewMutableValue(initialValue, func(any) {
-		ps.subscribers.NotifyAll()
-	}, opts.Compare)
+	ps.scopes[id] = state.NewMutableValue(
+		initialValue,
+		func(any) {
+			ps.subscribers.NotifyAll()
+		},
+		opts.Compare,
+		state.MutableValueWithOnForgotten(opts.OnForgotten),
+	)
+
+	// Mark this key as accessed for GC tracking
+	ps.frameLifecycleHandler.AttachValueToLifecycle(id, ps.scopes[id])
 
 	return ps.scopes[id]
 }
