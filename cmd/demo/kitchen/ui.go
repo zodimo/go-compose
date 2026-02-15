@@ -59,11 +59,11 @@ func UI(c api.Composer) api.LayoutNode {
 				func(scope lazy.LazyListScope) {
 					scope.Item(nil, func(c api.Composer) api.Composer {
 						return c.Sequence(
-							c.When(currentCategory == CategoryActions, ActionsScreen(c)),
-							c.When(currentCategory == CategorySelection, SelectionScreen(c)),
-							c.When(currentCategory == CategoryFeedback, FeedbackScreen(c, showDialog, snackbarHostState)),
-							c.When(currentCategory == CategoryInputs, InputsScreen(c)),
-							c.When(currentCategory == CategoryTypography, TypographyScreen(c)),
+							c.WhenLazy(currentCategory == CategoryActions, func() api.Composable { return ActionsScreen(c) }),
+							c.WhenLazy(currentCategory == CategorySelection, func() api.Composable { return SelectionScreen(c) }),
+							c.WhenLazy(currentCategory == CategoryFeedback, func() api.Composable { return FeedbackScreen(c, showDialog, snackbarHostState) }),
+							c.WhenLazy(currentCategory == CategoryInputs, func() api.Composable { return InputsScreen(c) }),
+							c.WhenLazy(currentCategory == CategoryTypography, func() api.Composable { return TypographyScreen(c) }),
 						)(c)
 					})
 				},

@@ -1,8 +1,12 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/runtime"
@@ -18,16 +22,28 @@ import (
 
 func main() {
 
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	rootContext, cancelFunc := context.WithCancel(ctx)
+
 	go func() {
+		defer cancelFunc()
 		w := new(app.Window)
 		w.Option(
 			app.Title("Component Showcase"),
 			app.Size(unit.Dp(1024), unit.Dp(768)),
 		)
 
-		if err := Run(w); err != nil {
+		if err := Run(w, rootContext); err != nil {
 			log.Fatal(err)
 		}
+
+	}()
+
+	go func() {
+		<-rootContext.Done()
+		fmt.Println("Root Context done")
 		os.Exit(0)
 	}()
 
@@ -35,14 +51,17 @@ func main() {
 
 }
 
-func Run(window *app.Window) error {
+func Run(window *app.Window, rootContext context.Context) error {
 
 	enLocale := system.Locale{Language: "en", Direction: system.LTR}
 
 	var ops op.Ops
 
-	store := store.NewPersistentState(map[string]state.MutableValue{})
-	store.SetOnStateChange(func() {
+	store := store.NewPersistentState(
+		map[string]state.MutableValue{},
+		store.WithRootContext(rootContext),
+	)
+	store.Subscribe(func() {
 		window.Invalidate()
 	})
 	runtime := runtime.NewRuntime()

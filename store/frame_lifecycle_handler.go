@@ -14,6 +14,7 @@ type FrameLifecycleHandler struct {
 	accessedKeys map[string]struct{}
 	frameActive  bool
 	debugMode    bool
+	rootContext  context.Context
 }
 
 func NewFrameLifecycleHandler(options ...FrameLifecycleHandlerOption) *FrameLifecycleHandler {
@@ -21,6 +22,7 @@ func NewFrameLifecycleHandler(options ...FrameLifecycleHandlerOption) *FrameLife
 		scopedValues: make(map[string]ScopedValue),
 		accessedKeys: make(map[string]struct{}),
 		debugMode:    false,
+		rootContext:  context.Background(),
 	}
 
 	startFrameTrigger := flh.StartFrame
@@ -38,6 +40,7 @@ func NewFrameLifecycleHandler(options ...FrameLifecycleHandlerOption) *FrameLife
 	}
 
 	flh.debugMode = opts.DebugMode
+	flh.rootContext = opts.RootContext
 
 	//provide triggers to receivers
 	opts.StartFrameTriggerReceiver(startFrameTrigger)
@@ -67,7 +70,7 @@ func (flh *FrameLifecycleHandler) AttachValueToLifecycle(key string, value any) 
 	defer flh.mu.Unlock()
 	// Mark this key as accessed for GC tracking
 	flh.accessedKeys[key] = struct{}{}
-	flh.scopedValues[key] = initScopedValue(value)
+	flh.scopedValues[key] = initScopedValue(value, flh.rootContext)
 }
 
 func (flh *FrameLifecycleHandler) Ping(key string) {
@@ -120,7 +123,7 @@ func (flh *FrameLifecycleHandler) EndFrame() []string {
 	return keysToRemove
 }
 
-func initScopedValue(initialValue any) ScopedValue {
+func initScopedValue(initialValue any, rootContext context.Context) ScopedValue {
 
 	scopedCancelFunc := func() {}
 	onForgotten := func() {}
@@ -132,7 +135,7 @@ func initScopedValue(initialValue any) ScopedValue {
 
 	// If implements HasViewModelScope, create and provide a cancellable context
 	if scopeHolder, ok := initialValue.(lifecycle.HasViewModelScope); ok {
-		ctx, cancelFunc := context.WithCancel(context.Background())
+		ctx, cancelFunc := context.WithCancel(rootContext)
 		scopeHolder.SetViewModelScope(ctx)
 		scopedCancelFunc = cancelFunc
 	}

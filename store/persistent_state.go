@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"reflect"
 
 	"github.com/zodimo/go-compose/lifecycle"
@@ -23,6 +24,7 @@ func NewPersistentState(scopes map[string]state.MutableValue, options ...Persist
 		StartFrameTriggerReceiver: func(trigger func()) {},
 		EndFrameTriggerReceiver:   func(trigger func() []string) {},
 		DebugMode:                 false,
+		RootContext:               context.Background(),
 	}
 
 	for _, option := range options {
@@ -37,6 +39,7 @@ func NewPersistentState(scopes map[string]state.MutableValue, options ...Persist
 			opts.EndFrameTriggerReceiver,
 		),
 		WithLifecycleDebugMode(opts.DebugMode),
+		WithLifecycleRootContext(opts.RootContext),
 	)
 
 	return &PersistentState{

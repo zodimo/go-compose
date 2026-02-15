@@ -12,12 +12,17 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/state"
 )
 
 // InputsScreen shows text fields and typography
 func InputsScreen(c api.Composer) api.Composable {
 	filledText := c.State("inp_text", func() any { return "" })
 	outlinedText := c.State("outlined_text", func() any { return "" })
+
+	_ = state.MustRemember(c, "input-viewmodel", func() *InputViewModel {
+		return NewInputViewModel()
+	})
 
 	return func(c api.Composer) api.Composer {
 		return column.Column(
