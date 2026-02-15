@@ -32,7 +32,11 @@ func NewClickableNode(element ClickableElement) ChainNode {
 					key := lno.GenerateID()
 
 					clickablePath := fmt.Sprintf("%d/clickable", key)
-					clickableValue := state.MustRemember(lno, clickablePath, func() *GioClickable { return &GioClickable{} })
+					clickableValue := state.MustRemember(
+						lno,
+						clickablePath,
+						func() *GioClickable { return &GioClickable{} },
+					)
 					clickable := clickableValue.Get()
 					element.clickableData.Clickable = clickable
 				}

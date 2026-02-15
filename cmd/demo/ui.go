@@ -29,113 +29,114 @@ import (
 	"github.com/zodimo/go-compose/pkg/api"
 )
 
-func UI(c api.Composer) api.LayoutNode {
+func UI() api.Composable {
+	return func(c api.Composer) api.Composer {
+		counterCell := c.State("counter", func() any { return 0 })
 
-	counterCell := c.State("counter", func() any { return 0 })
+		theme := material3.Theme(c)
 
-	theme := material3.Theme(c)
-
-	c = column.Column(
-		c.Sequence(
-			row.Row(c.Sequence(
-				column.Column(
-					c.Sequence(
-						text.Text(
-							fmt.Sprintf("state=%v", counterCell.Get()),
-							text.WithTextStyleOptions(
-								uiText.WithColor(
-									graphics.FromNRGBA(color.NRGBA{R: 255, G: 255, B: 255, A: 255}),
+		c = column.Column(
+			c.Sequence(
+				row.Row(c.Sequence(
+					column.Column(
+						c.Sequence(
+							text.Text(
+								fmt.Sprintf("state=%v", counterCell.Get()),
+								text.WithTextStyleOptions(
+									uiText.WithColor(
+										graphics.FromNRGBA(color.NRGBA{R: 255, G: 255, B: 255, A: 255}),
+									),
 								),
 							),
 						),
-					),
-					// column.WithModifier(size.Size(200, 200, size.SizeRequired())),
-					column.WithModifier(
-						clickable.OnClick(func() {
-							fmt.Println("First Column clicked!!")
-							counterCell.Set(counterCell.Get().(int) + 1)
-						}).
-							Then(weight.Weight(1)).
-							Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 0, G: 0, B: 200, A: 200}))).
-							Then(padding.All(20)).
-							Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 0, G: 100, B: 200, A: 200}))),
-					),
-				),
-				column.Column(
-					c.Sequence(
-						m3Button.FilledTonal(func() {
-							counterCell.Set(counterCell.Get().(int) + 1)
-							fmt.Println("Button clicked!")
-						}, "click me",
-						// button.WithModifier(size.FillMax())
+						// column.WithModifier(size.Size(200, 200, size.SizeRequired())),
+						column.WithModifier(
+							clickable.OnClick(func() {
+								fmt.Println("First Column clicked!!")
+								counterCell.Set(counterCell.Get().(int) + 1)
+							}).
+								Then(weight.Weight(1)).
+								Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 0, G: 0, B: 200, A: 200}))).
+								Then(padding.All(20)).
+								Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 0, G: 100, B: 200, A: 200}))),
 						),
 					),
-					column.WithModifier(weight.Weight(1).
-						Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 150, G: 0, B: 0, A: 200}))),
+					column.Column(
+						c.Sequence(
+							m3Button.FilledTonal(func() {
+								counterCell.Set(counterCell.Get().(int) + 1)
+								fmt.Println("Button clicked!")
+							}, "click me",
+							// button.WithModifier(size.FillMax())
+							),
+						),
+						column.WithModifier(weight.Weight(1).
+							Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 150, G: 0, B: 0, A: 200}))),
+						),
+					),
+					column.Column(
+						c.Sequence(),
+						column.WithModifier(clip.Clip(shape.CircleShape).
+							Then(size.Size(100, 50)).
+							Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 100, G: 0, B: 0, A: 200}))).
+							Then(clickable.OnClick(func() {
+								fmt.Println("Last Column clicked!!")
+							})),
+						),
 					),
 				),
-				column.Column(
-					c.Sequence(),
-					column.WithModifier(clip.Clip(shape.CircleShape).
-						Then(size.Size(100, 50)).
-						Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 100, G: 0, B: 0, A: 200}))).
-						Then(clickable.OnClick(func() {
-							fmt.Println("Last Column clicked!!")
+					row.WithModifier(size.Height(300).
+						Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 0, G: 200, B: 0, A: 200}))),
+					),
+				),
+				text.Text("hello world",
+					text.Selectable(),
+					text.WithGioAlignment(text.Middle),
+					text.WithModifier(background.Background(graphics.FromNRGBA(color.NRGBA{R: 100, G: 0, B: 0, A: 150})).
+						Then(padding.All(20)).
+						Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 200, G: 0, B: 50, A: 50}))),
+					),
+				),
+
+				m3Button.Text(func() {
+					fmt.Println("M3 Text Button clicked!")
+				}, "Hello M3 Text Button"),
+				m3Button.Outlined(func() {
+					fmt.Println("M3 Outlined Button clicked!")
+				}, "Hello M3 Outlined Button"),
+				m3Button.Filled(func() {
+					fmt.Println("M3 Filled Button clicked!")
+				}, "Hello M3 Filled Button",
+					m3Button.WithModifier(padding.All(20)),
+				),
+				m3Divider.Divider(),
+				m3Button.FilledTonal(func() {
+					fmt.Println("M3 Filled Tonal Button clicked!")
+				}, "Hello M3 FilledTonal Button",
+					m3Button.WithModifier(padding.All(20)),
+				),
+				m3Divider.Divider(),
+				m3Card.Filled(m3Card.CardContents(
+					m3Card.Content(text.Text("Filled")),
+				)),
+				icon.Icon(icon.SymbolRefresh,
+					icon.WithColor(theme.ColorScheme().OnSurfaceVariant),
+					icon.WithSize(uiUnit.Dp(32)),
+					icon.WithModifier(
+						clip.Clip(shape.CircleShape).Then(clickable.OnClick(func() {
+							log.Println("Re-deploy clicked")
 						})),
 					),
 				),
 			),
-				row.WithModifier(size.Height(300).
-					Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 0, G: 200, B: 0, A: 200}))),
-				),
-			),
-			text.Text("hello world",
-				text.Selectable(),
-				text.WithGioAlignment(text.Middle),
-				text.WithModifier(background.Background(graphics.FromNRGBA(color.NRGBA{R: 100, G: 0, B: 0, A: 150})).
-					Then(padding.All(20)).
-					Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 200, G: 0, B: 50, A: 50}))),
-				),
+			column.WithModifier(size.FillMax().
+				Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 200, G: 0, B: 0, A: 50}))),
 			),
 
-			m3Button.Text(func() {
-				fmt.Println("M3 Text Button clicked!")
-			}, "Hello M3 Text Button"),
-			m3Button.Outlined(func() {
-				fmt.Println("M3 Outlined Button clicked!")
-			}, "Hello M3 Outlined Button"),
-			m3Button.Filled(func() {
-				fmt.Println("M3 Filled Button clicked!")
-			}, "Hello M3 Filled Button",
-				m3Button.WithModifier(padding.All(20)),
-			),
-			m3Divider.Divider(),
-			m3Button.FilledTonal(func() {
-				fmt.Println("M3 Filled Tonal Button clicked!")
-			}, "Hello M3 FilledTonal Button",
-				m3Button.WithModifier(padding.All(20)),
-			),
-			m3Divider.Divider(),
-			m3Card.Filled(m3Card.CardContents(
-				m3Card.Content(text.Text("Filled")),
-			)),
-			icon.Icon(icon.SymbolRefresh,
-				icon.WithColor(theme.ColorScheme().OnSurfaceVariant),
-				icon.WithSize(uiUnit.Dp(32)),
-				icon.WithModifier(
-					clip.Clip(shape.CircleShape).Then(clickable.OnClick(func() {
-						log.Println("Re-deploy clicked")
-					})),
-				),
-			),
-		),
-		column.WithModifier(size.FillMax().
-			Then(background.Background(graphics.FromNRGBA(color.NRGBA{R: 200, G: 0, B: 0, A: 50}))),
-		),
+			column.WithAlignment(column.Middle),
+		)(c)
 
-		column.WithAlignment(column.Middle),
-	)(c)
-
-	return c.Build()
+		return c
+	}
 
 }

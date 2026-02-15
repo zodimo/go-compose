@@ -21,57 +21,59 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
-func UI(c api.Composer) api.LayoutNode {
-	// State
-	activeState := c.State("elevation_active", func() any {
-		return false
-	})
-	active := activeState.Get().(bool)
+func UI() api.Composable {
+	return func(c api.Composer) api.Composer {
+		// State
+		activeState := c.State("elevation_active", func() any {
+			return false
+		})
+		active := activeState.Get().(bool)
 
-	c = column.Column(
-		c.Sequence(
-			// Controls
-			row.Row(
-				c.Sequence(
-					button.Filled(
-						func() {
-							activeState.Set(!active)
-							fmt.Printf("Toggle Elevation: %v\n", !active)
-						},
-						"Toggle Elevation",
-						button.WithModifier(padding.All(8)),
-					),
-				),
-				row.WithModifier(size.FillMaxWidth().Then(padding.All(16))),
-			),
-			// Content Area
-			// Level 0: Surface (White/Background)
-			surface.Surface(
-				c.Sequence(
-					column.Column(
-						c.Sequence(
-							m3text.HeadlineLarge("Aloha!", text.WithTextStyleOptions(iuText.WithColor(
-								material3.Theme(c).ColorScheme().OnSurface,
-							))),
-							m3text.BodySmall("Level 1: 1", text.WithTextStyleOptions(iuText.WithColor(
-								material3.Theme(c).ColorScheme().OnSurface,
-							))),
-							// Start Recursion from Level 2
-							RecursiveSurface(2, active),
+		c = column.Column(
+			c.Sequence(
+				// Controls
+				row.Row(
+					c.Sequence(
+						button.Filled(
+							func() {
+								activeState.Set(!active)
+								fmt.Printf("Toggle Elevation: %v\n", !active)
+							},
+							"Toggle Elevation",
+							button.WithModifier(padding.All(8)),
 						),
-						column.WithModifier(padding.All(16)),
 					),
+					row.WithModifier(size.FillMaxWidth().Then(padding.All(16))),
 				),
-				surface.WithColor(graphics.FromNRGBA(color.NRGBA{R: 255, G: 251, B: 254, A: 255})), // Surface
-				surface.WithShape(&shape.CutCornerShape{Radius: unit.Dp(28)}),                      // TopEnd chamfer in demo usually, here simplified to all cut
-				surface.WithShadowElevation(0),                                                     // Root usually flat?
-				surface.WithModifier(size.FillMax()),
+				// Content Area
+				// Level 0: Surface (White/Background)
+				surface.Surface(
+					c.Sequence(
+						column.Column(
+							c.Sequence(
+								m3text.HeadlineLarge("Aloha!", text.WithTextStyleOptions(iuText.WithColor(
+									material3.Theme(c).ColorScheme().OnSurface,
+								))),
+								m3text.BodySmall("Level 1: 1", text.WithTextStyleOptions(iuText.WithColor(
+									material3.Theme(c).ColorScheme().OnSurface,
+								))),
+								// Start Recursion from Level 2
+								RecursiveSurface(2, active),
+							),
+							column.WithModifier(padding.All(16)),
+						),
+					),
+					surface.WithColor(graphics.FromNRGBA(color.NRGBA{R: 255, G: 251, B: 254, A: 255})), // Surface
+					surface.WithShape(&shape.CutCornerShape{Radius: unit.Dp(28)}),                      // TopEnd chamfer in demo usually, here simplified to all cut
+					surface.WithShadowElevation(0),                                                     // Root usually flat?
+					surface.WithModifier(size.FillMax()),
+				),
 			),
-		),
-		column.WithModifier(size.FillMax().Then(padding.All(8))),
-	)(c)
+			column.WithModifier(size.FillMax().Then(padding.All(8))),
+		)(c)
 
-	return c.Build()
+		return c
+	}
 }
 
 // RecursiveSurface generates nested surfaces with alternating colors and shapes

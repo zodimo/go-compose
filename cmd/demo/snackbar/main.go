@@ -10,6 +10,7 @@ import (
 	"gioui.org/unit"
 
 	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/lifecycle"
 	"github.com/zodimo/go-compose/runtime"
 	"github.com/zodimo/go-compose/state"
 	"github.com/zodimo/go-compose/store"
@@ -30,16 +31,28 @@ func main() {
 	app.Main()
 }
 
-func run(w *app.Window) error {
+func run(window *app.Window) error {
 	enLocale := system.Locale{Language: "en", Direction: system.LTR}
 	var ops op.Ops
 
 	store := store.NewPersistentState(map[string]state.MutableValue{})
-	runtime := runtime.NewRuntime()
+	store.Subscribe(func() {
+		window.Invalidate()
+	})
+
+	runtimeOptions := []runtime.RuntimeOption{}
+	if lifecycleAwareStore, ok := store.(lifecycle.FrameLifecycleAwarePersistentState); ok {
+		runtimeOptions = append(runtimeOptions,
+			runtime.WithOnStartFrame(lifecycleAwareStore.StartFrame),
+			runtime.WithOnEndFrame(lifecycleAwareStore.EndFrame),
+		)
+	}
+
+	runtime := runtime.NewRuntime(runtimeOptions...)
 	themeManager := theme.GetThemeManager()
 
 	for {
-		switch frameEvent := w.Event().(type) {
+		switch frameEvent := window.Event().(type) {
 		case app.DestroyEvent:
 			return frameEvent.Err
 		case app.FrameEvent:
@@ -48,9 +61,7 @@ func run(w *app.Window) error {
 			gtx = themeManager.Material3ThemeInit(gtx)
 
 			composer := compose.NewComposer(store)
-			layoutNode := UI(composer)
-
-			callOp := runtime.Run(gtx, layoutNode)
+			callOp := runtime.Run(gtx, composer, UI())
 			callOp.Add(gtx.Ops)
 			frameEvent.Frame(gtx.Ops)
 		}

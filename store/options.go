@@ -25,9 +25,9 @@ func WithRootContext(rootContext context.Context) PersistentStateOption {
 	}
 }
 
-func WithDebugMode() PersistentStateOption {
+func WithDebugMode(debugMode bool) PersistentStateOption {
 	return func(opts *PersistentStateOptions) {
-		opts.DebugMode = true
+		opts.DebugMode = debugMode
 	}
 }
 

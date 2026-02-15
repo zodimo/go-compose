@@ -11,28 +11,30 @@ import (
 	"github.com/zodimo/go-compose/pkg/api"
 )
 
-func UI(c api.Composer) api.LayoutNode {
-	return scaffold.Scaffold(
-		func(c api.Composer) api.Composer {
-			return column.Column(
-				c.Sequence(
-					text.TextWithStyle("Default Loading Indicator", text.TypestyleBodyLarge),
-					progress.LoadingIndicator(),
-					spacer.Height(16),
-					text.TextWithStyle("Loading Indicator with size 200x200", text.TypestyleBodyLarge),
-					progress.LoadingIndicator(
-						progress.WithModifier(size.Size(200, 200)),
+func UI() api.Composable {
+	return func(c api.Composer) api.Composer {
+		return scaffold.Scaffold(
+			func(c api.Composer) api.Composer {
+				return column.Column(
+					c.Sequence(
+						text.TextWithStyle("Default Loading Indicator", text.TypestyleBodyLarge),
+						progress.LoadingIndicator(),
+						spacer.Height(16),
+						text.TextWithStyle("Loading Indicator with size 200x200", text.TypestyleBodyLarge),
+						progress.LoadingIndicator(
+							progress.WithModifier(size.Size(200, 200)),
+						),
 					),
+					column.WithModifier(size.FillMax()),
+					column.WithSpacing(column.SpaceEvenly),
+					column.WithAlignment(column.Middle),
+				)(c)
+			},
+			scaffold.WithTopBar(
+				appbar.TopAppBar(
+					text.TextWithStyle("Loading Demo", text.TypestyleTitleMedium),
 				),
-				column.WithModifier(size.FillMax()),
-				column.WithSpacing(column.SpaceEvenly),
-				column.WithAlignment(column.Middle),
-			)(c)
-		},
-		scaffold.WithTopBar(
-			appbar.TopAppBar(
-				text.TextWithStyle("Loading Demo", text.TypestyleTitleMedium),
 			),
-		),
-	)(c).Build()
+		)(c)
+	}
 }

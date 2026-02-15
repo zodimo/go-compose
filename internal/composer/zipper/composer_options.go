@@ -3,9 +3,7 @@ package zipper
 import "time"
 
 type ComposerOptions struct {
-	TimeNowFunc  func() time.Time
-	OnStartFrame func()
-	OnEndFrame   func()
+	TimeNowFunc func() time.Time
 }
 
 func WithTimeNow(now time.Time) ComposerOption {
@@ -14,24 +12,10 @@ func WithTimeNow(now time.Time) ComposerOption {
 	}
 }
 
-func WithOnStartFrame(onStartFrame func()) ComposerOption {
-	return func(options *ComposerOptions) {
-		options.OnStartFrame = onStartFrame
-	}
-}
-
-func WithOnEndFrame(onEndFrame func()) ComposerOption {
-	return func(options *ComposerOptions) {
-		options.OnEndFrame = onEndFrame
-	}
-}
-
 type ComposerOption func(*ComposerOptions)
 
 func DefaultComposerOptions() ComposerOptions {
 	return ComposerOptions{
-		TimeNowFunc:  time.Now,
-		OnStartFrame: func() {},
-		OnEndFrame:   func() {},
+		TimeNowFunc: time.Now,
 	}
 }

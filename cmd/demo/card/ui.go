@@ -28,253 +28,255 @@ import (
 	"github.com/zodimo/go-compose/pkg/api"
 )
 
-func UI(c api.Composer) api.LayoutNode {
-	// State for interactive card demo
-	inputValue := c.State("card_input", func() any { return "" })
+func UI() api.Composable {
+	return func(c api.Composer) api.Composer {
+		// State for interactive card demo
+		inputValue := c.State("card_input", func() any { return "" })
 
-	c = lazy.LazyColumn(
-		func(scope lazy.LazyListScope) {
-			// Title
-			scope.Item("title", column.Column(
-				c.Sequence(
-					m3text.TextWithStyle("Card Component Demo", m3text.TypestyleHeadlineMedium),
-					spacer.Height(24),
-				),
-			))
+		c = lazy.LazyColumn(
+			func(scope lazy.LazyListScope) {
+				// Title
+				scope.Item("title", column.Column(
+					c.Sequence(
+						m3text.TextWithStyle("Card Component Demo", m3text.TypestyleHeadlineMedium),
+						spacer.Height(24),
+					),
+				))
 
-			// Elevated Card
-			scope.Item("elevated", column.Column(
-				c.Sequence(
-					SectionTitle("Elevated Card"),
-					spacer.Height(8),
-					card.Elevated(
-						card.CardContents(
-							card.Content(
-								CardContent(
-									"Elevated Card",
-									"Elevated cards use shadow to create depth. They're best for\nscanning and organizing content.",
+				// Elevated Card
+				scope.Item("elevated", column.Column(
+					c.Sequence(
+						SectionTitle("Elevated Card"),
+						spacer.Height(8),
+						card.Elevated(
+							card.CardContents(
+								card.Content(
+									CardContent(
+										"Elevated Card",
+										"Elevated cards use shadow to create depth. They're best for\nscanning and organizing content.",
+									),
+								),
+							),
+							card.WithModifier(size.Width(340, size.SizeRequired())),
+						),
+						spacer.Height(24),
+					),
+				))
+
+				// Filled Card
+				scope.Item("filled", column.Column(
+					c.Sequence(
+						SectionTitle("Filled Card"),
+						spacer.Height(8),
+						card.Filled(
+							card.CardContents(
+								card.Content(
+									CardContent(
+										"Filled Card",
+										"Filled cards use color to create depth. They use a subtle\nbackground color distinct from the surface.",
+									),
+								),
+							),
+							card.WithModifier(size.Width(340, size.SizeRequired())),
+						),
+						spacer.Height(24),
+					),
+				))
+
+				// Outlined Card
+				scope.Item("outlined", column.Column(
+					c.Sequence(
+						SectionTitle("Outlined Card"),
+						spacer.Height(8),
+						card.Outlined(
+							card.CardContents(
+								card.Content(
+									CardContent(
+										"Outlined Card",
+										"Outlined cards use a border instead of shadow. They're best\nfor grouping related content.",
+									),
+								),
+							),
+							card.WithModifier(size.Width(340, size.SizeRequired())),
+						),
+						spacer.Height(24),
+					),
+				))
+
+				// Interactive Card - demonstrates Tab navigation works
+				scope.Item("interactive", column.Column(
+					c.Sequence(
+						SectionTitle("Interactive Card (Tab Navigation Demo)"),
+						spacer.Height(8),
+						card.Elevated(
+							card.CardContents(
+								card.Content(
+									InteractiveCardContent(inputValue),
+								),
+							),
+							card.WithModifier(size.Width(340, size.SizeRequired())),
+						),
+						spacer.Height(24),
+					),
+				))
+
+				// ContentCover Example - full-bleed header
+				scope.Item("cover", column.Column(
+					c.Sequence(
+						SectionTitle("Card with ContentCover"),
+						m3text.TextWithStyle("ContentCover provides full-bleed content without padding", m3text.TypestyleBodySmall),
+						spacer.Height(8),
+						card.Elevated(
+							card.CardContents(
+								// Cover at top - no internal padding
+								card.ContentCover(
+									CoverBanner("Featured", "Primary color header"),
+								),
+								// Regular content below
+								card.Content(
+									CardContent(
+										"Main Content",
+										"This content has padding while the cover above extends edge-to-edge.",
+									),
+								),
+							),
+							card.WithModifier(size.Width(340, size.SizeRequired())),
+						),
+						spacer.Height(24),
+					),
+				))
+
+				// Multiple Content Sections
+				scope.Item("multiple", column.Column(
+					c.Sequence(
+						SectionTitle("Card with Multiple Sections"),
+						m3text.TextWithStyle("Cards can have multiple Content sections", m3text.TypestyleBodySmall),
+						spacer.Height(8),
+						card.Filled(
+							card.CardContents(
+								card.Content(
+									CardContent("Section 1", "First content section"),
+								),
+								card.Content(
+									CardContent("Section 2", "Second content section stacked below."),
+								),
+								card.Content(
+									ActionButtons(),
+								),
+							),
+							card.WithModifier(size.Width(340, size.SizeRequired())),
+						),
+						spacer.Height(24),
+					),
+				))
+
+				// Card with Image content type
+				scope.Item("image", column.Column(
+					c.Sequence(
+						SectionTitle("Card with Image"),
+						m3text.TextWithStyle("Using go-compose Image within ContentCover", m3text.TypestyleBodySmall),
+						spacer.Height(8),
+						card.Elevated(
+							card.CardContents(
+								// Use ContentCover with go-compose Image composable
+								card.ContentCover(
+									fImage.Image(
+										CreateImageResource(),
+										fImage.WithContentScale(uilayout.ContentScaleCrop),
+										fImage.WithModifier(size.Height(120)),
+									),
+								),
+								// Content below
+								card.Content(
+									CardContent(
+										"Media Card",
+										"Image content is displayed edge-to-edge at the card's width.",
+									),
+								),
+							),
+							card.WithModifier(size.Width(340, size.SizeRequired())),
+						),
+						spacer.Height(24),
+					),
+				))
+
+				// Clickable Cards - demonstrates hover effect with onClick
+				scope.Item("clickable", column.Column(
+					c.Sequence(
+						SectionTitle("Clickable Cards (Hover Effect Demo)"),
+						m3text.TextWithStyle("Cards with onClick show hover effect clipped to rounded corners", m3text.TypestyleBodySmall),
+						spacer.Height(8),
+						row.Row(
+							c.Sequence(
+								card.Elevated(
+									card.CardContents(
+										card.Content(SmallCardContent("Click Me")),
+									),
+									card.WithModifier(
+										size.Width(120).Then(clickable.OnClick(func() {
+											// Handle click
+										})),
+									),
+								),
+								spacer.Width(16),
+								card.Filled(
+									card.CardContents(
+										card.Content(SmallCardContent("Click Me")),
+									),
+									card.WithModifier(
+										size.Width(120).Then(clickable.OnClick(func() {
+											// Handle click
+										})),
+									),
+								),
+								spacer.Width(16),
+								card.Outlined(
+									card.CardContents(
+										card.Content(SmallCardContent("Click Me")),
+									),
+									card.WithModifier(
+										size.Width(120).Then(clickable.OnClick(func() {
+											// Handle click
+										})),
+									),
 								),
 							),
 						),
-						card.WithModifier(size.Width(340, size.SizeRequired())),
+						spacer.Height(24),
 					),
-					spacer.Height(24),
-				),
-			))
+				))
 
-			// Filled Card
-			scope.Item("filled", column.Column(
-				c.Sequence(
-					SectionTitle("Filled Card"),
-					spacer.Height(8),
-					card.Filled(
-						card.CardContents(
-							card.Content(
-								CardContent(
-									"Filled Card",
-									"Filled cards use color to create depth. They use a subtle\nbackground color distinct from the surface.",
+				// Cards in a Row
+				scope.Item("row", column.Column(
+					c.Sequence(
+						SectionTitle("Cards in a Row"),
+						spacer.Height(8),
+						row.Row(
+							c.Sequence(
+								card.Elevated(
+									card.CardContents(
+										card.Content(SmallCardContent("Card 1")),
+									),
+									card.WithModifier(size.Width(150)),
+								),
+								spacer.Width(16),
+								card.Filled(
+									card.CardContents(
+										card.Content(SmallCardContent("Card 2")),
+									),
+									card.WithModifier(size.Width(150)),
 								),
 							),
 						),
-						card.WithModifier(size.Width(340, size.SizeRequired())),
+						spacer.Height(24),
 					),
-					spacer.Height(24),
-				),
-			))
+				))
+			},
+			lazy.WithModifier(padding.All(24).Then(size.FillMax())),
+		)(c)
 
-			// Outlined Card
-			scope.Item("outlined", column.Column(
-				c.Sequence(
-					SectionTitle("Outlined Card"),
-					spacer.Height(8),
-					card.Outlined(
-						card.CardContents(
-							card.Content(
-								CardContent(
-									"Outlined Card",
-									"Outlined cards use a border instead of shadow. They're best\nfor grouping related content.",
-								),
-							),
-						),
-						card.WithModifier(size.Width(340, size.SizeRequired())),
-					),
-					spacer.Height(24),
-				),
-			))
-
-			// Interactive Card - demonstrates Tab navigation works
-			scope.Item("interactive", column.Column(
-				c.Sequence(
-					SectionTitle("Interactive Card (Tab Navigation Demo)"),
-					spacer.Height(8),
-					card.Elevated(
-						card.CardContents(
-							card.Content(
-								InteractiveCardContent(inputValue),
-							),
-						),
-						card.WithModifier(size.Width(340, size.SizeRequired())),
-					),
-					spacer.Height(24),
-				),
-			))
-
-			// ContentCover Example - full-bleed header
-			scope.Item("cover", column.Column(
-				c.Sequence(
-					SectionTitle("Card with ContentCover"),
-					m3text.TextWithStyle("ContentCover provides full-bleed content without padding", m3text.TypestyleBodySmall),
-					spacer.Height(8),
-					card.Elevated(
-						card.CardContents(
-							// Cover at top - no internal padding
-							card.ContentCover(
-								CoverBanner("Featured", "Primary color header"),
-							),
-							// Regular content below
-							card.Content(
-								CardContent(
-									"Main Content",
-									"This content has padding while the cover above extends edge-to-edge.",
-								),
-							),
-						),
-						card.WithModifier(size.Width(340, size.SizeRequired())),
-					),
-					spacer.Height(24),
-				),
-			))
-
-			// Multiple Content Sections
-			scope.Item("multiple", column.Column(
-				c.Sequence(
-					SectionTitle("Card with Multiple Sections"),
-					m3text.TextWithStyle("Cards can have multiple Content sections", m3text.TypestyleBodySmall),
-					spacer.Height(8),
-					card.Filled(
-						card.CardContents(
-							card.Content(
-								CardContent("Section 1", "First content section"),
-							),
-							card.Content(
-								CardContent("Section 2", "Second content section stacked below."),
-							),
-							card.Content(
-								ActionButtons(),
-							),
-						),
-						card.WithModifier(size.Width(340, size.SizeRequired())),
-					),
-					spacer.Height(24),
-				),
-			))
-
-			// Card with Image content type
-			scope.Item("image", column.Column(
-				c.Sequence(
-					SectionTitle("Card with Image"),
-					m3text.TextWithStyle("Using go-compose Image within ContentCover", m3text.TypestyleBodySmall),
-					spacer.Height(8),
-					card.Elevated(
-						card.CardContents(
-							// Use ContentCover with go-compose Image composable
-							card.ContentCover(
-								fImage.Image(
-									CreateImageResource(),
-									fImage.WithContentScale(uilayout.ContentScaleCrop),
-									fImage.WithModifier(size.Height(120)),
-								),
-							),
-							// Content below
-							card.Content(
-								CardContent(
-									"Media Card",
-									"Image content is displayed edge-to-edge at the card's width.",
-								),
-							),
-						),
-						card.WithModifier(size.Width(340, size.SizeRequired())),
-					),
-					spacer.Height(24),
-				),
-			))
-
-			// Clickable Cards - demonstrates hover effect with onClick
-			scope.Item("clickable", column.Column(
-				c.Sequence(
-					SectionTitle("Clickable Cards (Hover Effect Demo)"),
-					m3text.TextWithStyle("Cards with onClick show hover effect clipped to rounded corners", m3text.TypestyleBodySmall),
-					spacer.Height(8),
-					row.Row(
-						c.Sequence(
-							card.Elevated(
-								card.CardContents(
-									card.Content(SmallCardContent("Click Me")),
-								),
-								card.WithModifier(
-									size.Width(120).Then(clickable.OnClick(func() {
-										// Handle click
-									})),
-								),
-							),
-							spacer.Width(16),
-							card.Filled(
-								card.CardContents(
-									card.Content(SmallCardContent("Click Me")),
-								),
-								card.WithModifier(
-									size.Width(120).Then(clickable.OnClick(func() {
-										// Handle click
-									})),
-								),
-							),
-							spacer.Width(16),
-							card.Outlined(
-								card.CardContents(
-									card.Content(SmallCardContent("Click Me")),
-								),
-								card.WithModifier(
-									size.Width(120).Then(clickable.OnClick(func() {
-										// Handle click
-									})),
-								),
-							),
-						),
-					),
-					spacer.Height(24),
-				),
-			))
-
-			// Cards in a Row
-			scope.Item("row", column.Column(
-				c.Sequence(
-					SectionTitle("Cards in a Row"),
-					spacer.Height(8),
-					row.Row(
-						c.Sequence(
-							card.Elevated(
-								card.CardContents(
-									card.Content(SmallCardContent("Card 1")),
-								),
-								card.WithModifier(size.Width(150)),
-							),
-							spacer.Width(16),
-							card.Filled(
-								card.CardContents(
-									card.Content(SmallCardContent("Card 2")),
-								),
-								card.WithModifier(size.Width(150)),
-							),
-						),
-					),
-					spacer.Height(24),
-				),
-			))
-		},
-		lazy.WithModifier(padding.All(24).Then(size.FillMax())),
-	)(c)
-
-	return c.Build()
+		return c
+	}
 }
 
 // SectionTitle creates a section heading

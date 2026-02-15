@@ -22,7 +22,7 @@ func BenchmarkUI_Composition(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		UI(composer)
+		UI()(composer)
 	}
 }
 
@@ -32,9 +32,6 @@ func BenchmarkUI_Layout(b *testing.B) {
 	composer := compose.NewComposer(store)
 	rt := runtime.NewRuntime()
 	themeManager := theme.GetThemeManager()
-
-	// Initial composition to get the tree
-	layoutNode := UI(composer)
 
 	// Prepare context
 	var ops op.Ops
@@ -65,7 +62,7 @@ func BenchmarkUI_Layout(b *testing.B) {
 		// gtx = themeManager.Material3ThemeInit(gtx)
 		gtx = themeManager.Material3ThemeInit(gtx)
 
-		callOp := rt.Run(gtx, layoutNode)
+		callOp := rt.Run(gtx, composer, UI())
 		callOp.Add(gtx.Ops)
 	}
 }

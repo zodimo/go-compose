@@ -13,6 +13,7 @@ import (
 	"github.com/zodimo/go-compose/compose/material3/scaffold"
 	mswitch "github.com/zodimo/go-compose/compose/material3/switch"
 	"github.com/zodimo/go-compose/compose/material3/text"
+	"github.com/zodimo/go-compose/lifecycle"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/runtime"
 	"github.com/zodimo/go-compose/state"
@@ -45,10 +46,19 @@ func Run(window *app.Window) error {
 	var ops op.Ops
 
 	store := store.NewPersistentState(map[string]state.MutableValue{})
-	store.SetOnStateChange(func() {
+	store.Subscribe(func() {
 		window.Invalidate()
 	})
-	runtime := runtime.NewRuntime()
+
+	runtimeOptions := []runtime.RuntimeOption{}
+	if lifecycleAwareStore, ok := store.(lifecycle.FrameLifecycleAwarePersistentState); ok {
+		runtimeOptions = append(runtimeOptions,
+			runtime.WithOnStartFrame(lifecycleAwareStore.StartFrame),
+			runtime.WithOnEndFrame(lifecycleAwareStore.EndFrame),
+		)
+	}
+
+	runtime := runtime.NewRuntime(runtimeOptions...)
 
 	themeManager := theme.GetThemeManager()
 
@@ -63,67 +73,67 @@ func Run(window *app.Window) error {
 			gtx = themeManager.Material3ThemeInit(gtx)
 
 			composer := compose.NewComposer(store)
-			layoutNode := UI(composer)
-
-			callOp := runtime.Run(gtx, layoutNode)
+			callOp := runtime.Run(gtx, composer, UI())
 			callOp.Add(gtx.Ops)
 			frameEvent.Frame(gtx.Ops)
 		}
 	}
 }
 
-func UI(c compose.Composer) api.LayoutNode {
-	checked1 := c.State("switch_state_1", func() any { return false })
-	checked2 := c.State("switch_state_2", func() any { return false })
-	c = scaffold.Scaffold(
-		column.Column(
-			c.Sequence(
-				// Case 1: Switch in a row, text then switch
-				row.Row(
-					c.Sequence(
-						text.TextWithStyle("Enable Feature", text.TypestyleBodyMedium),
-						spacer.Width(20),
-						mswitch.Switch(
-							checked1.Get().(bool),
-							func(b bool) {
-								checked1.Set(b)
-								fmt.Printf("Switch toggled 1: %v\n", b)
-							},
+func UI() api.Composable {
+	return func(c compose.Composer) api.Composer {
+		checked1 := c.State("switch_state_1", func() any { return false })
+		checked2 := c.State("switch_state_2", func() any { return false })
+		c = scaffold.Scaffold(
+			column.Column(
+				c.Sequence(
+					// Case 1: Switch in a row, text then switch
+					row.Row(
+						c.Sequence(
+							text.TextWithStyle("Enable Feature", text.TypestyleBodyMedium),
+							spacer.Width(20),
+							mswitch.Switch(
+								checked1.Get().(bool),
+								func(b bool) {
+									checked1.Set(b)
+									fmt.Printf("Switch toggled 1: %v\n", b)
+								},
+							),
 						),
+						row.WithSpacing(row.SpaceStart),
+						row.WithAlignment(row.Middle),
 					),
-					row.WithSpacing(row.SpaceStart),
-					row.WithAlignment(row.Middle),
-				),
-				text.TextWithStyle("Switch should be to the right to text above", text.TypestyleBodyMedium),
-				// Case 2: Switch in a row, switch then text
-				row.Row(
-					c.Sequence(
-						mswitch.Switch(
-							checked2.Get().(bool),
-							func(b bool) {
-								checked2.Set(b)
-								fmt.Printf("Switch toggled 2: %v\n", b)
-							},
+					text.TextWithStyle("Switch should be to the right to text above", text.TypestyleBodyMedium),
+					// Case 2: Switch in a row, switch then text
+					row.Row(
+						c.Sequence(
+							mswitch.Switch(
+								checked2.Get().(bool),
+								func(b bool) {
+									checked2.Set(b)
+									fmt.Printf("Switch toggled 2: %v\n", b)
+								},
+							),
+							spacer.Width(20),
+							text.TextWithStyle("Enable Feature", text.TypestyleBodyMedium),
 						),
-						spacer.Width(20),
-						text.TextWithStyle("Enable Feature", text.TypestyleBodyMedium),
+						row.WithSpacing(row.SpaceStart),
+						row.WithAlignment(row.Middle),
 					),
-					row.WithSpacing(row.SpaceStart),
-					row.WithAlignment(row.Middle),
+					// Case 2: Just confirmation text
+					text.TextWithStyle("Switch should be to the right to text above", text.TypestyleBodyMedium),
 				),
-				// Case 2: Just confirmation text
-				text.TextWithStyle("Switch should be to the right to text above", text.TypestyleBodyMedium),
+				column.WithSpacing(column.SpaceAround),
+				column.WithAlignment(column.Middle),
 			),
-			column.WithSpacing(column.SpaceAround),
-			column.WithAlignment(column.Middle),
-		),
-		scaffold.WithTopBar(
-			appbar.TopAppBar(
-				func(c compose.Composer) compose.Composer {
-					return text.TextWithStyle("Switch Demo", text.TypestyleTitleLarge)(c)
-				},
+			scaffold.WithTopBar(
+				appbar.TopAppBar(
+					func(c compose.Composer) compose.Composer {
+						return text.TextWithStyle("Switch Demo", text.TypestyleTitleLarge)(c)
+					},
+				),
 			),
-		),
-	)(c)
-	return c.Build()
+		)(c)
+		return c
+	}
 }

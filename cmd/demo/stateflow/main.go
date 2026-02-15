@@ -9,6 +9,7 @@ import (
 	"gioui.org/unit"
 
 	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/lifecycle"
 	"github.com/zodimo/go-compose/runtime"
 	"github.com/zodimo/go-compose/state"
 	"github.com/zodimo/go-compose/store"
@@ -33,11 +34,19 @@ func main() {
 func Run(window *app.Window) error {
 	var ops op.Ops
 	store := store.NewPersistentState(map[string]state.MutableValue{})
-	store.SetOnStateChange(func() {
+	store.Subscribe(func() {
 		window.Invalidate()
 	})
 
-	rt := runtime.NewRuntime()
+	runtimeOptions := []runtime.RuntimeOption{}
+	if lifecycleAwareStore, ok := store.(lifecycle.FrameLifecycleAwarePersistentState); ok {
+		runtimeOptions = append(runtimeOptions,
+			runtime.WithOnStartFrame(lifecycleAwareStore.StartFrame),
+			runtime.WithOnEndFrame(lifecycleAwareStore.EndFrame),
+		)
+	}
+
+	runtime := runtime.NewRuntime(runtimeOptions...)
 	themeManager := theme.GetThemeManager()
 
 	for {
@@ -50,9 +59,8 @@ func Run(window *app.Window) error {
 			// Initialize Theme (M3)
 			gtx = themeManager.Material3ThemeInit(gtx)
 
-			composer := UI(compose.NewComposer(store))
-
-			callOp := rt.Run(gtx, composer.Build())
+			composer := compose.NewComposer(store)
+			callOp := runtime.Run(gtx, composer, UI())
 			callOp.Add(gtx.Ops)
 			frameEvent.Frame(gtx.Ops)
 			window.Invalidate()

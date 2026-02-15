@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/lifecycle"
 	"github.com/zodimo/go-compose/runtime"
 	"github.com/zodimo/go-compose/state"
 	"github.com/zodimo/go-compose/store"
@@ -36,8 +37,19 @@ func Run(window *app.Window) error {
 	var ops op.Ops
 
 	store := store.NewPersistentState(map[string]state.MutableValue{})
-	// runtime := runtime.NewRuntime() // Not used directly in this loop style often
+	store.Subscribe(func() {
+		window.Invalidate()
+	})
 
+	runtimeOptions := []runtime.RuntimeOption{}
+	if lifecycleAwareStore, ok := store.(lifecycle.FrameLifecycleAwarePersistentState); ok {
+		runtimeOptions = append(runtimeOptions,
+			runtime.WithOnStartFrame(lifecycleAwareStore.StartFrame),
+			runtime.WithOnEndFrame(lifecycleAwareStore.EndFrame),
+		)
+	}
+
+	runtime := runtime.NewRuntime(runtimeOptions...)
 	themeManager := theme.GetThemeManager()
 
 	for {
@@ -52,28 +64,9 @@ func Run(window *app.Window) error {
 			gtx = themeManager.Material3ThemeInit(gtx)
 
 			composer := compose.NewComposer(store)
-			// UI returns Composable, we need to execute it or wrapped it
-			// Checking other examples: UI(composer) returns LayoutNode if it matches signature
-			// But here UI() returns Composable.
-			// So:
-			rootComposable := UI()
-			// We need to build the tree.
-			// compose.NewComposer returns *composer.
-			// Composable is func(Composer) Composer.
-
-			// Execute composable
-			rootComposable(composer)
-
-			// Build to get LayoutNode
-			layoutNode := composer.Build()
-
-			rt := runtime.NewRuntime()
-			callOp := rt.Run(gtx, layoutNode)
+			callOp := runtime.Run(gtx, composer, UI())
 			callOp.Add(gtx.Ops)
 			frameEvent.Frame(gtx.Ops)
-
-			// Invalidate for animations/interactions if needed
-			// window.Invalidate() // Using aggressive invalidation for demo
 		}
 	}
 }

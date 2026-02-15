@@ -43,55 +43,57 @@ func init() {
 	}()
 }
 
-func UI(c api.Composer) api.Composer {
-	return box.Box(
-		func(c api.Composer) api.Composer {
-			// Collect the flow as state inside the layout context (Box)
-			// This ensures the LaunchedEffect node is a child of Box, not the Root.
-			countState := flow.CollectStateFlowAsState(c, "counter1", counterFlow)
-			count := countState.Get()
+func UI() api.Composable {
+	return func(c api.Composer) api.Composer {
+		return box.Box(
+			func(c api.Composer) api.Composer {
+				// Collect the flow as state inside the layout context (Box)
+				// This ensures the LaunchedEffect node is a child of Box, not the Root.
+				countState := flow.CollectStateFlowAsState(c, "counter1", counterFlow)
+				count := countState.Get()
 
-			countState2 := flow.CollectStateFlowAsState(c, "counter2", counterFlow2)
-			count2 := countState2.Get()
+				countState2 := flow.CollectStateFlowAsState(c, "counter2", counterFlow2)
+				count2 := countState2.Get()
 
-			return column.Column(
-				c.Sequence(
-					m3text.TextWithStyle("StateFlow Integration Demo", m3text.TypestyleHeadlineMedium),
-					m3text.TextWithStyle(fmt.Sprintf("Current Count (from flow: 1s interval): %d", count), m3text.TypestyleBodyLarge),
-					row.Row(
-						c.Sequence(
-							button.Filled(func() {
-								counterFlow.Emit(0)
-							}, "Reset"),
-							spacer.Width(5),
-							button.Filled(func() {
-								counterFlow.Update(func(curr int) int { return curr + 5 })
-							}, "Add 5"),
+				return column.Column(
+					c.Sequence(
+						m3text.TextWithStyle("StateFlow Integration Demo", m3text.TypestyleHeadlineMedium),
+						m3text.TextWithStyle(fmt.Sprintf("Current Count (from flow: 1s interval): %d", count), m3text.TypestyleBodyLarge),
+						row.Row(
+							c.Sequence(
+								button.Filled(func() {
+									counterFlow.Emit(0)
+								}, "Reset"),
+								spacer.Width(5),
+								button.Filled(func() {
+									counterFlow.Update(func(curr int) int { return curr + 5 })
+								}, "Add 5"),
+							),
+							row.WithModifier(padding.Vertical(20, 0)),
 						),
-						row.WithModifier(padding.Vertical(20, 0)),
-					),
-					spacer.Height(20),
-					m3text.TextWithStyle(fmt.Sprintf("Current Count (from flow2: 500ms interval): %d", count2), m3text.TypestyleBodyLarge),
-					row.Row(
-						c.Sequence(
-							button.Filled(func() {
-								counterFlow2.Emit(0)
-							}, "Reset"),
-							spacer.Width(5),
-							button.Filled(func() {
-								counterFlow2.Update(func(curr int) int { return curr + 5 })
-							}, "Add 5"),
+						spacer.Height(20),
+						m3text.TextWithStyle(fmt.Sprintf("Current Count (from flow2: 500ms interval): %d", count2), m3text.TypestyleBodyLarge),
+						row.Row(
+							c.Sequence(
+								button.Filled(func() {
+									counterFlow2.Emit(0)
+								}, "Reset"),
+								spacer.Width(5),
+								button.Filled(func() {
+									counterFlow2.Update(func(curr int) int { return curr + 5 })
+								}, "Add 5"),
+							),
+							row.WithModifier(padding.Vertical(20, 0)),
 						),
-						row.WithModifier(padding.Vertical(20, 0)),
 					),
-				),
-				column.WithModifier(
-					padding.All(20),
-				),
-				column.WithAlignment(layout.Middle),
-			)(c)
-		},
-		box.WithModifier(size.FillMax()),
-		box.WithAlignment(layout.Center),
-	)(c)
+					column.WithModifier(
+						padding.All(20),
+					),
+					column.WithAlignment(layout.Middle),
+				)(c)
+			},
+			box.WithModifier(size.FillMax()),
+			box.WithAlignment(layout.Center),
+		)(c)
+	}
 }

@@ -29,102 +29,104 @@ const (
 	CategoryTypography = 4
 )
 
-func UI(c api.Composer) api.LayoutNode {
-	// Navigation state
-	selectedCategory := c.State("nav_category", func() any { return CategoryActions })
-	currentCategory := selectedCategory.Get().(int)
+func UI() api.Composable {
+	return func(c api.Composer) api.Composer {
+		// Navigation state
+		selectedCategory := c.State("nav_category", func() any { return CategoryActions })
+		currentCategory := selectedCategory.Get().(int)
 
-	// Dialog visibility state
-	showDialog := c.State("showDialog", func() any { return false })
+		// Dialog visibility state
+		showDialog := c.State("showDialog", func() any { return false })
 
-	// Snackbar state
-	snackbarHostState := c.State("snackbarHostState", func() any { return snackbar.NewSnackbarHostState() }).Get().(*snackbar.SnackbarHostState)
+		// Snackbar state
+		snackbarHostState := c.State("snackbarHostState", func() any { return snackbar.NewSnackbarHostState() }).Get().(*snackbar.SnackbarHostState)
 
-	navItems := []struct {
-		Label string
-		Icon  []byte
-	}{
-		{"Actions", mdicons.ActionTouchApp},
-		{"Selection", mdicons.ToggleCheckBox},
-		{"Feedback", mdicons.ActionFeedback},
-		{"Inputs", mdicons.ActionInput},
-		{"Typography", mdicons.ActionLabel},
-	}
+		navItems := []struct {
+			Label string
+			Icon  []byte
+		}{
+			{"Actions", mdicons.ActionTouchApp},
+			{"Selection", mdicons.ToggleCheckBox},
+			{"Feedback", mdicons.ActionFeedback},
+			{"Inputs", mdicons.ActionInput},
+			{"Typography", mdicons.ActionLabel},
+		}
 
-	c = c.Sequence(
-		// Scaffold with navigation
-		scaffold.Scaffold(
-			// Content area based on selected category
-			lazy.LazyColumn(
-				func(scope lazy.LazyListScope) {
-					scope.Item(nil, func(c api.Composer) api.Composer {
-						return c.Sequence(
-							//use Lazy to not invoke the composlable and keep it in memory
-							c.WhenLazy(currentCategory == CategoryActions, func() api.Composable { return ActionsScreen(c) }),
-							c.WhenLazy(currentCategory == CategorySelection, func() api.Composable { return SelectionScreen(c) }),
-							c.WhenLazy(currentCategory == CategoryFeedback, func() api.Composable { return FeedbackScreen(c, showDialog, snackbarHostState) }),
-							c.WhenLazy(currentCategory == CategoryInputs, func() api.Composable { return InputsScreen(c) }),
-							c.WhenLazy(currentCategory == CategoryTypography, func() api.Composable { return TypographyScreen(c) }),
-						)(c)
-					})
-				},
-				lazy.WithModifier(weight.Weight(1).Then(size.FillMaxWidth())),
-			),
-			scaffold.WithTopBar(
-				appbar.TopAppBar(
-					m3text.TextWithStyle(
-						"Component Showcase",
-						m3text.TypestyleTitleLarge,
+		c = c.Sequence(
+			// Scaffold with navigation
+			scaffold.Scaffold(
+				// Content area based on selected category
+				lazy.LazyColumn(
+					func(scope lazy.LazyListScope) {
+						scope.Item(nil, func(c api.Composer) api.Composer {
+							return c.Sequence(
+								//use Lazy to not invoke the composlable and keep it in memory
+								c.WhenLazy(currentCategory == CategoryActions, func() api.Composable { return ActionsScreen(c) }),
+								c.WhenLazy(currentCategory == CategorySelection, func() api.Composable { return SelectionScreen(c) }),
+								c.WhenLazy(currentCategory == CategoryFeedback, func() api.Composable { return FeedbackScreen(c, showDialog, snackbarHostState) }),
+								c.WhenLazy(currentCategory == CategoryInputs, func() api.Composable { return InputsScreen(c) }),
+								c.WhenLazy(currentCategory == CategoryTypography, func() api.Composable { return TypographyScreen(c) }),
+							)(c)
+						})
+					},
+					lazy.WithModifier(weight.Weight(1).Then(size.FillMaxWidth())),
+				),
+				scaffold.WithTopBar(
+					appbar.TopAppBar(
+						m3text.TextWithStyle(
+							"Component Showcase",
+							m3text.TypestyleTitleLarge,
+						),
 					),
 				),
+				scaffold.WithBottomBar(
+					navigationbar.NavigationBar(
+						func(c api.Composer) api.Composer {
+							for i, item := range navItems {
+								idx := i
+								navigationbar.NavigationBarItem(
+									currentCategory == idx,
+									func() { selectedCategory.Set(idx) },
+									func(c api.Composer) api.Composer {
+										return icon.Icon(item.Icon)(c)
+									},
+									func(c api.Composer) api.Composer {
+										return m3text.TextWithStyle(item.Label, m3text.TypestyleLabelMedium)(c)
+									},
+								)(c)
+							}
+							return c
+						},
+					),
+				),
+				scaffold.WithModifier(size.FillMax()),
 			),
-			scaffold.WithBottomBar(
-				navigationbar.NavigationBar(
-					func(c api.Composer) api.Composer {
-						for i, item := range navItems {
-							idx := i
-							navigationbar.NavigationBarItem(
-								currentCategory == idx,
-								func() { selectedCategory.Set(idx) },
-								func(c api.Composer) api.Composer {
-									return icon.Icon(item.Icon)(c)
-								},
-								func(c api.Composer) api.Composer {
-									return m3text.TextWithStyle(item.Label, m3text.TypestyleLabelMedium)(c)
-								},
-							)(c)
-						}
-						return c
+			// Dialog overlay
+			c.When(showDialog.Get().(bool),
+				dialog.AlertDialog(
+					func() {
+						fmt.Println("Dialog Dismiss requested")
+						showDialog.Set(false)
 					},
+					button.Text(func() {
+						fmt.Println("Dialog Confirm button clicked")
+						showDialog.Set(false)
+					}, "Confirm"),
+					dialog.TextContent("This is an example AlertDialog demonstrating the Feedback category."),
+					dialog.WithTitleText("Example Dialog"),
+					dialog.WithDismissButton(button.Text(
+						func() {
+							fmt.Println("Dialog Dismis button clicked")
+							showDialog.Set(false)
+						}, "Cancel")),
 				),
 			),
-			scaffold.WithModifier(size.FillMax()),
-		),
-		// Dialog overlay
-		c.When(showDialog.Get().(bool),
-			dialog.AlertDialog(
-				func() {
-					fmt.Println("Dialog Dismiss requested")
-					showDialog.Set(false)
-				},
-				button.Text(func() {
-					fmt.Println("Dialog Confirm button clicked")
-					showDialog.Set(false)
-				}, "Confirm"),
-				dialog.TextContent("This is an example AlertDialog demonstrating the Feedback category."),
-				dialog.WithTitleText("Example Dialog"),
-				dialog.WithDismissButton(button.Text(
-					func() {
-						fmt.Println("Dialog Dismis button clicked")
-						showDialog.Set(false)
-					}, "Cancel")),
-			),
-		),
-		// Snackbar host overlay
-		snackbar.SnackbarHost(snackbarHostState),
-	)(c)
+			// Snackbar host overlay
+			snackbar.SnackbarHost(snackbarHostState),
+		)(c)
 
-	return c.Build()
+		return c
+	}
 }
 
 // SectionTitle is a helper for section headers

@@ -24,6 +24,10 @@ func NewLayoutNode(id NodeID, key string, slotStore immap.ImmutableMap[any], per
 
 func NewNodeCoordinator(node LayoutNode) NodeCoordinator {
 
+	if oldNodeCoordinator, ok := node.(NodeCoordinator); ok {
+		return oldNodeCoordinator
+	}
+
 	outNode := &nodeCoordinator{
 		LayoutNode:      node,
 		elementStore:    EmptyElementStore,

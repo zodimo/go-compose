@@ -7,22 +7,23 @@ import (
 	"github.com/zodimo/go-compose/pkg/api"
 )
 
-func UI(c api.Composer) api.Composer {
+func UI() api.Composable {
+	return func(c api.Composer) api.Composer {
+		c = column.Column(
+			c.Sequence(
+				// Search icon
+				icon.Symbol(icon.SymbolSearch, icon.WithSymbolSize(unit.Sp(48))),
 
-	c = column.Column(
-		c.Sequence(
-			// Search icon
-			icon.Symbol(icon.SymbolSearch, icon.WithSymbolSize(unit.Sp(48))),
+				// Home icon
+				icon.Symbol(icon.SymbolHome, icon.WithSymbolSize(unit.Sp(48))),
 
-			// Home icon
-			icon.Symbol(icon.SymbolHome, icon.WithSymbolSize(unit.Sp(48))),
+				// Settings icon
+				icon.Symbol(icon.SymbolSettings, icon.WithSymbolSize(unit.Sp(100))),
+			),
+			column.WithSpacing(column.SpaceEvenly),
+			column.WithAlignment(column.Middle),
+		)(c)
 
-			// Settings icon
-			icon.Symbol(icon.SymbolSettings, icon.WithSymbolSize(unit.Sp(100))),
-		),
-		column.WithSpacing(column.SpaceEvenly),
-		column.WithAlignment(column.Middle),
-	)(c)
-
-	return c
+		return c
+	}
 }

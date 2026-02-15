@@ -14,44 +14,46 @@ import (
 	"github.com/zodimo/go-compose/pkg/api"
 )
 
-func UI(c api.Composer) api.LayoutNode {
+func UI() api.Composable {
+	return func(c api.Composer) api.Composer {
 
-	// Create snackbar host state outside the loop to persist state
-	snackbarHostState := c.State("snackbarHostState", func() any { return snackbar.NewSnackbarHostState() }).Get().(*snackbar.SnackbarHostState)
+		// Create snackbar host state outside the loop to persist state
+		snackbarHostState := c.State("snackbarHostState", func() any { return snackbar.NewSnackbarHostState() }).Get().(*snackbar.SnackbarHostState)
 
-	// Define UI inline
-	return box.Box(
-		func(c compose.Composer) compose.Composer {
-			// Content
-			column.Column(
-				func(c compose.Composer) compose.Composer {
-					// Headline
-					m3Text.TextWithStyle("Snackbars!", m3Text.TypestyleHeadlineLarge)(c)
+		// Define UI inline
+		return box.Box(
+			func(c compose.Composer) compose.Composer {
+				// Content
+				column.Column(
+					func(c compose.Composer) compose.Composer {
+						// Headline
+						m3Text.TextWithStyle("Snackbars!", m3Text.TypestyleHeadlineLarge)(c)
 
-					// Body
-					m3Text.TextWithStyle("This is a simple body message, click for debug info.", m3Text.TypestyleBodyLarge)(c)
+						// Body
+						m3Text.TextWithStyle("This is a simple body message, click for debug info.", m3Text.TypestyleBodyLarge)(c)
 
-					// Button
-					button.Elevated(func() {
-						log.Println("Showing Snackbar")
-						snackbarHostState.ShowSnackbar("Hi!")
-					}, "Say Hi!",
-						button.WithModifier(padding.Vertical(20, 0)),
-					)(c)
+						// Button
+						button.Elevated(func() {
+							log.Println("Showing Snackbar")
+							snackbarHostState.ShowSnackbar("Hi!")
+						}, "Say Hi!",
+							button.WithModifier(padding.Vertical(20, 0)),
+						)(c)
 
-					return c
-				},
-				column.WithModifier(padding.All(16)),
-			)(c)
+						return c
+					},
+					column.WithModifier(padding.All(16)),
+				)(c)
 
-			// SnackbarHost overlay
-			// Since Box stacks children, this will be drawn on top (last child)
-			snackbar.SnackbarHost(snackbarHostState)(c)
+				// SnackbarHost overlay
+				// Since Box stacks children, this will be drawn on top (last child)
+				snackbar.SnackbarHost(snackbarHostState)(c)
 
-			return c
-		},
-		box.WithModifier(
-			size.FillMax(),
-		),
-	)(c).Build()
+				return c
+			},
+			box.WithModifier(
+				size.FillMax(),
+			),
+		)(c)
+	}
 }

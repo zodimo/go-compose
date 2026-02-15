@@ -8,21 +8,23 @@ import (
 	"github.com/zodimo/go-compose/pkg/api"
 )
 
-func UI(c api.Composer) api.LayoutNode {
-	root := column.Column(
-		c.Sequence(
-			fText.Text(
-				"Hello World",
-			),
-			fText.Text("🚦 Traffic Light"),
-			fText.Text(
-				"Hello World",
-				fText.WithTextStyleOptions(
-					uiText.WithColor(graphics.ColorRed),
+func UI() api.Composable {
+	return func(c api.Composer) api.Composer {
+		root := column.Column(
+			c.Sequence(
+				fText.Text(
+					"Hello World",
+				),
+				fText.Text("🚦 Traffic Light"),
+				fText.Text(
+					"Hello World",
+					fText.WithTextStyleOptions(
+						uiText.WithColor(graphics.ColorRed),
+					),
 				),
 			),
-		),
-	)
+		)
 
-	return root(c).Build()
+		return root(c)
+	}
 }

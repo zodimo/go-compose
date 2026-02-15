@@ -3,7 +3,6 @@ package compose
 import (
 	"github.com/zodimo/go-compose/internal/composer/zipper"
 	"github.com/zodimo/go-compose/internal/sequence"
-	"github.com/zodimo/go-compose/lifecycle"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/state"
 )
@@ -12,13 +11,6 @@ type Composable = api.Composable
 type Composer = api.Composer
 
 func NewComposer(store state.PersistentState) Composer {
-
-	if lifecycleAwareStore, ok := store.(lifecycle.FrameLifecycleAwarePersistentState); ok {
-		return zipper.NewComposer(store,
-			zipper.WithOnStartFrame(lifecycleAwareStore.StartFrame),
-			zipper.WithOnEndFrame(lifecycleAwareStore.EndFrame),
-		)
-	}
 	return zipper.NewComposer(store)
 }
 

@@ -12,56 +12,58 @@ import (
 	"github.com/zodimo/go-compose/pkg/api"
 )
 
-func UI(c api.Composer) api.LayoutNode {
-	// State for managing sheet visibility
-	showSheet := c.State("showSheet", func() any { return false })
-	isOpen := showSheet.Get().(bool)
+func UI() api.Composable {
+	return func(c api.Composer) api.Composer {
+		// State for managing sheet visibility
+		showSheet := c.State("showSheet", func() any { return false })
+		isOpen := showSheet.Get().(bool)
 
-	return bottomsheet.ModalBottomSheet(
-		// Sheet Content
-		func(c api.Composer) api.Composer {
-			return column.Column(
-				func(c api.Composer) api.Composer {
-					text.TextWithStyle("Bottom Sheet Title", text.TypestyleTitleLarge)(c)
-					spacer.Height(16)(c)
-					text.TextWithStyle("This is the content of the bottom sheet. It slides up from the bottom.", text.TypestyleBodyMedium)(c)
-					spacer.Height(16)(c)
-					button.Filled(
-						func() {
-							showSheet.Set(false)
-						},
-						"Close Sheet",
-					)(c)
-					return c
-				},
-				column.WithModifier(ui.EmptyModifier.Then(padding.All(24))),
-			)(c)
-		},
-		// Screen Content
-		func(c api.Composer) api.Composer {
-			return scaffold.Scaffold(
-				// Content
-				func(c api.Composer) api.Composer {
-					return column.Column(
-						func(c api.Composer) api.Composer {
-							text.TextWithStyle("Main Screen Content", text.TypestyleBodyMedium)(c)
-							spacer.Height(16)(c)
-							button.Filled(
-								func() {
-									showSheet.Set(true)
-								},
-								"Show Bottom Sheet",
-							)(c)
-							return c
-						},
-						column.WithModifier(ui.EmptyModifier.Then(padding.All(24))),
-					)(c)
-				},
-			)(c)
-		},
-		bottomsheet.WithIsOpen(isOpen),
-		bottomsheet.WithOnDismissRequest(func() {
-			showSheet.Set(false)
-		}),
-	)(c).Build()
+		return bottomsheet.ModalBottomSheet(
+			// Sheet Content
+			func(c api.Composer) api.Composer {
+				return column.Column(
+					func(c api.Composer) api.Composer {
+						text.TextWithStyle("Bottom Sheet Title", text.TypestyleTitleLarge)(c)
+						spacer.Height(16)(c)
+						text.TextWithStyle("This is the content of the bottom sheet. It slides up from the bottom.", text.TypestyleBodyMedium)(c)
+						spacer.Height(16)(c)
+						button.Filled(
+							func() {
+								showSheet.Set(false)
+							},
+							"Close Sheet",
+						)(c)
+						return c
+					},
+					column.WithModifier(ui.EmptyModifier.Then(padding.All(24))),
+				)(c)
+			},
+			// Screen Content
+			func(c api.Composer) api.Composer {
+				return scaffold.Scaffold(
+					// Content
+					func(c api.Composer) api.Composer {
+						return column.Column(
+							func(c api.Composer) api.Composer {
+								text.TextWithStyle("Main Screen Content", text.TypestyleBodyMedium)(c)
+								spacer.Height(16)(c)
+								button.Filled(
+									func() {
+										showSheet.Set(true)
+									},
+									"Show Bottom Sheet",
+								)(c)
+								return c
+							},
+							column.WithModifier(ui.EmptyModifier.Then(padding.All(24))),
+						)(c)
+					},
+				)(c)
+			},
+			bottomsheet.WithIsOpen(isOpen),
+			bottomsheet.WithOnDismissRequest(func() {
+				showSheet.Set(false)
+			}),
+		)(c)
+	}
 }

@@ -19,11 +19,7 @@ func NewComposer(state PersistentState, options ...ComposerOption) Composer {
 		idManager:      idManager,
 		locals:         make(map[interface{}]interface{}),
 		providersStack: []map[interface{}]interface{}{},
-
-		onStartFrameFunc: opts.OnStartFrame,
-		onEndFrameFunc:   opts.OnEndFrame,
 	}
 
-	c.startFrame()
 	return c
 }

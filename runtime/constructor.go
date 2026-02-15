@@ -1,5 +1,15 @@
 package runtime
 
-func NewRuntime() Runtime {
-	return &runtime{}
+func NewRuntime(options ...RuntimeOption) Runtime {
+	opts := DefaultRuntimeOptions()
+	for _, option := range options {
+		if option != nil {
+			option(&opts)
+		}
+	}
+	return &runtime{
+		onStartFrameFunc: opts.OnStartFrame,
+		onEndFrameFunc:   opts.OnEndFrame,
+		frameStarted:     false,
+	}
 }

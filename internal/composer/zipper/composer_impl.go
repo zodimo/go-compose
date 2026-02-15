@@ -29,25 +29,10 @@ type composer struct {
 	locals         map[interface{}]interface{}
 	providersStack []map[interface{}]interface{}
 	timeNowFunc    func() time.Time
-
-	//lifecycle hooks
-	frameStarted     bool
-	onStartFrameFunc func()
-	onEndFrameFunc   func()
 }
 
 func (c *composer) TimeNow() time.Time {
 	return c.timeNowFunc()
-}
-
-func (c *composer) startFrame() {
-	c.frameStarted = true
-	c.onStartFrameFunc()
-}
-
-func (c *composer) endFrame() {
-	c.frameStarted = false
-	c.onEndFrameFunc()
 }
 
 // Tree Builder operations
@@ -92,15 +77,7 @@ func (c *composer) Build() LayoutNode {
 		panic("No root layout node found")
 	}
 
-	focus := c.focus
-
-	if c.frameStarted {
-		c.endFrame()
-	}
-	// the will allow you to only call build once
-	c.focus = nil
-
-	return focus
+	return c.focus
 }
 
 func (c *composer) EmitSlot(k string, v any) Composer {
