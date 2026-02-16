@@ -7,6 +7,7 @@ import (
 
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/state"
 )
 
 // LaunchedEffect runs a side-effect in a goroutine.
@@ -19,14 +20,14 @@ func LaunchedEffect(block func(context.Context), keys ...any) api.Composable {
 		// Since State() might be global in this implementation, we need to scope it manually.
 		stateKey := fmt.Sprintf("launched_effect_%d", c.GetID().Value())
 
-		effectState := c.State(stateKey, func() any {
+		effectState := state.MustRemember(c, stateKey, func() *launchEffectState {
 			return &launchEffectState{}
 		})
 
-		state := effectState.Get().(*launchEffectState)
+		state := effectState.Get()
 
 		// Check if keys changed
-		keysChanged := !reflect.DeepEqual(state.lastKeys, keys)
+		keysChanged := !keysEqual(state.lastKeys, keys)
 
 		if keysChanged {
 			// Cancel previous
@@ -61,4 +62,49 @@ func LaunchedEffect(block func(context.Context), keys ...any) api.Composable {
 type launchEffectState struct {
 	cancel   context.CancelFunc
 	lastKeys []any
+}
+
+// keysEqual compares two key slices using identity (==) for pointer and interface
+// types, and reflect.DeepEqual for value types. This avoids deep-comparing mutable
+// internal state of objects like StateFlow (which contain sync.Mutex, atomic.Value,
+// channels, etc.) that would cause false negatives with reflect.DeepEqual.
+func keysEqual(a, b []any) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if !keyEqual(a[i], b[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+// keyEqual compares two key values. For pointer, interface, channel, map, and func
+// types it uses identity comparison (==). For value types it falls back to
+// reflect.DeepEqual for structural comparison.
+func keyEqual(a, b any) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+
+	va := reflect.ValueOf(a)
+	vb := reflect.ValueOf(b)
+
+	// Different types means different keys
+	if va.Type() != vb.Type() {
+		return false
+	}
+
+	switch va.Kind() {
+	case reflect.Ptr, reflect.Interface, reflect.Chan, reflect.Map, reflect.Func:
+		// Use pointer/identity comparison — avoids deep-comparing mutable internals
+		return va.Pointer() == vb.Pointer()
+	default:
+		// Value types (int, string, struct, etc.) — use structural equality
+		return reflect.DeepEqual(a, b)
+	}
 }
