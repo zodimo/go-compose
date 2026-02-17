@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/state"
 )
@@ -14,15 +13,22 @@ import (
 // The effect is restarted if any of the keys change.
 func LaunchedEffect(block func(context.Context), keys ...any) api.Composable {
 	return func(c api.Composer) api.Composer {
-		c.StartBlock("LaunchedEffect")
+		key := c.GenerateID()
+		path := c.GetPath()
+
+		coroutineScope := RememberCoroutineScope(c)
 
 		// Key for the persistent state, ensuring uniqueness per node using its ID.
 		// Since State() might be global in this implementation, we need to scope it manually.
-		stateKey := fmt.Sprintf("launched_effect_%d", c.GetID().Value())
+		stateKey := fmt.Sprintf("%d/%s/launched_effect", key, path)
 
-		effectState := state.MustRemember(c, stateKey, func() *launchEffectState {
-			return &launchEffectState{}
-		})
+		effectState := state.MustRemember(
+			c,
+			stateKey,
+			func() *launchEffectState {
+				return &launchEffectState{}
+			},
+		)
 
 		state := effectState.Get()
 
@@ -36,7 +42,7 @@ func LaunchedEffect(block func(context.Context), keys ...any) api.Composable {
 			}
 
 			// Start new
-			ctx, cancel := context.WithCancel(context.Background())
+			ctx, cancel := context.WithCancel(coroutineScope.Context())
 			state.cancel = cancel
 			// Copy keys to ensure we store a snapshot (though variadic slice is usually fresh)
 			keysCopy := make([]any, len(keys))
@@ -48,14 +54,7 @@ func LaunchedEffect(block func(context.Context), keys ...any) api.Composable {
 			}()
 		}
 
-		// Set a dummy widget constructor that does nothing (zero size)
-		c.SetWidgetConstructor(layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
-			return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-				return layoutnode.LayoutDimensions{}
-			}
-		}))
-
-		return c.EndBlock()
+		return c
 	}
 }
 

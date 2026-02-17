@@ -5,26 +5,28 @@ import (
 )
 
 type ScopedValue struct {
-	cancelFunc context.CancelFunc // Context cancel functions for ViewModelScope
+	cancelFuncs []context.CancelFunc // Context cancel functions for ViewModelScope
 
 	onForgotten func() // remember observer
 	onCleared   func() // view model observer
 }
 
 func NewScopedValue(
-	cancelFunc context.CancelFunc,
+	cancelFuncs []context.CancelFunc,
 	onForgotten func(),
 	onCleared func(),
 ) ScopedValue {
 	return ScopedValue{
-		cancelFunc:  cancelFunc,
+		cancelFuncs: cancelFuncs,
 		onForgotten: onForgotten,
 		onCleared:   onCleared,
 	}
 }
 
 func (sv ScopedValue) Cleanup() {
-	sv.cancelFunc()
+	for _, cancelFunc := range sv.cancelFuncs {
+		cancelFunc()
+	}
 	sv.onForgotten()
 	sv.onCleared()
 }

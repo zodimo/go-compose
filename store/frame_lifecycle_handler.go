@@ -126,7 +126,7 @@ func (flh *FrameLifecycleHandler) EndFrame() []string {
 
 func initScopedValue(mutableValue state.MutableValue, rootContext context.Context) ScopedValue {
 
-	scopedCancelFunc := func() {}
+	scopedCancelFuncs := []context.CancelFunc{}
 	onForgotten := func() {}
 	onCleared := func() {}
 
@@ -140,7 +140,14 @@ func initScopedValue(mutableValue state.MutableValue, rootContext context.Contex
 	if scopeHolder, ok := initialValue.(lifecycle.HasViewModelScope); ok {
 		ctx, cancelFunc := context.WithCancel(rootContext)
 		scopeHolder.SetViewModelScope(ctx)
-		scopedCancelFunc = cancelFunc
+		scopedCancelFuncs = append(scopedCancelFuncs, cancelFunc)
+	}
+
+	// If implements HasCoroutineScope, create and provide a cancellable context
+	if scopeHolder, ok := initialValue.(lifecycle.HasCoroutineScope); ok {
+		ctx, cancelFunc := context.WithCancel(rootContext)
+		scopeHolder.SetCoroutineScope(ctx)
+		scopedCancelFuncs = append(scopedCancelFuncs, cancelFunc)
 	}
 
 	if vm, ok := initialValue.(lifecycle.ViewModel); ok {
@@ -148,7 +155,7 @@ func initScopedValue(mutableValue state.MutableValue, rootContext context.Contex
 	}
 
 	scopedValue := NewScopedValue(
-		scopedCancelFunc,
+		scopedCancelFuncs,
 		onForgotten,
 		onCleared,
 	)
