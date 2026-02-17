@@ -23,9 +23,9 @@ func UI() api.Composable {
 			func(c api.Composer) api.Composer {
 				return column.Column(
 					func(c api.Composer) api.Composer {
-						text.TextWithStyle("Bottom Sheet Title", text.TypestyleTitleLarge)(c)
+						text.TitleLarge("Bottom Sheet Title")(c)
 						spacer.Height(16)(c)
-						text.TextWithStyle("This is the content of the bottom sheet. It slides up from the bottom.", text.TypestyleBodyMedium)(c)
+						text.BodyMedium("This is the content of the bottom sheet. It slides up from the bottom.")(c)
 						spacer.Height(16)(c)
 						button.Filled(
 							func() {
@@ -45,7 +45,7 @@ func UI() api.Composable {
 					func(c api.Composer) api.Composer {
 						return column.Column(
 							func(c api.Composer) api.Composer {
-								text.TextWithStyle("Main Screen Content", text.TypestyleBodyMedium)(c)
+								text.BodyMedium("Main Screen Content")(c)
 								spacer.Height(16)(c)
 								button.Filled(
 									func() {

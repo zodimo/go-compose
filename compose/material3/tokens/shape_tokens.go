@@ -1,6 +1,8 @@
 package tokens
 
 import (
+	"fmt"
+
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
@@ -73,4 +75,100 @@ type ShapeTokensData struct {
 	CornerValueMedium              unit.Dp
 	CornerValueNone                unit.Dp
 	CornerValueSmall               unit.Dp
+}
+
+type ShapeTokenKey int
+
+const (
+	ShapeTokenKeyUnspecified ShapeTokenKey = iota
+	ShapeTokenKeyCornerExtraExtraLarge
+	ShapeTokenKeyCornerExtraLarge
+	ShapeTokenKeyCornerExtraLargeIncreased
+	ShapeTokenKeyCornerExtraLargeTop
+	ShapeTokenKeyCornerExtraSmall
+	ShapeTokenKeyCornerExtraSmallTop
+	ShapeTokenKeyCornerFull
+	ShapeTokenKeyCornerLarge
+	ShapeTokenKeyCornerLargeEnd
+	ShapeTokenKeyCornerLargeIncreased
+	ShapeTokenKeyCornerLargeStart
+	ShapeTokenKeyCornerLargeTop
+	ShapeTokenKeyCornerMedium
+	ShapeTokenKeyCornerNone
+	ShapeTokenKeyCornerSmall
+)
+
+func (k ShapeTokenKey) String() string {
+	switch k {
+	case ShapeTokenKeyUnspecified:
+		return "ShapeTokenKeyUnspecified"
+	case ShapeTokenKeyCornerExtraExtraLarge:
+		return "ShapeTokenKeyCornerExtraExtraLarge"
+	case ShapeTokenKeyCornerExtraLarge:
+		return "ShapeTokenKeyCornerExtraLarge"
+	case ShapeTokenKeyCornerExtraLargeIncreased:
+		return "ShapeTokenKeyCornerExtraLargeIncreased"
+	case ShapeTokenKeyCornerExtraLargeTop:
+		return "ShapeTokenKeyCornerExtraLargeTop"
+	case ShapeTokenKeyCornerExtraSmall:
+		return "ShapeTokenKeyCornerExtraSmall"
+	case ShapeTokenKeyCornerExtraSmallTop:
+		return "ShapeTokenKeyCornerExtraSmallTop"
+	case ShapeTokenKeyCornerFull:
+		return "ShapeTokenKeyCornerFull"
+	case ShapeTokenKeyCornerLarge:
+		return "ShapeTokenKeyCornerLarge"
+	case ShapeTokenKeyCornerLargeEnd:
+		return "ShapeTokenKeyCornerLargeEnd"
+	case ShapeTokenKeyCornerLargeIncreased:
+		return "ShapeTokenKeyCornerLargeIncreased"
+	case ShapeTokenKeyCornerLargeStart:
+		return "ShapeTokenKeyCornerLargeStart"
+	case ShapeTokenKeyCornerLargeTop:
+		return "ShapeTokenKeyCornerLargeTop"
+	case ShapeTokenKeyCornerMedium:
+		return "ShapeTokenKeyCornerMedium"
+	case ShapeTokenKeyCornerNone:
+		return "ShapeTokenKeyCornerNone"
+	case ShapeTokenKeyCornerSmall:
+		return "ShapeTokenKeyCornerSmall"
+	default:
+		panic(fmt.Sprintf("unknown shape token key: %d", k))
+	}
+}
+
+var ShapeKeyTokens = ShapeKeyTokensData{
+	CornerExtraExtraLarge:     ShapeTokenKeyCornerExtraExtraLarge,
+	CornerExtraLarge:          ShapeTokenKeyCornerExtraLarge,
+	CornerExtraLargeIncreased: ShapeTokenKeyCornerExtraLargeIncreased,
+	CornerExtraLargeTop:       ShapeTokenKeyCornerExtraLargeTop,
+	CornerExtraSmall:          ShapeTokenKeyCornerExtraSmall,
+	CornerExtraSmallTop:       ShapeTokenKeyCornerExtraSmallTop,
+	CornerFull:                ShapeTokenKeyCornerFull,
+	CornerLarge:               ShapeTokenKeyCornerLarge,
+	CornerLargeEnd:            ShapeTokenKeyCornerLargeEnd,
+	CornerLargeIncreased:      ShapeTokenKeyCornerLargeIncreased,
+	CornerLargeStart:          ShapeTokenKeyCornerLargeStart,
+	CornerLargeTop:            ShapeTokenKeyCornerLargeTop,
+	CornerMedium:              ShapeTokenKeyCornerMedium,
+	CornerNone:                ShapeTokenKeyCornerNone,
+	CornerSmall:               ShapeTokenKeyCornerSmall,
+}
+
+type ShapeKeyTokensData struct {
+	CornerExtraExtraLarge     ShapeTokenKey
+	CornerExtraLarge          ShapeTokenKey
+	CornerExtraLargeIncreased ShapeTokenKey
+	CornerExtraLargeTop       ShapeTokenKey
+	CornerExtraSmall          ShapeTokenKey
+	CornerExtraSmallTop       ShapeTokenKey
+	CornerFull                ShapeTokenKey
+	CornerLarge               ShapeTokenKey
+	CornerLargeEnd            ShapeTokenKey
+	CornerLargeIncreased      ShapeTokenKey
+	CornerLargeStart          ShapeTokenKey
+	CornerLargeTop            ShapeTokenKey
+	CornerMedium              ShapeTokenKey
+	CornerNone                ShapeTokenKey
+	CornerSmall               ShapeTokenKey
 }

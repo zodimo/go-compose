@@ -57,8 +57,8 @@ func UI() api.Composable {
 
 				return column.Column(
 					c.Sequence(
-						m3text.TextWithStyle("StateFlow Integration Demo", m3text.TypestyleHeadlineMedium),
-						m3text.TextWithStyle(fmt.Sprintf("Current Count (from flow: 1s interval): %d", count), m3text.TypestyleBodyLarge),
+						m3text.HeadlineMedium("StateFlow Integration Demo"),
+						m3text.BodyLarge(fmt.Sprintf("Current Count (from flow: 1s interval): %d", count)),
 						row.Row(
 							c.Sequence(
 								button.Filled(func() {
@@ -72,7 +72,7 @@ func UI() api.Composable {
 							row.WithModifier(padding.Vertical(20, 0)),
 						),
 						spacer.Height(20),
-						m3text.TextWithStyle(fmt.Sprintf("Current Count (from flow2: 500ms interval): %d", count2), m3text.TypestyleBodyLarge),
+						m3text.BodyLarge(fmt.Sprintf("Current Count (from flow2: 500ms interval): %d", count2)),
 						row.Row(
 							c.Sequence(
 								button.Filled(func() {

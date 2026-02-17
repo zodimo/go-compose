@@ -11,6 +11,7 @@ import (
 	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
+	"github.com/zodimo/go-compose/compose/ui/next/platform"
 	uitext "github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/compose/ui/unit"
@@ -93,13 +94,17 @@ func iconFromSymbol(name SymbolName, opts IconOptions) Composable {
 		contentColor := material3.LocalContentColor.Current(c)
 		iconColor := opts.Color.TakeOrElse(contentColor)
 
+		layoutDirection := platform.LocalLayoutDirection.Current(c)
+		// Resolve text style with defaults
+		defaultTextStyles := uitext.TextStyleResolveDefaults(uitext.TextStyleUnspecified, layoutDirection)
+
 		// Resolve size - prefer unified Size, fallback to FontSize, then default 24sp
 		var fontSize unit.TextUnit
 		if opts.Size.IsSpecified() {
 			// Convert Dp to Sp (treat them as equivalent for font sizing)
 			fontSize = unit.Sp(opts.Size.Value())
 		} else {
-			fontSize = opts.FontSize.TakeOrElse(unit.Sp(24))
+			fontSize = opts.FontSize.TakeOrElse(defaultTextStyles.FontSize())
 		}
 
 		return box.Box(text.Text(

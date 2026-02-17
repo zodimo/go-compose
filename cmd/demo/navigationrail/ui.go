@@ -55,9 +55,7 @@ func UI() api.Composable {
 				return column.Column(
 					func(c api.Composer) api.Composer {
 						// Drawer Header / Headline
-						text.TextWithStyle("GoCompose", text.TypestyleHeadlineSmall,
-							ftext.WithModifier(padding.Padding(28, 24, 16, 24)),
-						)(c)
+						text.HeadlineSmall("GoCompose", ftext.WithModifier(padding.Padding(28, 24, 16, 24)))(c)
 
 						items := []struct {
 							Label string
@@ -185,9 +183,8 @@ func UI() api.Composable {
 												textColor = material3.Theme(c).ColorScheme().OnSurfaceVariant // theme.ColorHelper.ColorSelector().SurfaceRoles.OnVariant
 											}
 
-											return text.TextWithStyle(
+											return text.LabelMedium(
 												item.Label,
-												text.TypestyleLabelMedium,
 												ftext.WithTextStyleOptions(
 													uiText.WithColor(textColor),
 												),
@@ -205,7 +202,7 @@ func UI() api.Composable {
 						// Main Content Body
 						column.Column(
 							func(c api.Composer) api.Composer {
-								text.TextWithStyle(fmt.Sprintf("Selected Page: %d", selectedIndex), text.TypestyleHeadlineMedium)(c)
+								text.HeadlineMedium(fmt.Sprintf("Selected Page: %d", selectedIndex))(c)
 								return c
 							},
 							column.WithModifier(size.FillMax()),

@@ -113,9 +113,8 @@ func (s *treeScopeImpl) Branch(key any, header api.Composable, children func(Tre
 				}
 
 				// Toggle Button - only toggles expand/collapse
-				m3Text.TextWithStyle(
+				m3Text.BodyMedium(
 					icon,
-					m3Text.TypestyleBodyMedium,
 					fText.WithModifier(
 						clickable.OnClick(func() {
 							toggleBranchWithCallback(state, key, opts)

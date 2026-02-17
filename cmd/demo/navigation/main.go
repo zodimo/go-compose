@@ -97,8 +97,8 @@ func HomeScreen(navController *navigation.NavController) api.Composable {
 	return func(c api.Composer) api.Composer {
 		return column.Column(
 			c.Sequence(
-				text.TextWithStyle("Home Screen", text.TypestyleTitleLarge),
-				text.TextWithStyle("Select an item to view details:", text.TypestyleBodyLarge),
+				text.TitleLarge("Home Screen"),
+				text.BodyLarge("Select an item to view details:"),
 
 				// Navigate to different items with different IDs
 				button.Filled(
@@ -139,9 +139,9 @@ func DetailsScreen(navController *navigation.NavController, entry *navigation.Ba
 
 		return column.Column(
 			c.Sequence(
-				text.TextWithStyle("Details Screen", text.TypestyleTitleLarge),
-				text.TextWithStyle(fmt.Sprintf("Viewing Item: %s", itemId), text.TypestyleHeadlineMedium),
-				text.TextWithStyle(fmt.Sprintf("This is the detail view for item ID: %s", itemId), text.TypestyleBodyLarge),
+				text.TitleLarge("Details Screen"),
+				text.HeadlineMedium(fmt.Sprintf("Viewing Item: %s", itemId)),
+				text.BodyLarge(fmt.Sprintf("This is the detail view for item ID: %s", itemId)),
 				button.Filled(
 					func() {
 						navController.PopBackStack()

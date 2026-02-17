@@ -24,7 +24,7 @@ func UI() api.Composable {
 		return column.Column(
 			c.Sequence(
 				// Title for Fixed Grid
-				text.TextWithStyle("Fixed Grid (3 columns)", text.TypestyleHeadlineMedium,
+				text.HeadlineMedium("Fixed Grid (3 columns)",
 					ftext.WithModifier(padding.All(16)),
 				),
 
@@ -43,7 +43,7 @@ func UI() api.Composable {
 				spacer.Height(16),
 
 				// Title for Adaptive Grid
-				text.TextWithStyle("Adaptive Grid (min 100dp)", text.TypestyleHeadlineMedium,
+				text.HeadlineMedium("Adaptive Grid (min 100dp)",
 					ftext.WithModifier(padding.All(16)),
 				),
 
@@ -74,7 +74,7 @@ func GridItem(index int) api.Composable {
 	bgColor := colors[index%len(colors)]
 
 	return box.Box(
-		text.TextWithStyle(fmt.Sprintf("%d", index), text.TypestyleTitleLarge),
+		text.TitleLarge(fmt.Sprintf("%d", index)),
 		box.WithModifier(
 			size.Height(80).
 				Then(size.FillMaxWidth()).

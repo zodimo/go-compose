@@ -26,9 +26,8 @@ func UI() api.Composable {
 							// Sticky Header
 							headerIndex := i
 							scope.StickyHeader(fmt.Sprintf("header-%d", i), func(c api.Composer) api.Composer {
-								text.TextWithStyle(
+								text.HeadlineSmall(
 									fmt.Sprintf("Sticky Header %d", headerIndex),
-									text.TypestyleHeadlineSmall,
 									ftext.WithModifier(
 										background.Background(graphics.NewColorSrgb(200, 200, 200, 255)).
 											Then(size.FillMaxWidth()),
@@ -40,9 +39,8 @@ func UI() api.Composable {
 							// Items
 							scope.Items(15, nil, func(index int) api.Composable {
 								return func(c api.Composer) api.Composer {
-									text.TextWithStyle(
+									text.BodyMedium(
 										fmt.Sprintf("Item %d - %d", headerIndex, index),
-										text.TypestyleBodyMedium,
 										ftext.WithModifier(padding.All(8)),
 									)(c)
 									return c

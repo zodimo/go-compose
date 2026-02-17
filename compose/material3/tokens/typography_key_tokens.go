@@ -103,7 +103,38 @@ func (k TypographyTokenKey) String() string {
 	}
 }
 
-var TypographyKeyTokens = &TypographyKeyTokensData{}
+var TypographyKeyTokens = &TypographyKeyTokensData{
+	BodyLarge:                TypographyTokenKeyBodyLarge,
+	BodyMedium:               TypographyTokenKeyBodyMedium,
+	BodySmall:                TypographyTokenKeyBodySmall,
+	DisplayLarge:             TypographyTokenKeyDisplayLarge,
+	DisplayMedium:            TypographyTokenKeyDisplayMedium,
+	DisplaySmall:             TypographyTokenKeyDisplaySmall,
+	HeadlineLarge:            TypographyTokenKeyHeadlineLarge,
+	HeadlineMedium:           TypographyTokenKeyHeadlineMedium,
+	HeadlineSmall:            TypographyTokenKeyHeadlineSmall,
+	LabelLarge:               TypographyTokenKeyLabelLarge,
+	LabelMedium:              TypographyTokenKeyLabelMedium,
+	LabelSmall:               TypographyTokenKeyLabelSmall,
+	TitleLarge:               TypographyTokenKeyTitleLarge,
+	TitleMedium:              TypographyTokenKeyTitleMedium,
+	TitleSmall:               TypographyTokenKeyTitleSmall,
+	BodyLargeEmphasized:      TypographyTokenKeyBodyLargeEmphasized,
+	BodyMediumEmphasized:     TypographyTokenKeyBodyMediumEmphasized,
+	BodySmallEmphasized:      TypographyTokenKeyBodySmallEmphasized,
+	DisplayLargeEmphasized:   TypographyTokenKeyDisplayLargeEmphasized,
+	DisplayMediumEmphasized:  TypographyTokenKeyDisplayMediumEmphasized,
+	DisplaySmallEmphasized:   TypographyTokenKeyDisplaySmallEmphasized,
+	HeadlineLargeEmphasized:  TypographyTokenKeyHeadlineLargeEmphasized,
+	HeadlineMediumEmphasized: TypographyTokenKeyHeadlineMediumEmphasized,
+	HeadlineSmallEmphasized:  TypographyTokenKeyHeadlineSmallEmphasized,
+	LabelLargeEmphasized:     TypographyTokenKeyLabelLargeEmphasized,
+	LabelMediumEmphasized:    TypographyTokenKeyLabelMediumEmphasized,
+	LabelSmallEmphasized:     TypographyTokenKeyLabelSmallEmphasized,
+	TitleLargeEmphasized:     TypographyTokenKeyTitleLargeEmphasized,
+	TitleMediumEmphasized:    TypographyTokenKeyTitleMediumEmphasized,
+	TitleSmallEmphasized:     TypographyTokenKeyTitleSmallEmphasized,
+}
 
 type TypographyKeyTokensData struct {
 	BodyLarge                TypographyTokenKey

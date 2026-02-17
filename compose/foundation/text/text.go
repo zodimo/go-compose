@@ -64,7 +64,6 @@ func Text(value string, options ...TextOption) Composable {
 			textSelectionColor: textSelectionColors.BackgroundColor,
 
 			textShaper: textShaper,
-			// layoutDirection:    layoutDirection,
 		}
 
 		c.StartBlock(BasicTextNodeID)
@@ -83,7 +82,6 @@ type BasicTextConstructorArgs struct {
 	textSelectionColor graphics.Color
 
 	textShaper *text.TextShaper
-	// layoutDirection    unit.LayoutDirection
 }
 
 func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.LayoutNodeWidgetConstructor {
@@ -96,7 +94,7 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 			// local alias
 			textStyle := textOptions.TextStyle
 
-			resolvedTextColor := graphics.ColorToNRGBA(textStyle.Color())
+			resolvedTextColor := graphics.ColorToNRGBA(textStyle.Color().TakeOrElse(graphics.ColorBlack))
 			resolvedSelectColor := graphics.ColorToNRGBA(constructorArgs.textSelectionColor)
 
 			textColorMacro := op.Record(gtx.Ops)

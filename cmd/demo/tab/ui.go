@@ -27,7 +27,7 @@ func UI() Composable {
 			column.Column(
 				c.Sequence(
 					// Tab Row 1: Default theme colors
-					text.TextWithStyle("Default Theme Colors", text.TypestyleLabelLarge),
+					text.LabelLarge("Default Theme Colors"),
 					tab.TabRow(
 						selectedTabIndex.Get().(int),
 						func(c Composer) Composer {
@@ -40,7 +40,7 @@ func UI() Composable {
 										fmt.Printf("Clicked Tab %d\n", index)
 										selectedTabIndex.Set(index)
 									},
-									text.TextWithStyle(title, text.TypestyleLabelMedium),
+									text.LabelMedium(title),
 									tab.WithModifier(weight.Weight(1)),
 								)(c)
 							}
@@ -52,7 +52,7 @@ func UI() Composable {
 					spacer.Height(24),
 
 					// Tab Row 2: Custom theme colors
-					text.TextWithStyle("Custom Theme Colors (Secondary)", text.TypestyleLabelLarge),
+					text.LabelLarge("Custom Theme Colors (Secondary)"),
 					tab.TabRow(
 						selectedTabIndex2.Get().(int),
 						func(c Composer) Composer {
@@ -65,7 +65,7 @@ func UI() Composable {
 										fmt.Printf("Clicked Tab %d\n", index)
 										selectedTabIndex2.Set(index)
 									},
-									text.TextWithStyle(title, text.TypestyleLabelMedium),
+									text.LabelMedium(title),
 									tab.WithModifier(weight.Weight(1)),
 								)(c)
 							}
@@ -78,10 +78,9 @@ func UI() Composable {
 					spacer.Height(24),
 
 					// Explanatory text
-					text.TextWithStyle(
+					text.BodyMedium(
 						"Tab colors now use theme-aware styling. "+
 							"They automatically adapt to light/dark themes.",
-						text.TypestyleBodyMedium,
 					),
 				),
 				column.WithModifier(

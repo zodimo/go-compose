@@ -23,11 +23,7 @@ func UI() api.Composable {
 		return column.Column(
 			func(c api.Composer) api.Composer {
 				// Title
-				m3text.TextWithStyle(
-					"Tree Demo",
-					m3text.TypestyleHeadlineMedium,
-					ftext.WithModifier(padding.All(16)),
-				)(c)
+				m3text.HeadlineMedium("Tree Demo", ftext.WithModifier(padding.All(16)))(c)
 
 				divider.Divider()(c)
 
@@ -37,7 +33,7 @@ func UI() api.Composable {
 						// Pane 1: Declarative
 						column.Column(
 							func(c api.Composer) api.Composer {
-								m3text.TextWithStyle("Declarative", m3text.TypestyleTitleMedium, ftext.WithModifier(padding.All(8)))(c)
+								m3text.TitleMedium("Declarative", ftext.WithModifier(padding.All(8)))(c)
 								c.Key("declarative", DeclarativeTreeDemo())(c)
 								return c
 							},
@@ -52,7 +48,7 @@ func UI() api.Composable {
 						// Pane 2: Data-Driven
 						column.Column(
 							func(c api.Composer) api.Composer {
-								m3text.TextWithStyle("Data-Driven", m3text.TypestyleTitleMedium, ftext.WithModifier(padding.All(8)))(c)
+								m3text.TitleMedium("Data-Driven", ftext.WithModifier(padding.All(8)))(c)
 								c.Key("datadriven", DataDrivenTreeDemo())(c)
 								return c
 							},

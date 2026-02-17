@@ -157,7 +157,7 @@ func SegmentedButton(
 					// Let's rely on surface option below unless we need to override.
 
 					// Label
-					text.TextWithStyle(label, text.TypestyleLabelLarge)(c)
+					text.LabelLarge(label)(c)
 
 					return c
 				},

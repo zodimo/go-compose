@@ -8,7 +8,7 @@ import (
 type ThemeInterface interface {
 	ColorScheme() *ColorSchemeNext
 	Typography() *Typography
-	// Shapes() *Shapes
+	Shapes() *Shapes
 	MotionScheme() *MotionScheme
 }
 

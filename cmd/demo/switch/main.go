@@ -80,7 +80,7 @@ func UI() api.Composable {
 					// Case 1: Switch in a row, text then switch
 					row.Row(
 						c.Sequence(
-							text.TextWithStyle("Enable Feature", text.TypestyleBodyMedium),
+							text.BodyMedium("Enable Feature"),
 							spacer.Width(20),
 							mswitch.Switch(
 								checked1.Get().(bool),
@@ -93,7 +93,7 @@ func UI() api.Composable {
 						row.WithSpacing(row.SpaceStart),
 						row.WithAlignment(row.Middle),
 					),
-					text.TextWithStyle("Switch should be to the right to text above", text.TypestyleBodyMedium),
+					text.BodyMedium("Switch should be to the right to text above"),
 					// Case 2: Switch in a row, switch then text
 					row.Row(
 						c.Sequence(
@@ -105,13 +105,13 @@ func UI() api.Composable {
 								},
 							),
 							spacer.Width(20),
-							text.TextWithStyle("Enable Feature", text.TypestyleBodyMedium),
+							text.BodyMedium("Enable Feature"),
 						),
 						row.WithSpacing(row.SpaceStart),
 						row.WithAlignment(row.Middle),
 					),
 					// Case 2: Just confirmation text
-					text.TextWithStyle("Switch should be to the right to text above", text.TypestyleBodyMedium),
+					text.BodyMedium("Switch should be to the right to text above"),
 				),
 				column.WithSpacing(column.SpaceAround),
 				column.WithAlignment(column.Middle),
@@ -119,7 +119,7 @@ func UI() api.Composable {
 			scaffold.WithTopBar(
 				appbar.TopAppBar(
 					func(c compose.Composer) compose.Composer {
-						return text.TextWithStyle("Switch Demo", text.TypestyleTitleLarge)(c)
+						return text.TitleLarge("Switch Demo")(c)
 					},
 				),
 			),

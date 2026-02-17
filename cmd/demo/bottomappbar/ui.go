@@ -24,9 +24,8 @@ func UI() api.Composable {
 				// Content Area
 				box.Box(
 					func(c api.Composer) api.Composer {
-						return m3text.TextWithStyle(
+						return m3text.BodyLarge(
 							"Content Area",
-							m3text.TypestyleBodyLarge, // valid style
 						)(c)
 					},
 					box.WithModifier(weight.Weight(1)),

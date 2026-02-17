@@ -22,13 +22,13 @@ func UI() api.Composable {
 				c.Sequence(
 					// 1. Simple TopAppBar
 					appbar.TopAppBar(
-						text.TextWithStyle("Simple TopAppBar", text.TypestyleTitleLarge),
+						text.TitleLarge("Simple TopAppBar"),
 					),
 					spacer.Height(16),
 
 					// 2. TopAppBar with Navigation Icon
 					appbar.TopAppBar(
-						text.TextWithStyle("With Nav Icon", text.TypestyleTitleLarge),
+						text.TitleLarge("With Nav Icon"),
 						appbar.WithNavigationIcon(
 							iconbutton.Standard(
 								func() {},
@@ -41,7 +41,7 @@ func UI() api.Composable {
 
 					// 3. TopAppBar with Actions
 					appbar.TopAppBar(
-						text.TextWithStyle("With Actions", text.TypestyleTitleLarge),
+						text.TitleLarge("With Actions"),
 						appbar.WithActions(
 							iconbutton.Standard(
 								func() {},
@@ -64,7 +64,7 @@ func UI() api.Composable {
 
 					// 4. Center Aligned TopAppBar
 					appbar.CenterAlignedTopAppBar(
-						text.TextWithStyle("Center Aligned", text.TypestyleTitleLarge),
+						text.TitleLarge("Center Aligned"),
 						appbar.WithNavigationIcon(
 							iconbutton.Standard(
 								func() {},
@@ -84,7 +84,7 @@ func UI() api.Composable {
 
 					// 5. Medium TopAppBar
 					appbar.MediumTopAppBar(
-						text.TextWithStyle("Medium TopAppBar", text.TypestyleHeadlineSmall),
+						text.HeadlineSmall("Medium TopAppBar"),
 						appbar.WithNavigationIcon(
 							iconbutton.Standard(
 								func() {},
@@ -104,7 +104,7 @@ func UI() api.Composable {
 
 					// 6. Large TopAppBar
 					appbar.LargeTopAppBar(
-						text.TextWithStyle("Large TopAppBar", text.TypestyleHeadlineMedium),
+						text.HeadlineMedium("Large TopAppBar"),
 						appbar.WithNavigationIcon(
 							iconbutton.Standard(
 								func() {},

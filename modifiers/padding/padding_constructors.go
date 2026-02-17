@@ -62,3 +62,19 @@ func Horizontal(start, end int, options ...PaddingOption) ui.Modifier {
 func Vertical(top, bottom int, options ...PaddingOption) ui.Modifier {
 	return Padding(NotSet, top, NotSet, bottom, options...)
 }
+
+func End(end int, options ...PaddingOption) ui.Modifier {
+	return Padding(NotSet, NotSet, end, NotSet, options...)
+}
+
+func Start(start int, options ...PaddingOption) ui.Modifier {
+	return Padding(start, NotSet, NotSet, NotSet, options...)
+}
+
+func Top(top int, options ...PaddingOption) ui.Modifier {
+	return Padding(NotSet, top, NotSet, NotSet, options...)
+}
+
+func Bottom(bottom int, options ...PaddingOption) ui.Modifier {
+	return Padding(NotSet, NotSet, NotSet, bottom, options...)
+}

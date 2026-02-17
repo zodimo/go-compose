@@ -38,13 +38,13 @@ func UI() api.Composable {
 		return column.Column(
 			c.Sequence(
 				// Title
-				text.TextWithStyle("Segmented Button Demo", text.TypestyleTitleLarge),
+				text.TitleLarge("Segmented Button Demo"),
 
 				spacer.Height(16),
 
 				// Section: Single-Select
-				text.TextWithStyle("Single Select", text.TypestyleTitleMedium),
-				text.TextWithStyle(fmt.Sprintf("Selected: %s", singleOptions[selectedIndex]), text.TypestyleBodyMedium),
+				text.TitleMedium("Single Select"),
+				text.BodyMedium(fmt.Sprintf("Selected: %s", singleOptions[selectedIndex])),
 
 				spacer.Height(8),
 
@@ -70,7 +70,7 @@ func UI() api.Composable {
 				spacer.Height(24),
 
 				// Section: Multi-Select
-				text.TextWithStyle("Multi Select", text.TypestyleTitleMedium),
+				text.TitleMedium("Multi Select"),
 
 				spacer.Height(8),
 

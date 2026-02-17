@@ -38,7 +38,7 @@ func UI() api.Composable {
 				// Title
 				scope.Item("title", column.Column(
 					c.Sequence(
-						m3text.TextWithStyle("Card Component Demo", m3text.TypestyleHeadlineMedium),
+						m3text.HeadlineMedium("Card Component Demo"),
 						spacer.Height(24),
 					),
 				))
@@ -124,7 +124,7 @@ func UI() api.Composable {
 				scope.Item("cover", column.Column(
 					c.Sequence(
 						SectionTitle("Card with ContentCover"),
-						m3text.TextWithStyle("ContentCover provides full-bleed content without padding", m3text.TypestyleBodySmall),
+						m3text.BodySmall("ContentCover provides full-bleed content without padding"),
 						spacer.Height(8),
 						card.Elevated(
 							card.CardContents(
@@ -150,7 +150,7 @@ func UI() api.Composable {
 				scope.Item("multiple", column.Column(
 					c.Sequence(
 						SectionTitle("Card with Multiple Sections"),
-						m3text.TextWithStyle("Cards can have multiple Content sections", m3text.TypestyleBodySmall),
+						m3text.BodySmall("Cards can have multiple Content sections"),
 						spacer.Height(8),
 						card.Filled(
 							card.CardContents(
@@ -174,7 +174,7 @@ func UI() api.Composable {
 				scope.Item("image", column.Column(
 					c.Sequence(
 						SectionTitle("Card with Image"),
-						m3text.TextWithStyle("Using go-compose Image within ContentCover", m3text.TypestyleBodySmall),
+						m3text.BodySmall("Using go-compose Image within ContentCover"),
 						spacer.Height(8),
 						card.Elevated(
 							card.CardContents(
@@ -204,7 +204,7 @@ func UI() api.Composable {
 				scope.Item("clickable", column.Column(
 					c.Sequence(
 						SectionTitle("Clickable Cards (Hover Effect Demo)"),
-						m3text.TextWithStyle("Cards with onClick show hover effect clipped to rounded corners", m3text.TypestyleBodySmall),
+						m3text.BodySmall("Cards with onClick show hover effect clipped to rounded corners"),
 						spacer.Height(8),
 						row.Row(
 							c.Sequence(
@@ -281,7 +281,7 @@ func UI() api.Composable {
 
 // SectionTitle creates a section heading
 func SectionTitle(title string) api.Composable {
-	return m3text.TextWithStyle(title, m3text.TypestyleTitleMedium)
+	return m3text.TitleMedium(title)
 }
 
 // CardContent creates a standard card content with title and description
@@ -289,9 +289,9 @@ func CardContent(title, description string) api.Composable {
 	return func(c api.Composer) api.Composer {
 		return column.Column(
 			c.Sequence(
-				m3text.TextWithStyle(title, m3text.TypestyleTitleMedium),
+				m3text.TitleMedium(title),
 				spacer.Height(8),
-				m3text.TextWithStyle(description, m3text.TypestyleBodyMedium),
+				m3text.BodyMedium(description),
 			),
 		)(c)
 	}
@@ -301,7 +301,7 @@ func CardContent(title, description string) api.Composable {
 func SmallCardContent(title string) api.Composable {
 	return func(c api.Composer) api.Composer {
 		return box.Box(
-			m3text.TextWithStyle(title, m3text.TypestyleTitleSmall),
+			m3text.TitleSmall(title),
 			box.WithAlignment(layout.Center),
 		)(c)
 	}
@@ -312,9 +312,9 @@ func InteractiveCardContent(inputValue api.MutableValue) api.Composable {
 	return func(c api.Composer) api.Composer {
 		return column.Column(
 			c.Sequence(
-				m3text.TextWithStyle("Interactive Form", m3text.TypestyleTitleMedium),
+				m3text.TitleMedium("Interactive Form"),
 				spacer.Height(12),
-				m3text.TextWithStyle("Tab between fields works correctly:", m3text.TypestyleBodySmall),
+				m3text.BodySmall("Tab between fields works correctly:"),
 				spacer.Height(12),
 				textfield.TextField(
 					inputValue.Get().(string),
@@ -345,8 +345,8 @@ func CoverBanner(title, subtitle string) api.Composable {
 
 		return column.Column(
 			c.Sequence(
-				m3text.TextWithStyle(title, m3text.TypestyleHeadlineSmall),
-				m3text.TextWithStyle(subtitle, m3text.TypestyleBodySmall),
+				m3text.HeadlineSmall(title),
+				m3text.BodySmall(subtitle),
 			),
 			column.WithModifier(
 				background.Background(theme.ColorScheme().PrimaryContainer). //theme.ColorHelper.ColorSelector().PrimaryRoles.Container).

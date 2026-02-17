@@ -17,10 +17,10 @@ func UI() api.Composable {
 			func(c api.Composer) api.Composer {
 				return column.Column(
 					c.Sequence(
-						text.TextWithStyle("Default Loading Indicator", text.TypestyleBodyLarge),
+						text.BodyLarge("Default Loading Indicator"),
 						progress.LoadingIndicator(),
 						spacer.Height(16),
-						text.TextWithStyle("Loading Indicator with size 200x200", text.TypestyleBodyLarge),
+						text.BodyLarge("Loading Indicator with size 200x200"),
 						progress.LoadingIndicator(
 							progress.WithModifier(size.Size(200, 200)),
 						),
@@ -32,7 +32,7 @@ func UI() api.Composable {
 			},
 			scaffold.WithTopBar(
 				appbar.TopAppBar(
-					text.TextWithStyle("Loading Demo", text.TypestyleTitleMedium),
+					text.TitleMedium("Loading Demo"),
 				),
 			),
 		)(c)
