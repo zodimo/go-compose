@@ -32,15 +32,14 @@ const (
 func UI() api.Composable {
 	return func(c api.Composer) api.Composer {
 		// Navigation state
-		selectedCategory := c.State("nav_category", func() any { return CategoryActions })
-		currentCategory := selectedCategory.Get().(int)
+		selectedCategory := state.MustRemember(c, "nav_category", func() int { return CategoryActions })
+		currentCategory := selectedCategory.Get()
 
 		// Dialog visibility state
-		showDialog := c.State("showDialog", func() any { return false })
+		showDialog := state.MustRemember(c, "showDialog", func() bool { return false })
 
 		// Snackbar state
-		snackbarHostState := c.State("snackbarHostState", func() any { return snackbar.NewSnackbarHostState() }).Get().(*snackbar.SnackbarHostState)
-
+		snackbarHostState := snackbar.RemeberSnackbarHostState(c)
 		navItems := []struct {
 			Label string
 			Icon  []byte
@@ -102,7 +101,7 @@ func UI() api.Composable {
 				scaffold.WithModifier(size.FillMax()),
 			),
 			// Dialog overlay
-			c.When(showDialog.Get().(bool),
+			c.When(showDialog.Get(),
 				dialog.AlertDialog(
 					func() {
 						fmt.Println("Dialog Dismiss requested")
@@ -135,4 +134,4 @@ func SectionTitle(title string) api.Composable {
 }
 
 // DialogState is passed to FeedbackScreen
-type DialogState = state.MutableValue
+type DialogState = state.MutableValueTyped[bool]

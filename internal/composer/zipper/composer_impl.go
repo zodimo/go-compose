@@ -29,6 +29,7 @@ type composer struct {
 	locals         map[interface{}]interface{}
 	providersStack []map[interface{}]interface{}
 	timeNowFunc    func() time.Time
+	frameStarted   bool
 }
 
 func (c *composer) TimeNow() time.Time {
@@ -283,4 +284,21 @@ func emptyComposable() Composable {
 	return func(c Composer) Composer {
 		return c
 	}
+}
+
+func (c *composer) StartFrame() {
+	if c.frameStarted {
+		panic("StartFrame called more than once")
+	}
+	c.frameStarted = true
+	c.idManager.ResetKeyCounter()
+	c.state.StartFrame()
+}
+
+func (c *composer) EndFrame() {
+	if !c.frameStarted {
+		panic("EndFrame called more than once")
+	}
+	c.frameStarted = false
+	c.state.EndFrame()
 }

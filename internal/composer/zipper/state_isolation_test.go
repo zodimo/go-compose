@@ -3,7 +3,7 @@ package zipper
 import (
 	"testing"
 
-	"github.com/zodimo/go-compose/state"
+	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/store"
 )
 
@@ -12,7 +12,7 @@ import (
 // when switching between branches.
 func TestIfStateBranchIsolation(t *testing.T) {
 	// Create persistent state store
-	ps := store.NewPersistentState(make(map[string]state.MutableValue))
+	ps := store.NewPersistentState()
 
 	// Type A state (simulating LoginState)
 	type TypeA struct {
@@ -26,7 +26,7 @@ func TestIfStateBranchIsolation(t *testing.T) {
 
 	// First composition: condition = false, use TypeA in ifFalse branch
 	func() {
-		c := NewComposer(ps)
+		c := NewComposer(api.ComposerWithStore(ps))
 		c.StartBlock("root")
 
 		condition := false
@@ -64,7 +64,7 @@ func TestIfStateBranchIsolation(t *testing.T) {
 			}
 		}()
 
-		c := NewComposer(ps)
+		c := NewComposer(api.ComposerWithStore(ps))
 		c.StartBlock("root")
 
 		condition := true
@@ -97,9 +97,9 @@ func TestIfStateBranchIsolation(t *testing.T) {
 // TestKeyPrefixStackScoping verifies that nested c.Key calls create properly
 // scoped prefixes for all GenerateID calls within.
 func TestKeyPrefixStackScoping(t *testing.T) {
-	ps := store.NewPersistentState(make(map[string]state.MutableValue))
+	ps := store.NewPersistentState()
 
-	c := NewComposer(ps)
+	c := NewComposer(api.ComposerWithStore(ps))
 	c.StartBlock("root")
 
 	// Collect IDs at different scoping levels
@@ -138,7 +138,7 @@ func TestKeyPrefixStackScoping(t *testing.T) {
 // TestIfGeneratesDistinctStateKeys verifies that the same state key name
 // used in both If branches results in different actual keys.
 func TestIfGeneratesDistinctStateKeys(t *testing.T) {
-	ps := store.NewPersistentState(make(map[string]state.MutableValue))
+	ps := store.NewPersistentState()
 
 	// Track which states are created
 	stateKeys := make(map[string]bool)
@@ -149,7 +149,7 @@ func TestIfGeneratesDistinctStateKeys(t *testing.T) {
 
 	// First: execute ifFalse branch
 	func() {
-		c := NewComposer(ps)
+		c := NewComposer(api.ComposerWithStore(ps))
 		c.StartBlock("root")
 
 		c.If(false,
@@ -171,7 +171,7 @@ func TestIfGeneratesDistinctStateKeys(t *testing.T) {
 
 	// Second: execute ifTrue branch - should get its own state
 	func() {
-		c := NewComposer(ps)
+		c := NewComposer(api.ComposerWithStore(ps))
 		c.StartBlock("root")
 
 		c.If(true,

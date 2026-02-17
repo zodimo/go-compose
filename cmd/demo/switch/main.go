@@ -13,10 +13,8 @@ import (
 	"github.com/zodimo/go-compose/compose/material3/scaffold"
 	mswitch "github.com/zodimo/go-compose/compose/material3/switch"
 	"github.com/zodimo/go-compose/compose/material3/text"
-	"github.com/zodimo/go-compose/lifecycle"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/runtime"
-	"github.com/zodimo/go-compose/state"
 	"github.com/zodimo/go-compose/store"
 	"github.com/zodimo/go-compose/theme"
 
@@ -45,20 +43,12 @@ func main() {
 func Run(window *app.Window) error {
 	var ops op.Ops
 
-	store := store.NewPersistentState(map[string]state.MutableValue{})
+	store := store.NewPersistentState()
 	store.Subscribe(func() {
 		window.Invalidate()
 	})
 
-	runtimeOptions := []runtime.RuntimeOption{}
-	if lifecycleAwareStore, ok := store.(lifecycle.FrameLifecycleAwarePersistentState); ok {
-		runtimeOptions = append(runtimeOptions,
-			runtime.WithOnStartFrame(lifecycleAwareStore.StartFrame),
-			runtime.WithOnEndFrame(lifecycleAwareStore.EndFrame),
-		)
-	}
-
-	runtime := runtime.NewRuntime(runtimeOptions...)
+	runtime := runtime.NewRuntime()
 
 	themeManager := theme.GetThemeManager()
 
@@ -72,7 +62,7 @@ func Run(window *app.Window) error {
 			// Init Theme
 			gtx = themeManager.Material3ThemeInit(gtx)
 
-			composer := compose.NewComposer(store)
+			composer := compose.NewComposer(api.ComposerWithStore(store))
 			callOp := runtime.Run(gtx, composer, UI())
 			callOp.Add(gtx.Ops)
 			frameEvent.Frame(gtx.Ops)

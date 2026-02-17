@@ -1,12 +1,18 @@
 package store
 
-import "context"
+import (
+	"context"
+
+	"github.com/zodimo/go-compose/state"
+)
 
 type PersistentStateOptions struct {
 	StartFrameTriggerReceiver func(trigger func())
 	EndFrameTriggerReceiver   func(trigger func() []string)
 	RootContext               context.Context
 	DebugMode                 bool
+
+	Storage map[string]state.MutableValue
 }
 
 func WithFrameLifecycleTriggerReceivers(
@@ -28,6 +34,12 @@ func WithRootContext(rootContext context.Context) PersistentStateOption {
 func WithDebugMode(debugMode bool) PersistentStateOption {
 	return func(opts *PersistentStateOptions) {
 		opts.DebugMode = debugMode
+	}
+}
+
+func WithStorage(storage map[string]state.MutableValue) PersistentStateOption {
+	return func(opts *PersistentStateOptions) {
+		opts.Storage = storage
 	}
 }
 

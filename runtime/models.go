@@ -21,8 +21,8 @@ func (r *runtime) Run(gtx LayoutContext, composer api.Composer, ui api.Composabl
 
 	gtx.Constraints.Min = image.Point{X: 0, Y: 0}
 
-	r.startFrame()
-	defer r.endFrame()
+	composer.StartFrame()
+	defer composer.EndFrame()
 
 	node := ui(composer).Build()
 	nodeCoordinator := layoutnode.NewNodeCoordinator(node)
@@ -30,20 +30,4 @@ func (r *runtime) Run(gtx LayoutContext, composer api.Composer, ui api.Composabl
 	nodeCoordinator.Layout(gtx)
 	nodeCoordinator.PointerPhase(gtx)
 	return nodeCoordinator.Draw(gtx)
-}
-
-func (c *runtime) startFrame() {
-	if c.frameStarted {
-		return
-	}
-	c.frameStarted = true
-	c.onStartFrameFunc()
-}
-
-func (c *runtime) endFrame() {
-	if !c.frameStarted {
-		return
-	}
-	c.frameStarted = false
-	c.onEndFrameFunc()
 }

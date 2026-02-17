@@ -9,9 +9,8 @@ import (
 	"syscall"
 
 	"github.com/zodimo/go-compose/compose"
-	"github.com/zodimo/go-compose/lifecycle"
+	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/runtime"
-	"github.com/zodimo/go-compose/state"
 	"github.com/zodimo/go-compose/store"
 	"github.com/zodimo/go-compose/theme"
 
@@ -59,7 +58,6 @@ func Run(rootContext context.Context, window *app.Window) error {
 	var ops op.Ops
 
 	store := store.NewPersistentState(
-		map[string]state.MutableValue{},
 		store.WithRootContext(rootContext),
 	)
 	store.Subscribe(func() {
@@ -67,13 +65,6 @@ func Run(rootContext context.Context, window *app.Window) error {
 	})
 
 	runtimeOptions := []runtime.RuntimeOption{}
-	if lifecycleAwareStore, ok := store.(lifecycle.FrameLifecycleAwarePersistentState); ok {
-		runtimeOptions = append(runtimeOptions,
-			runtime.WithOnStartFrame(lifecycleAwareStore.StartFrame),
-			runtime.WithOnEndFrame(lifecycleAwareStore.EndFrame),
-		)
-	}
-
 	runtime := runtime.NewRuntime(runtimeOptions...)
 
 	themeManager := theme.GetThemeManager()
@@ -89,7 +80,7 @@ func Run(rootContext context.Context, window *app.Window) error {
 			// M3 Widget Requirement
 			gtx = themeManager.Material3ThemeInit(gtx)
 
-			composer := compose.NewComposer(store)
+			composer := compose.NewComposer(api.ComposerWithStore(store))
 
 			callOp := runtime.Run(gtx, composer, UI())
 			callOp.Add(gtx.Ops)

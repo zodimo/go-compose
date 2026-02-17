@@ -21,7 +21,7 @@ func UI() api.Composable {
 	return func(c api.Composer) api.Composer {
 
 		// Create snackbar host state outside the loop to persist state
-		snackbarHostState := c.State("snackbarHostState", func() any { return snackbar.NewSnackbarHostState() }).Get().(*snackbar.SnackbarHostState)
+		snackbarHostState := snackbar.RemeberSnackbarHostState(c)
 
 		return scaffold.Scaffold(
 			box.Box(
@@ -30,7 +30,7 @@ func UI() api.Composable {
 						func(c api.Composer) api.Composer {
 							m3text.TextWithStyle("Scaffold Content Area", m3text.TypestyleBodyLarge)(c)
 							button.Filled(func() {
-								snackbarHostState.ShowSnackbar("Content area button clicked!")
+								snackbarHostState.ShowSnackbarAsync("Content area button clicked!")
 							}, "Click Me")(c)
 
 							return c

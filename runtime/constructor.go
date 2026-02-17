@@ -7,9 +7,5 @@ func NewRuntime(options ...RuntimeOption) Runtime {
 			option(&opts)
 		}
 	}
-	return &runtime{
-		onStartFrameFunc: opts.OnStartFrame,
-		onEndFrameFunc:   opts.OnEndFrame,
-		frameStarted:     false,
-	}
+	return &runtime{}
 }

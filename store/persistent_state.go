@@ -4,13 +4,10 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/zodimo/go-compose/lifecycle"
 	"github.com/zodimo/go-compose/state"
 )
 
 type PersistentStateInterface = state.PersistentState
-
-var _ lifecycle.FrameLifecycleAwarePersistentState = (*PersistentState)(nil)
 
 type PersistentState struct {
 	scopes      map[string]state.MutableValue
@@ -19,12 +16,13 @@ type PersistentState struct {
 	frameLifecycleHandler *FrameLifecycleHandler
 }
 
-func NewPersistentState(scopes map[string]state.MutableValue, options ...PersistentStateOption) PersistentStateInterface {
+func NewPersistentState(options ...PersistentStateOption) PersistentStateInterface {
 	opts := PersistentStateOptions{
 		StartFrameTriggerReceiver: func(trigger func()) {},
 		EndFrameTriggerReceiver:   func(trigger func() []string) {},
 		DebugMode:                 false,
 		RootContext:               context.Background(),
+		Storage:                   map[string]state.MutableValue{},
 	}
 
 	for _, option := range options {
@@ -43,7 +41,7 @@ func NewPersistentState(scopes map[string]state.MutableValue, options ...Persist
 	)
 
 	return &PersistentState{
-		scopes:                scopes,
+		scopes:                opts.Storage,
 		subscribers:           state.NewSubscriptionManager(),
 		frameLifecycleHandler: frameLifecycleHandler,
 	}

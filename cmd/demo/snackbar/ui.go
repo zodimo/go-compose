@@ -18,7 +18,7 @@ func UI() api.Composable {
 	return func(c api.Composer) api.Composer {
 
 		// Create snackbar host state outside the loop to persist state
-		snackbarHostState := c.State("snackbarHostState", func() any { return snackbar.NewSnackbarHostState() }).Get().(*snackbar.SnackbarHostState)
+		snackbarHostState := snackbar.RemeberSnackbarHostState(c)
 
 		// Define UI inline
 		return box.Box(
@@ -35,7 +35,7 @@ func UI() api.Composable {
 						// Button
 						button.Elevated(func() {
 							log.Println("Showing Snackbar")
-							snackbarHostState.ShowSnackbar("Hi!")
+							snackbarHostState.ShowSnackbarAsync("Hi!")
 						}, "Say Hi!",
 							button.WithModifier(padding.Vertical(20, 0)),
 						)(c)

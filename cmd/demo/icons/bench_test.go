@@ -10,15 +10,15 @@ import (
 	"gioui.org/unit"
 
 	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/runtime"
-	"github.com/zodimo/go-compose/state"
 	"github.com/zodimo/go-compose/store"
 	"github.com/zodimo/go-compose/theme"
 )
 
 func BenchmarkUI_Composition(b *testing.B) {
-	store := store.NewPersistentState(map[string]state.MutableValue{})
-	composer := compose.NewComposer(store)
+	store := store.NewPersistentState()
+	composer := compose.NewComposer(api.ComposerWithStore(store))
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -28,8 +28,8 @@ func BenchmarkUI_Composition(b *testing.B) {
 
 func BenchmarkUI_Layout(b *testing.B) {
 	// Setup
-	store := store.NewPersistentState(map[string]state.MutableValue{})
-	composer := compose.NewComposer(store)
+	store := store.NewPersistentState()
+	composer := compose.NewComposer(api.ComposerWithStore(store))
 	rt := runtime.NewRuntime()
 	themeManager := theme.GetThemeManager()
 

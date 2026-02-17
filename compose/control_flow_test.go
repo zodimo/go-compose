@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"github.com/zodimo/go-compose/compose"
-	"github.com/zodimo/go-compose/state"
-	"github.com/zodimo/go-compose/store"
 )
 
 // MockComposable records whether it was called
@@ -18,8 +16,7 @@ func MockComposable(called *bool) compose.Composable {
 
 func TestConditionalComposables(t *testing.T) {
 	// Setup composer
-	mockStore := store.NewPersistentState(map[string]state.MutableValue{})
-	c := compose.NewComposer(mockStore)
+	c := compose.NewComposer()
 
 	t.Run("If", func(t *testing.T) {
 		t.Run("True condition", func(t *testing.T) {
