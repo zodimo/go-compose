@@ -39,7 +39,7 @@ func UI() api.Composable {
 		showDialog := state.MustRemember(c, "showDialog", func() bool { return false })
 
 		// Snackbar state
-		snackbarHostState := snackbar.RemeberSnackbarHostState(c)
+		snackbarHostState := snackbar.RememberSnackbarHostState(c)
 		navItems := []struct {
 			Label string
 			Icon  []byte
@@ -72,10 +72,7 @@ func UI() api.Composable {
 				),
 				scaffold.WithTopBar(
 					appbar.TopAppBar(
-						m3text.TextWithStyle(
-							"Component Showcase",
-							m3text.TypestyleTitleLarge,
-						),
+						m3text.TitleLarge("Component Showcase"),
 					),
 				),
 				scaffold.WithBottomBar(
@@ -90,7 +87,7 @@ func UI() api.Composable {
 										return icon.Icon(item.Icon)(c)
 									},
 									func(c api.Composer) api.Composer {
-										return m3text.TextWithStyle(item.Label, m3text.TypestyleLabelMedium)(c)
+										return m3text.LabelMedium(item.Label)(c)
 									},
 								)(c)
 							}

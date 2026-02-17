@@ -9,22 +9,31 @@ import (
 	"github.com/zodimo/go-compose/compose"
 )
 
-func TestShowSnackbar_BlocksUntilDismissed(t *testing.T) {
-	hostState := RemeberSnackbarHostState(compose.NewComposer())
+// newTestHostState creates a SnackbarHostState for testing without a composer.
+func newTestHostState() SnackbarHostState {
+	return RememberSnackbarHostState(compose.NewComposer())
+}
 
+func TestShowSnackbar_NonBlocking(t *testing.T) {
+	hostState := newTestHostState()
+
+	// ShowSnackbar should return immediately (non-blocking)
 	done := make(chan struct{})
-	var result SnackbarResult
-	var err error
-
 	go func() {
-		result, err = hostState.ShowSnackbar(context.Background(), "test message")
+		hostState.ShowSnackbar("test message")
 		close(done)
 	}()
 
-	// Give the goroutine time to start and block
+	select {
+	case <-done:
+		// Good — returned immediately
+	case <-time.After(1 * time.Second):
+		t.Fatal("ShowSnackbar should not block")
+	}
+
+	// Give the queue goroutine time to set current
 	time.Sleep(50 * time.Millisecond)
 
-	// Verify snackbar is showing
 	current := hostState.CurrentSnackbarData()
 	if current == nil {
 		t.Fatal("expected current snackbar data to be non-nil")
@@ -33,97 +42,97 @@ func TestShowSnackbar_BlocksUntilDismissed(t *testing.T) {
 		t.Fatalf("expected message 'test message', got %q", current.Visuals.Message)
 	}
 
-	// Verify caller is still blocked
-	select {
-	case <-done:
-		t.Fatal("ShowSnackbar should still be blocking")
-	default:
-	}
-
-	// Dismiss the snackbar
+	// Clean up: dismiss
 	current.Dismiss()
+	time.Sleep(50 * time.Millisecond)
 
-	// Wait for the caller to unblock
-	select {
-	case <-done:
-	case <-time.After(1 * time.Second):
-		t.Fatal("ShowSnackbar should have returned after dismiss")
-	}
-
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result != SnackbarDismissed {
-		t.Fatalf("expected SnackbarDismissed, got %v", result)
+	if hostState.CurrentSnackbarData() != nil {
+		t.Fatal("expected nil after dismiss")
 	}
 }
 
-func TestShowSnackbar_ActionPerformed(t *testing.T) {
-	hostState := RemeberSnackbarHostState(compose.NewComposer())
+func TestShowSnackbar_OnResultCallback(t *testing.T) {
+	hostState := newTestHostState()
 
-	done := make(chan struct{})
-	var result SnackbarResult
+	var gotResult SnackbarResult
+	resultReceived := make(chan struct{})
 
-	go func() {
-		result, _ = hostState.ShowSnackbar(context.Background(), "action msg",
-			WithActionLabel("undo"))
-		close(done)
-	}()
+	hostState.ShowSnackbar("callback msg",
+		WithOnResult(func(result SnackbarResult) {
+			gotResult = result
+			close(resultReceived)
+		}),
+	)
 
 	time.Sleep(50 * time.Millisecond)
 
 	current := hostState.CurrentSnackbarData()
 	if current == nil {
-		t.Fatal("expected current snackbar data")
-	}
-	if current.Visuals.ActionLabel != "undo" {
-		t.Fatalf("expected action label 'undo', got %q", current.Visuals.ActionLabel)
+		t.Fatal("expected current snackbar")
 	}
 
 	current.PerformAction()
 
 	select {
-	case <-done:
+	case <-resultReceived:
 	case <-time.After(1 * time.Second):
-		t.Fatal("ShowSnackbar should have returned after action")
+		t.Fatal("callback should have been invoked")
 	}
 
-	if result != SnackbarActionPerformed {
-		t.Fatalf("expected SnackbarActionPerformed, got %v", result)
+	if gotResult != SnackbarActionPerformed {
+		t.Fatalf("expected SnackbarActionPerformed, got %v", gotResult)
+	}
+}
+
+func TestShowSnackbar_DismissCallsOnResult(t *testing.T) {
+	hostState := newTestHostState()
+
+	var gotResult SnackbarResult
+	resultReceived := make(chan struct{})
+
+	hostState.ShowSnackbar("dismiss msg",
+		WithOnResult(func(result SnackbarResult) {
+			gotResult = result
+			close(resultReceived)
+		}),
+	)
+
+	time.Sleep(50 * time.Millisecond)
+
+	current := hostState.CurrentSnackbarData()
+	current.Dismiss()
+
+	select {
+	case <-resultReceived:
+	case <-time.After(1 * time.Second):
+		t.Fatal("callback should have been invoked on dismiss")
+	}
+
+	if gotResult != SnackbarDismissed {
+		t.Fatalf("expected SnackbarDismissed, got %v", gotResult)
 	}
 }
 
 func TestShowSnackbar_FIFOQueue(t *testing.T) {
-	hostState := RemeberSnackbarHostState(compose.NewComposer())
+	hostState := newTestHostState()
 
 	var mu sync.Mutex
-	var resultOrder []string
+	var dismissOrder []string
 
-	// Launch 5 snackbars concurrently, staggered to ensure FIFO ordering
-	const count = 5
-	allDone := make(chan struct{})
-	var wg sync.WaitGroup
-	wg.Add(count)
-
-	for i := 0; i < count; i++ {
-		msg := string(rune('A' + i)) // "A", "B", "C", "D", "E"
-		time.Sleep(10 * time.Millisecond)
-		go func(msg string) {
-			defer wg.Done()
-			hostState.ShowSnackbar(context.Background(), msg)
-			mu.Lock()
-			resultOrder = append(resultOrder, msg)
-			mu.Unlock()
-		}(msg)
+	// Enqueue 5 snackbars
+	for i := 0; i < 5; i++ {
+		msg := string(rune('A' + i))
+		hostState.ShowSnackbar(msg,
+			WithOnResult(func(result SnackbarResult) {
+				mu.Lock()
+				dismissOrder = append(dismissOrder, msg)
+				mu.Unlock()
+			}),
+		)
 	}
 
-	go func() {
-		wg.Wait()
-		close(allDone)
-	}()
-
 	// Process the queue: dismiss each one in order
-	for i := 0; i < count; i++ {
+	for i := 0; i < 5; i++ {
 		// Wait for a current snackbar to appear
 		var current *SnackbarData
 		for attempt := 0; attempt < 100; attempt++ {
@@ -143,39 +152,30 @@ func TestShowSnackbar_FIFOQueue(t *testing.T) {
 		}
 
 		current.Dismiss()
-		hostState.advanceQueue()
-
-		// Small delay to let the dismissed goroutine complete
-		time.Sleep(20 * time.Millisecond)
-	}
-
-	select {
-	case <-allDone:
-	case <-time.After(5 * time.Second):
-		t.Fatal("not all snackbars completed in time")
+		// Let the queue goroutine advance
+		time.Sleep(50 * time.Millisecond)
 	}
 
 	// Verify FIFO order
 	expected := []string{"A", "B", "C", "D", "E"}
-	if len(resultOrder) != len(expected) {
-		t.Fatalf("expected %d results, got %d: %v", len(expected), len(resultOrder), resultOrder)
+	mu.Lock()
+	defer mu.Unlock()
+	if len(dismissOrder) != len(expected) {
+		t.Fatalf("expected %d results, got %d: %v", len(expected), len(dismissOrder), dismissOrder)
 	}
 	for i, v := range expected {
-		if resultOrder[i] != v {
-			t.Fatalf("position %d: expected %q, got %q (full order: %v)", i, v, resultOrder[i], resultOrder)
+		if dismissOrder[i] != v {
+			t.Fatalf("position %d: expected %q, got %q (full order: %v)", i, v, dismissOrder[i], dismissOrder)
 		}
 	}
 }
 
 func TestShowSnackbar_OnlyOneActive(t *testing.T) {
-	hostState := RemeberSnackbarHostState(compose.NewComposer())
+	hostState := newTestHostState()
 
-	// Show first snackbar
-	go hostState.ShowSnackbar(context.Background(), "first")
-	time.Sleep(50 * time.Millisecond)
+	hostState.ShowSnackbar("first")
+	hostState.ShowSnackbar("second")
 
-	// Show second snackbar (should be queued)
-	go hostState.ShowSnackbar(context.Background(), "second")
 	time.Sleep(50 * time.Millisecond)
 
 	// Only first should be current
@@ -187,12 +187,10 @@ func TestShowSnackbar_OnlyOneActive(t *testing.T) {
 		t.Fatalf("expected 'first', got %q", current.Visuals.Message)
 	}
 
-	// Dismiss first — advance queue
+	// Dismiss first — queue goroutine should advance to second
 	current.Dismiss()
-	hostState.advanceQueue()
 	time.Sleep(50 * time.Millisecond)
 
-	// Second should now be current
 	current = hostState.CurrentSnackbarData()
 	if current == nil {
 		t.Fatal("expected second snackbar to be current")
@@ -201,36 +199,41 @@ func TestShowSnackbar_OnlyOneActive(t *testing.T) {
 		t.Fatalf("expected 'second', got %q", current.Visuals.Message)
 	}
 
-	// Dismiss second — should be nil
+	// Dismiss second — should be nil, goroutine should exit
 	current.Dismiss()
-	hostState.advanceQueue()
 	time.Sleep(50 * time.Millisecond)
 
 	if hostState.CurrentSnackbarData() != nil {
 		t.Fatal("expected no current snackbar after all dismissed")
 	}
+
+	if snackbar, ok := hostState.(*snackbarHostState); ok {
+		snackbar.mu.Lock()
+		processing := snackbar.processing
+		snackbar.mu.Unlock()
+		if processing {
+			t.Fatal("expected processing to be false after queue is empty")
+		}
+	} else {
+		t.Fatal("expected *snackbarHostState")
+	}
+
 }
 
 func TestShowSnackbar_ContextCancellation(t *testing.T) {
-	hostState := RemeberSnackbarHostState(compose.NewComposer())
+	hostState := newTestHostState()
 
 	// Show a snackbar that occupies the slot
-	go hostState.ShowSnackbar(context.Background(), "blocker")
+	hostState.ShowSnackbar("blocker")
 	time.Sleep(50 * time.Millisecond)
 
 	// Queue a second snackbar with a cancellable context
 	ctx, cancel := context.WithCancel(context.Background())
-	done := make(chan struct{})
-	var err error
 
-	go func() {
-		_, err = hostState.ShowSnackbar(ctx, "cancelled")
-		close(done)
-	}()
-
+	hostState.ShowSnackbar("cancelled", WithContext(ctx))
 	time.Sleep(50 * time.Millisecond)
 
-	// Verify it is queued (current is still "blocker")
+	// Current should still be "blocker"
 	current := hostState.CurrentSnackbarData()
 	if current.Visuals.Message != "blocker" {
 		t.Fatalf("expected 'blocker', got %q", current.Visuals.Message)
@@ -238,61 +241,63 @@ func TestShowSnackbar_ContextCancellation(t *testing.T) {
 
 	// Cancel the queued snackbar
 	cancel()
-
-	select {
-	case <-done:
-	case <-time.After(1 * time.Second):
-		t.Fatal("cancelled ShowSnackbar should have returned")
-	}
-
-	if err == nil {
-		t.Fatal("expected context cancellation error")
-	}
+	time.Sleep(50 * time.Millisecond)
 
 	// Verify the queue is empty (cancelled item removed)
-	hostState.mu.Lock()
-	queueLen := len(hostState.queue)
-	hostState.mu.Unlock()
 
-	if queueLen != 0 {
-		t.Fatalf("expected empty queue after cancellation, got %d items", queueLen)
+	if snackbar, ok := hostState.(*snackbarHostState); ok {
+		snackbar.mu.Lock()
+		queueLen := len(snackbar.queue)
+		snackbar.mu.Unlock()
+		if queueLen != 0 {
+			t.Fatalf("expected empty queue after cancellation, got %d items", queueLen)
+		}
+	} else {
+		t.Fatal("expected *snackbarHostState")
 	}
 
 	// Clean up: dismiss the blocker
 	current.Dismiss()
-	hostState.advanceQueue()
+	time.Sleep(50 * time.Millisecond)
 }
 
-func TestShowSnackbarAsync_DoesNotBlock(t *testing.T) {
-	hostState := RemeberSnackbarHostState(compose.NewComposer())
+func TestShowSnackbar_QueueGoroutineRestartsAfterEmpty(t *testing.T) {
+	hostState := newTestHostState()
 
-	// ShowSnackbarAsync should return immediately
-	done := make(chan struct{})
-	go func() {
-		hostState.ShowSnackbarAsync("async msg")
-		close(done)
-	}()
-
-	select {
-	case <-done:
-	case <-time.After(1 * time.Second):
-		t.Fatal("ShowSnackbarAsync should not block")
-	}
-
-	// Give the goroutine inside ShowSnackbarAsync time to enqueue
+	// First round
+	hostState.ShowSnackbar("round1")
 	time.Sleep(50 * time.Millisecond)
 
 	current := hostState.CurrentSnackbarData()
-	if current == nil {
-		t.Fatal("expected snackbar to be showing")
-	}
-	if current.Visuals.Message != "async msg" {
-		t.Fatalf("expected 'async msg', got %q", current.Visuals.Message)
+	current.Dismiss()
+	time.Sleep(50 * time.Millisecond)
+
+	// Goroutine should have stopped
+	if snackbar, ok := hostState.(*snackbarHostState); ok {
+		snackbar.mu.Lock()
+		processing := snackbar.processing
+		snackbar.mu.Unlock()
+		if processing {
+			t.Fatal("expected processing to be false")
+		}
+	} else {
+		t.Fatal("expected *snackbarHostState")
 	}
 
-	// Clean up
+	// Second round — goroutine should restart
+	hostState.ShowSnackbar("round2")
+	time.Sleep(50 * time.Millisecond)
+
+	current = hostState.CurrentSnackbarData()
+	if current == nil {
+		t.Fatal("expected snackbar after restart")
+	}
+	if current.Visuals.Message != "round2" {
+		t.Fatalf("expected 'round2', got %q", current.Visuals.Message)
+	}
+
 	current.Dismiss()
-	hostState.advanceQueue()
+	time.Sleep(50 * time.Millisecond)
 }
 
 func TestSnackbarDuration_DefaultWithAction(t *testing.T) {
@@ -335,7 +340,7 @@ func TestSnackbarDuration_ToDuration(t *testing.T) {
 }
 
 func TestSnackbarData_DismissOnlyOnce(t *testing.T) {
-	data := newSnackbarData(SnackbarVisuals{Message: "test"})
+	data := newSnackbarData(SnackbarVisuals{Message: "test"}, nil)
 
 	// First dismiss should send result
 	data.Dismiss()

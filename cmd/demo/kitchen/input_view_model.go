@@ -8,7 +8,7 @@ import (
 )
 
 var _ lifecycle.ViewModel = (*InputViewModel)(nil)
-var _ lifecycle.HasViewModelScope = (*InputViewModel)(nil)
+var _ lifecycle.HasCoroutineScope = (*InputViewModel)(nil)
 
 type InputViewModel struct {
 }
@@ -21,7 +21,7 @@ func (vm *InputViewModel) OnCleared() {
 	fmt.Println("InputViewModel cleared")
 }
 
-func (vm *InputViewModel) SetViewModelScope(ctx context.Context) {
+func (vm *InputViewModel) SetCoroutineScope(ctx context.Context) {
 	fmt.Println("InputViewModel scope set")
 
 	go func() {

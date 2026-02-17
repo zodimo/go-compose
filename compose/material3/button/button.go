@@ -6,6 +6,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 
+	"git.sr.ht/~schnwalter/gio-mw/token"
 	"git.sr.ht/~schnwalter/gio-mw/widget/button"
 )
 
@@ -54,6 +55,27 @@ func buttonComposable(material3Button *button.Button, onClick func(), label stri
 			opts.Button.Enable()
 		} else {
 			opts.Button.Disable()
+		}
+
+		if opts.ContentColor != 0 && opts.ContentColor.Alpha() > 0 {
+			// Apply custom content color (label and icon)
+			// We need to convert graphics.Color to token.MatColor
+			r := uint8(opts.ContentColor.Red() * 255)
+			g := uint8(opts.ContentColor.Green() * 255)
+			b := uint8(opts.ContentColor.Blue() * 255)
+			a := uint8(opts.ContentColor.Alpha() * 255)
+			matColor := token.MatColor{
+				R: r,
+				G: g,
+				B: b,
+				A: a,
+			}
+			opts.Button.WithColorScheme(&button.AlternativeColorScheme{
+				EnabledLabelColor: matColor,
+				EnabledIconColor:  matColor,
+			})
+		} else {
+			opts.Button.ClearColorScheme()
 		}
 
 		constructorArgs := ButtonConstructorArgs{

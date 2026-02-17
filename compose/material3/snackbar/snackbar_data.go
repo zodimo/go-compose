@@ -3,6 +3,8 @@ package snackbar
 import (
 	"sync"
 	"time"
+
+	"gioui.org/widget"
 )
 
 // SnackbarResult represents the outcome of a snackbar being shown.
@@ -57,14 +59,20 @@ type SnackbarVisuals struct {
 // Matches Kotlin's SnackbarData interface.
 type SnackbarData struct {
 	Visuals  SnackbarVisuals
-	resultCh chan SnackbarResult
+	onResult func(SnackbarResult) // optional callback invoked when dismissed/actioned
+	resultCh chan SnackbarResult  // signals the queue processor to advance
 	once     sync.Once
+
+	// Gio clickable state — persists across frames for immediate-mode rendering
+	ActionClickable  widget.Clickable
+	DismissClickable widget.Clickable
 }
 
-// newSnackbarData creates a new SnackbarData with a result channel.
-func newSnackbarData(visuals SnackbarVisuals) *SnackbarData {
+// newSnackbarData creates a new SnackbarData with a result channel and optional callback.
+func newSnackbarData(visuals SnackbarVisuals, onResult func(SnackbarResult)) *SnackbarData {
 	return &SnackbarData{
 		Visuals:  visuals,
+		onResult: onResult,
 		resultCh: make(chan SnackbarResult, 1),
 	}
 }
@@ -73,7 +81,9 @@ func newSnackbarData(visuals SnackbarVisuals) *SnackbarData {
 func (d *SnackbarData) PerformAction() {
 	d.once.Do(func() {
 		d.resultCh <- SnackbarActionPerformed
-		close(d.resultCh)
+		if d.onResult != nil {
+			d.onResult(SnackbarActionPerformed)
+		}
 	})
 }
 
@@ -81,6 +91,8 @@ func (d *SnackbarData) PerformAction() {
 func (d *SnackbarData) Dismiss() {
 	d.once.Do(func() {
 		d.resultCh <- SnackbarDismissed
-		close(d.resultCh)
+		if d.onResult != nil {
+			d.onResult(SnackbarDismissed)
+		}
 	})
 }

@@ -3,12 +3,14 @@ package button
 import (
 	"git.sr.ht/~schnwalter/gio-mw/widget/button"
 	"github.com/zodimo/go-compose/compose/ui"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 )
 
 type ButtonOptions struct {
-	Modifier ui.Modifier
-	Button   *button.Button
-	Enabled  bool
+	Modifier     ui.Modifier
+	Button       *button.Button
+	Enabled      bool
+	ContentColor graphics.Color
 }
 
 type ButtonOption func(o *ButtonOptions)
@@ -28,5 +30,11 @@ func WithButton(button *button.Button) ButtonOption {
 func WithEnabled(enabled bool) ButtonOption {
 	return func(o *ButtonOptions) {
 		o.Enabled = enabled
+	}
+}
+
+func WithContentColor(color graphics.Color) ButtonOption {
+	return func(o *ButtonOptions) {
+		o.ContentColor = color
 	}
 }

@@ -88,9 +88,9 @@ func InputsScreen(c api.Composer) api.Composable {
 							box.Box(
 								func(c api.Composer) api.Composer {
 									column.Column(c.Sequence(
-										m3text.TextWithStyle("Card Title", m3text.TypestyleTitleMedium),
+										m3text.TitleMedium("Card Title"),
 										spacer.Height(8),
-										m3text.TextWithStyle("This is card content demonstrating the Card surface component.", m3text.TypestyleBodyMedium),
+										m3text.BodyMedium("This is card content demonstrating the Card surface component."),
 									))(c)
 									return c
 								},
