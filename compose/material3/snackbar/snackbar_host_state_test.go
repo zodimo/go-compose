@@ -340,7 +340,7 @@ func TestSnackbarDuration_ToDuration(t *testing.T) {
 }
 
 func TestSnackbarData_DismissOnlyOnce(t *testing.T) {
-	data := newSnackbarData(SnackbarVisuals{Message: "test"}, nil)
+	data := newSnackbarData(context.Background(), SnackbarVisuals{Message: "test"}, nil)
 
 	// First dismiss should send result
 	data.Dismiss()

@@ -1,6 +1,7 @@
 package snackbar
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -58,6 +59,8 @@ type SnackbarVisuals struct {
 // SnackbarData represents the data of one particular Snackbar as managed by SnackbarHostState.
 // Matches Kotlin's SnackbarData interface.
 type SnackbarData struct {
+	Context context.Context
+
 	Visuals  SnackbarVisuals
 	onResult func(SnackbarResult) // optional callback invoked when dismissed/actioned
 	resultCh chan SnackbarResult  // signals the queue processor to advance
@@ -69,8 +72,9 @@ type SnackbarData struct {
 }
 
 // newSnackbarData creates a new SnackbarData with a result channel and optional callback.
-func newSnackbarData(visuals SnackbarVisuals, onResult func(SnackbarResult)) *SnackbarData {
+func newSnackbarData(ctx context.Context, visuals SnackbarVisuals, onResult func(SnackbarResult)) *SnackbarData {
 	return &SnackbarData{
+		Context:  ctx,
 		Visuals:  visuals,
 		onResult: onResult,
 		resultCh: make(chan SnackbarResult, 1),

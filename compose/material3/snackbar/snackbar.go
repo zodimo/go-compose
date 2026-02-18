@@ -201,7 +201,7 @@ func (s *snackbarHostState) ShowSnackbar(message string, options ...SnackbarOpti
 		Duration:          opts.Duration,
 	}
 
-	data := newSnackbarData(visuals, opts.OnResult)
+	data := newSnackbarData(opts.Context, visuals, opts.OnResult)
 
 	// If context is already cancelled, don't enqueue
 	if opts.Context.Err() != nil {
@@ -301,15 +301,25 @@ func SnackbarHost(hostState SnackbarHostState) compose.Composable {
 			// LaunchedEffect keyed on current snackbar — handles auto-dismiss after duration
 			effect.LaunchedEffect(func(ctx context.Context) {
 				dur := current.Visuals.Duration.ToDuration()
-				if dur > 0 {
+				if dur > 0 && current.Context.Err() == nil {
 					select {
 					case <-time.After(dur):
+						current.Dismiss()
+					case <-current.Context.Done():
 						current.Dismiss()
 					case <-ctx.Done():
 						// Effect cancelled (e.g., recomposition with new key)
 					}
 				}
-				// If duration is 0 (Indefinite), we just wait for explicit dismiss
+				// If duration is 0 (Indefinite), we just wait for explicit dismiss or cancelled context
+
+				select {
+				case <-current.Context.Done():
+					current.Dismiss()
+				case <-current.resultCh:
+					// noop
+				}
+
 			}, current)(c)
 
 			// Wrap in a Box aligned to bottom-center (S), matching Material 3 spec

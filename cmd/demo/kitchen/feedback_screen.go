@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/zodimo/go-compose/compose/foundation/icon"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
@@ -129,6 +131,25 @@ func FeedbackScreen(c api.Composer, showDialog DialogState, snackbarHostState sn
 							}),
 						)
 					}, "With Dismiss"),
+
+					button.Outlined(func() {
+						count := snackbarCount.Get() + 1
+						snackbarCount.Set(count)
+						ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+						go func() {
+							<-ctx.Done()
+							cancel()
+						}()
+						snackbarHostState.ShowSnackbar(
+							fmt.Sprintf("Dismiss snackbar #%d", count),
+							snackbar.WithContext(ctx),
+							snackbar.WithDismissAction(),
+							snackbar.WithDuration(snackbar.SnackbarDurationIndefinite),
+							snackbar.WithOnResult(func(result snackbar.SnackbarResult) {
+								fmt.Printf("Dismiss snackbar result: %d\n", result)
+							}),
+						)
+					}, "With Dismiss, auto-dismiss after 5s"),
 					spacer.Width(8),
 					button.Filled(func() {
 						count := snackbarCount.Get() + 1
@@ -146,6 +167,29 @@ func FeedbackScreen(c api.Composer, showDialog DialogState, snackbarHostState sn
 							}),
 						)
 					}, "Action + Dismiss"),
+					spacer.Width(8),
+					button.Filled(func() {
+						count := snackbarCount.Get() + 1
+						snackbarCount.Set(count)
+						ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+						go func() {
+							<-ctx.Done()
+							cancel()
+						}()
+						snackbarHostState.ShowSnackbar(
+							fmt.Sprintf("Full snackbar #%d", count),
+							snackbar.WithContext(ctx),
+							snackbar.WithActionLabel("Retry"),
+							snackbar.WithDismissAction(),
+							snackbar.WithOnResult(func(result snackbar.SnackbarResult) {
+								if result == snackbar.SnackbarActionPerformed {
+									fmt.Println("Retry action performed!")
+								} else {
+									fmt.Println("Full snackbar dismissed")
+								}
+							}),
+						)
+					}, "Action + Dismiss (auto-dismiss after 5s)"),
 				)),
 
 				spacer.Height(24),

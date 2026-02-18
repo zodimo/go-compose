@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"log"
+	"time"
 
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
@@ -45,6 +47,34 @@ func UI() api.Composable {
 							log.Println("Showing Snackbar with long text")
 							snackbarHostState.ShowSnackbar("Hi! This is a long message that will wrap around the snackbar.")
 						}, "Say Long Hi!",
+							button.WithModifier(padding.Vertical(20, 0)),
+						),
+						spacer.Height(16),
+						button.Elevated(func() {
+							log.Println("Showing Snackbar with long text")
+							ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+							go func() {
+								// Wait for the context to time out
+								<-ctx.Done()
+								cancel()
+							}()
+
+							snackbarHostState.ShowSnackbar("Hi! 1 second", snackbar.WithContext(ctx))
+						}, "Say Hi! (custom context 1s)",
+							button.WithModifier(padding.Vertical(20, 0)),
+						),
+						spacer.Height(16),
+						button.Elevated(func() {
+							log.Println("Showing Snackbar with long text")
+							ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+							go func() {
+								// Wait for the context to time out
+								<-ctx.Done()
+								cancel()
+							}()
+
+							snackbarHostState.ShowSnackbar("Hi! 200ms", snackbar.WithContext(ctx))
+						}, "Say Hi! (custom context 200ms)",
 							button.WithModifier(padding.Vertical(20, 0)),
 						),
 					),
