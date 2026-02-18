@@ -394,3 +394,196 @@ func TestMatchPartial(t *testing.T) {
 		}
 	})
 }
+
+func TestMatchOnLoading(t *testing.T) {
+	t.Run("returns handler result when loading", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		result := MatchOnLoading(r, func() string { return "loading" }, "default")
+		if result != "loading" {
+			t.Errorf("expected 'loading', got %s", result)
+		}
+	})
+
+	t.Run("returns default when success", func(t *testing.T) {
+		r := ResourceSuccess("data")
+		result := MatchOnLoading(r, func() string { return "loading" }, "default")
+		if result != "default" {
+			t.Errorf("expected 'default', got %s", result)
+		}
+	})
+
+	t.Run("returns default when error", func(t *testing.T) {
+		r := ResourceError[string](errors.New("fail"))
+		result := MatchOnLoading(r, func() string { return "loading" }, "default")
+		if result != "default" {
+			t.Errorf("expected 'default', got %s", result)
+		}
+	})
+}
+
+func TestMatchOnError(t *testing.T) {
+	t.Run("returns handler result when error", func(t *testing.T) {
+		r := ResourceError[string](errors.New("fail"))
+		result := MatchOnError(r, func(err error) string { return "error: " + err.Error() }, "default")
+		if result != "error: fail" {
+			t.Errorf("expected 'error: fail', got %s", result)
+		}
+	})
+
+	t.Run("returns default when success", func(t *testing.T) {
+		r := ResourceSuccess("data")
+		result := MatchOnError(r, func(err error) string { return "error" }, "default")
+		if result != "default" {
+			t.Errorf("expected 'default', got %s", result)
+		}
+	})
+
+	t.Run("returns default when loading", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		result := MatchOnError(r, func(err error) string { return "error" }, "default")
+		if result != "default" {
+			t.Errorf("expected 'default', got %s", result)
+		}
+	})
+}
+
+func TestMatchOnData(t *testing.T) {
+	t.Run("returns handler result when success", func(t *testing.T) {
+		r := ResourceSuccess("hello")
+		result := MatchOnData(r, func(data string) string { return "got: " + data }, "default")
+		if result != "got: hello" {
+			t.Errorf("expected 'got: hello', got %s", result)
+		}
+	})
+
+	t.Run("returns default when loading", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		result := MatchOnData(r, func(data string) string { return data }, "default")
+		if result != "default" {
+			t.Errorf("expected 'default', got %s", result)
+		}
+	})
+
+	t.Run("returns default when error", func(t *testing.T) {
+		r := ResourceError[string](errors.New("fail"))
+		result := MatchOnData(r, func(data string) string { return data }, "default")
+		if result != "default" {
+			t.Errorf("expected 'default', got %s", result)
+		}
+	})
+
+	t.Run("works with type transformation", func(t *testing.T) {
+		r := ResourceSuccess("test")
+		result := MatchOnData(r, func(data string) int { return len(data) }, 0)
+		if result != 4 {
+			t.Errorf("expected 4, got %d", result)
+		}
+	})
+}
+
+func TestMatchOnLoadingLazy(t *testing.T) {
+	t.Run("returns handler result when loading", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		defaultCalled := false
+		result := MatchOnLoadingLazy(r, func() string { return "loading" }, func() string {
+			defaultCalled = true
+			return "default"
+		})
+		if result != "loading" {
+			t.Errorf("expected 'loading', got %s", result)
+		}
+		if defaultCalled {
+			t.Errorf("default function should not be called when loading")
+		}
+	})
+
+	t.Run("returns default when success", func(t *testing.T) {
+		r := ResourceSuccess("data")
+		result := MatchOnLoadingLazy(r, func() string { return "loading" }, func() string { return "default" })
+		if result != "default" {
+			t.Errorf("expected 'default', got %s", result)
+		}
+	})
+
+	t.Run("returns default when error", func(t *testing.T) {
+		r := ResourceError[string](errors.New("fail"))
+		result := MatchOnLoadingLazy(r, func() string { return "loading" }, func() string { return "default" })
+		if result != "default" {
+			t.Errorf("expected 'default', got %s", result)
+		}
+	})
+}
+
+func TestMatchOnErrorLazy(t *testing.T) {
+	t.Run("returns handler result when error", func(t *testing.T) {
+		r := ResourceError[string](errors.New("fail"))
+		defaultCalled := false
+		result := MatchOnErrorLazy(r, func(err error) string { return "error: " + err.Error() }, func() string {
+			defaultCalled = true
+			return "default"
+		})
+		if result != "error: fail" {
+			t.Errorf("expected 'error: fail', got %s", result)
+		}
+		if defaultCalled {
+			t.Errorf("default function should not be called when error matches")
+		}
+	})
+
+	t.Run("returns default when success", func(t *testing.T) {
+		r := ResourceSuccess("data")
+		result := MatchOnErrorLazy(r, func(err error) string { return "error" }, func() string { return "default" })
+		if result != "default" {
+			t.Errorf("expected 'default', got %s", result)
+		}
+	})
+
+	t.Run("returns default when loading", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		result := MatchOnErrorLazy(r, func(err error) string { return "error" }, func() string { return "default" })
+		if result != "default" {
+			t.Errorf("expected 'default', got %s", result)
+		}
+	})
+}
+
+func TestMatchOnDataLazy(t *testing.T) {
+	t.Run("returns handler result when success", func(t *testing.T) {
+		r := ResourceSuccess("hello")
+		defaultCalled := false
+		result := MatchOnDataLazy(r, func(data string) string { return "got: " + data }, func() string {
+			defaultCalled = true
+			return "default"
+		})
+		if result != "got: hello" {
+			t.Errorf("expected 'got: hello', got %s", result)
+		}
+		if defaultCalled {
+			t.Errorf("default function should not be called when data matches")
+		}
+	})
+
+	t.Run("returns default when loading", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		result := MatchOnDataLazy(r, func(data string) string { return data }, func() string { return "default" })
+		if result != "default" {
+			t.Errorf("expected 'default', got %s", result)
+		}
+	})
+
+	t.Run("returns default when error", func(t *testing.T) {
+		r := ResourceError[string](errors.New("fail"))
+		result := MatchOnDataLazy(r, func(data string) string { return data }, func() string { return "default" })
+		if result != "default" {
+			t.Errorf("expected 'default', got %s", result)
+		}
+	})
+
+	t.Run("works with type transformation", func(t *testing.T) {
+		r := ResourceSuccess("test")
+		result := MatchOnDataLazy(r, func(data string) int { return len(data) }, func() int { return 0 })
+		if result != 4 {
+			t.Errorf("expected 4, got %d", result)
+		}
+	})
+}

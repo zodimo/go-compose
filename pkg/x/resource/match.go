@@ -79,3 +79,45 @@ func MatchPartial[T, U any](resource Resource[T], options ...MatchOption[T, U]) 
 		return defaultFunc()
 	})(resource.getError())
 }
+
+func MatchOnLoading[T, U any](resource Resource[T], onLoading func() U, defaultValue U) U {
+	if resource.isLoading() {
+		return onLoading()
+	}
+	return defaultValue
+}
+
+func MatchOnLoadingLazy[T, U any](resource Resource[T], onLoading func() U, defaultValue func() U) U {
+	if resource.isLoading() {
+		return onLoading()
+	}
+	return defaultValue()
+}
+
+func MatchOnError[T, U any](resource Resource[T], onError func(error) U, defaultValue U) U {
+	if resource.hasError() {
+		return onError(resource.getError())
+	}
+	return defaultValue
+}
+
+func MatchOnErrorLazy[T, U any](resource Resource[T], onError func(error) U, defaultValue func() U) U {
+	if resource.hasError() {
+		return onError(resource.getError())
+	}
+	return defaultValue()
+}
+
+func MatchOnData[T, U any](resource Resource[T], onData func(T) U, defaultValue U) U {
+	if resource.hasData() {
+		return onData(resource.getData())
+	}
+	return defaultValue
+}
+
+func MatchOnDataLazy[T, U any](resource Resource[T], onData func(T) U, defaultValue func() U) U {
+	if resource.hasData() {
+		return onData(resource.getData())
+	}
+	return defaultValue()
+}
