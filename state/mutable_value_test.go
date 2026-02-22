@@ -49,7 +49,7 @@ func TestMutableValue_AtomicUpdates(t *testing.T) {
 }
 
 func TestMutableValueTyped_AtomicUpdates(t *testing.T) {
-	mv := NewMutableState(10)
+	mv := newMutableState(10)
 
 	// CompareAndSet
 	if !mv.CompareAndSet(10, 20) {
@@ -91,7 +91,7 @@ func TestMutableValueTyped_AtomicUpdates(t *testing.T) {
 }
 
 func TestMutableValue_Concurrency(t *testing.T) {
-	mv := NewMutableState(0)
+	mv := newMutableState(0)
 	var wg sync.WaitGroup
 	routines := 50
 	increments := 100
@@ -120,7 +120,7 @@ func TestWrappers(t *testing.T) {
 	// Let's test the wrappers explicitly.
 
 	// 1. Typed -> Untyped (Unwrap)
-	typed := NewMutableState(10)
+	typed := newMutableState(10)
 	untyped := typed.Unwrap() // returns MutableValue
 
 	untyped.Update(func(current any) any {

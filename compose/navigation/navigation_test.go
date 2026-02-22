@@ -2,13 +2,17 @@ package navigation
 
 import (
 	"testing"
+	"time"
 
+	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/state"
 )
 
 func newMockTypedMutableValue[T any](value T) state.MutableValueTyped[T] {
-	return state.MutableStateOf(value)
+	return state.MustRemember[T](compose.NewComposer(), time.Now().String(), func() T {
+		return value
+	})
 }
 
 func TestNavController(t *testing.T) {

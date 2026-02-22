@@ -50,7 +50,7 @@ type mutableValueTyped[T any] struct {
 
 // NewMutableState creates a new typed mutable state with optional configuration.
 // This is the Kotlin-aligned API using MutationPolicy.
-func NewMutableState[T any](initial T, opts ...MutableValueTypedOption[T]) MutableValueTyped[T] {
+func newMutableState[T any](initial T, opts ...MutableValueTypedOption[T]) MutableValueTyped[T] {
 	config := &mutableValueTypedConfig[T]{
 		changeNotifier: func(T) {},
 		policy:         StructuralEqualityPolicy[T](),
@@ -228,19 +228,4 @@ func (w *MutableValueTypedWrapper[T]) Subscribe(callback func()) Subscription {
 
 func (w *MutableValueTypedWrapper[T]) Unwrap() MutableValue {
 	return w.mv
-}
-
-// --- Convenience constructors matching Kotlin patterns ---
-
-// MutableStateOf creates a new MutableValueTyped with the given initial value.
-// Uses StructuralEqualityPolicy by default.
-// This matches Kotlin's mutableStateOf function.
-func MutableStateOf[T any](value T) MutableValueTyped[T] {
-	return NewMutableState(value)
-}
-
-// MutableStateWithPolicy creates a new MutableValueTyped with a custom policy.
-// This matches Kotlin's mutableStateOf(value, policy) overload.
-func MutableStateWithPolicy[T any](value T, policy MutationPolicy[T]) MutableValueTyped[T] {
-	return NewMutableState(value, WithPolicy(policy))
 }

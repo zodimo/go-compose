@@ -64,8 +64,7 @@ func Run(rootContext context.Context, window *app.Window) error {
 		window.Invalidate()
 	})
 
-	runtimeOptions := []runtime.RuntimeOption{}
-	runtime := runtime.NewRuntime(runtimeOptions...)
+	runtime := runtime.NewRuntime()
 
 	themeManager := theme.GetThemeManager()
 

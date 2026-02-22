@@ -1,7 +1,8 @@
-.PHONY: help tag-patch tag-minor tag-major test generate-icons
+.PHONY: help version tag-patch tag-minor tag-major test generate-icons
 
 help:
 	@echo "Available targets:"
+	@echo "  version        - Show current version"
 	@echo "  generate-icons - Regenerate Material Symbol icon constants"
 	@echo "  test           - Run tests"
 	@echo "  tag-patch      - Increment patch version (v0.0.X -> v0.0.X+1)"
@@ -18,6 +19,10 @@ CURRENT_TAG := $(if $(LATEST_TAG),$(LATEST_TAG),v0.0.0)
 MAJOR := $(shell echo $(CURRENT_TAG) | awk -F. '{print $$1}' | sed 's/v//')
 MINOR := $(shell echo $(CURRENT_TAG) | awk -F. '{print $$2}')
 PATCH := $(shell echo $(CURRENT_TAG) | awk -F. '{print $$3}')
+
+version:
+	@echo "Current version: $(CURRENT_TAG)"
+
 
 tag-patch:
 	@echo "Current version: $(CURRENT_TAG)"

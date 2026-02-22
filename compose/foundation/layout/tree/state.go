@@ -11,14 +11,6 @@ type TreeState struct {
 	selectedItems state.MutableValueTyped[map[any]bool] // Using map for O(1) lookup, even for single selection
 }
 
-// NewTreeState creates a new TreeState.
-func NewTreeState() *TreeState {
-	return &TreeState{
-		expandedItems: state.MutableStateOf(make(map[any]bool)),
-		selectedItems: state.MutableStateOf(make(map[any]bool)),
-	}
-}
-
 // RememberTreeState creates a TreeState that is remembered across compositions.
 func RememberTreeState(c api.Composer) *TreeState {
 	expanded := c.State("treeState/expanded", func() any {
