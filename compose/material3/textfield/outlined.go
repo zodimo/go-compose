@@ -96,6 +96,7 @@ func Outlined(
 		// outWidget.Prefix = opts.Prefix
 		// outWidget.Suffix = opts.Suffix
 		outWidget.Helper = opts.SupportingText
+		outWidget.ReadOnly = opts.ReadOnly
 		// outWidget.Colors = opts.Colors
 		outWidget.SetError(opts.IsError, opts.SupportingText) // Use SupportingText as error message if Error is true
 

@@ -91,6 +91,7 @@ func Filled(
 		w.Editor.Submit = opts.OnSubmit != nil
 		w.Editor.Mask = opts.Mask
 		w.Helper = opts.SupportingText
+		w.ReadOnly = opts.ReadOnly
 		w.SetError(opts.IsError, opts.SupportingText)
 
 		c.StartBlock(Material3FilledTextFieldNodeID)
