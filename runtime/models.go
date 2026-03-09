@@ -12,9 +12,6 @@ import (
 var _ Runtime = (*runtime)(nil)
 
 type runtime struct {
-	onStartFrameFunc func()
-	onEndFrameFunc   func()
-	frameStarted     bool
 }
 
 func (r *runtime) Run(gtx LayoutContext, composer api.Composer, ui api.Composable) op.CallOp {

@@ -2,9 +2,12 @@ package viewmodel
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/zodimo/go-compose/compose/effect"
 	"github.com/zodimo/go-compose/lifecycle"
+	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/state"
 )
 
 var _ lifecycle.ViewModel = (*ViewModel)(nil)
@@ -26,4 +29,17 @@ func (v *ViewModel) MustContext() context.Context {
 		return ctx
 	}
 	panic("CoroutineScope not initialized, use SetViewModelScope")
+}
+
+func RememberViewModel[T lifecycle.ViewModel](c api.Composer, factory func() T) T {
+	key := c.GenerateID()
+	path := c.GetPath()
+
+	viewModelPath := fmt.Sprintf("%d/%s/viewModel", key, path)
+
+	currentViewModel := state.MustRemember(c, viewModelPath, func() T {
+		return factory()
+	}).Get()
+
+	return currentViewModel
 }

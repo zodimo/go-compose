@@ -135,16 +135,18 @@ func initScopedValue(mutableValue state.MutableValue, rootContext context.Contex
 	}
 
 	initialValue := mutableValue.Get()
+	scopeAttached := false
 
 	// If implements HasViewModelScope, create and provide a cancellable context
 	if scopeHolder, ok := initialValue.(lifecycle.HasViewModelScope); ok {
 		ctx, cancelFunc := context.WithCancel(rootContext)
 		scopeHolder.SetViewModelScope(ctx)
 		scopedCancelFuncs = append(scopedCancelFuncs, cancelFunc)
+		scopeAttached = true
 	}
 
 	// If implements HasCoroutineScope, create and provide a cancellable context
-	if scopeHolder, ok := initialValue.(lifecycle.HasCoroutineScope); ok {
+	if scopeHolder, ok := initialValue.(lifecycle.HasCoroutineScope); ok && !scopeAttached {
 		ctx, cancelFunc := context.WithCancel(rootContext)
 		scopeHolder.SetCoroutineScope(ctx)
 		scopedCancelFuncs = append(scopedCancelFuncs, cancelFunc)
