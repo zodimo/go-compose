@@ -42,7 +42,7 @@ func LaunchedEffect(block func(context.Context), keys ...any) api.Composable {
 			}
 
 			// Start new
-			ctx, cancel := context.WithCancel(coroutineScope.Context())
+			ctx, cancel := context.WithCancel(coroutineScope.MustContext())
 			state.cancel = cancel
 			// Copy keys to ensure we store a snapshot (though variadic slice is usually fresh)
 			keysCopy := make([]any, len(keys))

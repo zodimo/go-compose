@@ -10,3 +10,10 @@ type HasCoroutineScope interface {
 	// This is analogous to viewModelScope in Kotlin, which is a CoroutineScope.
 	SetCoroutineScope(ctx context.Context)
 }
+
+type CoroutineScope interface {
+	HasCoroutineScope
+	Context() (context.Context, bool)
+	MustContext() context.Context
+	Launch(block func(ctx context.Context))
+}

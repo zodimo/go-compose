@@ -19,6 +19,7 @@ import (
 	"github.com/zodimo/go-compose/compose/material3/surface"
 	"github.com/zodimo/go-compose/compose/material3/tokens"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
+	"github.com/zodimo/go-compose/lifecycle"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -146,7 +147,7 @@ type snackbarHostState struct {
 	// currentSnackbar is observable state matching Kotlin's mutableStateOf<SnackbarData?>(null).
 	currentSnackbar state.MutableValueTyped[*SnackbarData]
 
-	coroutineScope effect.CoroutineScope
+	coroutineScope lifecycle.CoroutineScope
 
 	mu         sync.Mutex
 	queue      []*SnackbarData
@@ -236,7 +237,7 @@ func (s *snackbarHostState) ShowSnackbar(message string, options ...SnackbarOpti
 func (s *snackbarHostState) processQueue() {
 	for {
 		select {
-		case <-s.coroutineScope.Context().Done():
+		case <-s.coroutineScope.MustContext().Done():
 			s.mu.Lock()
 			s.processing = false
 			s.currentSnackbar.Set(nil)

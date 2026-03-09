@@ -42,41 +42,42 @@ import (
 //     return remember { createCompositionCoroutineScope(getContext(), composer) }
 // }
 
-type CoroutineScope interface {
-	lifecycle.HasCoroutineScope
-	Context() context.Context
-	Launch(block func(ctx context.Context))
-}
+var _ lifecycle.CoroutineScope = (*CoroutineScope)(nil)
 
-var _ CoroutineScope = (*coroutineScope)(nil)
-
-type coroutineScope struct {
+type CoroutineScope struct {
 	ctx context.Context
 }
 
-func RememberCoroutineScope(c api.Composer) CoroutineScope {
+func RememberCoroutineScope(c api.Composer) lifecycle.CoroutineScope {
 	key := c.GenerateID()
 	path := c.GetPath()
 
 	coroutineScopePath := fmt.Sprintf("%d/%s/coroutineScope", key, path)
 
-	currentCoroutineScope := state.MustRemember(c, coroutineScopePath, func() CoroutineScope {
-		return &coroutineScope{}
+	currentCoroutineScope := state.MustRemember(c, coroutineScopePath, func() lifecycle.CoroutineScope {
+		return &CoroutineScope{}
 	}).Get()
 
 	return currentCoroutineScope
 }
 
-func (c *coroutineScope) SetCoroutineScope(ctx context.Context) {
+func (c *CoroutineScope) SetCoroutineScope(ctx context.Context) {
 	c.ctx = ctx
 }
 
-func (c *coroutineScope) Launch(block func(ctx context.Context)) {
+func (c *CoroutineScope) Launch(block func(ctx context.Context)) {
 	go func() {
 		block(c.ctx)
 	}()
 }
 
-func (c *coroutineScope) Context() context.Context {
-	return c.ctx
+func (c *CoroutineScope) Context() (context.Context, bool) {
+	return c.ctx, c.ctx != nil
+}
+
+func (c *CoroutineScope) MustContext() context.Context {
+	if ctx, ok := c.Context(); ok {
+		return ctx
+	}
+	panic("CoroutineScope not initialized, use SetCoroutineScope")
 }
