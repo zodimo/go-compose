@@ -47,7 +47,7 @@ func NewNavController(backStack state.MutableValueTyped[[]BackStackEntry]) *NavC
 }
 
 func RememberNavController(c api.Composer) *NavController {
-	backStack := state.MustState(c, "nav_backstack", func() []BackStackEntry {
+	backStack := state.MustRemember(c, "nav_backstack", func() []BackStackEntry {
 		return []BackStackEntry{}
 	})
 	return NewNavController(backStack)

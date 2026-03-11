@@ -35,10 +35,7 @@ func NavHost(
 		// Find matching destination and extract arguments
 		composableWithArgs, args, ok := graphBuilder.findDestination(currentEntry.Route)
 		if !ok {
-			// Log warning or handle error?
-			// For now, print to stdout as we don't have a logger
-			fmt.Printf("Warning: Destination not found for route: %s\n", currentEntry.Route)
-			return c
+			panic(fmt.Sprintf("Destination not found for route: %s\n", currentEntry.Route))
 		}
 
 		// Create entry with extracted arguments
