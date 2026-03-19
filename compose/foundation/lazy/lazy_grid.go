@@ -6,6 +6,7 @@ import (
 
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/ui"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 
 	"gioui.org/layout"
@@ -120,16 +121,16 @@ func lazyGridWidgetConstructor(
 
 					// Capture for closure
 					capturedCoordinator := childCoordinator
-					capturedCellSize := cellSize
+					capturedCellSizeInPx := unit.ToPixelsUnsafe(gtx, unit.Dp(float32(cellSize)))
 
 					flexChildren = append(flexChildren, layout.Rigid(func(gtx C) D {
 						// Constrain cell size in the cross-axis direction
 						if axis == layout.Vertical {
-							gtx.Constraints.Min.X = capturedCellSize
-							gtx.Constraints.Max.X = capturedCellSize
+							gtx.Constraints.Min.X = capturedCellSizeInPx
+							gtx.Constraints.Max.X = capturedCellSizeInPx
 						} else {
-							gtx.Constraints.Min.Y = capturedCellSize
-							gtx.Constraints.Max.Y = capturedCellSize
+							gtx.Constraints.Min.Y = capturedCellSizeInPx
+							gtx.Constraints.Max.Y = capturedCellSizeInPx
 						}
 
 						return capturedCoordinator.Layout(gtx)
@@ -138,12 +139,12 @@ func lazyGridWidgetConstructor(
 
 				// Add empty spacers for trailing empty cells to maintain alignment
 				for i := endIdx - startIdx; i < cellCount; i++ {
-					capturedCellSize := cellSize
+					capturedCellSizeInPx := unit.ToPixelsUnsafe(gtx, unit.Dp(float32(cellSize)))
 					flexChildren = append(flexChildren, layout.Rigid(func(gtx C) D {
 						if axis == layout.Vertical {
-							return D{Size: image.Point{X: capturedCellSize, Y: 0}}
+							return D{Size: image.Point{X: capturedCellSizeInPx, Y: 0}}
 						}
-						return D{Size: image.Point{X: 0, Y: capturedCellSize}}
+						return D{Size: image.Point{X: 0, Y: capturedCellSizeInPx}}
 					}))
 				}
 
