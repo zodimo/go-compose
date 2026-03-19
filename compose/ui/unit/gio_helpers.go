@@ -1,19 +1,53 @@
 package unit
 
 import (
+	"errors"
+
+	gioLayout "gioui.org/layout"
 	gioUnit "gioui.org/unit"
 )
 
-func DpToGioUnit(u Dp) gioUnit.Dp {
-	return gioUnit.Dp(float32(u))
+func DpToGioUnit(u Dp) (gioUnit.Dp, error) {
+	if u.IsUnspecified() {
+		return 0, errors.New("Dp is an unspecified unit, cannot convert to GioUnit")
+	}
+	return gioUnit.Dp(float32(u)), nil
 }
 
-func TextUnitToGioSp(tu TextUnit) gioUnit.Sp {
+func DpToGioUnitUnsafe(u Dp) gioUnit.Dp {
+	unit, err := DpToGioUnit(u)
+	if err != nil {
+		panic(err)
+	}
+	return unit
+}
+
+func TextUnitToGioSp(tu TextUnit) (gioUnit.Sp, error) {
 	if tu.IsUnspecified() {
-		return gioUnit.Sp(0)
+		return 0, errors.New("TextUnit is an unspecified unit, cannot convert to Sp")
 	}
 	if tu.IsEm() {
-		panic("TextUnit is an EM unit, cannot convert to Sp")
+		return 0, errors.New("TextUnit is an EM unit, cannot convert to Sp")
 	}
-	return gioUnit.Sp(tu.Value())
+	return gioUnit.Sp(tu.Value()), nil
+}
+
+func TextUnitToGioSpUnsafe(tu TextUnit) gioUnit.Sp {
+	unit, err := TextUnitToGioSp(tu)
+	if err != nil {
+		panic(err)
+	}
+	return unit
+}
+
+func ToPixels(gtx gioLayout.Context, value Dp) (int, error) {
+	unit, err := DpToGioUnit(value)
+	if err != nil {
+		return 0, err
+	}
+	return gtx.Dp(unit), nil
+}
+
+func ToPixelsUnsafe(gtx gioLayout.Context, value Dp) int {
+	return gtx.Dp(DpToGioUnitUnsafe(value))
 }

@@ -44,7 +44,7 @@ func (r *RoundedCornerShape) CreateOutline(size image.Point, metric gioUnit.Metr
 	// Note: Dp(0) is technically "specified" but means no rounding, which is correct.
 	// The uniform Radius field takes precedence when set.
 	if rValid.Radius.IsSpecified() {
-		radius := metric.Dp(unit.DpToGioUnit(rValid.Radius))
+		radius := metric.Dp(unit.DpToGioUnitUnsafe(rValid.Radius))
 		nw, ne, se, sw = radius, radius, radius, radius
 	} else {
 		// Fall back to per-corner values if uniform Radius is not set or is 0
@@ -55,10 +55,10 @@ func (r *RoundedCornerShape) CreateOutline(size image.Point, metric gioUnit.Metr
 		bottomStart := rValid.BottomStart.TakeOrElse(unit.Dp(0))
 
 		if topStart > 0 || topEnd > 0 || bottomEnd > 0 || bottomStart > 0 {
-			nw = metric.Dp(unit.DpToGioUnit(topStart))
-			ne = metric.Dp(unit.DpToGioUnit(topEnd))
-			se = metric.Dp(unit.DpToGioUnit(bottomEnd))
-			sw = metric.Dp(unit.DpToGioUnit(bottomStart))
+			nw = metric.Dp(unit.DpToGioUnitUnsafe(topStart))
+			ne = metric.Dp(unit.DpToGioUnitUnsafe(topEnd))
+			se = metric.Dp(unit.DpToGioUnitUnsafe(bottomEnd))
+			sw = metric.Dp(unit.DpToGioUnitUnsafe(bottomStart))
 		}
 	}
 

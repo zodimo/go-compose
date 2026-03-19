@@ -73,8 +73,8 @@ func popupWidgetConstructor(opts PopupOptions) layoutnode.LayoutNodeWidgetConstr
 			pGtx.Constraints.Min = image.Point{}
 
 			// Apply offset if needed
-			xPx := pGtx.Dp(unit.DpToGioUnit(opts.OffsetX))
-			yPx := pGtx.Dp(unit.DpToGioUnit(opts.OffsetY))
+			xPx := pGtx.Dp(unit.DpToGioUnitUnsafe(opts.OffsetX))
+			yPx := pGtx.Dp(unit.DpToGioUnitUnsafe(opts.OffsetY))
 
 			op.Offset(image.Pt(xPx, yPx)).Add(pGtx.Ops)
 

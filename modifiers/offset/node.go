@@ -28,8 +28,8 @@ func NewOffsetNode(data OffsetData) *OffsetNode {
 			no.AttachLayoutModifier(func(widget layoutnode.LayoutWidget) layoutnode.LayoutWidget {
 				return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 					// Convert dp to pixels
-					offsetX := gtx.Dp(unit.DpToGioUnit(n.data.X))
-					offsetY := gtx.Dp(unit.DpToGioUnit(n.data.Y))
+					offsetX := gtx.Dp(unit.DpToGioUnitUnsafe(n.data.X))
+					offsetY := gtx.Dp(unit.DpToGioUnitUnsafe(n.data.Y))
 
 					// Apply translation offset using op.Offset
 					stack := op.Offset(image.Point{X: offsetX, Y: offsetY}).Push(gtx.Ops)

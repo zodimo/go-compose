@@ -213,7 +213,7 @@ func (c *EditableTextLayoutController) Update(gtx layout.Context) {
 func (c *EditableTextLayoutController) Layout(gtx layout.Context, shaper *gioText.Shaper, textMaterial, selectMaterial gioOp.CallOp) layout.Dimensions {
 	gioFont := c.GetFont()
 	size := c.GetFontSize()
-	return c.editor.Layout(gtx, shaper, gioFont, unit.TextUnitToGioSp(size), textMaterial, selectMaterial)
+	return c.editor.Layout(gtx, shaper, gioFont, unit.TextUnitToGioSpUnsafe(size), textMaterial, selectMaterial)
 }
 
 // LayoutAndPaint performs update, layout and paints the text in one call.

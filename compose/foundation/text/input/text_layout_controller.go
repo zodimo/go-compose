@@ -128,7 +128,7 @@ func (c *TextLayoutController) PaintText(gtx layout.Context, textMaterial gioOp.
 func (c *TextLayoutController) LayoutAndPaint(gtx layout.Context, shaper *gioText.Shaper, textMaterial gioOp.CallOp) layout.Dimensions {
 	gioFont := c.GetFont()
 	size := c.GetFontSize()
-	c.view.Layout(gtx, shaper, gioFont, unit.TextUnitToGioSp(size))
+	c.view.Layout(gtx, shaper, gioFont, unit.TextUnitToGioSpUnsafe(size))
 	c.PaintText(gtx, textMaterial)
 	return c.view.Dimensions()
 }
@@ -187,7 +187,7 @@ func (c *TextLayoutController) ConfigureFromTextStyle(ts *text.TextStyle) {
 	}
 	c.textStyle = ts
 	c.SetAlignment(ts.TextAlign())
-	c.SetLineHeight(unit.TextUnitToGioSp(ts.LineHeight()))
+	c.SetLineHeight(unit.TextUnitToGioSpUnsafe(ts.LineHeight()))
 	c.SetWrapPolicy(lineBreakToGioWrapPolicy(ts.LineBreak()))
 }
 

@@ -51,7 +51,7 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 					// Draw Shadow
 					// Adapted from gio-mw wdk.Elevation.Layout
 
-					shadowSize := float32(gtx.Metric.Dp(unit.DpToGioUnit(elevation)))
+					shadowSize := float32(gtx.Metric.Dp(unit.DpToGioUnitUnsafe(elevation)))
 
 					//@TODO get shadow from theme, for now default to black
 					col := graphics.ColorToNRGBA(n.shadowData.AmbientColor.TakeOrElse(graphics.ColorBlack))

@@ -52,7 +52,7 @@ func NewBorderNode(element BorderElement) *BorderNode {
 					outline := n.borderData.Shape.CreateOutline(dims.Size, gtx.Metric)
 					macro := op.Record(gtx.Ops)
 
-					strokeWidth := float32(gtx.Metric.Dp(unit.DpToGioUnit(width)))
+					strokeWidth := float32(gtx.Metric.Dp(unit.DpToGioUnitUnsafe(width)))
 
 					pathSpec := outline.Path(gtx.Ops)
 
