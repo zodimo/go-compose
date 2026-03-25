@@ -49,6 +49,7 @@ func Table(
 								}
 								return c
 							},
+							row.WithModifier(size.MinHeight(int(opts.MinHeaderRowHeight))),
 						),
 						divider.Divider(),
 					)(c)
@@ -61,6 +62,7 @@ func Table(
 							}
 							return c
 						},
+						row.WithModifier(size.MinHeight(int(opts.MinRowHeight))),
 					)
 				}),
 			),

@@ -18,19 +18,37 @@ type Column struct {
 }
 
 type TableOptions struct {
-	Modifier ui.Modifier
+	Modifier           ui.Modifier
+	MinHeaderRowHeight unit.Dp
+	MinRowHeight       unit.Dp
 }
 
 type TableOption func(*TableOptions)
 
 func DefaultTableOptions() TableOptions {
 	return TableOptions{
-		Modifier: ui.EmptyModifier,
+		Modifier:           ui.EmptyModifier,
+		MinHeaderRowHeight: 56, // Material 3 standard data table header row height
+		MinRowHeight:       52, // Material 3 standard data table row height
 	}
 }
 
 func WithModifier(modifier ui.Modifier) TableOption {
 	return func(o *TableOptions) {
 		o.Modifier = modifier
+	}
+}
+
+// WithMinHeaderRowHeight sets the minimum height for the header row.
+func WithMinHeaderRowHeight(height unit.Dp) TableOption {
+	return func(o *TableOptions) {
+		o.MinHeaderRowHeight = height
+	}
+}
+
+// WithMinRowHeight sets the minimum height for data rows.
+func WithMinRowHeight(height unit.Dp) TableOption {
+	return func(o *TableOptions) {
+		o.MinRowHeight = height
 	}
 }
