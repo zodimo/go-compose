@@ -1,6 +1,7 @@
 package m3table
 
 import (
+	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
@@ -28,7 +29,6 @@ func Table(
 	}
 
 	return func(c api.Composer) api.Composer {
-		c.StartBlock("Table")
 
 		hasHeaders := false
 		for _, col := range columns {
@@ -38,17 +38,15 @@ func Table(
 			}
 		}
 
-		c.WithComposable(column.Column(
+		return column.Column(
 			c.Sequence(
 				c.When(hasHeaders, func(c api.Composer) api.Composer {
 					return c.Sequence(
 						row.Row(
-							func(c api.Composer) api.Composer {
-								for i, col := range columns {
-									c.Key(i, wrapCell(col, col.Header))
-								}
-								return c
-							},
+							c.Range(len(columns), func(i int) api.Composable {
+								return wrapCell(columns[i], columns[i].Header)
+							}),
+							row.WithAlignment(row.Middle),
 							row.WithModifier(size.MinHeight(int(opts.MinHeaderRowHeight))),
 						),
 						divider.Divider(),
@@ -56,20 +54,16 @@ func Table(
 				}),
 				c.Range(rowCount, func(r int) api.Composable {
 					return row.Row(
-						func(c api.Composer) api.Composer {
-							for cIdx, col := range columns {
-								c.Key(cIdx, wrapCell(col, cellContent(r, cIdx)))
-							}
-							return c
-						},
+						c.Range(len(columns), func(cIdx int) api.Composable {
+							return wrapCell(columns[cIdx], cellContent(r, cIdx))
+						}),
+						row.WithAlignment(row.Middle),
 						row.WithModifier(size.MinHeight(int(opts.MinRowHeight))),
 					)
 				}),
 			),
 			column.WithModifier(opts.Modifier),
-		))
-
-		return c.EndBlock()
+		)(c)
 	}
 }
 
@@ -83,7 +77,7 @@ func wrapCell(col Column, content api.Composable) api.Composable {
 	}
 
 	if content == nil {
-		content = func(c api.Composer) api.Composer { return c }
+		content = compose.Id()
 	}
 
 	return box.Box(content, box.WithModifier(mod))
