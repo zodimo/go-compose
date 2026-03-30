@@ -34,7 +34,7 @@ func Run(args []string) error {
 	fmt.Printf("Building %s for web...\n", pkgPath)
 	// Initial build
 	// TODO: Implement on-demand build handler for better DX
-	if err := build.BuildJS(tmpDir, pkgPath); err != nil {
+	if err := build.BuildJS(tmpDir, pkgPath, ""); err != nil {
 		return fmt.Errorf("build failed: %w", err)
 	}
 

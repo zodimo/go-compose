@@ -7,9 +7,12 @@ import (
 	"runtime"
 )
 
-func BuildDesktop(output string, pkgPath string) error {
+func BuildDesktop(output string, pkgPath string, ldflags string) error {
 	// Standard go build
 	args := []string{"build"}
+	if ldflags != "" {
+		args = append(args, "-ldflags", ldflags)
+	}
 	if output != "" {
 		args = append(args, "-o", output)
 	}

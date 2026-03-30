@@ -64,7 +64,7 @@ var (
 	}
 )
 
-func BuildAndroid(output string, args []string, androidAPI int, ndkVersion string) error {
+func BuildAndroid(output string, args []string, androidAPI int, ndkVersion string, ldflags string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("package path required")
 	}
@@ -89,10 +89,10 @@ func BuildAndroid(output string, args []string, androidAPI int, ndkVersion strin
 	}
 	defer os.RemoveAll(tmpDir)
 
-	return buildAndroid(tmpDir, bi, output, androidAPI, ndkVersion)
+	return buildAndroid(tmpDir, bi, output, androidAPI, ndkVersion, ldflags)
 }
 
-func buildAndroid(tmpDir string, bi *BuildInfo, outputFile string, androidAPI int, ndkVersion string) error {
+func buildAndroid(tmpDir string, bi *BuildInfo, outputFile string, androidAPI int, ndkVersion string, ldflags string) error {
 	// Derive SDK base from ANDROID_HOME or default to ~/Android/Sdk
 	sdk := os.Getenv("ANDROID_HOME")
 	if sdk == "" {
@@ -146,7 +146,7 @@ func buildAndroid(tmpDir string, bi *BuildInfo, outputFile string, androidAPI in
 	}
 	visitPkg(pkgs[0])
 
-	if err := compileAndroid(tmpDir, tools, bi, ndkVersion); err != nil {
+	if err := compileAndroid(tmpDir, tools, bi, ndkVersion, ldflags); err != nil {
 		return err
 	}
 
@@ -164,7 +164,7 @@ func buildAndroid(tmpDir string, bi *BuildInfo, outputFile string, androidAPI in
 	return signAPK(tmpDir, outputFile, tools, bi)
 }
 
-func compileAndroid(tmpDir string, tools *androidTools, bi *BuildInfo, ndkVersion string) error {
+func compileAndroid(tmpDir string, tools *androidTools, bi *BuildInfo, ndkVersion string, ldflags string) error {
 	// Derive NDK root from ndkVersion: ~/Android/Sdk/ndk/{version}
 	var ndkRoot string
 	if ndkVersion != "" {
@@ -205,10 +205,15 @@ func compileAndroid(tmpDir string, tools *androidTools, bi *BuildInfo, ndkVersio
 			return err
 		}
 		libFile := filepath.Join(archDir, "libgio.so")
+		// Merge Android-specific ldflags with any user-supplied ldflags
+		androidLdflags := `-w -s -extldflags "-Wl,-z,max-page-size=16384,-z,common-page-size=4096"`
+		if ldflags != "" {
+			androidLdflags = ldflags + " " + androidLdflags
+		}
 		cmd := exec.Command(
 			"go",
 			"build",
-			"-ldflags=-w -s -extldflags \"-Wl,-z,max-page-size=16384,-z,common-page-size=4096\"",
+			"-ldflags="+androidLdflags,
 			"-buildmode=c-shared",
 			"-tags", bi.Tags,
 			"-o", libFile,

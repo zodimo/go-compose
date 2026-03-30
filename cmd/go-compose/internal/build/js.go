@@ -14,19 +14,20 @@ import (
 )
 
 // BuildJS builds the package at pkgPath for the JS/WASM target and writes the output to outputDir.
-func BuildJS(outputDir string, pkgPath string) error {
+func BuildJS(outputDir string, pkgPath string, ldflags string) error {
 
 	if err := os.MkdirAll(outputDir, 0o700); err != nil {
 		return err
 	}
 
 	// 1. Build WASM binary
-	cmd := exec.Command(
-		"go",
-		"build",
-		"-o", filepath.Join(outputDir, "main.wasm"),
-		pkgPath,
-	)
+	buildArgs := []string{"build"}
+	if ldflags != "" {
+		buildArgs = append(buildArgs, "-ldflags", ldflags)
+	}
+	buildArgs = append(buildArgs, "-o", filepath.Join(outputDir, "main.wasm"), pkgPath)
+
+	cmd := exec.Command("go", buildArgs...)
 	cmd.Env = append(
 		os.Environ(),
 		"GOOS=js",
