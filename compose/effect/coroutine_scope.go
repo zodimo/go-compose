@@ -67,7 +67,7 @@ func (c *CoroutineScope) SetCoroutineScope(ctx context.Context) {
 
 func (c *CoroutineScope) Launch(block func(ctx context.Context)) {
 	go func() {
-		block(c.ctx)
+		block(c.MustContext())
 	}()
 }
 
