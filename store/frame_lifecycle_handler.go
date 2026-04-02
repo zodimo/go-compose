@@ -105,12 +105,22 @@ func (flh *FrameLifecycleHandler) EndFrame() []string {
 
 	toGC := make(map[string]ScopedValue, len(keysToRemove))
 
-	for _, key := range keysToRemove {
-		scopedValue := flh.scopedValues[key]
+	if flh.debugMode {
+		for _, key := range keysToRemove {
+			scopedValue := flh.scopedValues[key]
+			log.Printf("FrameLifecycleHandler: Removing %s\n", key)
+			delete(flh.scopedValues, key)
+			toGC[key] = scopedValue
+		}
+	} else {
+		for _, key := range keysToRemove {
+			scopedValue := flh.scopedValues[key]
 
-		delete(flh.scopedValues, key)
-		toGC[key] = scopedValue
+			delete(flh.scopedValues, key)
+			toGC[key] = scopedValue
+		}
 	}
+
 	flh.mu.Unlock()
 
 	// Call lifecycle callbacks outside the lock to avoid deadlocks

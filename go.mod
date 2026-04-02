@@ -6,6 +6,7 @@ toolchain go1.24.11
 
 require (
 	gioui.org v0.9.0
+	gioui.org/x v0.9.0
 	git.sr.ht/~schnwalter/gio-mw v0.0.0-20250713180710-9d8d98474447
 	github.com/go-text/typesetting v0.3.3
 	github.com/zodimo/go-maybe v0.1.6
@@ -20,7 +21,6 @@ require (
 
 require (
 	gioui.org/shader v1.0.8 // indirect
-	gioui.org/x v0.9.0 // indirect
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0 // indirect
 	github.com/godbus/dbus/v5 v5.0.6 // indirect
 	github.com/zodimo/go-lazy v0.1.1 // indirect
