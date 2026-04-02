@@ -71,7 +71,7 @@ func (flh *FrameLifecycleHandler) AttachValueToLifecycle(key string, value state
 	defer flh.mu.Unlock()
 	// Mark this key as accessed for GC tracking
 	flh.accessedKeys[key] = struct{}{}
-	flh.scopedValues[key] = initScopedValue(value, flh.rootContext)
+	flh.scopedValues[key] = initScopedValue(value, flh.rootContext, flh.debugMode)
 }
 
 func (flh *FrameLifecycleHandler) Ping(key string) {
@@ -134,21 +134,31 @@ func (flh *FrameLifecycleHandler) EndFrame() []string {
 	return keysToRemove
 }
 
-func initScopedValue(mutableValue state.MutableValue, rootContext context.Context) ScopedValue {
+func initScopedValue(mutableValue state.MutableValue, rootContext context.Context, debug bool) ScopedValue {
 
 	scopedCancelFuncs := []context.CancelFunc{}
 	onForgotten := func() {}
 	onCleared := func() {}
 
 	if observer, ok := mutableValue.(lifecycle.RememberObserver); ok {
+		if debug {
+			log.Printf("FrameLifecycleHandler: Attaching RememberObserver to %v\n", mutableValue)
+		}
 		onForgotten = observer.OnForgotten
 	}
 
 	initialValue := mutableValue.Get()
 	scopeAttached := false
 
+	if debug {
+		log.Printf("FrameLifecycleHandler: initScopedValue %T\n", initialValue)
+	}
+
 	// If implements HasViewModelScope, create and provide a cancellable context
 	if scopeHolder, ok := initialValue.(lifecycle.HasViewModelScope); ok {
+		if debug {
+			log.Printf("FrameLifecycleHandler: Attaching ViewModelScope to %T\n", initialValue)
+		}
 		ctx, cancelFunc := context.WithCancel(rootContext)
 		scopeHolder.SetViewModelScope(ctx)
 		scopedCancelFuncs = append(scopedCancelFuncs, cancelFunc)
@@ -157,12 +167,18 @@ func initScopedValue(mutableValue state.MutableValue, rootContext context.Contex
 
 	// If implements HasCoroutineScope, create and provide a cancellable context
 	if scopeHolder, ok := initialValue.(lifecycle.HasCoroutineScope); ok && !scopeAttached {
+		if debug {
+			log.Printf("FrameLifecycleHandler: Attaching CoroutineScope to %T\n", initialValue)
+		}
 		ctx, cancelFunc := context.WithCancel(rootContext)
 		scopeHolder.SetCoroutineScope(ctx)
 		scopedCancelFuncs = append(scopedCancelFuncs, cancelFunc)
 	}
 
 	if vm, ok := initialValue.(lifecycle.ViewModel); ok {
+		if debug {
+			log.Printf("FrameLifecycleHandler: Attaching ViewModel to %T\n", initialValue)
+		}
 		onCleared = vm.OnCleared
 	}
 
