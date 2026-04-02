@@ -161,6 +161,7 @@ func initScopedValue(mutableValue state.MutableValue, rootContext context.Contex
 		}
 		ctx, cancelFunc := context.WithCancel(rootContext)
 		scopeHolder.SetViewModelScope(ctx)
+		scopeHolder.OnInit()
 		scopedCancelFuncs = append(scopedCancelFuncs, cancelFunc)
 		scopeAttached = true
 	}

@@ -24,6 +24,10 @@ func (v *ViewModel) OnCleared() {
 func (v *ViewModel) SetViewModelScope(ctx context.Context) {
 	v.CoroutineScope.SetCoroutineScope(ctx)
 }
+
+func (v *ViewModel) OnInit() {
+}
+
 func (v *ViewModel) MustContext() context.Context {
 	if ctx, ok := v.CoroutineScope.Context(); ok {
 		return ctx

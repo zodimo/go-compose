@@ -3,6 +3,7 @@ package effect
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/zodimo/go-compose/lifecycle"
 	"github.com/zodimo/go-compose/pkg/api"
@@ -67,7 +68,11 @@ func (c *CoroutineScope) SetCoroutineScope(ctx context.Context) {
 
 func (c *CoroutineScope) Launch(block func(ctx context.Context)) {
 	go func() {
-		block(c.MustContext())
+		ctx, ok := c.Context()
+		if !ok {
+			log.Printf("CoroutineScope not initialized, use SetCoroutineScope")
+		}
+		block(ctx)
 	}()
 }
 

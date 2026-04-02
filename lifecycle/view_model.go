@@ -17,4 +17,7 @@ type HasViewModelScope interface {
 	// SetViewModelScope provides a context that is cancelled when the ViewModel is cleared.
 	// This is analogous to viewModelScope in Kotlin, which is a CoroutineScope.
 	SetViewModelScope(ctx context.Context)
+
+	// OnInit is called after SetViewModelScope
+	OnInit()
 }
