@@ -21,3 +21,8 @@ type HasViewModelScope interface {
 	// OnInit is called after SetViewModelScope
 	OnInit()
 }
+
+type ViewModelScope interface {
+	HasViewModelScope
+	CoroutineLauncher
+}

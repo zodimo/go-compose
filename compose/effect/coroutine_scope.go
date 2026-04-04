@@ -3,7 +3,6 @@ package effect
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/zodimo/go-compose/lifecycle"
 	"github.com/zodimo/go-compose/pkg/api"
@@ -46,7 +45,9 @@ import (
 var _ lifecycle.CoroutineScope = (*CoroutineScope)(nil)
 
 type CoroutineScope struct {
-	ctx context.Context
+	ctx      context.Context
+	options  *lifecycle.CoroutineLauncherOptions
+	launcher *CoroutineLauncer
 }
 
 func RememberCoroutineScope(c api.Composer) lifecycle.CoroutineScope {
@@ -66,14 +67,8 @@ func (c *CoroutineScope) SetCoroutineScope(ctx context.Context) {
 	c.ctx = ctx
 }
 
-func (c *CoroutineScope) Launch(block func(ctx context.Context)) {
-	go func() {
-		ctx, ok := c.Context()
-		if !ok {
-			log.Printf("CoroutineScope not initialized, use SetCoroutineScope")
-		}
-		block(ctx)
-	}()
+func (c *CoroutineScope) Launch(block func(ctx context.Context), options ...lifecycle.CoroutineLauncherOption) {
+	c.launcher.Launch(c.ctx, block, options...)
 }
 
 func (c *CoroutineScope) Context() (context.Context, bool) {
@@ -85,4 +80,25 @@ func (c *CoroutineScope) MustContext() context.Context {
 		return ctx
 	}
 	panic("CoroutineScope not initialized, use SetCoroutineScope")
+}
+
+type CoroutineLauncer struct {
+}
+
+func (c *CoroutineLauncer) Launch(ctx context.Context, block func(ctx context.Context), options ...lifecycle.CoroutineLauncherOption) {
+	launcherOptions := lifecycle.CoroutineLauncherOptionsDefaults()
+	for _, option := range options {
+		if option != nil {
+			option(launcherOptions)
+		}
+	}
+
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				launcherOptions.PanicHandler(r, launcherOptions.RecoverFromPanic)
+			}
+		}()
+		block(ctx)
+	}()
 }

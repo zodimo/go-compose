@@ -11,8 +11,7 @@ import (
 )
 
 var _ lifecycle.ViewModel = (*ViewModel)(nil)
-var _ lifecycle.HasCoroutineScope = (*ViewModel)(nil)
-var _ lifecycle.HasViewModelScope = (*ViewModel)(nil)
+var _ lifecycle.ViewModelScope = (*ViewModel)(nil)
 
 type ViewModel struct {
 	effect.CoroutineScope
