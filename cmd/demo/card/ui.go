@@ -41,6 +41,7 @@ func UI() api.Composable {
 						m3text.HeadlineMedium("Card Component Demo"),
 						spacer.Height(24),
 					),
+					column.WithModifier(padding.Horizontal(24, 24)),
 				))
 
 				// Elevated Card
@@ -61,6 +62,7 @@ func UI() api.Composable {
 						),
 						spacer.Height(24),
 					),
+					column.WithModifier(padding.Horizontal(24, 24)),
 				))
 
 				// Filled Card
@@ -81,6 +83,7 @@ func UI() api.Composable {
 						),
 						spacer.Height(24),
 					),
+					column.WithModifier(padding.Horizontal(24, 24)),
 				))
 
 				// Outlined Card
@@ -101,6 +104,7 @@ func UI() api.Composable {
 						),
 						spacer.Height(24),
 					),
+					column.WithModifier(padding.Horizontal(24, 24)),
 				))
 
 				// Interactive Card - demonstrates Tab navigation works
@@ -118,6 +122,7 @@ func UI() api.Composable {
 						),
 						spacer.Height(24),
 					),
+					column.WithModifier(padding.Horizontal(24, 24)),
 				))
 
 				// ContentCover Example - full-bleed header
@@ -144,6 +149,7 @@ func UI() api.Composable {
 						),
 						spacer.Height(24),
 					),
+					column.WithModifier(padding.Horizontal(24, 24)),
 				))
 
 				// Multiple Content Sections
@@ -168,6 +174,7 @@ func UI() api.Composable {
 						),
 						spacer.Height(24),
 					),
+					column.WithModifier(padding.Horizontal(24, 24)),
 				))
 
 				// Card with Image content type
@@ -198,6 +205,7 @@ func UI() api.Composable {
 						),
 						spacer.Height(24),
 					),
+					column.WithModifier(padding.Horizontal(24, 24)),
 				))
 
 				// Clickable Cards - demonstrates hover effect with onClick
@@ -244,6 +252,7 @@ func UI() api.Composable {
 						),
 						spacer.Height(24),
 					),
+					column.WithModifier(padding.Horizontal(24, 24)),
 				))
 
 				// Cards in a Row
@@ -270,9 +279,10 @@ func UI() api.Composable {
 						),
 						spacer.Height(24),
 					),
+					column.WithModifier(padding.Horizontal(24, 24)),
 				))
 			},
-			lazy.WithModifier(padding.All(24).Then(size.FillMax())),
+			lazy.WithModifier(size.FillMax()),
 		)(c)
 
 		return c
