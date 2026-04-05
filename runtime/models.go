@@ -24,7 +24,11 @@ func (r *runtime) Run(gtx LayoutContext, composer api.Composer, ui api.Composabl
 	node := ui(composer).Build()
 	nodeCoordinator := layoutnode.NewNodeCoordinator(node)
 
+	// Stop double rendering
+	macro := op.Record(gtx.Ops)
 	nodeCoordinator.Layout(gtx)
 	nodeCoordinator.PointerPhase(gtx)
+	_ = macro.Stop()
+
 	return nodeCoordinator.Draw(gtx)
 }
