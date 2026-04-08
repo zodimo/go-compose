@@ -1,7 +1,9 @@
 package resource
 
 import (
+	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 )
 
@@ -584,6 +586,261 @@ func TestMatchOnDataLazy(t *testing.T) {
 		result := MatchOnDataLazy(r, func(data string) int { return len(data) }, func() int { return 0 })
 		if result != 4 {
 			t.Errorf("expected 4, got %d", result)
+		}
+	})
+}
+
+// --- MarshalJSON tests ---
+
+func mustMarshalToMap(t *testing.T, v json.Marshaler) map[string]any {
+	t.Helper()
+	data, err := v.MarshalJSON()
+	if err != nil {
+		t.Fatalf("MarshalJSON returned unexpected error: %v", err)
+	}
+	var m map[string]any
+	if err := json.Unmarshal(data, &m); err != nil {
+		t.Fatalf("failed to unmarshal JSON output: %v", err)
+	}
+	return m
+}
+
+func TestResourceSuccess_MarshalJSON(t *testing.T) {
+	t.Run("string data", func(t *testing.T) {
+		r := ResourceSuccess("hello")
+		m := mustMarshalToMap(t, r.(*resourceSuccess[string]))
+
+		if _, ok := m["resource_type"]; !ok {
+			t.Error("expected 'resource_type' key in JSON output")
+		}
+		rt, _ := m["resource_type"].(string)
+		if !strings.Contains(rt, "resourceSuccess") {
+			t.Errorf("expected resource_type containing 'resourceSuccess', got %q", rt)
+		}
+		if data, ok := m["data"]; !ok {
+			t.Error("expected 'data' key in JSON output")
+		} else if data != "hello" {
+			t.Errorf("expected data 'hello', got %v", data)
+		}
+	})
+
+	t.Run("int data", func(t *testing.T) {
+		r := ResourceSuccess(42)
+		m := mustMarshalToMap(t, r.(*resourceSuccess[int]))
+
+		if data, ok := m["data"]; !ok {
+			t.Error("expected 'data' key in JSON output")
+		} else if data != float64(42) { // JSON numbers are float64
+			t.Errorf("expected data 42, got %v", data)
+		}
+	})
+
+	type testStruct struct {
+		Name  string `json:"name"`
+		Value int    `json:"value"`
+	}
+
+	t.Run("struct data", func(t *testing.T) {
+		r := ResourceSuccess(testStruct{Name: "test", Value: 99})
+		m := mustMarshalToMap(t, r.(*resourceSuccess[testStruct]))
+
+		dataRaw, ok := m["data"]
+		if !ok {
+			t.Fatal("expected 'data' key in JSON output")
+		}
+		dataMap, ok := dataRaw.(map[string]any)
+		if !ok {
+			t.Fatalf("expected data to be a map, got %T", dataRaw)
+		}
+		if dataMap["name"] != "test" {
+			t.Errorf("expected name 'test', got %v", dataMap["name"])
+		}
+		if dataMap["value"] != float64(99) {
+			t.Errorf("expected value 99, got %v", dataMap["value"])
+		}
+	})
+
+	t.Run("nil pointer data", func(t *testing.T) {
+		r := ResourceSuccess[*string](nil)
+		m := mustMarshalToMap(t, r.(*resourceSuccess[*string]))
+
+		if m["data"] != nil {
+			t.Errorf("expected data nil, got %v", m["data"])
+		}
+	})
+
+	t.Run("does not contain error or loading keys", func(t *testing.T) {
+		r := ResourceSuccess("test")
+		m := mustMarshalToMap(t, r.(*resourceSuccess[string]))
+
+		if _, ok := m["error"]; ok {
+			t.Error("success resource should not contain 'error' key")
+		}
+		if _, ok := m["loading"]; ok {
+			t.Error("success resource should not contain 'loading' key")
+		}
+	})
+}
+
+func TestResourceLoading_MarshalJSON(t *testing.T) {
+	t.Run("contains loading true", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		m := mustMarshalToMap(t, r.(*resourceLoading[string]))
+
+		if _, ok := m["resource_type"]; !ok {
+			t.Error("expected 'resource_type' key in JSON output")
+		}
+		rt, _ := m["resource_type"].(string)
+		if !strings.Contains(rt, "resourceLoading") {
+			t.Errorf("expected resource_type containing 'resourceLoading', got %q", rt)
+		}
+		if loading, ok := m["loading"]; !ok {
+			t.Error("expected 'loading' key in JSON output")
+		} else if loading != true {
+			t.Errorf("expected loading true, got %v", loading)
+		}
+	})
+
+	t.Run("does not contain data or error keys", func(t *testing.T) {
+		r := ResourceLoading[int]()
+		m := mustMarshalToMap(t, r.(*resourceLoading[int]))
+
+		if _, ok := m["data"]; ok {
+			t.Error("loading resource should not contain 'data' key")
+		}
+		if _, ok := m["error"]; ok {
+			t.Error("loading resource should not contain 'error' key")
+		}
+	})
+}
+
+func TestResourceError_MarshalJSON(t *testing.T) {
+	t.Run("contains error message", func(t *testing.T) {
+		r := ResourceError[string](errors.New("something failed"))
+		m := mustMarshalToMap(t, r.(*resourceError[string]))
+
+		if _, ok := m["resource_type"]; !ok {
+			t.Error("expected 'resource_type' key in JSON output")
+		}
+		rt, _ := m["resource_type"].(string)
+		if !strings.Contains(rt, "resourceError") {
+			t.Errorf("expected resource_type containing 'resourceError', got %q", rt)
+		}
+		if errMsg, ok := m["error"]; !ok {
+			t.Error("expected 'error' key in JSON output")
+		} else if errMsg != "something failed" {
+			t.Errorf("expected error 'something failed', got %v", errMsg)
+		}
+	})
+
+	t.Run("does not contain data or loading keys", func(t *testing.T) {
+		r := ResourceError[int](errors.New("fail"))
+		m := mustMarshalToMap(t, r.(*resourceError[int]))
+
+		if _, ok := m["data"]; ok {
+			t.Error("error resource should not contain 'data' key")
+		}
+		if _, ok := m["loading"]; ok {
+			t.Error("error resource should not contain 'loading' key")
+		}
+	})
+}
+
+func TestWrappedResource_MarshalJSON(t *testing.T) {
+	t.Run("success mapped data", func(t *testing.T) {
+		r := ResourceSuccess("test")
+		mapped := MapData(r, func(s string) int { return len(s) })
+		m := mustMarshalToMap(t, mapped.(*wrappedResource[int]))
+
+		rt, _ := m["resource_type"].(string)
+		if !strings.Contains(rt, "wrappedResource") {
+			t.Errorf("expected resource_type containing 'wrappedResource', got %q", rt)
+		}
+		if data, ok := m["data"]; !ok {
+			t.Error("expected 'data' key in JSON output")
+		} else if data != float64(4) {
+			t.Errorf("expected data 4, got %v", data)
+		}
+		if _, ok := m["loading"]; ok {
+			t.Error("didnt expect 'loading' key in JSON output")
+		}
+		if _, ok := m["error"]; ok {
+			t.Error("didnt expect 'error' key in JSON output")
+		}
+	})
+
+	t.Run("loading wrapped resource", func(t *testing.T) {
+		r := ResourceLoading[string]()
+		mapped := MapData(r, func(s string) int { return len(s) })
+		m := mustMarshalToMap(t, mapped.(*wrappedResource[int]))
+
+		if loading, ok := m["loading"]; !ok {
+			t.Error("expected 'loading' key in JSON output")
+		} else if loading != true {
+			t.Errorf("expected loading true, got %v", loading)
+		}
+		if _, ok := m["data"]; ok {
+			t.Error("didnt expect 'data' key in JSON output")
+		}
+		if _, ok := m["error"]; ok {
+			t.Error("didnt expect 'error' key in JSON output")
+		}
+	})
+
+	t.Run("error wrapped resource", func(t *testing.T) {
+		r := ResourceError[string](errors.New("wrapped error"))
+		mapped := MapData(r, func(s string) int { return len(s) })
+		m := mustMarshalToMap(t, mapped.(*wrappedResource[int]))
+
+		// error should be serialised as the error message string
+		if errVal, ok := m["error"]; !ok {
+			t.Error("expected 'error' key in JSON output")
+		} else if errVal != "wrapped error" {
+			t.Errorf("expected error 'wrapped error', got %v", errVal)
+		}
+		if _, ok := m["data"]; ok {
+			t.Error("didnt expect 'data' key in JSON output")
+		}
+		if _, ok := m["loading"]; ok {
+			t.Error("didnt expect 'loading' key in JSON output")
+		}
+	})
+
+	t.Run("mapped error via MapError", func(t *testing.T) {
+		r := ResourceError[string](errors.New("original"))
+		mapped := MapError(r, func(err error) error {
+			return errors.New("mapped: " + err.Error())
+		})
+		m := mustMarshalToMap(t, mapped.(*wrappedResource[string]))
+
+		if errVal, ok := m["error"]; !ok {
+			t.Error("expected 'error' key in JSON output")
+		} else if errVal != "mapped: original" {
+			t.Errorf("expected error 'mapped: original', got %v", errVal)
+		}
+		if _, ok := m["data"]; ok {
+			t.Error("didnt expect 'data' key in JSON output")
+		}
+		if _, ok := m["loading"]; ok {
+			t.Error("didnt expect 'loading' key in JSON output")
+		}
+	})
+
+	t.Run("valid JSON roundtrip", func(t *testing.T) {
+		r := ResourceSuccess("hello")
+		mapped := MapData(r, func(s string) string { return strings.ToUpper(s) })
+
+		data, err := json.Marshal(mapped)
+		if err != nil {
+			t.Fatalf("json.Marshal failed: %v", err)
+		}
+
+		var m map[string]any
+		if err := json.Unmarshal(data, &m); err != nil {
+			t.Fatalf("json.Unmarshal roundtrip failed: %v", err)
+		}
+		if m["data"] != "HELLO" {
+			t.Errorf("expected data 'HELLO', got %v", m["data"])
 		}
 	})
 }

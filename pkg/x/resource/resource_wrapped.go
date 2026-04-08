@@ -1,6 +1,10 @@
 package resource
 
-import "sync"
+import (
+	"encoding/json"
+	"fmt"
+	"sync"
+)
 
 var _ Resource[any] = (*wrappedResource[any])(nil)
 
@@ -52,6 +56,26 @@ func newWrappedResource[T, U any](resource Resource[T], mapDataFunc func(T) U, o
 			return resource.hasData()
 		},
 	}
+}
+
+func (w *wrappedResource[T]) MarshalJSON() ([]byte, error) {
+	resourceType := fmt.Sprintf("%T", w)
+	if w.isLoading() {
+		return json.Marshal(map[string]any{
+			"resource_type": resourceType,
+			"loading":       true,
+		})
+	}
+	if w.hasError() {
+		return json.Marshal(map[string]any{
+			"resource_type": resourceType,
+			"error":         w.getError().Error(),
+		})
+	}
+	return json.Marshal(map[string]any{
+		"resource_type": resourceType,
+		"data":          w.getData(),
+	})
 }
 
 func (w *wrappedResource[T]) isLoading() bool {

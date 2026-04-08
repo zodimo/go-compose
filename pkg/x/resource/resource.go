@@ -1,5 +1,7 @@
 package resource
 
+import "encoding/json"
+
 type Resource[T any] interface {
 	isLoading() bool
 	getError() error
@@ -7,6 +9,8 @@ type Resource[T any] interface {
 	getData() T
 	hasData() bool
 	isResource()
+
+	json.Marshaler
 }
 
 func ResourceError[T any](err error) Resource[T] {

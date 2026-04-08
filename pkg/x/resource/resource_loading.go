@@ -1,8 +1,20 @@
 package resource
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 var _ Resource[any] = (*resourceLoading[any])(nil)
 
 type resourceLoading[T any] struct {
+}
+
+func (r *resourceLoading[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]any{
+		"resource_type": fmt.Sprintf("%T", r),
+		"loading":       true,
+	})
 }
 
 func (r *resourceLoading[T]) isLoading() bool {
