@@ -1,22 +1,14 @@
 package divider
 
 import (
-	"image"
-
+	fDivider "github.com/zodimo/go-compose/compose/foundation/divider"
 	"github.com/zodimo/go-compose/compose/material3"
-	"github.com/zodimo/go-compose/compose/ui"
-	"github.com/zodimo/go-compose/compose/ui/graphics"
-	"github.com/zodimo/go-compose/internal/layoutnode"
-
-	"gioui.org/op/clip"
-	"gioui.org/op/paint"
-	gioUnit "gioui.org/unit"
+	"github.com/zodimo/go-compose/compose/ui/layout"
+	"github.com/zodimo/go-compose/pkg/api"
 )
 
-const Material3DivideNodeID = "Material3Divider"
-
-func Divider(options ...DividerOption) Composable {
-	return func(c Composer) Composer {
+func Divider(options ...DividerOption) api.Composable {
+	return func(c api.Composer) api.Composer {
 
 		opts := DefaultDividerOptions()
 		for _, option := range options {
@@ -28,45 +20,50 @@ func Divider(options ...DividerOption) Composable {
 
 		theme := material3.Theme(c)
 		opts.Color = opts.Color.TakeOrElse(theme.ColorScheme().OutlineVariant)
+		options = append(options, WithColor(opts.Color))
+		if opts.Axis == layout.AxisUnspecified {
+			opts.Axis = layout.AxisHorizontal
+			options = append(options, WithAxis(opts.Axis))
+		}
 
-		c.StartBlock(Material3DivideNodeID)
-		c.Modifier(func(modifier ui.Modifier) ui.Modifier {
-			return modifier.Then(opts.Modifier)
-		})
-		c.SetWidgetConstructor(widgetConstructor(opts))
-
-		return c.EndBlock()
+		return fDivider.Divider(options...)(c)
 	}
 }
 
-func widgetConstructor(options DividerOptions) layoutnode.LayoutNodeWidgetConstructor {
-	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
-		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-			thickness := gtx.Dp(gioUnit.Dp(options.Thickness))
-			if thickness < 1 {
-				thickness = 1
+func HorizontalDivider(options ...DividerOption) api.Composable {
+	return func(c api.Composer) api.Composer {
+
+		opts := DefaultDividerOptions()
+		for _, option := range options {
+			if option == nil {
+				continue
 			}
-
-			// Dividers fill the width
-			width := gtx.Constraints.Min.X
-			if gtx.Constraints.Max.X > width {
-				width = gtx.Constraints.Max.X // Or Min/Max strategy? Usually divider fills parent width.
-			}
-
-			// Size
-			size := image.Pt(width, thickness)
-
-			// Resolve Color
-			resolvedColor := graphics.ColorToNRGBA(options.Color)
-
-			// Draw
-			shape := clip.Rect{Max: size}.Push(gtx.Ops)
-			paint.ColorOp{Color: resolvedColor}.Add(gtx.Ops)
-			paint.PaintOp{}.Add(gtx.Ops)
-			shape.Pop()
-
-			return layoutnode.LayoutDimensions{Size: size}
+			option(&opts)
 		}
-	})
 
+		opts.Axis = layout.AxisHorizontal
+
+		options = append(options, WithAxis(opts.Axis))
+
+		return Divider(options...)(c)
+	}
+}
+
+func VerticalDivider(options ...DividerOption) api.Composable {
+	return func(c api.Composer) api.Composer {
+
+		opts := DefaultDividerOptions()
+		for _, option := range options {
+			if option == nil {
+				continue
+			}
+			option(&opts)
+		}
+
+		opts.Axis = layout.AxisVertical
+
+		options = append(options, WithAxis(opts.Axis))
+
+		return Divider(options...)(c)
+	}
 }
