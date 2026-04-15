@@ -19,6 +19,8 @@ type TreeOptions struct {
 	// HideSeparators hides the visual separators between tree nodes.
 	HideSeparators bool
 
+	IconSize int
+
 	// Callbacks (inspired by Fyne)
 
 	// OnSelected is called when a node is selected.
@@ -39,6 +41,7 @@ func DefaultTreeOptions() TreeOptions {
 	return TreeOptions{
 		Modifier:       modifier.EmptyModifier,
 		IndentSize:     24,
+		IconSize:       16,
 		HideSeparators: false,
 	}
 }
@@ -54,6 +57,12 @@ func WithModifier(m ui.Modifier) TreeOption {
 func WithIndentSize(size int) TreeOption {
 	return func(o *TreeOptions) {
 		o.IndentSize = size
+	}
+}
+
+func WithIconSize(size int) TreeOption {
+	return func(o *TreeOptions) {
+		o.IconSize = size
 	}
 }
 

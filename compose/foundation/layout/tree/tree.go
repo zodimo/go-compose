@@ -1,14 +1,15 @@
 package tree
 
 import (
-	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/foundation/lazy"
 	"github.com/zodimo/go-compose/compose/material3/icon"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
+
 	"github.com/zodimo/go-compose/pkg/api"
 )
 
@@ -21,9 +22,6 @@ type TreeScope interface {
 	// header is the content displayed for the branch itself.
 	// children is a function that defines the children of this branch.
 	Branch(key any, header api.Composable, children func(TreeScope))
-
-	// Indent adds indentation to the content.
-	Indent(content api.Composable) api.Composable
 }
 
 // Tree creates a tree component that efficiently renders hierarchical data using LazyColumn.
@@ -65,22 +63,6 @@ type treeScopeImpl struct {
 	options   *TreeOptions
 }
 
-func (s *treeScopeImpl) Indent(content api.Composable) api.Composable {
-	indentSize := s.options.IndentSize
-
-	return row.Row(
-		compose.Sequence(
-			// Indentation
-			spacer.Width(s.depth*indentSize),
-			// Spacer for the expander icon alignment
-			spacer.Width(indentSize),
-			// Node content
-			content,
-		),
-		row.WithAlignment(row.Middle),
-	)
-}
-
 func (s *treeScopeImpl) Node(key any, content api.Composable) {
 	indentSize := s.options.IndentSize
 	opts := s.options
@@ -92,16 +74,18 @@ func (s *treeScopeImpl) Node(key any, content api.Composable) {
 				// Indentation
 				spacer.Width(s.depth*indentSize),
 				// Spacer for the expander icon alignment
-				spacer.Width(indentSize),
+				// spacer.Width(indentSize),
 				// Node content
 				content,
 			),
+			row.WithAlignment(row.Middle),
 			row.WithModifier(
 				size.FillMaxWidth().
-					Then(padding.All(4)).
 					Then(clickable.OnClick(func() {
 						SelectNodeWithCallback(state, key, opts)
-					})),
+					}).
+						Then(padding.All(4)),
+					),
 			),
 		)(c)
 	})
@@ -126,35 +110,33 @@ func (s *treeScopeImpl) Branch(key any, header api.Composable, children func(Tre
 				spacer.Width(s.depth*indentSize),
 				// Expander Icon
 				// Toggle Button - only toggles expand/collapse
+
 				c.If(
 					isExpanded,
 					icon.Icon(
 						downArrowIcon,
-						// icon.WithSize(unit.Dp(indentSize)),
-						icon.WithModifier(
-							size.Width(indentSize),
-						),
+						icon.WithSize(unit.Dp(s.options.IconSize)),
 					),
+
 					icon.Icon(
 						rightArrowIcon,
-						// icon.WithSize(unit.Dp(indentSize)),
-						icon.WithModifier(
-							size.Width(indentSize),
-						),
+						icon.WithSize(unit.Dp(s.options.IconSize)),
 					),
 				),
+
 				// Header Content
 				header,
 			),
 			row.WithAlignment(row.Middle),
 			row.WithModifier(
 				size.FillMaxWidth().
-					Then(padding.All(4)).
 					Then(clickable.OnClick(func() {
 						// Select the branch node and toggle it
 						SelectNodeWithCallback(state, key, opts)
 						toggleBranchWithCallback(state, key, opts)
-					})),
+					}).
+						Then(padding.All(4)),
+					),
 			),
 		)(c)
 	})
