@@ -9,6 +9,7 @@ import (
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
+	"github.com/zodimo/go-compose/modifiers/weight"
 
 	"github.com/zodimo/go-compose/pkg/api"
 )
@@ -106,37 +107,56 @@ func (s *treeScopeImpl) Branch(key any, header api.Composable, children func(Tre
 	s.listScope.Item(key, func(c api.Composer) api.Composer {
 		return row.Row(
 			c.Sequence(
-				// Indentation
-				spacer.Width(s.depth*indentSize),
-				// Expander Icon
-				// Toggle Button - only toggles expand/collapse
+				row.Row(
+					c.Sequence(
+						// Indentation
+						spacer.Width(s.depth*indentSize),
+						// Expander Icon
+						// Toggle Button - only toggles expand/collapse
 
-				c.If(
-					isExpanded,
-					icon.Icon(
-						downArrowIcon,
-						icon.WithSize(unit.Dp(s.options.IconSize)),
+						c.If(
+							isExpanded,
+							icon.Icon(
+								downArrowIcon,
+								icon.WithSize(unit.Dp(s.options.IconSize)),
+							),
+
+							icon.Icon(
+								rightArrowIcon,
+								icon.WithSize(unit.Dp(s.options.IconSize)),
+							),
+						),
 					),
+					row.WithAlignment(row.Middle),
+					row.WithModifier(
+						clickable.OnClick(func() {
+							// toggle branch node
+							toggleBranchWithCallback(state, key, opts)
 
-					icon.Icon(
-						rightArrowIcon,
-						icon.WithSize(unit.Dp(s.options.IconSize)),
+						}).
+							Then(padding.All(4)),
 					),
 				),
+				row.Row(
+					c.Sequence(
 
-				// Header Content
-				header,
-			),
-			row.WithAlignment(row.Middle),
-			row.WithModifier(
-				size.FillMaxWidth().
-					Then(clickable.OnClick(func() {
-						// Select the branch node and toggle it
-						SelectNodeWithCallback(state, key, opts)
-						toggleBranchWithCallback(state, key, opts)
-					}).
-						Then(padding.All(4)),
+						// Header Content
+						header,
 					),
+					row.WithAlignment(row.Middle),
+					row.WithModifier(
+						weight.Weight(1).
+							Then(clickable.OnClick(func() {
+								// Select the branch node
+								SelectNodeWithCallback(state, key, opts)
+							}).
+								Then(padding.All(4)),
+							),
+					),
+				),
+			),
+			row.WithModifier(
+				size.FillMaxWidth(),
 			),
 		)(c)
 	})
