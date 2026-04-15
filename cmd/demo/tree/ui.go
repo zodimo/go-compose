@@ -9,6 +9,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/tree"
 	ftext "github.com/zodimo/go-compose/compose/foundation/text"
 	"github.com/zodimo/go-compose/compose/material3/divider"
+	"github.com/zodimo/go-compose/compose/material3/icon"
 	m3text "github.com/zodimo/go-compose/compose/material3/text"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/modifiers/background"
@@ -74,18 +75,28 @@ func DeclarativeTreeDemo() api.Composable {
 		return tree.Tree(
 			state,
 			func(scope tree.TreeScope) {
-				scope.Branch("dir1", m3text.BodyMedium("Directory 1"), func(s tree.TreeScope) {
-					s.Node("file1", m3text.BodyMedium("File 1.txt"))
-					s.Node("file2", m3text.BodyMedium("File 2.txt"))
-					s.Branch("subdir1", m3text.BodyMedium("Sub-directory 1"),
-						func(s2 tree.TreeScope) {
-							s2.Node("file3", m3text.BodyMedium("File 3.txt"))
-						},
-					)
-				})
-				scope.Branch("dir2", m3text.BodyMedium("Directory 2"), func(s tree.TreeScope) {
-					s.Node("file4", m3text.BodyMedium("File 4.txt"))
-				})
+				scope.Branch(
+					"dir1",
+					m3text.BodyMedium("Directory 1"),
+					func(s tree.TreeScope) {
+						s.Node("file1", m3text.BodyMedium("File 1.txt"))
+						s.Node("file2", m3text.BodyMedium("File 2.txt"))
+						s.Branch(
+							"subdir1",
+							m3text.BodyMedium("Sub-directory 1"),
+							func(s2 tree.TreeScope) {
+								s2.Node("file3", m3text.BodyMedium("File 3.txt"))
+							},
+						)
+					},
+				)
+				scope.Branch(
+					"dir2",
+					m3text.BodyMedium("Directory 2"),
+					func(s tree.TreeScope) {
+						s.Node("file4", m3text.BodyMedium("File 4.txt"))
+					},
+				)
 				scope.Node("rootFile", m3text.BodyMedium("Root File.txt"))
 			},
 			tree.WithOnBranchOpened(func(id any) {
@@ -130,9 +141,14 @@ func DataDrivenTreeDemo() api.Composable {
 	return func(c api.Composer) api.Composer {
 		state := tree.RememberTreeState(c)
 
+		folderClosedIcon := icon.SymbolFolder
+		folderOpenIcon := icon.SymbolFolderOpen
+		fileIcon := icon.SymbolArticle
+
 		return tree.TreeFromData(
 			state,
 			[]any{"root"}, // Root IDs
+			//childUIDs
 			func(id any) []any {
 				strID := id.(string)
 				item := fsData[strID]
@@ -145,25 +161,31 @@ func DataDrivenTreeDemo() api.Composable {
 				}
 				return children
 			},
+			//isBranch
 			func(id any) bool {
 				strID := id.(string)
 				return fsData[strID].IsFolder
 			},
+			//create node
 			func(id any) api.Composable {
 				strID := id.(string)
 				name := fsData[strID].Name
 				// Simple icon logic
-				icon := "📄"
-				if fsData[strID].IsFolder {
-					icon = "📁"
-				}
+
 				return row.Row(
-					func(c api.Composer) api.Composer {
-						m3text.BodyMedium(icon)(c)
-						spacer.Width(8)(c)
-						m3text.BodyMedium(name)(c)
-						return c
-					},
+					c.Sequence(
+						c.If(
+							fsData[strID].IsFolder,
+							c.If(
+								state.IsExpanded(id),
+								icon.Icon(folderOpenIcon),
+								icon.Icon(folderClosedIcon),
+							),
+							icon.Icon(fileIcon),
+						),
+						spacer.Width(8),
+						m3text.BodyMedium(name),
+					),
 				)
 			},
 			tree.WithOnBranchOpened(func(id any) {

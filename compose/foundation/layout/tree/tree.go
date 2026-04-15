@@ -1,11 +1,11 @@
 package tree
 
 import (
+	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/foundation/lazy"
-	fText "github.com/zodimo/go-compose/compose/foundation/text"
-	m3Text "github.com/zodimo/go-compose/compose/material3/text"
+	"github.com/zodimo/go-compose/compose/material3/icon"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -21,6 +21,9 @@ type TreeScope interface {
 	// header is the content displayed for the branch itself.
 	// children is a function that defines the children of this branch.
 	Branch(key any, header api.Composable, children func(TreeScope))
+
+	// Indent adds indentation to the content.
+	Indent(content api.Composable) api.Composable
 }
 
 // Tree creates a tree component that efficiently renders hierarchical data using LazyColumn.
@@ -62,6 +65,22 @@ type treeScopeImpl struct {
 	options   *TreeOptions
 }
 
+func (s *treeScopeImpl) Indent(content api.Composable) api.Composable {
+	indentSize := s.options.IndentSize
+
+	return row.Row(
+		compose.Sequence(
+			// Indentation
+			spacer.Width(s.depth*indentSize),
+			// Spacer for the expander icon alignment
+			spacer.Width(indentSize),
+			// Node content
+			content,
+		),
+		row.WithAlignment(row.Middle),
+	)
+}
+
 func (s *treeScopeImpl) Node(key any, content api.Composable) {
 	indentSize := s.options.IndentSize
 	opts := s.options
@@ -69,17 +88,14 @@ func (s *treeScopeImpl) Node(key any, content api.Composable) {
 
 	s.listScope.Item(key, func(c api.Composer) api.Composer {
 		return row.Row(
-			func(c api.Composer) api.Composer {
+			c.Sequence(
 				// Indentation
-				spacer.Width(s.depth * indentSize)(c)
-
+				spacer.Width(s.depth*indentSize),
 				// Spacer for the expander icon alignment
-				spacer.Width(indentSize)(c)
-
+				spacer.Width(indentSize),
 				// Node content
-				content(c)
-				return c
-			},
+				content,
+			),
 			row.WithModifier(
 				size.FillMaxWidth().
 					Then(padding.All(4)).
@@ -99,33 +115,38 @@ func (s *treeScopeImpl) Branch(key any, header api.Composable, children func(Tre
 	state := s.state
 	opts := s.options
 
+	rightArrowIcon := icon.SymbolArrowRight
+	downArrowIcon := icon.SymbolArrowDropDown
+
 	// Branch Header
 	s.listScope.Item(key, func(c api.Composer) api.Composer {
 		return row.Row(
-			func(c api.Composer) api.Composer {
+			c.Sequence(
 				// Indentation
-				spacer.Width(s.depth * indentSize)(c)
-
+				spacer.Width(s.depth*indentSize),
 				// Expander Icon
-				icon := "▶" // Right pointer
-				if isExpanded {
-					icon = "▼" // Down pointer
-				}
-
 				// Toggle Button - only toggles expand/collapse
-				m3Text.BodyMedium(
-					icon,
-					fText.WithModifier(
-						clickable.OnClick(func() {
-							toggleBranchWithCallback(state, key, opts)
-						}).Then(size.Width(indentSize)),
+				c.If(
+					isExpanded,
+					icon.Icon(
+						downArrowIcon,
+						// icon.WithSize(unit.Dp(indentSize)),
+						icon.WithModifier(
+							size.Width(indentSize),
+						),
 					),
-				)(c)
-
+					icon.Icon(
+						rightArrowIcon,
+						// icon.WithSize(unit.Dp(indentSize)),
+						icon.WithModifier(
+							size.Width(indentSize),
+						),
+					),
+				),
 				// Header Content
-				header(c)
-				return c
-			},
+				header,
+			),
+			row.WithAlignment(row.Middle),
 			row.WithModifier(
 				size.FillMaxWidth().
 					Then(padding.All(4)).
@@ -181,30 +202,39 @@ func TreeFromData(
 	createNode func(any) api.Composable,
 	options ...TreeOption,
 ) api.Composable {
-	return Tree(state, func(scope TreeScope) {
-		var traverse func(s TreeScope, ids []any)
-		traverse = func(s TreeScope, ids []any) {
-			for _, id := range ids {
-				isB := false
-				if isBranch != nil {
-					isB = isBranch(id)
-				} else {
-					children := childUIDs(id)
-					isB = len(children) > 0
-				}
 
-				if isB {
-					scope.Branch(id, createNode(id), func(innerS TreeScope) {
-						traverse(innerS, childUIDs(id))
-					})
-				} else {
-					scope.Node(id, createNode(id))
+	return Tree(
+		state,
+		func(scope TreeScope) {
+			var traverse func(s TreeScope, ids []any)
+			traverse = func(s TreeScope, ids []any) {
+				for _, id := range ids {
+					isB := false
+					if isBranch != nil {
+						isB = isBranch(id)
+					} else {
+						children := childUIDs(id)
+						isB = len(children) > 0
+					}
+
+					if isB {
+						s.Branch(
+							id,
+							createNode(id),
+							func(innerS TreeScope) {
+								traverse(innerS, childUIDs(id))
+							},
+						)
+					} else {
+						s.Node(id, createNode(id))
+					}
 				}
 			}
-		}
 
-		traverse(scope, roots)
-	}, options...)
+			traverse(scope, roots)
+		},
+		options...,
+	)
 }
 
 // SelectNodeWithCallback selects a node and invokes the appropriate callbacks.
