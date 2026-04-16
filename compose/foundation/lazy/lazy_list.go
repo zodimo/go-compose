@@ -2,12 +2,11 @@ package lazy
 
 import (
 	"fmt"
+	"image"
 
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/internal/layoutnode"
-
-	"image"
 
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -76,19 +75,17 @@ func lazyList(axis layout.Axis, content func(LazyListScope), options ...LazyList
 			}
 		}
 
-		c.SetWidgetConstructor(lazyListWidgetConstructor(opts.State, axis, stickyIndices))
+		c.SetWidgetConstructor(lazyListWidgetConstructor(opts.State, axis, stickyIndices, opts.Scrollbar))
 
 		return c.EndBlock()
 	}
 }
 
-func lazyListWidgetConstructor(state *LazyListState, axis layout.Axis, stickyIndices []int) layoutnode.LayoutNodeWidgetConstructor {
+func lazyListWidgetConstructor(state *LazyListState, axis layout.Axis, stickyIndices []int, scrollbar bool) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-			// Update axis configuration
 			state.List.List.Axis = axis
 
-			// Track item sizes for this frame
 			itemSizes := make(map[int]int)
 
 			dims := state.List.List.Layout(gtx, len(node.Children()), func(gtx C, i int) D {
@@ -98,7 +95,6 @@ func lazyListWidgetConstructor(state *LazyListState, axis layout.Axis, stickyInd
 				child := node.Children()[i].(layoutnode.NodeCoordinator)
 				d := child.Layout(gtx)
 
-				// Store size for main axis
 				size := d.Size.Y
 				if axis == layout.Horizontal {
 					size = d.Size.X
@@ -106,6 +102,10 @@ func lazyListWidgetConstructor(state *LazyListState, axis layout.Axis, stickyInd
 				itemSizes[i] = size
 				return d
 			})
+
+			if scrollbar {
+				layoutScrollbar(gtx, &state.List, axis, len(node.Children()), dims)
+			}
 
 			// Handle Sticky Header
 			if len(stickyIndices) > 0 {

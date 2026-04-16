@@ -3,6 +3,7 @@ package lazy
 import (
 	"fmt"
 	"image"
+	"image/color"
 
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/ui"
@@ -10,6 +11,7 @@ import (
 	"github.com/zodimo/go-compose/internal/layoutnode"
 
 	"gioui.org/layout"
+	"gioui.org/widget"
 )
 
 // LazyVerticalGrid is a vertically scrolling grid that lays out items in columns.
@@ -62,7 +64,7 @@ func lazyGrid(axis layout.Axis, cells GridCells, content func(LazyGridScope), op
 		}
 
 		// Store cells and axis for widget constructor
-		c.SetWidgetConstructor(lazyGridWidgetConstructor(opts.State, axis, cells))
+		c.SetWidgetConstructor(lazyGridWidgetConstructor(opts.State, axis, cells, opts.Scrollbar))
 
 		return c.EndBlock()
 	}
@@ -72,6 +74,7 @@ func lazyGridWidgetConstructor(
 	state *LazyGridState,
 	axis layout.Axis,
 	cells GridCells,
+	scrollbar bool,
 ) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
@@ -82,9 +85,8 @@ func lazyGridWidgetConstructor(
 				return D{}
 			}
 
-			// Calculate the cross-axis cell count based on available space
 			var availableSpace int
-			var spacing int = 0 // Could be made configurable
+			var spacing int = 0
 
 			if axis == layout.Vertical {
 				availableSpace = gtx.Constraints.Max.X
@@ -95,16 +97,14 @@ func lazyGridWidgetConstructor(
 			cellCount := cells.calculateCrossAxisCellCount(availableSpace, spacing)
 			cellSize := cells.calculateCellSize(availableSpace, cellCount, spacing)
 
-			// Group items into rows (for vertical) or columns (for horizontal)
 			rowCount := (itemCount + cellCount - 1) / cellCount
 			if rowCount == 0 {
 				return D{}
 			}
 
-			// Set up list axis
 			state.List.List.Axis = axis
 
-			return state.List.List.Layout(gtx, rowCount, func(gtx C, rowIndex int) D {
+			dims := state.List.List.Layout(gtx, rowCount, func(gtx C, rowIndex int) D {
 				// Calculate range of items for this row
 				startIdx := rowIndex * cellCount
 				endIdx := startIdx + cellCount
@@ -158,6 +158,51 @@ func lazyGridWidgetConstructor(
 
 				return layout.Flex{Axis: rowAxis}.Layout(gtx, flexChildren...)
 			})
+
+			if scrollbar {
+				layoutGridScrollbar(gtx, &state.List, axis, rowCount, dims)
+			}
+
+			return dims
 		}
 	})
+}
+
+func layoutGridScrollbar(gtx layout.Context, list *widget.List, axis layout.Axis, rowCount int, dims layout.Dimensions) {
+	majorAxisSize := axis.Convert(dims.Size).X
+	start, end := fromListPosition(list.Position, rowCount, majorAxisSize)
+
+	if !rangeIsScrollable(start, end) {
+		return
+	}
+
+	sb := scrollbarStyle{
+		scrollbar:  &list.Scrollbar,
+		trackPad:   2,
+		indicatorW: 6,
+		indicatorR: 3,
+		color:      color.NRGBA{R: 128, G: 128, B: 128, A: 150},
+		hoverColor: color.NRGBA{R: 128, G: 128, B: 128, A: 200},
+	}
+
+	anchoring := layout.E
+	if axis == layout.Horizontal {
+		anchoring = layout.S
+	}
+
+	gtx.Constraints.Min = dims.Size
+	gtx.Constraints.Max = dims.Size
+	anchoring.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+		list.Scrollbar.Update(gtx, axis, start, end)
+
+		if list.Scrollbar.IndicatorHovered() {
+			sb.color = sb.hoverColor
+		}
+
+		return sb.layout(gtx, axis, start, end)
+	})
+
+	if delta := list.ScrollDistance(); delta != 0 {
+		list.List.ScrollBy(delta * float32(rowCount))
+	}
 }

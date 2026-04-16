@@ -10,15 +10,17 @@ type LazyGridOption func(*LazyGridOptions)
 
 // LazyGridOptions holds configuration for a lazy grid.
 type LazyGridOptions struct {
-	Modifier ui.Modifier
-	State    *LazyGridState
+	Modifier  ui.Modifier
+	State     *LazyGridState
+	Scrollbar bool
 }
 
 // DefaultLazyGridOptions returns the default options for a lazy grid.
 func DefaultLazyGridOptions() LazyGridOptions {
 	return LazyGridOptions{
-		Modifier: modifier.EmptyModifier,
-		State:    nil,
+		Modifier:  modifier.EmptyModifier,
+		State:     nil,
+		Scrollbar: true,
 	}
 }
 
@@ -33,5 +35,11 @@ func WithGridModifier(m ui.Modifier) LazyGridOption {
 func WithGridState(state *LazyGridState) LazyGridOption {
 	return func(o *LazyGridOptions) {
 		o.State = state
+	}
+}
+
+func WithGridScrollbar(enabled bool) LazyGridOption {
+	return func(o *LazyGridOptions) {
+		o.Scrollbar = enabled
 	}
 }
