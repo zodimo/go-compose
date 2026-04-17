@@ -11,6 +11,8 @@ git.sr.ht/~schnwalter/gio-mw v0.0.0-20250713180710-9d8d98474447 h1:HYmUhTNys/xHf
 git.sr.ht/~schnwalter/gio-mw v0.0.0-20250713180710-9d8d98474447/go.mod h1:2delIHRFXOUBnmXbltTSUCnnbpzWawIGwQGxqw2K7p0=
 git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0 h1:bGG/g4ypjrCJoSvFrP5hafr9PPB5aw8SjcOWWila7ZI=
 git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0/go.mod h1:+axXBRUTIDlCeE73IKeD/os7LoEnTKdkp8/gQOFjqyo=
+github.com/go-text/typesetting v0.3.2 h1:OUOFxp9Rx5PiO0/rh2IY+5gmyXjXsVG8+LfEyk9NMcE=
+github.com/go-text/typesetting v0.3.2/go.mod h1:vIRUT25mLQaSh4C8H/lIsKppQz/Gdb8Pu/tNwpi52ts=
 github.com/go-text/typesetting-utils v0.0.0-20250618110550-c820a94c77b8 h1:4KCscI9qYWMGTuz6BpJtbUSRzcBrUSSE0ENMJbNSrFs=
 github.com/go-text/typesetting-utils v0.0.0-20250618110550-c820a94c77b8/go.mod h1:3/62I4La/HBRX9TcTpBj4eipLiwzf+vhI+7whTc9V7o=
 github.com/godbus/dbus/v5 v5.0.6 h1:mkgN1ofwASrYnJ5W6U/BxG15eXXXjirgZc7CLqkcaro=
@@ -25,8 +27,6 @@ github.com/zodimo/go-ternary v0.2.0 h1:6LbRHjwUJOaQUwiHK46bjdTk8ToZMyJUnapkRbIJ/
 github.com/zodimo/go-ternary v0.2.0/go.mod h1:OqDc4PqIxO8eNroVTgLkpBkhDxx2gR9Kei7hvlBmYgg=
 github.com/zodimo/go-zero-hash v0.1.0 h1:rk0b+StUT0BICaORHHyYhEmX196+jG5XKp4gqWXImqU=
 github.com/zodimo/go-zero-hash v0.1.0/go.mod h1:7ff6hwK72Xthya8po1z2nCsNbUpmvuGesovXXa9sc+E=
-github.com/zodimo/typesetting v0.3.4-0.20260209162200-1565df70b998 h1:38osaqOhItJ9XlO4QruIGc8yg3DEjiiM4pN8tsfUZoY=
-github.com/zodimo/typesetting v0.3.4-0.20260209162200-1565df70b998/go.mod h1:vIRUT25mLQaSh4C8H/lIsKppQz/Gdb8Pu/tNwpi52ts=
 golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc h1:TS73t7x3KarrNd5qAipmspBDS1rkMcgVG/fS1aRb4Rc=
 golang.org/x/exp v0.0.0-20250711185948-6ae5c78190dc/go.mod h1:A+z0yzpGtvnG90cToK5n2tu8UJVP2XUATh+r+sfOOOc=
 golang.org/x/exp/shiny v0.0.0-20260112195511-716be5621a96 h1:wJ3cDLvYRAWzRt6f3e2VwVlziH3httfx2PGMa8hqqWo=

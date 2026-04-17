@@ -8,7 +8,7 @@ require (
 	gioui.org v0.9.0
 	gioui.org/x v0.9.0
 	git.sr.ht/~schnwalter/gio-mw v0.0.0-20250713180710-9d8d98474447
-	github.com/go-text/typesetting v0.3.3
+	github.com/go-text/typesetting v0.3.2
 	github.com/zodimo/go-maybe v0.1.6
 	github.com/zodimo/go-ternary v0.2.0
 	github.com/zodimo/go-zero-hash v0.1.0
@@ -32,4 +32,7 @@ require (
 // replace gioui.org => ../../development/zodimo-gio
 
 // replace github.com/go-text/typesetting => ../../../GoProjects/clones/typesetting
-replace github.com/go-text/typesetting => github.com/zodimo/typesetting v0.3.4-0.20260209162200-1565df70b998
+
+// replace github.com/go-text/typesetting => github.com/zodimo/typesetting v0.3.4-0.20260209162200-1565df70b998
+
+// replace github.com/go-text/typesetting => ../typesetting
