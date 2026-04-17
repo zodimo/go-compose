@@ -1,6 +1,8 @@
 package tree
 
 import (
+	"fmt"
+
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/state"
 )
@@ -13,10 +15,17 @@ type TreeState struct {
 
 // RememberTreeState creates a TreeState that is remembered across compositions.
 func RememberTreeState(c api.Composer) *TreeState {
-	expanded := c.State("treeState/expanded", func() any {
+
+	key := c.GenerateID()
+	path := c.GetPath()
+
+	expandedPath := fmt.Sprintf("%d/%s/expanded", key, path)
+	selectedPath := fmt.Sprintf("%d/%s/selected", key, path)
+
+	expanded := c.State(expandedPath, func() any {
 		return make(map[any]bool)
 	})
-	selected := c.State("treeState/selected", func() any {
+	selected := c.State(selectedPath, func() any {
 		return make(map[any]bool)
 	})
 
