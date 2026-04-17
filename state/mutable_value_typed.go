@@ -2,6 +2,7 @@ package state
 
 import (
 	"fmt"
+	"reflect"
 	"sync"
 )
 
@@ -179,10 +180,23 @@ func MutableValueToTyped[T any](mv MutableValue) (MutableValueTyped[T], error) {
 		return nil, fmt.Errorf("cell is not of type %T, got %T", mvTyped, mv)
 	}
 
-	_, ok = mvTyped.cell.(T)
-	if !ok {
+	if mvTyped.cell != nil {
+		_, ok = mvTyped.cell.(T)
+		if !ok {
+			var zero T
+			return nil, fmt.Errorf("cell is not of type %T, got %T", zero, mvTyped.cell)
+		}
+	} else {
 		var zero T
-		return nil, fmt.Errorf("cell is not of type %T, got %T", zero, mvTyped.cell)
+		t := reflect.TypeOf(&zero).Elem()
+		if t != nil {
+			switch t.Kind() {
+			case reflect.Ptr, reflect.Slice, reflect.Map, reflect.Func, reflect.Chan, reflect.Interface:
+				// nillable, ok
+			default:
+				return nil, fmt.Errorf("cell is nil but type %T is not nillable", zero)
+			}
+		}
 	}
 
 	return &MutableValueTypedWrapper[T]{
@@ -191,7 +205,12 @@ func MutableValueToTyped[T any](mv MutableValue) (MutableValueTyped[T], error) {
 }
 
 func (w *MutableValueTypedWrapper[T]) Get() T {
-	return w.mv.Get().(T)
+	val := w.mv.Get()
+	if val == nil {
+		var zero T
+		return zero
+	}
+	return val.(T)
 }
 
 func (w *MutableValueTypedWrapper[T]) Set(value T) {
@@ -204,21 +223,41 @@ func (w *MutableValueTypedWrapper[T]) CompareAndSet(expect, update T) bool {
 
 func (w *MutableValueTypedWrapper[T]) Update(f func(T) T) {
 	w.mv.Update(func(current any) any {
-		return f(current.(T))
+		var tCurrent T
+		if current != nil {
+			tCurrent = current.(T)
+		}
+		return f(tCurrent)
 	})
 }
 
 func (w *MutableValueTypedWrapper[T]) UpdateAndGet(f func(T) T) T {
 	res := w.mv.UpdateAndGet(func(current any) any {
-		return f(current.(T))
+		var tCurrent T
+		if current != nil {
+			tCurrent = current.(T)
+		}
+		return f(tCurrent)
 	})
+	if res == nil {
+		var zero T
+		return zero
+	}
 	return res.(T)
 }
 
 func (w *MutableValueTypedWrapper[T]) GetAndUpdate(f func(T) T) T {
 	res := w.mv.GetAndUpdate(func(current any) any {
-		return f(current.(T))
+		var tCurrent T
+		if current != nil {
+			tCurrent = current.(T)
+		}
+		return f(tCurrent)
 	})
+	if res == nil {
+		var zero T
+		return zero
+	}
 	return res.(T)
 }
 
