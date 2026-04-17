@@ -22,19 +22,16 @@ func RememberTreeState(c api.Composer) *TreeState {
 	expandedPath := fmt.Sprintf("%d/%s/expanded", key, path)
 	selectedPath := fmt.Sprintf("%d/%s/selected", key, path)
 
-	expanded := c.State(expandedPath, func() any {
+	expanded := state.MustRemember(c, expandedPath, func() map[any]bool {
 		return make(map[any]bool)
 	})
-	selected := c.State(selectedPath, func() any {
+	selected := state.MustRemember(c, selectedPath, func() map[any]bool {
 		return make(map[any]bool)
 	})
-
-	expandedTyped, _ := state.MutableValueToTyped[map[any]bool](expanded)
-	selectedTyped, _ := state.MutableValueToTyped[map[any]bool](selected)
 
 	return &TreeState{
-		expandedItems: expandedTyped,
-		selectedItems: selectedTyped,
+		expandedItems: expanded,
+		selectedItems: selected,
 	}
 }
 
