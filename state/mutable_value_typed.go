@@ -2,7 +2,6 @@ package state
 
 import (
 	"fmt"
-	"reflect"
 	"sync"
 )
 
@@ -171,7 +170,8 @@ func (mv *mutableValueTyped[T]) Subscribe(callback func()) Subscription {
 // Wrapper
 
 type MutableValueTypedWrapper[T any] struct {
-	mv *mutableValue
+	mv       *mutableValue
+	nillable bool
 }
 
 func MutableValueToTyped[T any](mv MutableValue) (MutableValueTyped[T], error) {
@@ -180,37 +180,21 @@ func MutableValueToTyped[T any](mv MutableValue) (MutableValueTyped[T], error) {
 		return nil, fmt.Errorf("cell is not of type %T, got %T", mvTyped, mv)
 	}
 
-	if mvTyped.cell != nil {
-		_, ok = mvTyped.cell.(T)
-		if !ok {
-			var zero T
-			return nil, fmt.Errorf("cell is not of type %T, got %T", zero, mvTyped.cell)
-		}
-	} else {
-		var zero T
-		t := reflect.TypeOf(&zero).Elem()
-		if t != nil {
-			switch t.Kind() {
-			case reflect.Ptr, reflect.Slice, reflect.Map, reflect.Func, reflect.Chan, reflect.Interface:
-				// nillable, ok
-			default:
-				return nil, fmt.Errorf("cell is nil but type %T is not nillable", zero)
-			}
-		}
+	nillable := isNillableType[T]()
+	_, err := typeAssert[T](mvTyped.cell, nillable)
+	if err != nil {
+		return nil, fmt.Errorf("could not convert cell to type %T: %w", mvTyped.cell, err)
 	}
 
 	return &MutableValueTypedWrapper[T]{
-		mv: mvTyped,
+		mv:       mvTyped,
+		nillable: nillable,
 	}, nil
 }
 
 func (w *MutableValueTypedWrapper[T]) Get() T {
 	val := w.mv.Get()
-	if val == nil {
-		var zero T
-		return zero
-	}
-	return val.(T)
+	return typeAssertUnsafe[T](val, w.nillable)
 }
 
 func (w *MutableValueTypedWrapper[T]) Set(value T) {
@@ -223,21 +207,13 @@ func (w *MutableValueTypedWrapper[T]) CompareAndSet(expect, update T) bool {
 
 func (w *MutableValueTypedWrapper[T]) Update(f func(T) T) {
 	w.mv.Update(func(current any) any {
-		var tCurrent T
-		if current != nil {
-			tCurrent = current.(T)
-		}
-		return f(tCurrent)
+		return f(typeAssertUnsafe[T](current, w.nillable))
 	})
 }
 
 func (w *MutableValueTypedWrapper[T]) UpdateAndGet(f func(T) T) T {
 	res := w.mv.UpdateAndGet(func(current any) any {
-		var tCurrent T
-		if current != nil {
-			tCurrent = current.(T)
-		}
-		return f(tCurrent)
+		return f(typeAssertUnsafe[T](current, w.nillable))
 	})
 	if res == nil {
 		var zero T
@@ -248,11 +224,7 @@ func (w *MutableValueTypedWrapper[T]) UpdateAndGet(f func(T) T) T {
 
 func (w *MutableValueTypedWrapper[T]) GetAndUpdate(f func(T) T) T {
 	res := w.mv.GetAndUpdate(func(current any) any {
-		var tCurrent T
-		if current != nil {
-			tCurrent = current.(T)
-		}
-		return f(tCurrent)
+		return f(typeAssertUnsafe[T](current, w.nillable))
 	})
 	if res == nil {
 		var zero T
