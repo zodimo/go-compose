@@ -30,7 +30,7 @@ var LocalTextShaper = CompositionLocalOf(func() *text.TextShaper {
 })
 
 var LocalTextStyle = CompositionLocalOf(func() *text.TextStyle {
-	return nil
+	return text.TextStyleUnspecified
 })
 
 // LocalDensity.current
