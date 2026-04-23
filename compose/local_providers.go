@@ -5,6 +5,7 @@ import (
 	"github.com/zodimo/go-compose/assets/fonts"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // LocalContentColor is a CompositionLocal containing the preferred content color for a given
@@ -26,4 +27,14 @@ var LocalTextShaper = CompositionLocalOf(func() *text.TextShaper {
 	// for portable emoji support without relying on system fonts
 	shaper := gioText.NewShaper(gioText.NoSystemFonts(), gioText.WithCollection(fonts.Collection()))
 	return &text.TextShaper{Shaper: shaper}
+})
+
+var LocalTextStyle = CompositionLocalOf(func() *text.TextStyle {
+	return nil
+})
+
+// LocalDensity.current
+
+var LocalDensity = CompositionLocalOf(func() unit.Density {
+	panic("No Density provided")
 })

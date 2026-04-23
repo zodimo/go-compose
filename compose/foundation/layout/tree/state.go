@@ -7,6 +7,18 @@ import (
 	"github.com/zodimo/go-compose/state"
 )
 
+type TreeBranchIcons struct {
+	OpenIcon   api.Composable
+	ClosedIcon api.Composable
+}
+
+func newTreeBranchIcons(open, closed api.Composable) *TreeBranchIcons {
+	return &TreeBranchIcons{
+		OpenIcon:   open,
+		ClosedIcon: closed,
+	}
+}
+
 // TreeState controls the state of a Tree component, such as which branches are expanded.
 type TreeState struct {
 	expandedItems state.MutableValueTyped[map[any]bool]

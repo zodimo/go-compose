@@ -1,3 +1,3 @@
 # Compose Material
 
-This package provides shared resources for Material Design 3 components.
+Foundational Material Components for Compose

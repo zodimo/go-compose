@@ -49,12 +49,18 @@ type Density interface {
 
 	// SizeToDpSize converts a [Size] to a [DpSize].
 	SizeToDpSize(size geometry.Size) DpSize
+
+	// DpToTextUnit converts [Dp] to [TextUnit] (Sp).
+	DpToTextUnit(dp Dp) TextUnit
+
+	// TextUnitToDp converts Sp to [Dp] (non-rounding).
+	TextUnitToDp(tu TextUnit) Dp
 }
 
-// NewDensity creates a new Density.
+//	A density of the screen. Used for convert [Dp] to pixels.
 //
-// density: The logical density of the display.
-// fontScale: Current user preference for the scaling factor for fonts. Default should be 1.0 if unknown.
+// density The logical density of the display. This is a scaling factor for the [Dp] unit.
+// fontScale Current user preference for the scaling factor for fonts.
 func NewDensity(density, fontScale float32) Density {
 	return &densityImpl{
 		density:   density,
@@ -141,4 +147,17 @@ func (d *densityImpl) SizeToDpSize(size geometry.Size) DpSize {
 		return NewDpSize(d.FloatToDp(size.Width()), d.FloatToDp(size.Height()))
 	}
 	return DpSizeUnspecified
+}
+
+func (d *densityImpl) DpToTextUnit(dp Dp) TextUnit {
+	return Sp(dp.Value() * d.fontScale)
+}
+
+func (d *densityImpl) TextUnitToDp(tu TextUnit) Dp {
+	if tu.Type() != TextUnitTypeSp {
+		panic("Only Sp can convert to Dp")
+	}
+	// Sp -> Dp
+	// Dp = Sp * fontScale
+	return Dp(tu.Value() / d.fontScale)
 }

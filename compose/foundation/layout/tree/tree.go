@@ -1,11 +1,12 @@
 package tree
 
 import (
+	"log"
+
+	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/foundation/lazy"
-	"github.com/zodimo/go-compose/compose/material3/icon"
-	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -43,17 +44,21 @@ func Tree(
 		lazyOpts = append(lazyOpts, lazy.WithModifier(opts.Modifier))
 	}
 
-	return lazy.LazyColumn(
-		func(scope lazy.LazyListScope) {
-			tScope := &treeScopeImpl{
-				listScope: scope,
-				state:     state,
-				depth:     0,
-				options:   &opts,
-			}
-			content(tScope)
-		},
-		lazyOpts...,
+	// localprovider of text size
+	return compose.CompositionLocalProvider(
+		[]api.ProvidedValue{compose.LocalTextStyle.Provides(opts.TextStyle)},
+		lazy.LazyColumn(
+			func(scope lazy.LazyListScope) {
+				tScope := &treeScopeImpl{
+					listScope: scope,
+					state:     state,
+					depth:     0,
+					options:   &opts,
+				}
+				content(tScope)
+			},
+			lazyOpts...,
+		),
 	)
 }
 
@@ -88,6 +93,7 @@ func (s *treeScopeImpl) Node(key any, content api.Composable) {
 						Then(padding.All(4)),
 					),
 			),
+			row.WithAlignment(row.Middle),
 		)(c)
 	})
 }
@@ -99,9 +105,6 @@ func (s *treeScopeImpl) Branch(key any, header api.Composable, children func(Tre
 	// Capture state and options for closure
 	state := s.state
 	opts := s.options
-
-	rightArrowIcon := icon.SymbolArrowRight
-	downArrowIcon := icon.SymbolArrowDropDown
 
 	// Branch Header
 	s.listScope.Item(key, func(c api.Composer) api.Composer {
@@ -116,15 +119,8 @@ func (s *treeScopeImpl) Branch(key any, header api.Composable, children func(Tre
 
 						c.If(
 							isExpanded,
-							icon.Icon(
-								downArrowIcon,
-								icon.WithSize(unit.Dp(s.options.IconSize)),
-							),
-
-							icon.Icon(
-								rightArrowIcon,
-								icon.WithSize(unit.Dp(s.options.IconSize)),
-							),
+							opts.BranchIcons.OpenIcon,
+							opts.BranchIcons.ClosedIcon,
 						),
 					),
 					row.WithAlignment(row.Middle),
@@ -155,6 +151,7 @@ func (s *treeScopeImpl) Branch(key any, header api.Composable, children func(Tre
 					),
 				),
 			),
+			row.WithAlignment(row.Middle),
 			row.WithModifier(
 				size.FillMaxWidth(),
 			),
@@ -175,6 +172,8 @@ func (s *treeScopeImpl) Branch(key any, header api.Composable, children func(Tre
 
 // toggleBranchWithCallback toggles the branch and invokes appropriate callbacks.
 func toggleBranchWithCallback(state *TreeState, key any, opts *TreeOptions) {
+
+	log.Printf("Toggling branch: %v, state: %v", key, state)
 	wasExpanded := state.IsExpanded(key)
 	state.Toggle(key)
 

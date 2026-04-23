@@ -38,8 +38,9 @@ func Text(value string, options ...TextOption) Composable {
 
 		textShaper := compose.LocalTextShaper.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
+		localTextStyle := compose.LocalTextStyle.Current(c)
 		// Resolve text style with defaults
-		opts.TextStyle = text.TextStyleResolveDefaults(opts.TextStyle, layoutDirection)
+		opts.TextStyle = text.MergeTextStyle(text.TextStyleResolveDefaults(localTextStyle, layoutDirection), opts.TextStyle)
 
 		path := c.GetPath()
 		key := c.GenerateID()

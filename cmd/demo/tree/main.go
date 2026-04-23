@@ -34,7 +34,9 @@ func Run(window *app.Window) error {
 	enLocale := system.Locale{Language: "en", Direction: system.LTR}
 	var ops op.Ops
 
-	store := store.NewPersistentState()
+	store := store.NewPersistentState(
+	// store.WithDebugMode(true),
+	)
 	store.Subscribe(func() {
 		window.Invalidate()
 	})

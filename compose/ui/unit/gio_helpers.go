@@ -26,10 +26,21 @@ func TextUnitToGioSp(tu TextUnit) (gioUnit.Sp, error) {
 	if tu.IsUnspecified() {
 		return 0, errors.New("TextUnit is an unspecified unit, cannot convert to Sp")
 	}
-	if tu.IsEm() {
-		return 0, errors.New("TextUnit is an EM unit, cannot convert to Sp")
+	if tu.IsSp() {
+		return gioUnit.Sp(tu.Value()), nil
 	}
-	return gioUnit.Sp(tu.Value()), nil
+
+	return 0, errors.New("TextUnit is an EM unit, cannot convert to Sp")
+}
+
+func TextUnitToGioDp(tu TextUnit, density float32) (gioUnit.Dp, error) {
+	if tu.IsUnspecified() {
+		return 0, errors.New("TextUnit is an unspecified unit, cannot convert to Dp")
+	}
+	if tu.IsSp() {
+		return 0, errors.New("TextUnit is an Sp unit, cannot convert to Dp")
+	}
+	return gioUnit.Dp(tu.Value() * density), nil
 }
 
 func TextUnitToGioSpUnsafe(tu TextUnit) gioUnit.Sp {
@@ -40,14 +51,8 @@ func TextUnitToGioSpUnsafe(tu TextUnit) gioUnit.Sp {
 	return unit
 }
 
-func ToPixels(gtx gioLayout.Context, value Dp) (int, error) {
-	unit, err := DpToGioUnit(value)
-	if err != nil {
-		return 0, err
-	}
-	return gtx.Dp(unit), nil
-}
-
-func ToPixelsUnsafe(gtx gioLayout.Context, value Dp) int {
-	return gtx.Dp(DpToGioUnitUnsafe(value))
+// DensityFromLayoutContext creates a Density from a Gio Layout Context.
+// gtx: The Gio Layout Context.
+func DensityFromLayoutContext(gtx gioLayout.Context) Density {
+	return NewDensity(gtx.Metric.PxPerDp, gtx.Metric.PxPerSp)
 }

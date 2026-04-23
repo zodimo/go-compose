@@ -9,6 +9,9 @@ import (
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
+	"github.com/zodimo/go-compose/compose/ui/next/platform"
+	uitext "github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 
 	"gioui.org/layout"
@@ -33,6 +36,17 @@ func Icon(iconByte []byte, options ...IconOption) Composable {
 
 		opts.Color = opts.Color.TakeOrElse(compose.LocalContentColor.Current(c))
 
+		localTextStyle := compose.LocalTextStyle.Current(c)
+		localDensity := compose.LocalDensity.Current(c)
+
+		layoutDirection := platform.LocalLayoutDirection.Current(c)
+		// Resolve text style with defaults
+		defaultTextStyles := uitext.TextStyleResolveDefaults(localTextStyle, layoutDirection)
+
+		// icon size is   gtx.Constraints.Min.X = pixels
+
+		// sz := gtx.Constraints.Min.X
+
 		c.StartBlock("Icon")
 		c.Modifier(func(modifier ui.Modifier) ui.Modifier {
 			return modifier.Then(opts.Modifier)
@@ -42,7 +56,7 @@ func Icon(iconByte []byte, options ...IconOption) Composable {
 		cacheVal := c.State(iconCacheKey, initCache)
 		cache := cacheVal.Get().(*GlobalIconCache)
 
-		c.SetWidgetConstructor(iconWidgetConstructor(opts, iconByte, cache))
+		c.SetWidgetConstructor(iconWidgetConstructor(opts, iconByte, defaultTextStyles.FontSize(), cache, localDensity))
 
 		return c.EndBlock()
 	}
@@ -82,7 +96,7 @@ func initCache() any {
 	return NewGlobalIconCache()
 }
 
-func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIconCache) layoutnode.LayoutNodeWidgetConstructor {
+func iconWidgetConstructor(options IconOptions, iconByte []byte, fontSize unit.TextUnit, cache *GlobalIconCache, density unit.Density) layoutnode.LayoutNodeWidgetConstructor {
 	// Pre-calculate hash for this icon data
 	h := fnv.New64a()
 	h.Write(iconByte)
@@ -93,6 +107,9 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIc
 		iconWidget := requireIconWidget(iconByte)
 
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+
+			// set gtx.Constraints.Min.X = fontSize
+			gtx.Constraints.Min.X = density.TextUnitRoundToPx(fontSize)
 
 			nrgba := graphics.ColorToNRGBA(options.Color)
 

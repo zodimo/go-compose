@@ -2,10 +2,12 @@ package icon
 
 import (
 	"container/list"
+	"fmt"
 	"hash/fnv"
 	"image/color"
 	"sync"
 
+	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/text"
 	"github.com/zodimo/go-compose/compose/material3"
@@ -56,8 +58,7 @@ func Icon(source IconSource, options ...IconOption) Composable {
 	case SymbolName:
 		return iconFromSymbol(src, opts)
 	default:
-		// Fallback: if unknown type, return empty composable
-		return func(c Composer) Composer { return c }
+		panic(fmt.Sprintf("Unknown IconSource type: %T", src))
 	}
 }
 
@@ -65,6 +66,11 @@ func Icon(source IconSource, options ...IconOption) Composable {
 func iconFromBytes(iconByte []byte, opts IconOptions) Composable {
 	return func(c Composer) Composer {
 		opts.Color = opts.Color.TakeOrElse(material3.LocalContentColor.Current(c))
+
+		localTextStyle := compose.LocalTextStyle.Current(c)
+		localDensity := compose.LocalDensity.Current(c)
+
+		iconSizeInPx := localDensity.DpRoundToPx(opts.Size.TakeOrElse(localDensity.TextUnitToDp(localTextStyle.FontSize())))
 
 		c.StartBlock(Material3IconNodeID)
 		c.Modifier(func(modifier ui.Modifier) ui.Modifier {
@@ -81,7 +87,7 @@ func iconFromBytes(iconByte []byte, opts IconOptions) Composable {
 		cacheVal := c.State(iconCacheKey, initCache)
 		cache := cacheVal.Get().(*GlobalIconCache)
 
-		c.SetWidgetConstructor(iconWidgetConstructor(opts, iconByte, cache))
+		c.SetWidgetConstructor(iconWidgetConstructor(opts, iconByte, cache, iconSizeInPx))
 
 		return c.EndBlock()
 	}
@@ -94,15 +100,18 @@ func iconFromSymbol(name SymbolName, opts IconOptions) Composable {
 		contentColor := material3.LocalContentColor.Current(c)
 		iconColor := opts.Color.TakeOrElse(contentColor)
 
+		localTextStyle := compose.LocalTextStyle.Current(c)
+		localDensity := compose.LocalDensity.Current(c)
+
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 		// Resolve text style with defaults
-		defaultTextStyles := uitext.TextStyleResolveDefaults(uitext.TextStyleUnspecified, layoutDirection)
+		defaultTextStyles := uitext.TextStyleResolveDefaults(localTextStyle, layoutDirection)
 
 		// Resolve size - prefer unified Size, fallback to FontSize, then default 24sp
 		var fontSize unit.TextUnit
 		if opts.Size.IsSpecified() {
 			// Convert Dp to Sp (treat them as equivalent for font sizing)
-			fontSize = unit.Sp(opts.Size.Value())
+			fontSize = localDensity.DpToTextUnit(opts.Size)
 		} else {
 			fontSize = opts.FontSize.TakeOrElse(defaultTextStyles.FontSize())
 		}
@@ -157,7 +166,7 @@ func initCache() any {
 	return NewGlobalIconCache()
 }
 
-func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIconCache) layoutnode.LayoutNodeWidgetConstructor {
+func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIconCache, iconSizeInPx int) layoutnode.LayoutNodeWidgetConstructor {
 	// Pre-calculate hash for this icon data
 	h := fnv.New64a()
 	h.Write(iconByte)
@@ -168,6 +177,8 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIc
 		iconWidget := requireIconWidget(iconByte)
 
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+
+			gtx.Constraints.Min.X = iconSizeInPx
 
 			nrgba := graphics.ColorToNRGBA(options.Color)
 

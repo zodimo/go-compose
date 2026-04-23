@@ -1,9 +1,12 @@
 package tokens
 
 import (
+	materialTokens "github.com/zodimo/go-compose/compose/material/tokens"
 	"github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
+
+var TypefaceTokens = materialTokens.TypefaceTokens
 
 var TypeScaleTokens = TypeScaleTokensData{
 	BodyLargeFont:       TypefaceTokens.Plain,

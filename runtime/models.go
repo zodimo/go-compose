@@ -3,6 +3,8 @@ package runtime
 import (
 	"image"
 
+	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/pkg/api"
 
@@ -18,10 +20,17 @@ func (r *runtime) Run(gtx LayoutContext, composer api.Composer, ui api.Composabl
 
 	gtx.Constraints.Min = image.Point{X: 0, Y: 0}
 
+	density := unit.DensityFromLayoutContext(gtx)
+
 	composer.StartFrame()
 	defer composer.EndFrame()
 
-	node := ui(composer).Build()
+	finalComposable := compose.CompositionLocalProvider(
+		[]api.ProvidedValue{compose.LocalDensity.Provides(density)},
+		ui,
+	)
+
+	node := finalComposable(composer).Build()
 	nodeCoordinator := layoutnode.NewNodeCoordinator(node)
 
 	// Stop double rendering

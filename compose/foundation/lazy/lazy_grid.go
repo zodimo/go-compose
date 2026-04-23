@@ -41,6 +41,8 @@ func lazyGrid(axis layout.Axis, cells GridCells, content func(LazyGridScope), op
 			opt(&opts)
 		}
 
+		density := compose.LocalDensity.Current(c)
+
 		// Ensure state is initialized
 		if opts.State == nil {
 			id := c.GenerateID()
@@ -64,7 +66,7 @@ func lazyGrid(axis layout.Axis, cells GridCells, content func(LazyGridScope), op
 		}
 
 		// Store cells and axis for widget constructor
-		c.SetWidgetConstructor(lazyGridWidgetConstructor(opts.State, axis, cells, opts.Scrollbar))
+		c.SetWidgetConstructor(lazyGridWidgetConstructor(opts.State, axis, cells, opts.Scrollbar, density))
 
 		return c.EndBlock()
 	}
@@ -75,6 +77,7 @@ func lazyGridWidgetConstructor(
 	axis layout.Axis,
 	cells GridCells,
 	scrollbar bool,
+	density unit.Density,
 ) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
@@ -121,7 +124,7 @@ func lazyGridWidgetConstructor(
 
 					// Capture for closure
 					capturedCoordinator := childCoordinator
-					capturedCellSizeInPx := unit.ToPixelsUnsafe(gtx, unit.Dp(float32(cellSize)))
+					capturedCellSizeInPx := density.DpRoundToPx(unit.Dp(float32(cellSize)))
 
 					flexChildren = append(flexChildren, layout.Rigid(func(gtx C) D {
 						// Constrain cell size in the cross-axis direction
@@ -139,7 +142,7 @@ func lazyGridWidgetConstructor(
 
 				// Add empty spacers for trailing empty cells to maintain alignment
 				for i := endIdx - startIdx; i < cellCount; i++ {
-					capturedCellSizeInPx := unit.ToPixelsUnsafe(gtx, unit.Dp(float32(cellSize)))
+					capturedCellSizeInPx := density.DpRoundToPx(unit.Dp(float32(cellSize)))
 					flexChildren = append(flexChildren, layout.Rigid(func(gtx C) D {
 						if axis == layout.Vertical {
 							return D{Size: image.Point{X: capturedCellSizeInPx, Y: 0}}

@@ -7,11 +7,14 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/foundation/layout/tree"
+
 	ftext "github.com/zodimo/go-compose/compose/foundation/text"
 	"github.com/zodimo/go-compose/compose/material3/divider"
 	"github.com/zodimo/go-compose/compose/material3/icon"
 	m3text "github.com/zodimo/go-compose/compose/material3/text"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
+	uiText "github.com/zodimo/go-compose/compose/ui/text"
+	uiUnit "github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/modifiers/background"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -77,27 +80,27 @@ func DeclarativeTreeDemo() api.Composable {
 			func(scope tree.TreeScope) {
 				scope.Branch(
 					"dir1",
-					m3text.BodyMedium("Directory 1"),
+					ftext.Text("Directory 1"),
 					func(s tree.TreeScope) {
-						s.Node("file1", m3text.BodyMedium("File 1.txt"))
-						s.Node("file2", m3text.BodyMedium("File 2.txt"))
+						s.Node("file1", ftext.Text("File 1.txt"))
+						s.Node("file2", ftext.Text("File 2.txt"))
 						s.Branch(
 							"subdir1",
-							m3text.BodyMedium("Sub-directory 1"),
+							ftext.Text("Sub-directory 1"),
 							func(s2 tree.TreeScope) {
-								s2.Node("file3", m3text.BodyMedium("File 3.txt"))
+								s2.Node("file3", ftext.Text("File 3.txt"))
 							},
 						)
 					},
 				)
 				scope.Branch(
 					"dir2",
-					m3text.BodyMedium("Directory 2"),
+					ftext.Text("Directory 2"),
 					func(s tree.TreeScope) {
-						s.Node("file4", m3text.BodyMedium("File 4.txt"))
+						s.Node("file4", ftext.Text("File 4.txt"))
 					},
 				)
-				scope.Node("rootFile", m3text.BodyMedium("Root File.txt"))
+				scope.Node("rootFile", ftext.Text("Root File.txt"))
 			},
 			tree.WithOnBranchOpened(func(id any) {
 				log.Printf("[Declarative] Branch opened: %v", id)
@@ -111,6 +114,7 @@ func DeclarativeTreeDemo() api.Composable {
 			tree.WithOnUnselected(func(id any) {
 				log.Printf("[Declarative] Node unselected: %v", id)
 			}),
+			tree.WithTextStyleOption(uiText.WithFontSize(uiUnit.Sp(30))),
 		)(c)
 	}
 }
@@ -184,7 +188,7 @@ func DataDrivenTreeDemo() api.Composable {
 							icon.Icon(fileIcon),
 						),
 						spacer.Width(8),
-						m3text.BodyMedium(name),
+						ftext.Text(name),
 					),
 				)
 			},
@@ -200,6 +204,7 @@ func DataDrivenTreeDemo() api.Composable {
 			tree.WithOnUnselected(func(id any) {
 				log.Printf("[DataDriven] Node unselected: %v", id)
 			}),
+			tree.WithTextStyleOption(uiText.WithFontSize(uiUnit.Sp(20))),
 		)(c)
 	}
 }

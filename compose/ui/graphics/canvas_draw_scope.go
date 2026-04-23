@@ -5,6 +5,8 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
+var _ DrawScope = (*CanvasDrawScope)(nil)
+
 // CanvasDrawScope is the implementation of DrawScope that issues drawing commands
 // into the specified canvas and bounds.
 // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-graphics/src/commonMain/kotlin/androidx/compose/ui/graphics/drawscope/CanvasDrawScope.kt
@@ -112,6 +114,14 @@ func (c *CanvasDrawScope) DpSizeToSize(size unit.DpSize) geometry.Size {
 
 func (c *CanvasDrawScope) SizeToDpSize(size geometry.Size) unit.DpSize {
 	return c.drawContext.Density().SizeToDpSize(size)
+}
+
+func (c *CanvasDrawScope) DpToTextUnit(dp unit.Dp) unit.TextUnit {
+	return c.drawContext.Density().DpToTextUnit(dp)
+}
+
+func (c *CanvasDrawScope) TextUnitToDp(tu unit.TextUnit) unit.Dp {
+	return c.drawContext.Density().TextUnitToDp(tu)
 }
 
 // DrawScope interface implementation
