@@ -15,6 +15,7 @@ func NavigationBar(
 	content Composable,
 	options ...NavigationBarOption,
 ) Composable {
+
 	return func(c Composer) Composer {
 		opts := DefaultNavigationBarOptions(c)
 		for _, option := range options {
@@ -23,6 +24,7 @@ func NavigationBar(
 			}
 			option(&opts)
 		}
+
 		return surface.Surface(
 			row.Row(
 				func(c Composer) Composer {

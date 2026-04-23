@@ -12,6 +12,7 @@ import (
 	"github.com/zodimo/go-compose/compose/material3/scaffold"
 	"github.com/zodimo/go-compose/compose/material3/snackbar"
 	m3text "github.com/zodimo/go-compose/compose/material3/text"
+	uiUnit "github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/modifiers/weight"
 	"github.com/zodimo/go-compose/pkg/api"
@@ -84,7 +85,10 @@ func UI() api.Composable {
 									currentCategory == idx,
 									func() { selectedCategory.Set(idx) },
 									func(c api.Composer) api.Composer {
-										return icon.Icon(item.Icon)(c)
+										return icon.Icon(
+											item.Icon,
+											icon.WithSize(uiUnit.Dp(24)),
+										)(c)
 									},
 									func(c api.Composer) api.Composer {
 										return m3text.LabelMedium(item.Label)(c)

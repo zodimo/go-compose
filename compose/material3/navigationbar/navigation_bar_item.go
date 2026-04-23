@@ -61,7 +61,7 @@ func NavigationBarItem(
 			column.Column(
 				c.Sequence(
 					// Top padding
-					spacer.Uniform(12),
+					spacer.Uniform(6),
 					// Icon Container (Indicator)
 					surface.Surface(
 						func(c Composer) Composer {
@@ -83,7 +83,7 @@ func NavigationBarItem(
 						surface.WithShape(&shape.RoundedCornerShape{Radius: unit.Dp(16)}),
 						surface.WithModifier(
 							ui.EmptyModifier.
-								Then(size.Width(64)).
+								Then(size.Width(56)).
 								Then(size.Height(32)).
 								Then(clip.Clip(&shape.RoundedCornerShape{Radius: unit.Dp(16)})),
 						),
@@ -98,7 +98,7 @@ func NavigationBarItem(
 						),
 					),
 					// Bottom padding
-					spacer.Uniform(12),
+					spacer.Uniform(6),
 				),
 				column.WithAlignment(column.Middle), // Center children horizontally
 			),

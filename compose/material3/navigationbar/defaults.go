@@ -39,7 +39,7 @@ func (d navigationBarDefaults) ContainerElevation() unit.Dp {
 
 // Height returns the default height for a NavigationBar.
 func (d navigationBarDefaults) Height() unit.Dp {
-	return unit.Dp(80)
+	return unit.Dp(64)
 }
 
 func DefaultNavigationBarItemOptions() NavigationBarItemOptions {

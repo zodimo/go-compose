@@ -11,7 +11,6 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/next/platform"
 	uitext "github.com/zodimo/go-compose/compose/ui/text"
-	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 
 	"gioui.org/layout"
@@ -43,9 +42,7 @@ func Icon(iconByte []byte, options ...IconOption) Composable {
 		// Resolve text style with defaults
 		defaultTextStyles := uitext.TextStyleResolveDefaults(localTextStyle, layoutDirection)
 
-		// icon size is   gtx.Constraints.Min.X = pixels
-
-		// sz := gtx.Constraints.Min.X
+		iconSizeInPx := localDensity.DpRoundToPx(opts.Size.TakeOrElse(localDensity.TextUnitToDp(defaultTextStyles.FontSize())))
 
 		c.StartBlock("Icon")
 		c.Modifier(func(modifier ui.Modifier) ui.Modifier {
@@ -56,7 +53,7 @@ func Icon(iconByte []byte, options ...IconOption) Composable {
 		cacheVal := c.State(iconCacheKey, initCache)
 		cache := cacheVal.Get().(*GlobalIconCache)
 
-		c.SetWidgetConstructor(iconWidgetConstructor(opts, iconByte, defaultTextStyles.FontSize(), cache, localDensity))
+		c.SetWidgetConstructor(iconWidgetConstructor(opts, iconByte, cache, iconSizeInPx))
 
 		return c.EndBlock()
 	}
@@ -96,7 +93,7 @@ func initCache() any {
 	return NewGlobalIconCache()
 }
 
-func iconWidgetConstructor(options IconOptions, iconByte []byte, fontSize unit.TextUnit, cache *GlobalIconCache, density unit.Density) layoutnode.LayoutNodeWidgetConstructor {
+func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIconCache, iconSizeInPx int) layoutnode.LayoutNodeWidgetConstructor {
 	// Pre-calculate hash for this icon data
 	h := fnv.New64a()
 	h.Write(iconByte)
@@ -109,7 +106,7 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, fontSize unit.T
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 
 			// set gtx.Constraints.Min.X = fontSize
-			gtx.Constraints.Min.X = density.TextUnitRoundToPx(fontSize)
+			gtx.Constraints.Min.X = iconSizeInPx
 
 			nrgba := graphics.ColorToNRGBA(options.Color)
 

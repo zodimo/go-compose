@@ -65,21 +65,22 @@ func Icon(source IconSource, options ...IconOption) Composable {
 // iconFromBytes renders an icon from raw byte data (SVG icons).
 func iconFromBytes(iconByte []byte, opts IconOptions) Composable {
 	return func(c Composer) Composer {
-		opts.Color = opts.Color.TakeOrElse(material3.LocalContentColor.Current(c))
+		// Resolve color
+		contentColor := material3.LocalContentColor.Current(c)
+		opts.Color = opts.Color.TakeOrElse(contentColor)
 
 		localTextStyle := compose.LocalTextStyle.Current(c)
 		localDensity := compose.LocalDensity.Current(c)
+		layoutDirection := platform.LocalLayoutDirection.Current(c)
 
-		iconSizeInPx := localDensity.DpRoundToPx(opts.Size.TakeOrElse(localDensity.TextUnitToDp(localTextStyle.FontSize())))
+		// Resolve text style with defaults
+		defaultTextStyles := uitext.TextStyleResolveDefaults(localTextStyle, layoutDirection)
+
+		iconSizeInPx := localDensity.DpRoundToPx(opts.Size.TakeOrElse(localDensity.TextUnitToDp(defaultTextStyles.FontSize())))
 
 		c.StartBlock(Material3IconNodeID)
 		c.Modifier(func(modifier ui.Modifier) ui.Modifier {
 			baseModifier := modifier.Then(opts.Modifier)
-			// Apply size constraint if specified
-			if opts.Size.IsSpecified() {
-				sizeInt := int(opts.Size)
-				baseModifier = baseModifier.Then(size.Size(sizeInt, sizeInt))
-			}
 			return baseModifier
 		})
 
@@ -102,8 +103,8 @@ func iconFromSymbol(name SymbolName, opts IconOptions) Composable {
 
 		localTextStyle := compose.LocalTextStyle.Current(c)
 		localDensity := compose.LocalDensity.Current(c)
-
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
+
 		// Resolve text style with defaults
 		defaultTextStyles := uitext.TextStyleResolveDefaults(localTextStyle, layoutDirection)
 
