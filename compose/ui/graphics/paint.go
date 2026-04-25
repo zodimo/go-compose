@@ -7,6 +7,7 @@ type Paint struct {
 	Shader      Shader
 	BlendMode   BlendMode
 	StrokeWidth float32
+	Style       DrawStyle
 	// Add other fields as needed
 }
 
@@ -17,4 +18,8 @@ func NewPaint() *Paint {
 		// Default BlendMode is usually SrcOver
 		BlendMode: BlendModeSrcOver,
 	}
+}
+
+func (p *Paint) ApplyStyle(style DrawStyle) {
+	p.Style = style
 }

@@ -5,6 +5,9 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
+var canvas Canvas
+var graphicsLayer any
+
 // DefaultDensity is a stub density value used as a placeholder within CanvasDrawScope.
 // The actual density is provided as a parameter during draw calls.
 var DefaultDensity = unit.NewDensity(1.0, 1.0)
@@ -50,22 +53,25 @@ type DrawContext interface {
 
 // drawContextImpl is the default implementation of DrawContext.
 type drawContextImpl struct {
-	size            geometry.Size
 	canvas          Canvas
+	size            geometry.Size
 	transform       DrawTransform
 	layoutDirection unit.LayoutDirection
 	density         unit.Density
-	graphicsLayer   interface{}
 }
 
 // NewDrawContext creates a new DrawContext with the given initial values.
-func NewDrawContext() DrawContext {
+func NewDrawContext(
+	canvas Canvas,
+	size geometry.Size,
+	density unit.Density,
+	layoutDirection unit.LayoutDirection,
+) DrawContext {
 	return &drawContextImpl{
-		size:            geometry.SizeZero,
-		canvas:          nil,
-		layoutDirection: unit.LayoutDirectionLtr,
-		density:         DefaultDensity,
-		graphicsLayer:   nil,
+		canvas:          canvas,
+		size:            size,
+		layoutDirection: layoutDirection,
+		density:         density,
 	}
 }
 
@@ -110,9 +116,9 @@ func (d *drawContextImpl) SetDensity(density unit.Density) {
 }
 
 func (d *drawContextImpl) GraphicsLayer() interface{} {
-	return d.graphicsLayer
+	panic("GraphicsLayer not implemented")
 }
 
 func (d *drawContextImpl) SetGraphicsLayer(layer interface{}) {
-	d.graphicsLayer = layer
+	panic("SetGraphicsLayer not implemented")
 }

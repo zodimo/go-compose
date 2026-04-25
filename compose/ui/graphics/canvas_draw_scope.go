@@ -12,14 +12,35 @@ var _ DrawScope = (*CanvasDrawScope)(nil)
 // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-graphics/src/commonMain/kotlin/androidx/compose/ui/graphics/drawscope/CanvasDrawScope.kt
 type CanvasDrawScope struct {
 	drawContext *drawContextImpl
-	fillPaint   *Paint
+
+	/**
+	 * Internal [Paint] used only for drawing filled in shapes with a color or gradient This is
+	 * lazily allocated on the first drawing command that uses the [Fill] [DrawStyle] and re-used
+	 * across subsequent calls
+	 */
+	fillPaint *Paint
+	/**
+	 * Internal [Paint] used only for drawing stroked shapes with a color or gradient This is lazily
+	 * allocated on the first drawing command that uses the [Stroke] [DrawStyle] and re-used across
+	 * subsequent calls
+	 */
 	strokePaint *Paint
 }
 
 // NewCanvasDrawScope creates a new CanvasDrawScope.
-func NewCanvasDrawScope() *CanvasDrawScope {
+func NewCanvasDrawScope(
+	canvas Canvas,
+	size geometry.Size,
+	density unit.Density,
+	layoutDirection unit.LayoutDirection,
+) *CanvasDrawScope {
 	return &CanvasDrawScope{
-		drawContext: NewDrawContext().(*drawContextImpl),
+		drawContext: NewDrawContext(
+			canvas,
+			size,
+			density,
+			layoutDirection,
+		).(*drawContextImpl),
 		fillPaint:   nil,
 		strokePaint: nil,
 	}

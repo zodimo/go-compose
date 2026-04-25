@@ -38,3 +38,8 @@ var LocalTextStyle = CompositionLocalOf(func() *text.TextStyle {
 var LocalDensity = CompositionLocalOf(func() unit.Density {
 	panic("No Density provided")
 })
+
+// localCanvas
+var LocalCanvas = CompositionLocalOf(func() graphics.Canvas {
+	panic("No Canvas provided")
+})

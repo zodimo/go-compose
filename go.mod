@@ -9,7 +9,9 @@ require (
 	gioui.org/x v0.9.0
 	git.sr.ht/~schnwalter/gio-mw v0.0.0-20250713180710-9d8d98474447
 	github.com/go-text/typesetting v0.3.2
+	github.com/zodimo/gio-skia v0.1.5
 	github.com/zodimo/go-maybe v0.1.6
+	github.com/zodimo/go-skia-support v0.1.16
 	github.com/zodimo/go-ternary v0.2.0
 	github.com/zodimo/go-zero-hash v0.1.0
 	golang.org/x/exp/shiny v0.0.0-20260112195511-716be5621a96
@@ -22,6 +24,7 @@ require (
 require (
 	gioui.org/shader v1.0.8 // indirect
 	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0 // indirect
+	github.com/andybalholm/stroke v0.0.0-20221221101821-bd29b49d73f0 // indirect
 	github.com/godbus/dbus/v5 v5.0.6 // indirect
 	github.com/zodimo/go-lazy v0.1.1 // indirect
 	golang.org/x/mod v0.32.0 // indirect
