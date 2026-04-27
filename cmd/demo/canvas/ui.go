@@ -5,8 +5,11 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/canvas"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/material3/text"
+	"github.com/zodimo/go-compose/compose/ui/geometry"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
+	"github.com/zodimo/go-compose/internal/skiagraphics"
 	"github.com/zodimo/go-compose/modifiers/size"
+	"github.com/zodimo/go-compose/modifiers/weight"
 	"github.com/zodimo/go-compose/pkg/api"
 )
 
@@ -23,29 +26,63 @@ func UI() api.Composable {
 						w := size.Width()
 						h := size.Height()
 
-						// ─────────────────────────────────────────────────────────
-						// Row 1: Rectangles
-						// ─────────────────────────────────────────────────────────
-
 						s.DrawIntoCanvas(func(c graphics.Canvas) {
-							// DrawRect
 							c.Save()
 							c.Translate(w*0.15, h*0.15)
-							//rect := models.Rect{Left: -40, Top: -30, Right: 40, Bottom: 30}
-							// p := skia.NewPaintFill(color.NRGBA{R: 100, G: 200, B: 255, A: 255})
 							p := graphics.NewPaint()
 							p.ApplyStyle(graphics.NewStroke(2))
 							p.Color = graphics.ColorBlue
 							p.Alpha = 0.25
-							// p.SetColor(color.NRGBA{R: 100, G: 200, B: 255, A: 255})
 
 							c.DrawRect(-40, -30, 40, 30, p)
 							c.Restore()
 						})
 
 					},
-					canvas.WithModifier(size.FillMax()),
+					canvas.WithModifier(weight.Weight(1)),
 				),
+				text.HeadlineSmall("Path Demo - AddPath"),
+				canvas.Canvas(
+					func(s graphics.DrawScope) {
+						s.DrawIntoCanvas(func(c graphics.Canvas) {
+
+							path1 := skiagraphics.NewPath()
+							path1.MoveTo(20, 20)
+							path1.LineTo(20, 40)
+							path1.LineTo(40, 20)
+
+							path2 := skiagraphics.NewPath()
+							path2.MoveTo(60, 60)
+							path2.LineTo(80, 60)
+							path2.LineTo(80, 40)
+
+							strokeStyle := graphics.NewStroke(2)
+
+							c.Save()
+							for i := range 2 {
+								testPath := skiagraphics.NewPath()
+								testPath.MoveTo(20, 20)
+								testPath.LineTo(20, 40)
+								testPath.LineTo(40, 20)
+								if i == 1 {
+									testPath.Close()
+								}
+
+								testPath.AddPath(path2, geometry.OffsetZero)
+
+								c.DrawPath(testPath, &graphics.Paint{
+									Color:       graphics.ColorRed,
+									StrokeWidth: 2,
+									Style:       strokeStyle,
+									Alpha:       1,
+								})
+
+								c.Translate(120, 0)
+							}
+							c.Restore()
+						})
+					},
+					canvas.WithModifier(weight.Weight(1))),
 			),
 			column.WithSpacing(column.SpaceSides),
 			column.WithAlignment(column.Middle),

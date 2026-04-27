@@ -7,10 +7,10 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/internal/skiagraphics"
 )
 
 func widgetConstructor(
-	canvas graphics.Canvas,
 	density unit.Density,
 	layoutDirection unit.LayoutDirection,
 	onDraw func(drawscope graphics.DrawScope),
@@ -19,6 +19,7 @@ func widgetConstructor(
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 
 			w, h := float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)
+			canvas := skiagraphics.NewCanvas(gtx)
 
 			drawscope := graphics.NewCanvasDrawScope(
 				canvas,

@@ -35,7 +35,6 @@ func Canvas(
 			}
 		}
 		density := compose.LocalDensity.Current(c)
-		canvas := compose.LocalCanvas.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 
 		c.StartBlock(FoundationCanvasNodeID)
@@ -43,7 +42,6 @@ func Canvas(
 			return modifier.Then(opts.Modifier)
 		})
 		c.SetWidgetConstructor(widgetConstructor(
-			canvas,
 			density,
 			layoutDirection,
 			onDraw,

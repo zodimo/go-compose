@@ -39,3 +39,7 @@ require (
 // replace github.com/go-text/typesetting => github.com/zodimo/typesetting v0.3.4-0.20260209162200-1565df70b998
 
 // replace github.com/go-text/typesetting => ../typesetting
+
+replace github.com/zodimo/go-skia-support => ../go-skia-support
+
+replace github.com/zodimo/gio-skia => ../gio-skia
