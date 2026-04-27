@@ -29,12 +29,11 @@ func UI() api.Composable {
 						s.DrawIntoCanvas(func(c graphics.Canvas) {
 							c.Save()
 							c.Translate(w*0.15, h*0.15)
-							p := graphics.NewPaint()
-							p.ApplyStyle(graphics.NewStroke(2))
-							p.Color = graphics.ColorBlue
-							p.Alpha = 0.25
 
-							c.DrawRect(-40, -30, 40, 30, p)
+							c.DrawRect(-40, -30, 40, 30, graphics.NewPaint(
+								graphics.PaintWithColor(graphics.ColorBlue),
+								graphics.PaintWithStrokeWidth(2),
+							))
 							c.Restore()
 						})
 
@@ -70,12 +69,11 @@ func UI() api.Composable {
 
 								testPath.AddPath(path2, geometry.OffsetZero)
 
-								c.DrawPath(testPath, &graphics.Paint{
-									Color:       graphics.ColorRed,
-									StrokeWidth: 2,
-									Style:       strokeStyle,
-									Alpha:       1,
-								})
+								c.DrawPath(testPath, graphics.NewPaint(
+									graphics.PaintWithColor(graphics.ColorRed),
+									graphics.PaintWithStrokeWidth(2),
+									graphics.PaintWithStyle(strokeStyle),
+								))
 
 								c.Translate(120, 0)
 							}
