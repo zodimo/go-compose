@@ -7,7 +7,7 @@ import (
 	"github.com/zodimo/go-compose/compose/material3/text"
 	"github.com/zodimo/go-compose/compose/ui/geometry"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
-	"github.com/zodimo/go-compose/internal/skiagraphics"
+	"github.com/zodimo/go-compose/compose/ui/graphics/path"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/modifiers/weight"
 	"github.com/zodimo/go-compose/pkg/api"
@@ -45,12 +45,12 @@ func UI() api.Composable {
 					func(s graphics.DrawScope) {
 						s.DrawIntoCanvas(func(c graphics.Canvas) {
 
-							path1 := skiagraphics.NewPath()
+							path1 := path.New()
 							path1.MoveTo(20, 20)
 							path1.LineTo(20, 40)
 							path1.LineTo(40, 20)
 
-							path2 := skiagraphics.NewPath()
+							path2 := path.New()
 							path2.MoveTo(60, 60)
 							path2.LineTo(80, 60)
 							path2.LineTo(80, 40)
@@ -59,7 +59,7 @@ func UI() api.Composable {
 
 							c.Save()
 							for i := range 2 {
-								testPath := skiagraphics.NewPath()
+								testPath := path.New()
 								testPath.MoveTo(20, 20)
 								testPath.LineTo(20, 40)
 								testPath.LineTo(40, 20)

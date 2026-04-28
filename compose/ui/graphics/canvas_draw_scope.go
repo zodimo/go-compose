@@ -27,13 +27,27 @@ type CanvasDrawScope struct {
 	strokePaint *Paint
 }
 
+type DrawScopeOptions struct {
+	fillPaint   *Paint
+	strokePaint *Paint
+}
+type DrawScopeOption func(*DrawScopeOptions)
+
 // NewCanvasDrawScope creates a new CanvasDrawScope.
 func NewCanvasDrawScope(
 	canvas Canvas,
 	size geometry.Size,
 	density unit.Density,
 	layoutDirection unit.LayoutDirection,
+	options ...DrawScopeOption,
+
 ) *CanvasDrawScope {
+	opts := &DrawScopeOptions{}
+	for _, opt := range options {
+		if opt != nil {
+			opt(opts)
+		}
+	}
 	return &CanvasDrawScope{
 		drawContext: NewDrawContext(
 			canvas,
@@ -41,8 +55,8 @@ func NewCanvasDrawScope(
 			density,
 			layoutDirection,
 		).(*drawContextImpl),
-		fillPaint:   nil,
-		strokePaint: nil,
+		fillPaint:   opts.fillPaint,
+		strokePaint: opts.strokePaint,
 	}
 }
 
