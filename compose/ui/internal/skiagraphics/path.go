@@ -85,22 +85,22 @@ func (p *pathWrapper) RelativeCubicTo(dx1, dy1, dx2, dy2, dx3, dy3 float32) {
 
 // ArcTo adds an arc segment from the current point.
 func (p *pathWrapper) ArcTo(rect geometry.Rect, startAngleDegrees, sweepAngleDegrees float32, forceMoveTo bool) {
-	p.path.ArcTo(GeometryRectToSkiaRect(rect), startAngleDegrees, sweepAngleDegrees, forceMoveTo)
+	p.path.ArcTo(geometryRectToSkiaRect(rect), startAngleDegrees, sweepAngleDegrees, forceMoveTo)
 }
 
 // AddRect adds a rectangle as a new subpath.
 func (p *pathWrapper) AddRect(rect geometry.Rect, direction graphics.PathDirection) {
-	p.path.AddRect(GeometryRectToSkiaRect(rect), GraphicsPathDirectionToSkiaPathDirection(direction), 0)
+	p.path.AddRect(geometryRectToSkiaRect(rect), graphicsPathDirectionToSkiaPathDirection(direction), 0)
 }
 
 // AddOval adds an oval (ellipse) as a new subpath.
 func (p *pathWrapper) AddOval(oval geometry.Rect, direction graphics.PathDirection) {
-	p.path.AddOval(GeometryRectToSkiaRect(oval), GraphicsPathDirectionToSkiaPathDirection(direction))
+	p.path.AddOval(geometryRectToSkiaRect(oval), graphicsPathDirectionToSkiaPathDirection(direction))
 }
 
 // AddArc adds an arc segment as a new subpath.
 func (p *pathWrapper) AddArc(oval geometry.Rect, startAngleDegrees, sweepAngleDegrees float32) {
-	p.path.AddArc(GeometryRectToSkiaRect(oval), startAngleDegrees, sweepAngleDegrees)
+	p.path.AddArc(geometryRectToSkiaRect(oval), startAngleDegrees, sweepAngleDegrees)
 }
 
 // AddPath adds another path to this path with an optional offset.
@@ -131,14 +131,14 @@ func (p *pathWrapper) Translate(offset geometry.Offset) {
 
 // GetBounds computes the bounds of the control points of the path.
 func (p *pathWrapper) GetBounds() geometry.Rect {
-	return SkiaRectToGeometryRect(p.path.Bounds())
+	return skiaRectToGeometryRect(p.path.Bounds())
 }
 
 // Op performs a boolean operation on two paths.
 func (p *pathWrapper) Op(path1, path2 graphics.Path, operation graphics.PathOperation) bool {
 	p1 := path1.(*pathWrapper)
 	p2 := path2.(*pathWrapper)
-	result := p1.path.Op(p2.path, GraphicsPathOperationToSkiaPathOp(operation))
+	result := p1.path.Op(p2.path, graphicsPathOperationToSkiaPathOp(operation))
 	p1.path = result
 	return true
 }

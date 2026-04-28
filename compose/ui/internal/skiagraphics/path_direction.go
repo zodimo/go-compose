@@ -7,7 +7,7 @@ import (
 	"github.com/zodimo/go-skia-support/skia/enums"
 )
 
-func SkiaPathDirectionToGraphicsPathDirection(d enums.PathDirection) graphics.PathDirection {
+func skiaPathDirectionToGraphicsPathDirection(d enums.PathDirection) graphics.PathDirection {
 	switch d {
 	case enums.PathDirectionCCW:
 		return graphics.PathDirectionCounterClockwise
@@ -18,7 +18,7 @@ func SkiaPathDirectionToGraphicsPathDirection(d enums.PathDirection) graphics.Pa
 	}
 }
 
-func GraphicsPathDirectionToSkiaPathDirection(d graphics.PathDirection) enums.PathDirection {
+func graphicsPathDirectionToSkiaPathDirection(d graphics.PathDirection) enums.PathDirection {
 	switch d {
 	case graphics.PathDirectionCounterClockwise:
 		return enums.PathDirectionCCW

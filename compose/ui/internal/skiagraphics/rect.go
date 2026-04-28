@@ -5,7 +5,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/geometry"
 )
 
-func GeometryRectToSkiaRect(r geometry.Rect) skia.Rect {
+func geometryRectToSkiaRect(r geometry.Rect) skia.Rect {
 	return skia.Rect{
 		Left:   r.Left,
 		Top:    r.Top,
@@ -14,7 +14,7 @@ func GeometryRectToSkiaRect(r geometry.Rect) skia.Rect {
 	}
 }
 
-func SkiaRectToGeometryRect(r skia.Rect) geometry.Rect {
+func skiaRectToGeometryRect(r skia.Rect) geometry.Rect {
 	return geometry.Rect{
 		Left:   r.Left,
 		Top:    r.Top,

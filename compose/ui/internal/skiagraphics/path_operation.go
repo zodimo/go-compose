@@ -7,7 +7,7 @@ import (
 	"github.com/zodimo/go-skia-support/skia/enums"
 )
 
-func GraphicsPathOperationToSkiaPathOp(op graphics.PathOperation) enums.PathOp {
+func graphicsPathOperationToSkiaPathOp(op graphics.PathOperation) enums.PathOp {
 	switch op {
 	case graphics.PathOperationDifference:
 		return enums.PathOpDifference
