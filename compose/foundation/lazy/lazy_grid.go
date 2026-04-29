@@ -7,6 +7,7 @@ import (
 
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/ui"
+	"github.com/zodimo/go-compose/compose/ui/platform"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 
@@ -41,7 +42,7 @@ func lazyGrid(axis layout.Axis, cells GridCells, content func(LazyGridScope), op
 			opt(&opts)
 		}
 
-		density := compose.LocalDensity.Current(c)
+		density := platform.LocalDensity.Current(c)
 
 		// Ensure state is initialized
 		if opts.State == nil {
@@ -77,7 +78,7 @@ func lazyGridWidgetConstructor(
 	axis layout.Axis,
 	cells GridCells,
 	scrollbar bool,
-	density unit.Density,
+	density unit.DensityScope,
 ) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {

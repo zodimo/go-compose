@@ -1,8 +1,7 @@
 package graphics
 
 import (
-	"image"
-
+	"gioui.org/f32"
 	"github.com/zodimo/go-compose/compose/ui/geometry"
 )
 
@@ -135,7 +134,7 @@ type Path interface {
 
 	// Contains returns true if the point is inside the path according to the fill type.
 	// Uses winding or even-odd fill rule based on path's fill type.
-	Contains(point image.Point) bool
+	Contains(point f32.Point) bool
 }
 
 // PathOperation specifies the boolean operation to perform on two paths.

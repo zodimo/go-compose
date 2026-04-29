@@ -5,7 +5,6 @@ import (
 	"github.com/zodimo/go-compose/assets/fonts"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text"
-	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // LocalContentColor is a CompositionLocal containing the preferred content color for a given
@@ -31,12 +30,6 @@ var LocalTextShaper = CompositionLocalOf(func() *text.TextShaper {
 
 var LocalTextStyle = CompositionLocalOf(func() *text.TextStyle {
 	return text.TextStyleUnspecified
-})
-
-// LocalDensity.current
-
-var LocalDensity = CompositionLocalOf(func() unit.Density {
-	panic("No Density provided")
 })
 
 // localCanvas

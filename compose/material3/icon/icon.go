@@ -13,7 +13,7 @@ import (
 	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
-	"github.com/zodimo/go-compose/compose/ui/next/platform"
+	"github.com/zodimo/go-compose/compose/ui/platform"
 	uitext "github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/compose/ui/unit"
@@ -70,7 +70,7 @@ func iconFromBytes(iconByte []byte, opts IconOptions) Composable {
 		opts.Color = opts.Color.TakeOrElse(contentColor)
 
 		localTextStyle := compose.LocalTextStyle.Current(c)
-		localDensity := compose.LocalDensity.Current(c)
+		localDensity := platform.LocalDensity.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 
 		// Resolve text style with defaults
@@ -102,7 +102,7 @@ func iconFromSymbol(name SymbolName, opts IconOptions) Composable {
 		iconColor := opts.Color.TakeOrElse(contentColor)
 
 		localTextStyle := compose.LocalTextStyle.Current(c)
-		localDensity := compose.LocalDensity.Current(c)
+		localDensity := platform.LocalDensity.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 
 		// Resolve text style with defaults

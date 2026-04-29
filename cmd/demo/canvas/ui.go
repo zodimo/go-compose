@@ -1,7 +1,6 @@
 package main
 
 import (
-	_ "github.com/zodimo/gio-skia/skia"
 	"github.com/zodimo/go-compose/compose/foundation/canvas"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/material3/text"

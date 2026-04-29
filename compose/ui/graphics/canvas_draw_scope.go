@@ -37,7 +37,7 @@ type DrawScopeOption func(*DrawScopeOptions)
 func NewCanvasDrawScope(
 	canvas Canvas,
 	size geometry.Size,
-	density unit.Density,
+	density unit.DensityScope,
 	layoutDirection unit.LayoutDirection,
 	options ...DrawScopeOption,
 
@@ -62,7 +62,7 @@ func NewCanvasDrawScope(
 
 // Draw executes the drawing commands within the provided canvas and bounds.
 func (c *CanvasDrawScope) Draw(
-	density unit.Density,
+	density unit.DensityScope,
 	layoutDirection unit.LayoutDirection,
 	canvas Canvas,
 	size geometry.Size,
@@ -79,7 +79,7 @@ func (c *CanvasDrawScope) Draw(
 
 // DrawWithGraphicsLayer executes drawing with an optional graphics layer.
 func (c *CanvasDrawScope) DrawWithGraphicsLayer(
-	density unit.Density,
+	density unit.DensityScope,
 	layoutDirection unit.LayoutDirection,
 	canvas Canvas,
 	size geometry.Size,
@@ -208,6 +208,8 @@ func (c *CanvasDrawScope) configurePaintWithColor(
 	paint.Color = modulateColorAlpha(color, alpha)
 	paint.BlendMode = blendMode
 	paint.Shader = nil
+	paint.Style = style
+	paint.Alpha = alpha
 
 	if stroke, ok := style.(*Stroke); ok {
 		paint.StrokeWidth = stroke.Width
@@ -225,6 +227,7 @@ func (c *CanvasDrawScope) configurePaintWithBrush(
 	paint := c.selectPaint(style)
 	brush.ApplyTo(c.Size(), paint, alpha)
 	paint.BlendMode = blendMode
+	paint.Style = style
 
 	if stroke, ok := style.(*Stroke); ok {
 		paint.StrokeWidth = stroke.Width
@@ -237,7 +240,9 @@ func (c *CanvasDrawScope) configurePaintWithBrush(
 func (c *CanvasDrawScope) DrawLine(color Color, start, end geometry.Offset, opts ...DrawLineOption) {
 	cfg := defaultDrawLineConfig()
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.obtainStrokePaint()
@@ -251,7 +256,9 @@ func (c *CanvasDrawScope) DrawLine(color Color, start, end geometry.Offset, opts
 func (c *CanvasDrawScope) DrawLineWithBrush(brush Brush, start, end geometry.Offset, opts ...DrawLineOption) {
 	cfg := defaultDrawLineConfig()
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.obtainStrokePaint()
@@ -265,7 +272,9 @@ func (c *CanvasDrawScope) DrawLineWithBrush(brush Brush, start, end geometry.Off
 func (c *CanvasDrawScope) DrawRect(color Color, opts ...DrawRectOption) {
 	cfg := defaultDrawRectConfig(c.Size())
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.configurePaintWithColor(color, cfg.style, cfg.alpha, cfg.blendMode)
@@ -279,7 +288,9 @@ func (c *CanvasDrawScope) DrawRect(color Color, opts ...DrawRectOption) {
 func (c *CanvasDrawScope) DrawRectWithBrush(brush Brush, opts ...DrawRectOption) {
 	cfg := defaultDrawRectConfig(c.Size())
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.configurePaintWithBrush(brush, cfg.style, cfg.alpha, cfg.blendMode)
@@ -293,7 +304,9 @@ func (c *CanvasDrawScope) DrawRectWithBrush(brush Brush, opts ...DrawRectOption)
 func (c *CanvasDrawScope) DrawRoundRect(color Color, opts ...DrawRoundRectOption) {
 	cfg := defaultDrawRoundRectConfig(c.Size())
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.configurePaintWithColor(color, cfg.style, cfg.alpha, cfg.blendMode)
@@ -307,7 +320,9 @@ func (c *CanvasDrawScope) DrawRoundRect(color Color, opts ...DrawRoundRectOption
 func (c *CanvasDrawScope) DrawRoundRectWithBrush(brush Brush, opts ...DrawRoundRectOption) {
 	cfg := defaultDrawRoundRectConfig(c.Size())
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.configurePaintWithBrush(brush, cfg.style, cfg.alpha, cfg.blendMode)
@@ -321,7 +336,9 @@ func (c *CanvasDrawScope) DrawRoundRectWithBrush(brush Brush, opts ...DrawRoundR
 func (c *CanvasDrawScope) DrawCircle(color Color, opts ...DrawCircleOption) {
 	cfg := defaultDrawCircleConfig(c.Size())
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.configurePaintWithColor(color, cfg.style, cfg.alpha, cfg.blendMode)
@@ -331,7 +348,9 @@ func (c *CanvasDrawScope) DrawCircle(color Color, opts ...DrawCircleOption) {
 func (c *CanvasDrawScope) DrawCircleWithBrush(brush Brush, opts ...DrawCircleOption) {
 	cfg := defaultDrawCircleConfig(c.Size())
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.configurePaintWithBrush(brush, cfg.style, cfg.alpha, cfg.blendMode)
@@ -341,7 +360,9 @@ func (c *CanvasDrawScope) DrawCircleWithBrush(brush Brush, opts ...DrawCircleOpt
 func (c *CanvasDrawScope) DrawOval(color Color, opts ...DrawOvalOption) {
 	cfg := defaultDrawOvalConfig(c.Size())
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.configurePaintWithColor(color, cfg.style, cfg.alpha, cfg.blendMode)
@@ -355,7 +376,9 @@ func (c *CanvasDrawScope) DrawOval(color Color, opts ...DrawOvalOption) {
 func (c *CanvasDrawScope) DrawOvalWithBrush(brush Brush, opts ...DrawOvalOption) {
 	cfg := defaultDrawOvalConfig(c.Size())
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.configurePaintWithBrush(brush, cfg.style, cfg.alpha, cfg.blendMode)
@@ -369,7 +392,9 @@ func (c *CanvasDrawScope) DrawOvalWithBrush(brush Brush, opts ...DrawOvalOption)
 func (c *CanvasDrawScope) DrawArc(color Color, startAngle, sweepAngle float32, useCenter bool, opts ...DrawArcOption) {
 	cfg := defaultDrawArcConfig(c.Size())
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.configurePaintWithColor(color, cfg.style, cfg.alpha, cfg.blendMode)
@@ -383,7 +408,9 @@ func (c *CanvasDrawScope) DrawArc(color Color, startAngle, sweepAngle float32, u
 func (c *CanvasDrawScope) DrawArcWithBrush(brush Brush, startAngle, sweepAngle float32, useCenter bool, opts ...DrawArcOption) {
 	cfg := defaultDrawArcConfig(c.Size())
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.configurePaintWithBrush(brush, cfg.style, cfg.alpha, cfg.blendMode)
@@ -397,7 +424,9 @@ func (c *CanvasDrawScope) DrawArcWithBrush(brush Brush, startAngle, sweepAngle f
 func (c *CanvasDrawScope) DrawPath(path Path, color Color, opts ...DrawPathOption) {
 	cfg := defaultDrawPathConfig()
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.configurePaintWithColor(color, cfg.style, cfg.alpha, cfg.blendMode)
@@ -407,7 +436,9 @@ func (c *CanvasDrawScope) DrawPath(path Path, color Color, opts ...DrawPathOptio
 func (c *CanvasDrawScope) DrawPathWithBrush(path Path, brush Brush, opts ...DrawPathOption) {
 	cfg := defaultDrawPathConfig()
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.configurePaintWithBrush(brush, cfg.style, cfg.alpha, cfg.blendMode)
@@ -417,7 +448,9 @@ func (c *CanvasDrawScope) DrawPathWithBrush(path Path, brush Brush, opts ...Draw
 func (c *CanvasDrawScope) DrawPoints(points []geometry.Offset, pointMode PointMode, color Color, opts ...DrawPointsOption) {
 	cfg := defaultDrawPointsConfig()
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.obtainStrokePaint()
@@ -431,7 +464,9 @@ func (c *CanvasDrawScope) DrawPoints(points []geometry.Offset, pointMode PointMo
 func (c *CanvasDrawScope) DrawPointsWithBrush(points []geometry.Offset, pointMode PointMode, brush Brush, opts ...DrawPointsOption) {
 	cfg := defaultDrawPointsConfig()
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.obtainStrokePaint()
@@ -445,7 +480,9 @@ func (c *CanvasDrawScope) DrawPointsWithBrush(points []geometry.Offset, pointMod
 func (c *CanvasDrawScope) DrawImage(image ImageBitmap, opts ...DrawImageOption) {
 	cfg := defaultDrawImageConfig()
 	for _, opt := range opts {
-		opt(&cfg)
+		if opt != nil {
+			opt(&cfg)
+		}
 	}
 
 	paint := c.obtainFillPaint()

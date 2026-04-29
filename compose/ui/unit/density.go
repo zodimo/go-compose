@@ -6,9 +6,9 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/geometry"
 )
 
-// Density provides information about the density of the display.
+// DensityScope provides information about the density of the display.
 // Used for the conversions between pixels, [Dp], [int] and [TextUnit].
-type Density interface {
+type DensityScope interface {
 	// Density returns the logical density of the display.
 	// This is a scaling factor for the [Dp] unit.
 	Density() float32
@@ -61,7 +61,7 @@ type Density interface {
 //
 // density The logical density of the display. This is a scaling factor for the [Dp] unit.
 // fontScale Current user preference for the scaling factor for fonts.
-func NewDensity(density, fontScale float32) Density {
+func NewDensity(density, fontScale float32) DensityScope {
 	return &densityImpl{
 		density:   density,
 		fontScale: fontScale,

@@ -36,7 +36,7 @@ type TextLayoutInput struct {
 	Overflow style.TextOverFlow
 
 	// Density is the density used for computing this text layout.
-	Density unit.Density
+	Density unit.DensityScope
 
 	// LayoutDirection is the layout direction used for computing this text layout.
 	LayoutDirection unit.LayoutDirection
@@ -57,7 +57,7 @@ func NewTextLayoutInput(
 	maxLines int,
 	softWrap bool,
 	overflow style.TextOverFlow,
-	density unit.Density,
+	density unit.DensityScope,
 	layoutDirection unit.LayoutDirection,
 	fontFamilyResolver interface{},
 	constraints unit.Constraints,

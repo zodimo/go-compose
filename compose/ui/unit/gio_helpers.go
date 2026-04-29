@@ -53,6 +53,6 @@ func TextUnitToGioSpUnsafe(tu TextUnit) gioUnit.Sp {
 
 // DensityFromLayoutContext creates a Density from a Gio Layout Context.
 // gtx: The Gio Layout Context.
-func DensityFromLayoutContext(gtx gioLayout.Context) Density {
+func DensityFromLayoutContext(gtx gioLayout.Context) DensityScope {
 	return NewDensity(gtx.Metric.PxPerDp, gtx.Metric.PxPerSp)
 }

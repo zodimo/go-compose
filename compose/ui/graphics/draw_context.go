@@ -38,10 +38,10 @@ type DrawContext interface {
 	SetLayoutDirection(ld unit.LayoutDirection)
 
 	// Density returns the density used for dp/sp conversions.
-	Density() unit.Density
+	Density() unit.DensityScope
 
 	// SetDensity sets the density.
-	SetDensity(d unit.Density)
+	SetDensity(d unit.DensityScope)
 
 	// GraphicsLayer returns the current graphics layer, if any.
 	// May return nil if not drawing into a graphics layer.
@@ -57,14 +57,14 @@ type drawContextImpl struct {
 	size            geometry.Size
 	transform       DrawTransform
 	layoutDirection unit.LayoutDirection
-	density         unit.Density
+	density         unit.DensityScope
 }
 
 // NewDrawContext creates a new DrawContext with the given initial values.
 func NewDrawContext(
 	canvas Canvas,
 	size geometry.Size,
-	density unit.Density,
+	density unit.DensityScope,
 	layoutDirection unit.LayoutDirection,
 ) DrawContext {
 	return &drawContextImpl{
@@ -107,11 +107,11 @@ func (d *drawContextImpl) SetLayoutDirection(ld unit.LayoutDirection) {
 	d.layoutDirection = ld
 }
 
-func (d *drawContextImpl) Density() unit.Density {
+func (d *drawContextImpl) Density() unit.DensityScope {
 	return d.density
 }
 
-func (d *drawContextImpl) SetDensity(density unit.Density) {
+func (d *drawContextImpl) SetDensity(density unit.DensityScope) {
 	d.density = density
 }
 

@@ -1,8 +1,7 @@
 package skiagraphics
 
 import (
-	"image"
-
+	"gioui.org/f32"
 	"github.com/zodimo/gio-skia/skia"
 	"github.com/zodimo/go-compose/compose/ui/geometry"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
@@ -145,6 +144,6 @@ func (p *pathWrapper) Op(path1, path2 graphics.Path, operation graphics.PathOper
 
 // Contains returns true if the point is inside the path according to the fill type.
 // Uses winding or even-odd fill rule based on path's fill type.
-func (p *pathWrapper) Contains(point image.Point) bool {
-	return p.path.Contains(models.Point{X: float32(point.X), Y: float32(point.Y)})
+func (p *pathWrapper) Contains(point f32.Point) bool {
+	return p.path.Contains(models.Point{X: point.X, Y: point.Y})
 }

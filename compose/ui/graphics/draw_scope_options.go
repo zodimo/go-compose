@@ -309,7 +309,7 @@ type drawPathConfig struct {
 func defaultDrawPathConfig() drawPathConfig {
 	return drawPathConfig{
 		alpha:       1.0,
-		style:       Fill,
+		style:       NewStroke(1),
 		colorFilter: nil,
 		blendMode:   DefaultBlendMode,
 	}

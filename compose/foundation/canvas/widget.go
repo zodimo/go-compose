@@ -11,7 +11,7 @@ import (
 )
 
 func widgetConstructor(
-	density unit.Density,
+	density unit.DensityScope,
 	layoutDirection unit.LayoutDirection,
 	onDraw func(drawscope graphics.DrawScope),
 ) layoutnode.LayoutNodeWidgetConstructor {
@@ -20,7 +20,6 @@ func widgetConstructor(
 
 			w, h := float32(gtx.Constraints.Max.X), float32(gtx.Constraints.Max.Y)
 			canvas := canvas.New(gtx)
-
 			drawscope := graphics.NewCanvasDrawScope(
 				canvas,
 				geometry.NewSize(

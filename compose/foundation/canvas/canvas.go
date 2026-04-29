@@ -1,10 +1,9 @@
 package canvas
 
 import (
-	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
-	"github.com/zodimo/go-compose/compose/ui/next/platform"
+	"github.com/zodimo/go-compose/compose/ui/platform"
 	"github.com/zodimo/go-compose/pkg/api"
 )
 
@@ -34,7 +33,7 @@ func Canvas(
 				opt(&opts)
 			}
 		}
-		density := compose.LocalDensity.Current(c)
+		density := platform.LocalDensity.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 
 		c.StartBlock(FoundationCanvasNodeID)

@@ -4,6 +4,7 @@ import (
 	"image"
 
 	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/compose/ui/platform"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/pkg/api"
@@ -26,7 +27,7 @@ func (r *runtime) Run(gtx LayoutContext, composer api.Composer, ui api.Composabl
 	defer composer.EndFrame()
 
 	finalComposable := compose.CompositionLocalProvider(
-		[]api.ProvidedValue{compose.LocalDensity.Provides(density)},
+		[]api.ProvidedValue{platform.LocalDensity.Provides(density)},
 		ui,
 	)
 

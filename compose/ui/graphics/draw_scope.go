@@ -11,7 +11,7 @@ var DefaultBlendMode = BlendModeSrcOver
 // DrawScope provides a scoped drawing environment with a declarative, stateless API.
 // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-graphics/src/commonMain/kotlin/androidx/compose/ui/graphics/drawscope/DrawScope.kt
 type DrawScope interface {
-	unit.Density
+	unit.DensityScope
 
 	// DrawContext returns the underlying draw context.
 	DrawContext() DrawContext

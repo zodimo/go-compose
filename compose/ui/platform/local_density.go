@@ -6,6 +6,6 @@ import (
 )
 
 // LocalDensity is a CompositionLocal that provides the Density to the composition.
-var LocalDensity = compose.StaticCompositionLocalOf[unit.Density](func() unit.Density {
+var LocalDensity = compose.StaticCompositionLocalOf[unit.DensityScope](func() unit.DensityScope {
 	panic("CompositionLocal LocalDensity not present")
 })

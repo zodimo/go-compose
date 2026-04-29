@@ -9,7 +9,7 @@ import (
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
-	"github.com/zodimo/go-compose/compose/ui/next/platform"
+	"github.com/zodimo/go-compose/compose/ui/platform"
 	uitext "github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 
@@ -36,7 +36,7 @@ func Icon(iconByte []byte, options ...IconOption) Composable {
 		opts.Color = opts.Color.TakeOrElse(compose.LocalContentColor.Current(c))
 
 		localTextStyle := compose.LocalTextStyle.Current(c)
-		localDensity := compose.LocalDensity.Current(c)
+		localDensity := platform.LocalDensity.Current(c)
 
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 		// Resolve text style with defaults
