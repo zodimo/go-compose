@@ -44,11 +44,6 @@ func UI() api.Composable {
 					func(s graphics.DrawScope) {
 						s.DrawIntoCanvas(func(c graphics.Canvas) {
 
-							path1 := path.New()
-							path1.MoveTo(20, 20)
-							path1.LineTo(20, 40)
-							path1.LineTo(40, 20)
-
 							path2 := path.New()
 							path2.MoveTo(60, 60)
 							path2.LineTo(80, 60)
