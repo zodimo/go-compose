@@ -11,6 +11,8 @@ type Tree interface {
 	ID() TreeId
 	Label() string
 	isTree()
+
+	FindById(TreeId) (Tree, bool)
 }
 
 type TreeBuilder interface {

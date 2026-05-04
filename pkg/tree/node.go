@@ -2,6 +2,7 @@ package tree
 
 import (
 	"slices"
+	"strings"
 )
 
 type TreeNodeScope interface {
@@ -45,6 +46,21 @@ func (n *TreeNode) Label() string {
 
 func (n *TreeNode) String() string {
 	return "Node"
+}
+
+func (n *TreeNode) FindById(id TreeId) (Tree, bool) {
+	if n.id.Equals(id) {
+		return n, true
+	}
+	if strings.HasPrefix(n.id.String(), id.String()) {
+		for _, child := range n.children {
+			_, found := child.FindById(id)
+			if found {
+				return child, true
+			}
+		}
+	}
+	return nil, false
 }
 
 func (n *TreeNode) isTree() {}

@@ -20,6 +20,14 @@ func (n *TreeLeaf) Label() string {
 func (l *TreeLeaf) String() string {
 	return "Leaf"
 }
+
+func (n *TreeLeaf) FindById(id TreeId) (Tree, bool) {
+	if n.id.Equals(id) {
+		return n, true
+	}
+	return nil, false
+}
+
 func (l *TreeLeaf) isTree() {}
 
 // Leaf
