@@ -576,3 +576,447 @@ func TestTreeLeafParent(t *testing.T) {
 		}
 	})
 }
+
+func TestFindById(t *testing.T) {
+	t.Run("find root node by id", func(t *testing.T) {
+		tr := NewTree("root", func(scope TreeScope) {
+			scope.AddLeaf("leaf1", func(scope TreeLeafScope) {})
+		})
+
+		rootId := NewTreeNodeId("root")
+		found, ok := tr.FindById(rootId)
+
+		if !ok {
+			t.Errorf("FindById(rootId) = (_, false), want (_, true)")
+		}
+		if found == nil {
+			t.Errorf("FindById(rootId) returned nil tree")
+		} else if found.Label() != "root" {
+			t.Errorf("FindById(rootId).Label() = %q, want %q", found.Label(), "root")
+		}
+	})
+
+	t.Run("find leaf by id", func(t *testing.T) {
+		tr := NewTree("root", func(scope TreeScope) {
+			scope.AddLeaf("leaf1", func(scope TreeLeafScope) {})
+		})
+
+		leafId := NewChildTreeId("leaf1", NewTreeNodeId("root"))
+		found, ok := tr.FindById(leafId)
+
+		if !ok {
+			t.Errorf("FindById(leafId) = (_, false), want (_, true)")
+		}
+		if found == nil {
+			t.Errorf("FindById(leafId) returned nil tree")
+		} else if found.Label() != "leaf1" {
+			t.Errorf("FindById(leafId).Label() = %q, want %q", found.Label(), "leaf1")
+		}
+	})
+
+	t.Run("find nested node by id", func(t *testing.T) {
+		tr := NewTree("root", func(scope TreeScope) {
+			scope.AddNode("level1", func(scope TreeNodeScope) {
+				scope.AddChild(func(scope TreeScope) {
+					scope.AddNode("level2", func(scope TreeNodeScope) {
+						scope.AddChild(func(scope TreeScope) {
+							scope.AddLeaf("deep", func(scope TreeLeafScope) {})
+						})
+					})
+				})
+			})
+		})
+
+		level2Id := NewChildTreeId("level2", NewChildTreeId("level1", NewTreeNodeId("root")))
+		found, ok := tr.FindById(level2Id)
+
+		if !ok {
+			t.Errorf("FindById(level2Id) = (_, false), want (_, true)")
+		}
+		if found == nil {
+			t.Errorf("FindById(level2Id) returned nil tree")
+		} else if found.Label() != "level2" {
+			t.Errorf("FindById(level2Id).Label() = %q, want %q", found.Label(), "level2")
+		}
+	})
+
+	t.Run("find non-existent id", func(t *testing.T) {
+		tr := NewTree("root", func(scope TreeScope) {
+			scope.AddLeaf("leaf1", func(scope TreeLeafScope) {})
+		})
+
+		nonExistentId := NewTreeNodeId("nonexistent")
+		found, ok := tr.FindById(nonExistentId)
+
+		if ok {
+			t.Errorf("FindById(nonExistentId) = (_, true), want (_, false)")
+		}
+		if found != nil {
+			t.Errorf("FindById(nonExistentId) = (%v, _), want (nil, _)", found)
+		}
+	})
+
+	t.Run("find id not in lineage", func(t *testing.T) {
+		tr := NewTree("root", func(scope TreeScope) {
+			scope.AddNode("child", func(scope TreeNodeScope) {
+				scope.AddChild(func(scope TreeScope) {})
+			})
+		})
+
+		// "other" is not a descendant of "root"
+		otherId := NewTreeNodeId("other")
+		found, ok := tr.FindById(otherId)
+
+		if ok {
+			t.Errorf("FindById(otherId) = (_, true), want (_, false)")
+		}
+		if found != nil {
+			t.Errorf("FindById(otherId) = (%v, _), want (nil, _)", found)
+		}
+	})
+
+	t.Run("find intermediate node by id", func(t *testing.T) {
+		tr := NewTree("root", func(scope TreeScope) {
+			scope.AddNode("level1", func(scope TreeNodeScope) {
+				scope.AddChild(func(scope TreeScope) {
+					scope.AddLeaf("leaf", func(scope TreeLeafScope) {})
+				})
+			})
+		})
+
+		level1Id := NewChildTreeId("level1", NewTreeNodeId("root"))
+		found, ok := tr.FindById(level1Id)
+
+		if !ok {
+			t.Errorf("FindById(level1Id) = (_, false), want (_, true)")
+		}
+		if found == nil {
+			t.Errorf("FindById(level1Id) returned nil tree")
+		} else if found.Label() != "level1" {
+			t.Errorf("FindById(level1Id).Label() = %q, want %q", found.Label(), "level1")
+		}
+	})
+
+	t.Run("find by id from leaf", func(t *testing.T) {
+		tr := NewTree("root", func(scope TreeScope) {
+			scope.AddLeaf("leaf1", func(scope TreeLeafScope) {})
+		})
+
+		root, _ := tr.(*TreeNode)
+		leaf, _ := root.Children()[0].(*TreeLeaf)
+
+		// Leaf should only find itself
+		leafId := leaf.ID()
+		found, ok := leaf.FindById(leafId)
+
+		if !ok {
+			t.Errorf("leaf.FindById(leafId) = (_, false), want (_, true)")
+		}
+		if found == nil {
+			t.Errorf("leaf.FindById(leafId) returned nil")
+		} else if found.Label() != "leaf1" {
+			t.Errorf("leaf.FindById(leafId).Label() = %q, want %q", found.Label(), "leaf1")
+		}
+
+		// Leaf should not find root
+		rootId := root.ID()
+		_, ok = leaf.FindById(rootId)
+		if ok {
+			t.Errorf("leaf.FindById(rootId) = (_, true), want (_, false)")
+		}
+	})
+}
+
+func TestTreeIdEncodingDefault(t *testing.T) {
+	t.Run("default encoder is passthru", func(t *testing.T) {
+		id := NewTreeNodeId("hello world")
+		got := id.String()
+		want := "hello world"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("default encoder preserves special characters", func(t *testing.T) {
+		id := NewTreeNodeId("test/path#fragment?query=value")
+		got := id.String()
+		want := "test/path#fragment?query=value"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("default encoder with spaces", func(t *testing.T) {
+		id := NewTreeNodeId("hello world")
+		got := id.String()
+		want := "hello world"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("child inherits default encoder", func(t *testing.T) {
+		parent := NewTreeNodeId("parent")
+		child := NewChildTreeId("child with space", parent)
+		got := child.String()
+		want := "parent/child with space"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+}
+
+func TestTreeIdEncodingPassthru(t *testing.T) {
+	t.Run("passthru encoder preserves label as-is", func(t *testing.T) {
+		id := NewTreeNodeId("hello", PassthruEncoder)
+		got := id.String()
+		want := "hello"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("passthru encoder with special chars", func(t *testing.T) {
+		id := NewTreeNodeId("test/path#frag?a=1&b=2", PassthruEncoder)
+		got := id.String()
+		want := "test/path#frag?a=1&b=2"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("passthru encoder decode returns same value", func(t *testing.T) {
+		id := NewTreeNodeId("encoded%20value", PassthruEncoder)
+		got := id.Label()
+		want := "encoded%20value"
+		if got != want {
+			t.Errorf("Label() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("passthru encoder with unicode", func(t *testing.T) {
+		id := NewTreeNodeId("hello 世界 🌍", PassthruEncoder)
+		got := id.String()
+		want := "hello 世界 🌍"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("child inherits passthru encoder", func(t *testing.T) {
+		parent := NewTreeNodeId("parent", PassthruEncoder)
+		child := NewChildTreeId("child/path", parent)
+		got := child.String()
+		want := "parent/child/path"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+}
+
+func TestTreeIdEncodingQueryEscape(t *testing.T) {
+	t.Run("query escape encoder escapes spaces", func(t *testing.T) {
+		id := NewTreeNodeId("hello world", QueryEscapeEncoder)
+		got := id.String()
+		want := "hello+world"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("query escape encoder decodes correctly", func(t *testing.T) {
+		id := NewTreeNodeId("hello world", QueryEscapeEncoder)
+		got := id.Label()
+		want := "hello world"
+		if got != want {
+			t.Errorf("Label() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("query escape encoder escapes special chars", func(t *testing.T) {
+		id := NewTreeNodeId("path/to/file", QueryEscapeEncoder)
+		got := id.String()
+		want := "path%2Fto%2Ffile"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("query escape encoder decodes special chars", func(t *testing.T) {
+		id := NewTreeNodeId("path/to/file", QueryEscapeEncoder)
+		got := id.Label()
+		want := "path/to/file"
+		if got != want {
+			t.Errorf("Label() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("query escape encoder with query params", func(t *testing.T) {
+		id := NewTreeNodeId("a=1&b=2", QueryEscapeEncoder)
+		got := id.String()
+		want := "a%3D1%26b%3D2"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("query escape encoder decodes query params", func(t *testing.T) {
+		id := NewTreeNodeId("a=1&b=2", QueryEscapeEncoder)
+		got := id.Label()
+		want := "a=1&b=2"
+		if got != want {
+			t.Errorf("Label() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("child inherits query escape encoder", func(t *testing.T) {
+		parent := NewTreeNodeId("parent name", QueryEscapeEncoder)
+		child := NewChildTreeId("child name", parent)
+		got := child.String()
+		want := "parent+name/child+name"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+		if got := child.Label(); got != "child name" {
+			t.Errorf("Label() = %q, want %q", got, "child name")
+		}
+	})
+
+	t.Run("query escape encoder with empty string", func(t *testing.T) {
+		id := NewTreeNodeId("", QueryEscapeEncoder)
+		got := id.String()
+		want := ""
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+}
+
+func TestTreeIdFromString(t *testing.T) {
+	t.Run("from string single part", func(t *testing.T) {
+		id := FromString("root")
+		got := id.String()
+		want := "root"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+		if got := id.Label(); got != want {
+			t.Errorf("Label() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("from string two parts", func(t *testing.T) {
+		id := FromString("parent/child")
+		got := id.String()
+		want := "parent/child"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+		if got := id.Label(); got != "child" {
+			t.Errorf("Label() = %q, want %q", got, "child")
+		}
+	})
+
+	t.Run("from string multiple parts", func(t *testing.T) {
+		id := FromString("a/b/c/d")
+		got := id.String()
+		want := "a/b/c/d"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+		if got := id.Label(); got != "d" {
+			t.Errorf("Label() = %q, want %q", got, "d")
+		}
+	})
+
+	t.Run("from string empty", func(t *testing.T) {
+		id := FromString("")
+		got := id.String()
+		want := ""
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("from string with spaces using passthru", func(t *testing.T) {
+		id := FromString("hello world", PassthruEncoder)
+		got := id.String()
+		want := "hello world"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+		if got := id.Label(); got != want {
+			t.Errorf("Label() = %q, want %q", got, want)
+		}
+	})
+
+	t.Run("from string with escaped chars using query escape", func(t *testing.T) {
+		id := FromString("hello+world", QueryEscapeEncoder)
+		got := id.String()
+		want := "hello+world"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+		if got := id.Label(); got != "hello world" {
+			t.Errorf("Label() = %q, want %q", got, "hello world")
+		}
+	})
+
+	t.Run("from string nested with escaped chars", func(t *testing.T) {
+		id := FromString("parent+name/child+name", QueryEscapeEncoder)
+		got := id.String()
+		want := "parent+name/child+name"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+		if got := id.Label(); got != "child name" {
+			t.Errorf("Label() = %q, want %q", got, "child name")
+		}
+	})
+
+	t.Run("from string with percent encoded slash", func(t *testing.T) {
+		id := FromString("path%2Fto%2Ffile", QueryEscapeEncoder)
+		got := id.String()
+		want := "path%2Fto%2Ffile"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+		if got := id.Label(); got != "path/to/file" {
+			t.Errorf("Label() = %q, want %q", got, "path/to/file")
+		}
+	})
+
+	t.Run("roundtrip with passthru encoder", func(t *testing.T) {
+		original := NewTreeNodeId("test-label", PassthruEncoder)
+		id := FromString(original.String(), PassthruEncoder)
+
+		if got := id.String(); got != original.String() {
+			t.Errorf("String() = %q, want %q", got, original.String())
+		}
+		if got := id.Label(); got != original.Label() {
+			t.Errorf("Label() = %q, want %q", got, original.Label())
+		}
+	})
+
+	t.Run("roundtrip with query escape encoder", func(t *testing.T) {
+		original := NewTreeNodeId("hello world", QueryEscapeEncoder)
+		id := FromString(original.String(), QueryEscapeEncoder)
+
+		if got := id.String(); got != original.String() {
+			t.Errorf("String() = %q, want %q", got, original.String())
+		}
+		if got := id.Label(); got != original.Label() {
+			t.Errorf("Label() = %q, want %q", got, original.Label())
+		}
+	})
+
+	t.Run("from string with default encoder", func(t *testing.T) {
+		// No encoder specified, should use PassthruEncoder
+		id := FromString("test/label")
+		got := id.String()
+		want := "test/label"
+		if got != want {
+			t.Errorf("String() = %q, want %q", got, want)
+		}
+	})
+}

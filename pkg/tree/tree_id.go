@@ -6,9 +6,9 @@ import (
 )
 
 type TreeId struct {
-	lineage      []string
-	label        string
-	labelEndoder LabelEncoder
+	encodedLineage []string
+	decodedLabel   string
+	labelEndoder   LabelEncoder
 }
 
 func (id TreeId) Equals(oth TreeId) bool {
@@ -16,11 +16,11 @@ func (id TreeId) Equals(oth TreeId) bool {
 }
 
 func (id TreeId) String() string {
-	return strings.Join(append(id.lineage, id.label), "/")
+	return strings.Join(append(id.encodedLineage, id.labelEndoder.Encode(id.decodedLabel)), "/")
 }
 
 func (id TreeId) Label() string {
-	return id.labelEndoder.Decode(id.label)
+	return id.labelEndoder.Decode(id.decodedLabel)
 }
 
 func NewTreeNodeId(label string, labelEndoder ...LabelEncoder) TreeId {
@@ -35,18 +35,18 @@ func NewTreeNodeId(label string, labelEndoder ...LabelEncoder) TreeId {
 	}
 
 	return TreeId{
-		lineage:      []string{},
-		label:        localLabelEncoder.Encode(label),
-		labelEndoder: localLabelEncoder,
+		encodedLineage: []string{},
+		decodedLabel:   label,
+		labelEndoder:   localLabelEncoder,
 	}
 }
 
 func NewChildTreeId(label string, parentId TreeId) TreeId {
-	lineage := append(parentId.lineage, parentId.label)
+	lineage := append(parentId.encodedLineage, parentId.labelEndoder.Encode(parentId.decodedLabel))
 	return TreeId{
-		lineage:      lineage,
-		label:        label,
-		labelEndoder: parentId.labelEndoder,
+		encodedLineage: lineage,
+		decodedLabel:   label,
+		labelEndoder:   parentId.labelEndoder,
 	}
 }
 
@@ -86,18 +86,15 @@ func FromString(idString string, labelEndoder ...LabelEncoder) TreeId {
 	}
 
 	parts := strings.Split(idString, "/")
-	decodedParts := make([]string, 0, len(parts))
-	for i, part := range parts {
-		decodedParts[i] = localLabelEncoder.Decode(part)
-	}
+
 	if len(parts) == 1 {
-		return NewTreeNodeId(decodedParts[0])
+		return NewTreeNodeId(localLabelEncoder.Decode(parts[0]), localLabelEncoder)
 	}
 
 	return TreeId{
-		lineage:      decodedParts[:len(decodedParts)-2],
-		label:        decodedParts[len(decodedParts)-1],
-		labelEndoder: localLabelEncoder,
+		encodedLineage: parts[:len(parts)-1],
+		decodedLabel:   localLabelEncoder.Decode(parts[len(parts)-1]),
+		labelEndoder:   localLabelEncoder,
 	}
 }
 

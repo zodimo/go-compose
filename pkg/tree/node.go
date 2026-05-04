@@ -52,11 +52,11 @@ func (n *TreeNode) FindById(id TreeId) (Tree, bool) {
 	if n.id.Equals(id) {
 		return n, true
 	}
-	if strings.HasPrefix(n.id.String(), id.String()) {
+	if strings.HasPrefix(id.String(), n.id.String()) {
 		for _, child := range n.children {
-			_, found := child.FindById(id)
-			if found {
-				return child, true
+			found, ok := child.FindById(id)
+			if ok {
+				return found, true
 			}
 		}
 	}
