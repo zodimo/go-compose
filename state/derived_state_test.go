@@ -3,11 +3,14 @@ package state
 import (
 	"sync"
 	"testing"
+
+	"github.com/zodimo/go-compose/state/core"
+	"github.com/zodimo/go-compose/state/internal"
 )
 
-func newMockMutableValue[T any](value T) *mutableValue {
+func newMockMutableValue[T any](value T) *internal.MutableValue {
 	mv := NewMutableValue(value, nil, nil)
-	return mv.(*mutableValue)
+	return mv.(*internal.MutableValue)
 }
 
 func TestDerivedState_BasicCalculation(t *testing.T) {
@@ -255,22 +258,22 @@ func TestDerivedState_SubscriptionCleanup(t *testing.T) {
 	_ = derived.Get()
 
 	// Check subscription count on mvA
-	if mvA.subscribers.Count() != 1 {
-		t.Errorf("Expected 1 subscriber on mvA, got %d", mvA.subscribers.Count())
+	if internal.MutableValueSubscribers(mvA).Count() != 1 {
+		t.Errorf("Expected 1 subscriber on mvA, got %d", internal.MutableValueSubscribers(mvA).Count())
 	}
-	if mvB.subscribers.Count() != 0 {
-		t.Errorf("Expected 0 subscribers on mvB, got %d", mvB.subscribers.Count())
+	if internal.MutableValueSubscribers(mvB).Count() != 0 {
+		t.Errorf("Expected 0 subscribers on mvB, got %d", internal.MutableValueSubscribers(mvB).Count())
 	}
 
 	// Toggle to false: should unsubscribe from mvA, subscribe to mvB
 	toggle.Set(false)
 	_ = derived.Get()
 
-	if mvA.subscribers.Count() != 0 {
-		t.Errorf("Expected 0 subscribers on mvA after toggle, got %d", mvA.subscribers.Count())
+	if internal.MutableValueSubscribers(mvA).Count() != 0 {
+		t.Errorf("Expected 0 subscribers on mvA after toggle, got %d", internal.MutableValueSubscribers(mvA).Count())
 	}
-	if mvB.subscribers.Count() != 1 {
-		t.Errorf("Expected 1 subscriber on mvB after toggle, got %d", mvB.subscribers.Count())
+	if internal.MutableValueSubscribers(mvB).Count() != 1 {
+		t.Errorf("Expected 1 subscriber on mvB after toggle, got %d", internal.MutableValueSubscribers(mvB).Count())
 	}
 }
 
@@ -310,7 +313,7 @@ func TestDerivedState_ChainedInvalidation(t *testing.T) {
 }
 
 func TestSubscriptionManager_MultipleSubscribers(t *testing.T) {
-	sm := NewSubscriptionManager()
+	sm := core.NewSubscriptionManager()
 
 	called1 := false
 	called2 := false

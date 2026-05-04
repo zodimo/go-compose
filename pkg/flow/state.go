@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 
 	"github.com/zodimo/go-compose/state"
+	"github.com/zodimo/go-compose/state/core"
 )
 
 // StateFlow defines the read-only behavior
@@ -55,7 +56,7 @@ type MutableStateFlow[T any] struct {
 	policy      state.MutationPolicy[T]
 
 	// Subscription manager for state change notifications (push-based invalidation)
-	stateSubscribers *state.SubscriptionManager
+	stateSubscribers *core.SubscriptionManager
 
 	// subscriptionCount tracks the number of active subscribers
 	subscriptionCount *MutableStateFlow[int]
@@ -74,7 +75,7 @@ func NewMutableStateFlow[T any](initial T, opts ...StateFlowOption[T]) *MutableS
 
 	flow := &MutableStateFlow[T]{
 		subscribers:      make([]chan T, 0),
-		stateSubscribers: state.NewSubscriptionManager(),
+		stateSubscribers: core.NewSubscriptionManager(),
 		policy:           config.policy,
 	}
 	flow.value.Store(initial)

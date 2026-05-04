@@ -3,6 +3,8 @@ package state
 import (
 	"sync"
 	"sync/atomic"
+
+	"github.com/zodimo/go-compose/state/core"
 )
 
 var _ ValueTyped[any] = (*DerivedState[any])(nil)
@@ -31,11 +33,11 @@ type DerivedState[T any] struct {
 
 	// Internal invalidation propagation - notifies downstream derived states
 	// that they need to recalculate. This happens during invalidation.
-	invalidationSubs *SubscriptionManager
+	invalidationSubs *core.SubscriptionManager
 
 	// External value-change notifications - notifies user callbacks only
 	// when the computed value actually changes. NOT called during invalidation.
-	subscribers *SubscriptionManager
+	subscribers *core.SubscriptionManager
 }
 
 // DerivedStateOf creates a new DerivedState with the given calculation function.
@@ -44,8 +46,8 @@ func DerivedStateOf[T any](calculation func() T) *DerivedState[T] {
 	ds := &DerivedState[T]{
 		calculation:      calculation,
 		policy:           StructuralEqualityPolicy[T](),
-		invalidationSubs: NewSubscriptionManager(),
-		subscribers:      NewSubscriptionManager(),
+		invalidationSubs: core.NewSubscriptionManager(),
+		subscribers:      core.NewSubscriptionManager(),
 	}
 	ds.invalid.Store(true) // Start as invalid to trigger initial calculation
 	return ds
@@ -56,8 +58,8 @@ func DerivedStateOfCustom[T any](calculation func() T, compare func(T, T) bool) 
 	ds := &DerivedState[T]{
 		calculation:      calculation,
 		policy:           NewMutationPolicy(compare, nil),
-		invalidationSubs: NewSubscriptionManager(),
-		subscribers:      NewSubscriptionManager(),
+		invalidationSubs: core.NewSubscriptionManager(),
+		subscribers:      core.NewSubscriptionManager(),
 	}
 	ds.invalid.Store(true)
 	return ds
@@ -68,8 +70,8 @@ func DerivedStateWithPolicy[T any](calculation func() T, policy MutationPolicy[T
 	ds := &DerivedState[T]{
 		calculation:      calculation,
 		policy:           policy,
-		invalidationSubs: NewSubscriptionManager(),
-		subscribers:      NewSubscriptionManager(),
+		invalidationSubs: core.NewSubscriptionManager(),
+		subscribers:      core.NewSubscriptionManager(),
 	}
 	ds.invalid.Store(true)
 	return ds

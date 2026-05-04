@@ -2,13 +2,15 @@ package state
 
 import (
 	"testing"
+
+	"github.com/zodimo/go-compose/state/internal"
 )
 
 func TestMustRememberWithNilInterface(t *testing.T) {
 	mv := NewMutableValue(nil, nil, nil)
 
 	// if T is an interface we can support nil
-	mvTyped, err := MutableValueToTyped[error](mv)
+	mvTyped, err := internal.MutableValueToTyped[error](mv)
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)
 	}

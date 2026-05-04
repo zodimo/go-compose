@@ -1,90 +1,35 @@
 package state
 
-type StateOption func(*StateOptions)
+import (
+	"github.com/zodimo/go-compose/state/core"
+)
 
-type StateOptions struct {
-	Compare     func(any, any) bool
-	OnForgotten func()
-}
+type StateOption = core.StateOption
 
-func WithCompare(compare func(any, any) bool) StateOption {
-	if compare == nil {
-		panic("WithCompare: compare cannot be nil")
-	}
-	return func(opts *StateOptions) {
-		opts.Compare = compare
-	}
-}
+type StateOptions = core.StateOptions
 
-func WithOnForgotten(onForgotten func()) StateOption {
-	if onForgotten == nil {
-		panic("WithOnForgotten: onForgotten cannot be nil")
-	}
-	return func(o *StateOptions) {
-		o.OnForgotten = onForgotten
-	}
-}
+var WithCompare = core.WithCompare
 
-type StateTypedOption[T any] func(*StateTypedOptions[T])
+var WithOnForgotten = core.WithOnForgotten
 
-type StateTypedOptions[T any] struct {
-	Compare     func(T, T) bool
-	OnForgotten func()
-}
+type StateTypedOption[T any] = core.StateTypedOption[T]
+
+type StateTypedOptions[T any] = core.StateTypedOptions[T]
 
 func WithTypedCompare[T any](compare func(T, T) bool) StateTypedOption[T] {
-	if compare == nil {
-		panic("WithTypedCompare: compare cannot be nil")
-	}
-	return func(o *StateTypedOptions[T]) {
-		o.Compare = compare
-	}
+	return core.WithTypedCompare(compare)
 }
 
 func WithTypedOnForgotten[T any](onForgotten func()) StateTypedOption[T] {
-	if onForgotten == nil {
-		panic("WithTypedOnForgotten: onForgotten cannot be nil")
-	}
-	return func(o *StateTypedOptions[T]) {
-		o.OnForgotten = onForgotten
-	}
+	return core.WithTypedOnForgotten[T](onForgotten)
 }
 
-type SupportState interface {
-	Remember(key string, initial func() any, options ...StateOption) MutableValue // persistent state
+type SupportState = core.SupportState
 
-	// deprecate this one to get closer to jetpack compose
-	// alias for Remember
-	// Deprecated: use Remember instead
-	State(key string, initial func() any, options ...StateOption) MutableValue // persistent state
-}
+type Value = core.Value
 
-type Value interface {
-	Get() any
-	Subscribe(callback func()) Subscription
-}
+type ValueTyped[T any] = core.ValueTyped[T]
 
-type ValueTyped[T any] interface {
-	Get() T
-	Subscribe(callback func()) Subscription
-}
+type MutableValue = core.MutableValue
 
-type MutableValue interface {
-	Value
-	Set(value any)
-	CompareAndSet(expect, update any) bool
-	Update(func(any) any)
-	UpdateAndGet(func(any) any) any
-	GetAndUpdate(func(any) any) any
-}
-
-type MutableValueTyped[T any] interface {
-	ValueTyped[T]
-	Set(value T)
-	CompareAndSet(expect, update T) bool
-	Update(func(T) T)
-	UpdateAndGet(func(T) T) T
-	GetAndUpdate(func(T) T) T
-
-	Unwrap() MutableValue
-}
+type MutableValueTyped[T any] = core.MutableValueTyped[T]

@@ -4,6 +4,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/zodimo/go-compose/state/internal"
 )
 
 func TestMutableValue_AtomicUpdates(t *testing.T) {
@@ -49,7 +51,7 @@ func TestMutableValue_AtomicUpdates(t *testing.T) {
 }
 
 func TestMutableValueTyped_AtomicUpdates(t *testing.T) {
-	mv := newMutableState(10)
+	mv := internal.NewMutableState(10)
 
 	// CompareAndSet
 	if !mv.CompareAndSet(10, 20) {
@@ -91,7 +93,7 @@ func TestMutableValueTyped_AtomicUpdates(t *testing.T) {
 }
 
 func TestMutableValue_Concurrency(t *testing.T) {
-	mv := newMutableState(0)
+	mv := internal.NewMutableState(0)
 	var wg sync.WaitGroup
 	routines := 50
 	increments := 100
@@ -120,7 +122,7 @@ func TestWrappers(t *testing.T) {
 	// Let's test the wrappers explicitly.
 
 	// 1. Typed -> Untyped (Unwrap)
-	typed := newMutableState(10)
+	typed := internal.NewMutableState(10)
 	untyped := typed.Unwrap() // returns MutableValue
 
 	untyped.Update(func(current any) any {
@@ -134,7 +136,7 @@ func TestWrappers(t *testing.T) {
 	// Create untyped
 	baseUntyped := NewMutableValue(100, nil, nil)
 	// Wrap as typed
-	wrappedTyped, err := MutableValueToTyped[int](baseUntyped)
+	wrappedTyped, err := internal.MutableValueToTyped[int](baseUntyped)
 	if err != nil {
 		t.Fatalf("MutableValueToTyped failed: %v", err)
 	}

@@ -5,13 +5,14 @@ import (
 	"reflect"
 
 	"github.com/zodimo/go-compose/state"
+	"github.com/zodimo/go-compose/state/core"
 )
 
 type PersistentStateInterface = state.PersistentState
 
 type PersistentState struct {
 	scopes      map[string]state.MutableValue
-	subscribers *state.SubscriptionManager
+	subscribers *core.SubscriptionManager
 
 	frameLifecycleHandler *FrameLifecycleHandler
 }
@@ -42,7 +43,7 @@ func NewPersistentState(options ...PersistentStateOption) PersistentStateInterfa
 
 	return &PersistentState{
 		scopes:                opts.Storage,
-		subscribers:           state.NewSubscriptionManager(),
+		subscribers:           core.NewSubscriptionManager(),
 		frameLifecycleHandler: frameLifecycleHandler,
 	}
 }

@@ -1,14 +1,15 @@
-package state
+package helpers
 
 import (
 	"fmt"
 	"reflect"
 
+	"github.com/zodimo/go-compose/state/core"
 	"github.com/zodimo/go-compose/state/internal"
 )
 
-func Remember[T any](c SupportState, key string, initial func() T, options ...StateTypedOption[T]) (MutableValueTyped[T], error) {
-	opts := StateTypedOptions[T]{
+func Remember[T any](c core.SupportState, key string, initial func() T, options ...core.StateTypedOption[T]) (core.MutableValueTyped[T], error) {
+	opts := core.StateTypedOptions[T]{
 		Compare: func(t1, t2 T) bool {
 			return reflect.DeepEqual(t1, t2)
 		},
@@ -23,10 +24,10 @@ func Remember[T any](c SupportState, key string, initial func() T, options ...St
 	mv := c.State(
 		key,
 		func() any { return initial() },
-		WithCompare(func(a, b any) bool {
+		core.WithCompare(func(a, b any) bool {
 			return opts.Compare(typeAssertUnsafe[T](a, isNillable), typeAssertUnsafe[T](b, isNillable))
 		}),
-		WithOnForgotten(opts.OnForgotten),
+		core.WithOnForgotten(opts.OnForgotten),
 	)
 	anyMv, ok := mv.(*internal.MutableValue)
 	if !ok {
@@ -35,7 +36,7 @@ func Remember[T any](c SupportState, key string, initial func() T, options ...St
 	return internal.MutableValueToTyped[T](anyMv)
 }
 
-func RememberUnsafe[T any](c SupportState, key string, initial func() T, options ...StateTypedOption[T]) MutableValueTyped[T] {
+func RememberUnsafe[T any](c core.SupportState, key string, initial func() T, options ...core.StateTypedOption[T]) core.MutableValueTyped[T] {
 	mv, err := Remember[T](c, key, initial, options...)
 	if err != nil {
 		panic(err)
@@ -43,13 +44,13 @@ func RememberUnsafe[T any](c SupportState, key string, initial func() T, options
 	return mv
 }
 
-func MustRemember[T any](c SupportState, key string, initial func() T, options ...StateTypedOption[T]) MutableValueTyped[T] {
+func MustRemember[T any](c core.SupportState, key string, initial func() T, options ...core.StateTypedOption[T]) core.MutableValueTyped[T] {
 	return RememberUnsafe[T](c, key, initial, options...)
 }
 
 // Deprecated: use Remember instead
-func State[T any](c SupportState, key string, initial func() T, options ...StateTypedOption[T]) (MutableValueTyped[T], error) {
-	opts := StateTypedOptions[T]{
+func State[T any](c core.SupportState, key string, initial func() T, options ...core.StateTypedOption[T]) (core.MutableValueTyped[T], error) {
+	opts := core.StateTypedOptions[T]{
 		Compare: func(t1, t2 T) bool {
 			return reflect.DeepEqual(t1, t2)
 		},
@@ -64,10 +65,10 @@ func State[T any](c SupportState, key string, initial func() T, options ...State
 	mv := c.State(
 		key,
 		func() any { return initial() },
-		WithCompare(func(a, b any) bool {
+		core.WithCompare(func(a, b any) bool {
 			return opts.Compare(typeAssertUnsafe[T](a, isNillable), typeAssertUnsafe[T](b, isNillable))
 		}),
-		WithOnForgotten(opts.OnForgotten),
+		core.WithOnForgotten(opts.OnForgotten),
 	)
 	anyMv, ok := mv.(*internal.MutableValue)
 	if !ok {
@@ -77,7 +78,7 @@ func State[T any](c SupportState, key string, initial func() T, options ...State
 }
 
 // Deprecated: use RememberUnsafe instead
-func StateUnsafe[T any](c SupportState, key string, initial func() T, options ...StateTypedOption[T]) MutableValueTyped[T] {
+func StateUnsafe[T any](c core.SupportState, key string, initial func() T, options ...core.StateTypedOption[T]) core.MutableValueTyped[T] {
 	mv, err := State[T](c, key, initial, options...)
 	if err != nil {
 		panic(err)
@@ -86,7 +87,7 @@ func StateUnsafe[T any](c SupportState, key string, initial func() T, options ..
 }
 
 // Deprecated: use MustState instead
-func MustState[T any](c SupportState, key string, initial func() T, options ...StateTypedOption[T]) MutableValueTyped[T] {
+func MustState[T any](c core.SupportState, key string, initial func() T, options ...core.StateTypedOption[T]) core.MutableValueTyped[T] {
 	return StateUnsafe[T](c, key, initial, options...)
 }
 
