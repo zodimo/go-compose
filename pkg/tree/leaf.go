@@ -28,6 +28,13 @@ func (n *TreeLeaf) FindById(id TreeId) (Tree, bool) {
 	return nil, false
 }
 
+func (n *TreeLeaf) FoldIn(initial interface{}, operation func(carry interface{}, item Tree) interface{}) interface{} {
+	return operation(initial, n)
+}
+func (n *TreeLeaf) FoldOut(initial interface{}, operation func(element Tree, carry interface{}) interface{}) interface{} {
+	return operation(n, initial)
+}
+
 func (l *TreeLeaf) isTree() {}
 
 // Leaf

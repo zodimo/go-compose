@@ -13,6 +13,9 @@ type Tree interface {
 	isTree()
 
 	FindById(TreeId) (Tree, bool)
+
+	FoldIn(initial interface{}, operation func(acc interface{}, item Tree) interface{}) interface{}
+	FoldOut(initial interface{}, operation func(element Tree, acc interface{}) interface{}) interface{}
 }
 
 type TreeBuilder interface {

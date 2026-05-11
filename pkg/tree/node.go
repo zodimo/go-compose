@@ -63,6 +63,32 @@ func (n *TreeNode) FindById(id TreeId) (Tree, bool) {
 	return nil, false
 }
 
+func (n *TreeNode) FoldIn(initial interface{}, operation func(carry interface{}, item Tree) interface{}) interface{} {
+	carry := initial
+
+	// Recurse into children (Folding Inwward)
+	// Iterate backwards to simulate foldr without mutating the original slice
+	for i := len(n.children) - 1; i >= 0; i-- {
+		carry = n.children[i].FoldIn(carry, operation)
+	}
+
+	// Process current node
+	carry = operation(carry, n)
+	return carry
+
+}
+
+func (n *TreeNode) FoldOut(initial interface{}, operation func(element Tree, carry interface{}) interface{}) interface{} {
+	// Process current node
+	carry := operation(n, initial)
+
+	// Recurse into children (Folding Outward)
+	for _, child := range n.children {
+		carry = child.FoldOut(carry, operation)
+	}
+	return carry
+}
+
 func (n *TreeNode) isTree() {}
 
 // TreeNode
