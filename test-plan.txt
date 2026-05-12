@@ -1,0 +1,15 @@
+Ah, the user asked "What about row height constraints ?"
+In `Table`, we currently don't constrain the row height.
+Usually a table row in Material 3 has a standard minimum height, or we can add `MinHeight` to `TableOptions` or `RowOptions`.
+But `pkg/x/m3table/table.go` uses `row.Row`. We can apply a `MinHeight` modifier to the `row.Row` for both headers and cells.
+Let's see if there's a standard Material 3 table row height. The Material 3 spec for Data tables says:
+Row height: 52dp
+Header row height: 56dp
+
+We can add `MinHeight` modifier to the row.
+Wait, let's look at `modifiers/size/constructor.go` to see if we have `MinHeight`.
+Yes, `MinHeight(minHeight int) ui.Modifier`.
+
+Let's modify `pkg/x/m3table/table.go` to add a default `MinHeight` to rows, or maybe pass it via `TableOptions`.
+Since it's a basic table, maybe we can just hardcode or provide options.
+Let's provide `MinRowHeight unit.Dp` and `MinHeaderRowHeight unit.Dp` in `TableOptions`.
