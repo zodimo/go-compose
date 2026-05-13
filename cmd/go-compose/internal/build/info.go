@@ -13,6 +13,7 @@ type BuildInfo struct {
 	Key       string // Path to keystore
 	Password  string // Keystore password
 	Archs     []string
+	UseTinygo bool   // Use TinyGo compiler for smaller binaries
 }
 
 type Semver struct {

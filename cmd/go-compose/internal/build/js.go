@@ -2,6 +2,7 @@ package build
 
 import (
 	"bytes"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"os"
@@ -14,19 +15,32 @@ import (
 )
 
 // BuildJS builds the package at pkgPath for the JS/WASM target and writes the output to outputDir.
-func BuildJS(outputDir string, pkgPath string, ldflags string) error {
+func BuildJS(outputDir string, pkgPath string, ldflags string, useTinygo bool) error {
 
 	if err := os.MkdirAll(outputDir, 0o700); err != nil {
 		return err
 	}
 
-	// 1. Build WASM binary
-	buildArgs := []string{"build"}
-	if ldflags != "" {
-		buildArgs = append(buildArgs, "-ldflags", ldflags)
+	// Auto-disable TinyGo for WASM targets due to net/http compatibility issues
+	// See: https://github.com/tinygo-org/tinygo/issues/4420
+	if useTinygo {
+		fmt.Println("Note: TinyGo disabled for WASM target (net/http compatibility issues)")
+		fmt.Println("Using standard Go with size optimizations instead...")
+		useTinygo = false
 	}
-	buildArgs = append(buildArgs, "-o", filepath.Join(outputDir, "main.wasm"), pkgPath)
 
+	// 1. Build WASM binary with standard Go
+	// Apply default size optimizations if no custom ldflags provided
+	effectiveLdflags := ldflags
+	if effectiveLdflags == "" {
+		effectiveLdflags = "-s -w"
+		fmt.Println("Building WASM binary with size optimizations (-s -w)...")
+	} else {
+		fmt.Println("Building WASM binary...")
+	}
+
+	buildArgs := []string{"build", "-ldflags", effectiveLdflags}
+	buildArgs = append(buildArgs, "-o", filepath.Join(outputDir, "main.wasm"), pkgPath)
 	cmd := exec.Command("go", buildArgs...)
 	cmd.Env = append(
 		os.Environ(),
@@ -37,12 +51,17 @@ func BuildJS(outputDir string, pkgPath string, ldflags string) error {
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 
-	fmt.Println("Building WASM binary...")
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("go build failed: %w", err)
+		return fmt.Errorf("build failed: %w", err)
 	}
 
-	// 2. Generate HTML
+	// 2. Compress WASM file and report sizes
+	wasmPath := filepath.Join(outputDir, "main.wasm")
+	if err := compressAndReportSize(wasmPath); err != nil {
+		fmt.Printf("Warning: could not compress WASM: %v\n", err)
+	}
+
+	// 3. Generate HTML
 	// TODO: Get real name/icon from build info later
 	name := filepath.Base(pkgPath)
 	if name == "." || name == "/" {
@@ -244,3 +263,97 @@ const (
     });
 })();`
 )
+
+func compressAndReportSize(wasmPath string) error {
+	info, err := os.Stat(wasmPath)
+	if err != nil {
+		return err
+	}
+
+	originalSize := info.Size()
+
+	var bestSize int64 = originalSize
+	var bestMethod string = "uncompressed"
+
+	if _, err := exec.LookPath("brotli"); err == nil {
+		brPath := wasmPath + ".br"
+		brCmd := exec.Command("brotli", "-9", "-o", brPath, wasmPath)
+		if err := brCmd.Run(); err == nil {
+			if brInfo, err := os.Stat(brPath); err == nil {
+				if brInfo.Size() < bestSize {
+					bestSize = brInfo.Size()
+					bestMethod = "brotli"
+				}
+			}
+		}
+	}
+
+	compressedPath := wasmPath + ".gz"
+	compressedFile, err := os.Create(compressedPath)
+	if err != nil {
+		return err
+	}
+	defer compressedFile.Close()
+
+	gzipWriter, err := gzip.NewWriterLevel(compressedFile, gzip.BestCompression)
+	if err != nil {
+		return err
+	}
+	defer gzipWriter.Close()
+
+	originalFile, err := os.Open(wasmPath)
+	if err != nil {
+		return err
+	}
+	defer originalFile.Close()
+
+	_, err = io.Copy(gzipWriter, originalFile)
+	if err != nil {
+		return err
+	}
+
+	gzipWriter.Close()
+	compressedFile.Close()
+
+	compressedInfo, err := os.Stat(compressedPath)
+	if err != nil {
+		return err
+	}
+	gzSize := compressedInfo.Size()
+
+	if gzSize < bestSize {
+		bestSize = gzSize
+		bestMethod = "gzip"
+	}
+
+	reduction := float64(originalSize-bestSize) / float64(originalSize) * 100
+
+	fmt.Printf("WASM size: %s", formatBytes(originalSize))
+	if bestMethod != "uncompressed" {
+		fmt.Printf(" → %s (%s, %.1f%% reduction)", formatBytes(bestSize), bestMethod, reduction)
+	}
+	fmt.Println()
+	fmt.Printf("Compressed files created: %s, %s\n", wasmPath+".gz", wasmPath+".br")
+	fmt.Printf("Serve with %s compression for optimal transfer.\n", bestMethod)
+
+	return nil
+}
+
+func formatBytes(bytes int64) string {
+	const (
+		KB = 1024
+		MB = 1024 * KB
+		GB = 1024 * MB
+	)
+
+	switch {
+	case bytes >= GB:
+		return fmt.Sprintf("%.2f GB", float64(bytes)/float64(GB))
+	case bytes >= MB:
+		return fmt.Sprintf("%.2f MB", float64(bytes)/float64(MB))
+	case bytes >= KB:
+		return fmt.Sprintf("%.2f KB", float64(bytes)/float64(KB))
+	default:
+		return fmt.Sprintf("%d bytes", bytes)
+	}
+}

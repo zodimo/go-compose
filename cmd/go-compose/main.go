@@ -43,6 +43,8 @@ func usage() {
 	fmt.Println()
 	fmt.Println("Commands:")
 	fmt.Println("  build    Build the application for a specific target (android, js, desktop)")
+	fmt.Println("           Use -tinygo flag for smaller binaries")
 	fmt.Println("  serve    Serve the application for web development")
+	fmt.Println("           Use -tinygo flag for smaller binaries")
 	fmt.Println("  help     Show this help message")
 }

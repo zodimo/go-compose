@@ -13,6 +13,7 @@ func Run(args []string) error {
 		ldflags    = fs.String("ldflags", "", "Arguments to pass on each go tool link invocation")
 		androidAPI = fs.Int("api", 35, "Android API version (e.g., 35)")
 		ndkVersion = fs.String("ndk", "", "NDK version (e.g., 27.2.12479018)")
+		useTinygo  = fs.Bool("tinygo", false, "Use TinyGo compiler for smaller binaries (desktop/android only)")
 	)
 
 	if err := fs.Parse(args); err != nil {
@@ -29,14 +30,14 @@ func Run(args []string) error {
 		if *output == "" {
 			*output = "dist"
 		}
-		return BuildJS(*output, pkgPath, *ldflags)
+		return BuildJS(*output, pkgPath, *ldflags, *useTinygo)
 	case "android":
 		if *output == "" {
 			// output is optional in BuildAndroid logic, handled there
 		}
-		return BuildAndroid(*output, []string{pkgPath}, *androidAPI, *ndkVersion, *ldflags)
+		return BuildAndroid(*output, []string{pkgPath}, *androidAPI, *ndkVersion, *ldflags, *useTinygo)
 	case "desktop":
-		return BuildDesktop(*output, pkgPath, *ldflags)
+		return BuildDesktop(*output, pkgPath, *ldflags, *useTinygo)
 	default:
 		return fmt.Errorf("unknown target: %s", *target)
 	}

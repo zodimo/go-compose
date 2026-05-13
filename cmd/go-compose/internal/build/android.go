@@ -64,7 +64,7 @@ var (
 	}
 )
 
-func BuildAndroid(output string, args []string, androidAPI int, ndkVersion string, ldflags string) error {
+func BuildAndroid(output string, args []string, androidAPI int, ndkVersion string, ldflags string, useTinygo bool) error {
 	if len(args) == 0 {
 		return fmt.Errorf("package path required")
 	}
@@ -81,6 +81,7 @@ func BuildAndroid(output string, args []string, androidAPI int, ndkVersion strin
 		PkgPath:   pkgPath,
 		Archs:     []string{"arm64", "amd64"}, // Common archs
 		Tags:      "",
+		UseTinygo: useTinygo,
 	}
 
 	tmpDir, err := os.MkdirTemp("", "go-compose-android-*")
@@ -205,34 +206,55 @@ func compileAndroid(tmpDir string, tools *androidTools, bi *BuildInfo, ndkVersio
 			return err
 		}
 		libFile := filepath.Join(archDir, "libgio.so")
-		// Merge Android-specific ldflags with any user-supplied ldflags
-		androidLdflags := `-w -s -extldflags "-Wl,-z,max-page-size=16384,-z,common-page-size=4096"`
-		if ldflags != "" {
-			androidLdflags = ldflags + " " + androidLdflags
+
+		var cmd *exec.Cmd
+		if bi.UseTinygo {
+			// TinyGo build for Android - may have limited arch support
+			fmt.Printf("Building for %s with TinyGo (smaller binary)...\n", a)
+			buildArgs := []string{"build", "-target", fmt.Sprintf("android-%s", a)}
+			if ldflags != "" {
+				buildArgs = append(buildArgs, "-ldflags", ldflags)
+			}
+			buildArgs = append(buildArgs, "-o", libFile, bi.PkgPath)
+			cmd = exec.Command("tinygo", buildArgs...)
+			cmd.Env = append(
+				os.Environ(),
+				"CGO_ENABLED=1",
+				"CC="+clang,
+			)
+		} else {
+			// Standard Go build
+			fmt.Printf("Building for %s...\n", a)
+			// Merge Android-specific ldflags with any user-supplied ldflags
+			androidLdflags := `-w -s -extldflags "-Wl,-z,max-page-size=16384,-z,common-page-size=4096"`
+			if ldflags != "" {
+				androidLdflags = ldflags + " " + androidLdflags
+			}
+			cmd = exec.Command(
+				"go",
+				"build",
+				"-ldflags="+
+					androidLdflags,
+				"-buildmode=c-shared",
+				"-tags", bi.Tags,
+				"-o", libFile,
+				bi.PkgPath,
+			)
+			cmd.Env = append(
+				os.Environ(),
+				"GOOS=android",
+				"GOARCH="+a,
+				"GOARM=7",
+				"CGO_ENABLED=1",
+				"CC="+clang,
+			)
 		}
-		cmd := exec.Command(
-			"go",
-			"build",
-			"-ldflags="+androidLdflags,
-			"-buildmode=c-shared",
-			"-tags", bi.Tags,
-			"-o", libFile,
-			bi.PkgPath,
-		)
-		cmd.Env = append(
-			os.Environ(),
-			"GOOS=android",
-			"GOARCH="+a,
-			"GOARM=7",
-			"CGO_ENABLED=1",
-			"CC="+clang,
-		)
+
 		// Redirect output
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
 		builds.Go(func() error {
-			fmt.Printf("Building for %s...\n", a)
 			return cmd.Run()
 		})
 	}

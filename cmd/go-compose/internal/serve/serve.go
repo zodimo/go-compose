@@ -12,8 +12,9 @@ import (
 func Run(args []string) error {
 	fs := flag.NewFlagSet("serve", flag.ExitOnError)
 	var (
-		httpAddr = fs.String("http", ":8080", "HTTP bind address to serve")
-		pkgPath  = "."
+		httpAddr  = fs.String("http", ":8080", "HTTP bind address to serve")
+		useTinygo = fs.Bool("tinygo", false, "Use TinyGo compiler (auto-disabled for web targets)")
+		pkgPath   = "."
 	)
 
 	if err := fs.Parse(args); err != nil {
@@ -34,7 +35,7 @@ func Run(args []string) error {
 	fmt.Printf("Building %s for web...\n", pkgPath)
 	// Initial build
 	// TODO: Implement on-demand build handler for better DX
-	if err := build.BuildJS(tmpDir, pkgPath, ""); err != nil {
+	if err := build.BuildJS(tmpDir, pkgPath, "", *useTinygo); err != nil {
 		return fmt.Errorf("build failed: %w", err)
 	}
 
