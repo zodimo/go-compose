@@ -7,9 +7,13 @@ import (
 	"gioui.org/widget/material"
 )
 
-func defaultMaterialTheme() *material.Theme {
-	materialTheme := material.NewTheme()
-	materialTheme.Shaper = text.NewShaper(text.WithCollection(fonts.Collection()))
-
-	return materialTheme
+func defaultMaterialTheme() *BasicTheme {
+	mt := material.NewTheme()
+	mt.Shaper = text.NewShaper(text.WithCollection(fonts.Collection()))
+	return &BasicTheme{
+		Bg:         mt.Bg,
+		Fg:         mt.Fg,
+		ContrastBg: mt.ContrastBg,
+		ContrastFg: mt.ContrastFg,
+	}
 }

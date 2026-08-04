@@ -57,7 +57,7 @@ func Run(window *app.Window) error {
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, frameEvent)
 			gtx.Locale = enLocale
-			gtx = themeManager.Material3ThemeInit(gtx)
+			gtx = themeManager.Material3ThemeInit(gtx).(layout.Context)
 
 			composer := compose.NewComposer(api.ComposerWithStore(store))
 
@@ -120,8 +120,8 @@ func HomeScreen(navController *navigation.NavController) api.Composable {
 					"View Item 303",
 				),
 			),
-			column.WithSpacing(layout.SpaceAround),
-			column.WithAlignment(layout.Middle),
+			column.WithSpacing(column.SpaceAround),
+			column.WithAlignment(column.Middle),
 		)(c)
 	}
 }
@@ -149,8 +149,8 @@ func DetailsScreen(navController *navigation.NavController, entry *navigation.Ba
 					"Go Back",
 				),
 			),
-			column.WithSpacing(layout.SpaceAround),
-			column.WithAlignment(layout.Middle),
+			column.WithSpacing(column.SpaceAround),
+			column.WithAlignment(column.Middle),
 		)(c)
 	}
 }

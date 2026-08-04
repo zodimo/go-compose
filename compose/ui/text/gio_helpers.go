@@ -2,13 +2,13 @@ package text
 
 import (
 	gioFont "gioui.org/font"
-	"github.com/zodimo/go-compose/compose/ui/text/font"
+	"github.com/zodimo/go-compose/internal/textconvert"
 )
 
 // TextStyleFromGioFont converts a gio font.Font to a TextStyle.
 // This is useful for integrating with Gio's font system.
 func TextStyleFromGioFont(gf gioFont.Font) *TextStyle {
-	fontFamily, fontWeight, fontStyle := font.FromGioFont(gf)
+	fontFamily, fontWeight, fontStyle := textconvert.FromGioFont(gf)
 
 	return TextStyleFromOptions(
 		WithFontFamily(fontFamily),
@@ -23,7 +23,7 @@ func TextStyleFromGioFont(gf gioFont.Font) *TextStyle {
 func ToGioFont(ts *TextStyle) gioFont.Font {
 	ts = CoalesceTextStyle(ts, TextStyleUnspecified)
 
-	return font.ToGioFont(
+	return textconvert.ToGioFont(
 		ts.FontFamily(),
 		ts.FontWeight(),
 		ts.FontStyle(),

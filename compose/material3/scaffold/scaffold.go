@@ -9,7 +9,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/modifiers/weight"
 
-	"gioui.org/layout"
 )
 
 type FabPosition int
@@ -75,7 +74,7 @@ func Scaffold(content Composable, options ...ScaffoldOption) Composable {
 								opts.FloatingActionButtonPosition == FabPositionCenter,
 								box.Box(
 									opts.FloatingActionButton,
-									box.WithAlignment(layout.S), // Bottom Center
+					box.WithAlignment(box.S), // Bottom Center
 									// Add standard padding for FAB
 									box.WithModifier(padding_modifier.All(16).
 										// Wrapper must fill max to align FAB relative to screen
@@ -84,7 +83,7 @@ func Scaffold(content Composable, options ...ScaffoldOption) Composable {
 								),
 								box.Box(
 									opts.FloatingActionButton,
-									box.WithAlignment(layout.SE), // Bottom End
+					box.WithAlignment(box.SE), // Bottom End
 									// Add standard padding for FAB
 									box.WithModifier(padding_modifier.All(16).
 										// Wrapper must fill max to align FAB relative to screen

@@ -5,7 +5,6 @@ import (
 	"image"
 
 	"gioui.org/op/clip"
-	gioUnit "gioui.org/unit"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
@@ -35,7 +34,7 @@ type RoundedCornerShape struct {
 	BottomStart unit.Dp
 }
 
-func (r *RoundedCornerShape) CreateOutline(size image.Point, metric gioUnit.Metric) Outline {
+func (r *RoundedCornerShape) CreateOutline(size image.Point, metric Metric) Outline {
 	rValid := coalesceRoundedCornerShape(r, RoundedCornerShapeUnspecified)
 
 	var nw, ne, se, sw int
@@ -44,7 +43,7 @@ func (r *RoundedCornerShape) CreateOutline(size image.Point, metric gioUnit.Metr
 	// Note: Dp(0) is technically "specified" but means no rounding, which is correct.
 	// The uniform Radius field takes precedence when set.
 	if rValid.Radius.IsSpecified() {
-		radius := metric.Dp(unit.DpToGioUnitUnsafe(rValid.Radius))
+		radius := int(float32(rValid.Radius) * metric.PxPerDp)
 		nw, ne, se, sw = radius, radius, radius, radius
 	} else {
 		// Fall back to per-corner values if uniform Radius is not set or is 0
@@ -55,10 +54,10 @@ func (r *RoundedCornerShape) CreateOutline(size image.Point, metric gioUnit.Metr
 		bottomStart := rValid.BottomStart.TakeOrElse(unit.Dp(0))
 
 		if topStart > 0 || topEnd > 0 || bottomEnd > 0 || bottomStart > 0 {
-			nw = metric.Dp(unit.DpToGioUnitUnsafe(topStart))
-			ne = metric.Dp(unit.DpToGioUnitUnsafe(topEnd))
-			se = metric.Dp(unit.DpToGioUnitUnsafe(bottomEnd))
-			sw = metric.Dp(unit.DpToGioUnitUnsafe(bottomStart))
+			nw = int(float32(topStart) * metric.PxPerDp)
+			ne = int(float32(topEnd) * metric.PxPerDp)
+			se = int(float32(bottomEnd) * metric.PxPerDp)
+			sw = int(float32(bottomStart) * metric.PxPerDp)
 		}
 	}
 

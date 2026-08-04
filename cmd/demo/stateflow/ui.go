@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"gioui.org/layout"
-
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
@@ -89,11 +87,11 @@ func UI() api.Composable {
 					column.WithModifier(
 						padding.All(20),
 					),
-					column.WithAlignment(layout.Middle),
+					column.WithAlignment(column.Middle),
 				)(c)
 			},
 			box.WithModifier(size.FillMax()),
-			box.WithAlignment(layout.Center),
+			box.WithAlignment(box.Center),
 		)(c)
 	}
 }

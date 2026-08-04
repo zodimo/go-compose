@@ -4,7 +4,6 @@ import (
 	"image"
 	"image/color"
 
-	"gioui.org/layout"
 	"gioui.org/op/paint"
 	gioWidget "gioui.org/widget"
 
@@ -312,7 +311,7 @@ func SmallCardContent(title string) api.Composable {
 	return func(c api.Composer) api.Composer {
 		return box.Box(
 			m3text.TitleSmall(title),
-			box.WithAlignment(layout.Center),
+			box.WithAlignment(box.Center),
 		)(c)
 	}
 }
@@ -379,7 +378,7 @@ func ActionButtons() api.Composable {
 				),
 			),
 			box.WithModifier(padding.Horizontal(16, 16).Then(padding.Vertical(0, 16))),
-			box.WithAlignment(layout.E),
+			box.WithAlignment(box.E),
 		)(c)
 	}
 }
@@ -423,7 +422,5 @@ func CreateImageResource() graphics.ImageResource {
 	}
 
 	// graphics.ImageResource expects an ImageOp
-	return graphics.ImageResource{
-		ImageOp: paint.NewImageOp(img),
-	}
+	return graphics.NewImageResource(img)
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"gioui.org/layout"
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
@@ -29,7 +28,7 @@ func UI() api.Composable {
 						)(c)
 					},
 					box.WithModifier(weight.Weight(1)),
-					box.WithAlignment(layout.Center),
+			box.WithAlignment(box.Center),
 				),
 				// Bottom App Bar with FAB
 				bottomappbar.BottomAppBar(

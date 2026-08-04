@@ -47,7 +47,7 @@ func BenchmarkUI_Layout(b *testing.B) {
 		Metric:      unit.Metric{PxPerDp: 1, PxPerSp: 1},
 		Now:         time.Now(),
 	}
-	// Note: Material3ThemeInit expects a layout.Context and returns one.
+	// Note: Material3ThemeInit accepts any and returns any (opaque context pattern).
 	// It basically sets up the theme in the context.
 	// We should probably do this once if possible, but it might modify ops?
 	// Actually theme init usually just reads from context or sets values in context variable?
@@ -60,7 +60,7 @@ func BenchmarkUI_Layout(b *testing.B) {
 
 		// In the main loop:
 		// gtx = themeManager.Material3ThemeInit(gtx)
-		gtx = themeManager.Material3ThemeInit(gtx)
+		gtx = themeManager.Material3ThemeInit(gtx).(layout.Context)
 
 		cmd := rt.Run(gtx, composer, UI())
 		cmd.Apply(gtx.Ops)

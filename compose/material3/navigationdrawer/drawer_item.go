@@ -14,7 +14,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 
-	"gioui.org/widget"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
@@ -44,7 +43,7 @@ func NavigationDrawerItem(
 		key := c.GenerateID()
 		path := c.GetPath()
 		clickStatePath := key.String() + "/" + path.String() + "/draweritem_click"
-		clickWidget := c.State(clickStatePath, func() any { return &widget.Clickable{} }).Get().(*widget.Clickable)
+	clickWidget := c.State(clickStatePath, func() any { return clickable.NewGioClickable() }).Get().(*clickable.GioClickable)
 
 		return surface.Surface(
 			func(c Composer) Composer {

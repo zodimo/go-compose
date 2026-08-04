@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 
-	gioUnit "gioui.org/unit"
 	"github.com/zodimo/go-compose/pkg/floatutils"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 )
@@ -183,15 +182,6 @@ func (tu TextUnit) Compare(other TextUnit) int {
 	return 1
 }
 
-func (tu TextUnit) AsGioSp() gioUnit.Sp {
-	if !tu.IsSpecified() {
-		return gioUnit.Sp(0)
-	}
-	if tu.IsEm() {
-		panic("TextUnit is an EM unit, cannot convert to Sp")
-	}
-	return gioUnit.Sp(tu.Value())
-}
 
 // LerpTextUnit linearly interpolates between two TextUnits.
 func LerpTextUnit(start, stop TextUnit, fraction float32) TextUnit {

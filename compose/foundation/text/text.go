@@ -10,9 +10,10 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/platform"
 	"github.com/zodimo/go-compose/compose/ui/text"
-	"github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/internal/textconvert"
+	"github.com/zodimo/go-compose/internal/unitconvert"
 	"github.com/zodimo/go-compose/state"
 
 	"gioui.org/op"
@@ -140,24 +141,24 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 
 			// fmt.Printf("textStyle [%s]: %s\n", textValue, text.StringTextStyle(textStyle))
 			dims = layoutnode.FromGioDimensions(widget.Label{
-				Alignment:       style.TextAlignToGioTextAlignment(textStyle.TextAlign()),
+				Alignment:       textconvert.TextAlignToGioTextAlignment(textStyle.TextAlign()),
 				MaxLines:        textOptions.MaxLines,
 				Truncator:       textOptions.Truncator,
-				WrapPolicy:      style.LineBreakToGioWrapPolicy(textStyle.LineBreak()),
-				LineHeight:      textStyle.LineHeight().AsGioSp(),
+			WrapPolicy:      textconvert.LineBreakToGioWrapPolicy(textStyle.LineBreak()),
+			LineHeight:      unitconvert.TextUnitToGioSpUnsafe(textStyle.LineHeight()),
 				LineHeightScale: 0, // TODO how should this be handled?
 			}.Layout(
 				*gtx.ToGio(),
 				constructorArgs.textShaper.Shaper,
-				font.ToGioFont(
-					textStyle.FontFamily(),
-					textStyle.FontWeight(),
-					textStyle.FontStyle(),
-				),
-				textStyle.FontSize().AsGioSp(),
-				textValue,
-				textColor,
-			))
+			textconvert.ToGioFont(
+				textStyle.FontFamily(),
+				textStyle.FontWeight(),
+				textStyle.FontStyle(),
+			),
+			unitconvert.TextUnitToGioSpUnsafe(textStyle.FontSize()),
+			textValue,
+			textColor,
+		))
 			// }
 
 			textDecoration := style.TakeOrElseTextDecoration(textOptions.TextStyle.TextDecoration(), style.TextDecorationNone)

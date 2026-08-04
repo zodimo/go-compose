@@ -19,7 +19,8 @@ type themeColorResolver struct {
 }
 
 func (cr *themeColorResolver) Material3(reader ThemeColorReaderFunc) ThemeColor {
-	return reader(cr.tm.getMaterial3Theme())
+	tokenTheme := cr.tm.getMaterial3Theme()
+	return reader(&Theme{Scheme: tokenTheme.Scheme})
 }
 
 func (cr *themeColorResolver) Material(reader ThemeBasicColorReaderFunc) ThemeColor {

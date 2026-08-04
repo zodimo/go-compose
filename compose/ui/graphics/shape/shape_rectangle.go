@@ -3,9 +3,8 @@ package shape
 import (
 	"image"
 
-	"gioui.org/op"
 	"gioui.org/op/clip"
-	gioUnit "gioui.org/unit"
+	"github.com/zodimo/go-compose/internal/clipconvert"
 )
 
 var ShapeRectangle Shape = &rectangleShape{}
@@ -13,7 +12,7 @@ var ShapeRectangle Shape = &rectangleShape{}
 // RectangleShape
 type rectangleShape struct{}
 
-func (r *rectangleShape) CreateOutline(size image.Point, metric gioUnit.Metric) Outline {
+func (r *rectangleShape) CreateOutline(size image.Point, metric Metric) Outline {
 	return rectOutline{clip.Rect{Max: size}}
 }
 
@@ -48,30 +47,30 @@ type rectOutline struct {
 	clip.Rect
 }
 
-func (r rectOutline) Push(ops *op.Ops) clip.Stack {
-	return r.Rect.Push(ops)
+func (r rectOutline) Push(ops *clipconvert.Ops) clipconvert.Stack {
+	return clipconvert.NewStack(r.Rect.Push(ops.ToGio()))
 }
 
-func (r rectOutline) Op(ops *op.Ops) clip.Op {
-	return r.Rect.Op()
+func (r rectOutline) ClipOp(ops *clipconvert.Ops) clipconvert.ClipOp {
+	return clipconvert.NewClipOp(r.Rect.Op())
 }
 
-func (r rectOutline) Path(ops *op.Ops) clip.PathSpec {
-	return r.Rect.Path()
+func (r rectOutline) Path(ops *clipconvert.Ops) clipconvert.PathSpec {
+	return clipconvert.NewPathSpec(r.Rect.Path())
 }
 
 type rrectOutline struct {
 	clip.RRect
 }
 
-func (r rrectOutline) Push(ops *op.Ops) clip.Stack {
-	return r.RRect.Push(ops)
+func (r rrectOutline) Push(ops *clipconvert.Ops) clipconvert.Stack {
+	return clipconvert.NewStack(r.RRect.Push(ops.ToGio()))
 }
 
-func (r rrectOutline) Op(ops *op.Ops) clip.Op {
-	return r.RRect.Op(ops)
+func (r rrectOutline) ClipOp(ops *clipconvert.Ops) clipconvert.ClipOp {
+	return clipconvert.NewClipOp(r.RRect.Op(ops.ToGio()))
 }
 
-func (r rrectOutline) Path(ops *op.Ops) clip.PathSpec {
-	return r.RRect.Path(ops)
+func (r rrectOutline) Path(ops *clipconvert.Ops) clipconvert.PathSpec {
+	return clipconvert.NewPathSpec(r.RRect.Path(ops.ToGio()))
 }

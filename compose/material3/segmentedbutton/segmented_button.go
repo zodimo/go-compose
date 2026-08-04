@@ -13,7 +13,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
 
-	"gioui.org/widget"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
@@ -107,8 +106,8 @@ func SegmentedButton(
 		key := c.GenerateID()
 		path := c.GetPath()
 		clickStatePath := fmt.Sprintf("%d/%s/segment_click", key, path)
-		clickState := c.State(clickStatePath, func() any { return &widget.Clickable{} })
-		gioClickable := clickState.Get().(*widget.Clickable)
+		clickState := c.State(clickStatePath, func() any { return clickable.NewGioClickable() })
+		gioClickable := clickState.Get().(*clickable.GioClickable)
 
 		// Determine colors based on checked state
 		bgColor := opts.UnselectedColor

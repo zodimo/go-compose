@@ -10,8 +10,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
 
-	"gioui.org/layout"
-	"gioui.org/widget"
 	"git.sr.ht/~schnwalter/gio-mw/token"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
@@ -36,8 +34,8 @@ func FloatingActionButton(
 		key := c.GenerateID()
 		path := c.GetPath()
 		statePath := fmt.Sprintf("%d/%s/fab_clickable", key, path)
-		clickableState := c.State(statePath, func() any { return &widget.Clickable{} })
-		fabClickable := clickableState.Get().(*widget.Clickable)
+		clickableState := c.State(statePath, func() any { return clickable.NewGioClickable() })
+	fabClickable := clickableState.Get().(*clickable.GioClickable)
 
 		// Determine Elevation based on state
 		elevation := opts.Elevation
@@ -61,7 +59,7 @@ func FloatingActionButton(
 			fabModifier,
 			box.Box(
 				content,
-				box.WithAlignment(layout.Center),
+			box.WithAlignment(box.Center),
 				box.WithModifier(size.FillMax()),
 			),
 		)(c)
@@ -70,7 +68,7 @@ func FloatingActionButton(
 
 // SurfaceWithThemeDefaults wraps Surface.
 func SurfaceWithThemeDefaults(
-	fabClickable *widget.Clickable,
+	fabClickable *clickable.GioClickable,
 	elevation token.ElevationLevel,
 	opts FloatingActionButtonOptions,
 	fabModifier ui.Modifier,

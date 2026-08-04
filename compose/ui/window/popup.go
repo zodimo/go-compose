@@ -3,7 +3,7 @@ package window
 import (
 	"image"
 
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/internal/unitconvert"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/pkg/api"
 
@@ -75,8 +75,8 @@ func popupWidgetConstructor(opts PopupOptions) layoutnode.LayoutNodeWidgetConstr
 			pGtx := layoutnode.NewLayoutContext(&g)
 
 			// Apply offset if needed
-			xPx := pGtx.ToGio().Dp(unit.DpToGioUnitUnsafe(opts.OffsetX))
-			yPx := pGtx.ToGio().Dp(unit.DpToGioUnitUnsafe(opts.OffsetY))
+				xPx := pGtx.ToGio().Dp(unitconvert.DpToGioUnitUnsafe(opts.OffsetX))
+				yPx := pGtx.ToGio().Dp(unitconvert.DpToGioUnitUnsafe(opts.OffsetY))
 
 			op.Offset(image.Pt(xPx, yPx)).Add(pGtx.ToGio().Ops)
 

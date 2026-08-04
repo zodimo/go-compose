@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"gioui.org/layout"
-	"gioui.org/widget/material"
 	"git.sr.ht/~schnwalter/gio-mw/token"
 	"git.sr.ht/~schnwalter/gio-mw/wdk"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
@@ -47,10 +46,10 @@ func newTheColorHelper() ThemeColorHelper {
 
 // Runtime
 type ThemeManager interface {
-	materialTheme() *material.Theme
-	setMaterialTheme(theme *material.Theme)
+	materialTheme() *BasicTheme
+	setMaterialTheme(theme *BasicTheme)
 
-	Material3ThemeInit(gtx layout.Context) layout.Context
+	Material3ThemeInit(gtx any) any
 	setMaterial3Theme(gtx layout.Context, theme *token.Theme)
 	getMaterial3Theme() *token.Theme
 
@@ -62,7 +61,7 @@ var _ ThemeManager = (*themeManager)(nil)
 type themeManager struct {
 	mu                   sync.RWMutex
 	basicTheme           *BasicTheme
-	theme                *Theme
+	tokenTheme           *token.Theme
 	themeColorResolver   ThemeColorResolver
 	colorRoleDescriptors ColorRoleDescriptors
 }
@@ -76,43 +75,49 @@ func newThemeManager(theme *BasicTheme) ThemeManager {
 	return tm
 }
 
-func (tm *themeManager) materialTheme() *material.Theme {
+func (tm *themeManager) materialTheme() *BasicTheme {
 	tm.mu.RLock()
 	defer tm.mu.RUnlock()
 	return tm.basicTheme
-
 }
-func (tm *themeManager) setMaterialTheme(theme *material.Theme) {
+
+func (tm *themeManager) setMaterialTheme(theme *BasicTheme) {
 	tm.mu.Lock()
 	defer tm.mu.Unlock()
 	tm.basicTheme = theme
 }
 
-func (tm *themeManager) Material3ThemeInit(gtx layout.Context) layout.Context {
+func (tm *themeManager) Material3ThemeInit(gtx any) any {
 	tm.mu.Lock()
 	defer tm.mu.Unlock()
-	if tm.theme == nil {
-		tm.theme = defaultMaterial3Theme(gtx)
+
+	g, ok := gtx.(layout.Context)
+	if !ok {
+		panic("theme.Material3ThemeInit: gtx must be gioui.org/layout.Context")
 	}
 
-	gtx.Values = make(map[string]any)
-	wdk.InitMaterialThemeInContext(gtx, tm.theme)
-	return gtx
+	if tm.tokenTheme == nil {
+		tm.tokenTheme = defaultMaterial3Theme(g)
+	}
 
+	g.Values = make(map[string]any)
+	wdk.InitMaterialThemeInContext(g, tm.tokenTheme)
+	return g
 }
+
 func (tm *themeManager) setMaterial3Theme(gtx layout.Context, theme *token.Theme) {
 	tm.mu.Lock()
 	defer tm.mu.Unlock()
-	tm.theme = theme
+	tm.tokenTheme = theme
 }
 
 func (tm *themeManager) getMaterial3Theme() *token.Theme {
 	tm.mu.RLock()
 	defer tm.mu.RUnlock()
-	if tm.theme == nil {
+	if tm.tokenTheme == nil {
 		panic("material3Theme is nil")
 	}
-	return tm.theme
+	return tm.tokenTheme
 }
 
 func (tm *themeManager) ResolveColorDescriptor(desc ColorDescriptor) ThemeColor {

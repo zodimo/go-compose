@@ -35,7 +35,7 @@ func NewClickableNode(element ClickableElement) ChainNode {
 					clickableValue := state.MustRemember(
 						lno,
 						clickablePath,
-						func() *GioClickable { return &GioClickable{} },
+					func() *GioClickable { return NewGioClickable() },
 					)
 					clickable := clickableValue.Get()
 					element.clickableData.Clickable = clickable
@@ -47,7 +47,7 @@ func NewClickableNode(element ClickableElement) ChainNode {
 					return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 						clickable := element.clickableData.Clickable
 						onClick := element.clickableData.OnClick
-						if clickable.Clicked(*gtx.ToGio()) {
+					if clickable.Clicked(gtx) {
 							onClick()
 						}
 
@@ -56,7 +56,7 @@ func NewClickableNode(element ClickableElement) ChainNode {
 								backgroundWidget := func(gtx layout.Context) layout.Dimensions {
 									return layout.Dimensions{Size: gtx.Constraints.Min}
 								}
-								return material.Clickable(gtx, clickable, backgroundWidget)
+						return material.Clickable(gtx, clickable.impl.W, backgroundWidget)
 							},
 							func(gtx layout.Context) layout.Dimensions {
 								return layoutnode.ToGioDimensions(widget.Layout(layoutnode.NewLayoutContext(&gtx)))

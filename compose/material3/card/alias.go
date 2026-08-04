@@ -3,8 +3,6 @@ package card
 import (
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/state"
-
-	"gioui.org/widget"
 	"git.sr.ht/~schnwalter/gio-mw/widget/card"
 )
 
@@ -26,5 +24,3 @@ type m3CardChild = card.Child
 var m3CardImage = card.Image
 var m3CardContent = card.Content
 var m3CardContentCover = card.ContentCover
-
-type GioImage = widget.Image

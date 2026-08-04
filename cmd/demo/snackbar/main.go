@@ -6,6 +6,7 @@ import (
 
 	"gioui.org/app"
 	"gioui.org/io/system"
+	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/unit"
 
@@ -49,7 +50,7 @@ func run(window *app.Window) error {
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, frameEvent)
 			gtx.Locale = enLocale
-			gtx = themeManager.Material3ThemeInit(gtx)
+			gtx = themeManager.Material3ThemeInit(gtx).(layout.Context)
 
 			composer := compose.NewComposer(api.ComposerWithStore(store))
 			cmd := runtime.Run(gtx, composer, UI())

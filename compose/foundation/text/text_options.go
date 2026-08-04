@@ -6,6 +6,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
 	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/internal/textconvert"
 	"github.com/zodimo/go-maybe"
 
 	gioFont "gioui.org/font"
@@ -73,7 +74,7 @@ func WithTextStyleOptions(options ...text.TextStyleOption) TextOption {
 }
 
 func WithGioAlignment(alignment Alignment) TextOption {
-	return WithAlignment(style.FromGioTextAlign(alignment))
+	return WithAlignment(textconvert.FromGioTextAlign(alignment))
 }
 
 func WithAlignment(alignment style.TextAlign) TextOption {
@@ -94,7 +95,7 @@ func WithTruncator(truncator string) TextOption {
 
 // Deprecated: use WithTextStyle, WithAdditionalTextStyle or WithTextStyleOptions
 func WithWrapPolicy(wrapPolicy WrapPolicy) TextOption {
-	return WithTextStyleOptions(text.WithLineBreak(style.GioWrapPolicyToLineBreak(wrapPolicy)))
+	return WithTextStyleOptions(text.WithLineBreak(textconvert.GioWrapPolicyToLineBreak(wrapPolicy)))
 }
 
 // Deprecated: use WithTextStyle, WithAdditionalTextStyle or WithTextStyleOptions

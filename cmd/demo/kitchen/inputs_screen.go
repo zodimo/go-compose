@@ -1,8 +1,6 @@
 package main
 
 import (
-	"gioui.org/layout"
-
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
@@ -113,7 +111,7 @@ func InputsScreen(c api.Composer) api.Composable {
 									return c
 								},
 								box.WithModifier(padding.All(16)),
-								box.WithAlignment(layout.NW),
+				box.WithAlignment(box.NW),
 							),
 						),
 					),

@@ -12,7 +12,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/pkg/api"
 
-	"gioui.org/widget"
 )
 
 const ChipNodeID = "Material3Chip"
@@ -63,8 +62,8 @@ func Chip(onClick func(), label string, options ...ChipOption) api.Composable {
 		key := c.GenerateID()
 		path := c.GetPath()
 		clickStatePath := fmt.Sprintf("%d/%s/chip_click", key, path)
-		clickState := c.State(clickStatePath, func() any { return &widget.Clickable{} })
-		gioClickable := clickState.Get().(*widget.Clickable)
+		clickState := c.State(clickStatePath, func() any { return clickable.NewGioClickable() })
+		gioClickable := clickState.Get().(*clickable.GioClickable)
 
 		// Layout:
 		// Surface (Shape, Border, Color) -> Clickable -> Padding -> Row [Icon, Label, Icon]

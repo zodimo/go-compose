@@ -1,9 +1,8 @@
 package column
 
-import "gioui.org/layout"
-
-type Spacing = layout.Spacing
-type Alignment = layout.Alignment
+// Spacing determines the spacing mode for a Flex layout.
+// Defined as a framework-owned type to avoid leaking gioui types.
+type Spacing uint8
 
 const (
 	// SpaceEnd leaves space at the end.
@@ -22,6 +21,10 @@ const (
 	// at the start and end.
 	SpaceEvenly
 )
+
+// Alignment is the mutual alignment of a list of widgets.
+// Defined as a framework-owned type to avoid leaking gioui types.
+type Alignment uint8
 
 const (
 	Start Alignment = iota

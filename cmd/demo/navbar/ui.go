@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 
-	"gioui.org/layout"
-
 	"github.com/zodimo/go-compose/compose/foundation/icon"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
@@ -41,7 +39,7 @@ func UI() api.Composable {
 						return m3text.DisplayMedium(fmt.Sprintf("Selected: %s", items[selectedIdx].Label))(c)
 					},
 					box.WithModifier(weight.Weight(1)),
-					box.WithAlignment(layout.Center),
+					box.WithAlignment(box.Center),
 				)(c)
 
 				// Navigation Bar

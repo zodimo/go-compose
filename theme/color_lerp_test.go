@@ -14,7 +14,7 @@ func TestColorLerp(t *testing.T) {
 	gtx := layout.Context{
 		Ops: new(op.Ops),
 	}
-	tm.Material3ThemeInit(gtx)
+	gtx = tm.Material3ThemeInit(gtx).(layout.Context)
 
 	t.Run("Static Color Lerp", func(t *testing.T) {
 		start := theme.ColorLerp(

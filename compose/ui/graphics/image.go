@@ -7,12 +7,23 @@ import (
 	"io"
 	"io/fs"
 	"os"
-
-	"gioui.org/op/paint"
 )
 
+// ImageResource represents a decoded image that can be used for rendering.
+// It stores the decoded image as a standard library image.Image, keeping
+// gioui.org/op/paint types out of the public API surface.
 type ImageResource struct {
-	ImageOp paint.ImageOp
+	img image.Image
+}
+
+// NewImageResource creates an ImageResource from a decoded image.Image.
+func NewImageResource(img image.Image) ImageResource {
+	return ImageResource{img: img}
+}
+
+// Image returns the underlying decoded image.
+func (ir ImageResource) Image() image.Image {
+	return ir.img
 }
 
 func NewResourceFromImageFile(imageFile io.Reader) ImageResource {
@@ -34,7 +45,7 @@ func requireImage(imageFile io.Reader) ImageResource {
 		panic(fmt.Errorf("failed to decode image file: %v", err))
 	}
 	return ImageResource{
-		ImageOp: paint.NewImageOp(decodedImage),
+		img: decodedImage,
 	}
 }
 

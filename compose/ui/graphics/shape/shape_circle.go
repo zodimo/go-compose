@@ -3,9 +3,8 @@ package shape
 import (
 	"image"
 
-	"gioui.org/op"
 	"gioui.org/op/clip"
-	gioUnit "gioui.org/unit"
+	"github.com/zodimo/go-compose/internal/clipconvert"
 )
 
 // Deprecated: Use CircleShape instead
@@ -17,7 +16,7 @@ var CircleShape Shape = &circleShape{}
 // CircleShape
 type circleShape struct{}
 
-func (c *circleShape) CreateOutline(size image.Point, metric gioUnit.Metric) Outline {
+func (c *circleShape) CreateOutline(size image.Point, metric Metric) Outline {
 	radius := min(size.X, size.Y) / 2
 	return rrectOutline{clip.RRect{
 		Rect: image.Rectangle{Max: size},
@@ -63,16 +62,14 @@ type ellipseOutline struct {
 	clip.Ellipse
 }
 
-func (e ellipseOutline) Push(ops *op.Ops) clip.Stack {
-	return e.Ellipse.Push(ops)
+func (e ellipseOutline) Push(ops *clipconvert.Ops) clipconvert.Stack {
+	return clipconvert.NewStack(e.Ellipse.Push(ops.ToGio()))
 }
 
-func (e ellipseOutline) Op(ops *op.Ops) clip.Op {
-	return e.Ellipse.Op(ops)
+func (e ellipseOutline) ClipOp(ops *clipconvert.Ops) clipconvert.ClipOp {
+	return clipconvert.NewClipOp(e.Ellipse.Op(ops.ToGio()))
 }
 
-// Ellipse.Path takes ops argument? No, Ellipse.Path(ops) returns PathSpec.
-// checking docs/source... Ellipse.Path(ops) -> PathSpec.
-func (e ellipseOutline) Path(ops *op.Ops) clip.PathSpec {
-	return e.Ellipse.Path(ops)
+func (e ellipseOutline) Path(ops *clipconvert.Ops) clipconvert.PathSpec {
+	return clipconvert.NewPathSpec(e.Ellipse.Path(ops.ToGio()))
 }

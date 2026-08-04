@@ -2,9 +2,11 @@ package shadow
 
 import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
+	"github.com/zodimo/go-compose/internal/clipconvert"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	node "github.com/zodimo/go-compose/internal/node"
+	"github.com/zodimo/go-compose/internal/unitconvert"
 
 	"gioui.org/f32"
 	"gioui.org/op"
@@ -51,7 +53,7 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 					// Draw Shadow
 					// Adapted from gio-mw wdk.Elevation.Layout
 
-					shadowSize := float32(gtx.ToGio().Metric.Dp(unit.DpToGioUnitUnsafe(elevation)))
+					shadowSize := float32(gtx.ToGio().Metric.Dp(unitconvert.DpToGioUnitUnsafe(elevation)))
 
 					//@TODO get shadow from theme, for now default to black
 					col := graphics.ColorToNRGBA(n.shadowData.AmbientColor.TakeOrElse(graphics.ColorBlack))
@@ -68,11 +70,11 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 
 					// Create Outline for the shape
 					// We need the outline path.
-					outline := n.shadowData.Shape.CreateOutline(dims.Size, gtx.ToGio().Metric)
+					outline := n.shadowData.Shape.CreateOutline(dims.Size, shape.Metric{PxPerDp: gtx.ToGio().Metric.PxPerDp, PxPerSp: gtx.ToGio().Metric.PxPerSp})
 
 					// Draw base layer
 					baseMacro := op.Record(gtx.ToGio().Ops)
-					paint.FillShape(gtx.ToGio().Ops, col, outline.Op(gtx.ToGio().Ops))
+					paint.FillShape(gtx.ToGio().Ops, col, outline.ClipOp(clipconvert.NewOps(gtx.ToGio().Ops)).ToClipOp())
 					baseCall := baseMacro.Stop()
 
 					var stack op.TransformStack

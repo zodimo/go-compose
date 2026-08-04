@@ -44,7 +44,6 @@ func Outlined(
 
 	return func(c Composer) Composer {
 
-		theme := material.Theme(c)
 
 		opts.Colors = ResolveTextFieldColors(c, opts.Colors)
 		opts.SupportingText = sentinel.TakeOrElseString(opts.SupportingText, "")
@@ -114,7 +113,9 @@ func Outlined(
 		}
 
 		// Constructor
-		c.SetWidgetConstructor(outlinedTextFieldWidgetConstructor(outWidget, value, opts, handlerWrapper, onSubmitWrapper, tracker, theme))
+		gioTh := material.GioThemeForEngine(c).(*gioMaterial.Theme)
+
+		c.SetWidgetConstructor(outlinedTextFieldWidgetConstructor(outWidget, value, opts, handlerWrapper, onSubmitWrapper, tracker, gioTh))
 
 		return c.EndBlock()
 	}
@@ -127,7 +128,7 @@ func outlinedTextFieldWidgetConstructor(
 	handler *HandlerWrapper,
 	onSubmitHandler *OnSubmitWrapper,
 	tracker *TextFieldStateTracker,
-	theme material.ThemeInterface,
+	theme *gioMaterial.Theme,
 ) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 
@@ -184,9 +185,7 @@ func outlinedTextFieldWidgetConstructor(
 				tracker.LastValue = value
 			}
 
-			// 2. Events & Layout
-			th := theme.GioMaterialTheme()
-			// Check for submit events
+		// Check for submit events
 			for {
 				ev, ok := w.Editor.Update(*gtx.ToGio())
 				if !ok {
@@ -232,7 +231,7 @@ func outlinedTextFieldWidgetConstructor(
 
 			w.Colors = opts.Colors
 
-			return layoutnode.FromGioDimensions(w.Layout(*gtx.ToGio(), th, opts.Label))
+			return layoutnode.FromGioDimensions(w.Layout(*gtx.ToGio(), theme, opts.Label))
 		}
 	})
 }

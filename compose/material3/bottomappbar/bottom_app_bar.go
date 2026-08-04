@@ -9,7 +9,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/modifiers/weight"
 
-	"gioui.org/layout"
 )
 
 // BottomAppBar displays navigation and key actions at the bottom of the screen.
@@ -43,14 +42,14 @@ func BottomAppBar(
 								return c
 							},
 							box.WithModifier(weight.Weight(1)), // Flex to fill available space
-							box.WithAlignment(layout.W),        // Align content to start
+				box.WithAlignment(box.W),        // Align content to start
 						)(c)
 
 						// Floating Action Button Section
 						if opts.FloatingActionButton != nil {
 							box.Box(
 								opts.FloatingActionButton,
-								box.WithAlignment(layout.E),
+				box.WithAlignment(box.E),
 								// Add padding around FAB if needed?
 								// Usually FAB has its own padding or shadow, but BottomAppBar might add some.
 								// M3 spec says FAB has specific padding from end.

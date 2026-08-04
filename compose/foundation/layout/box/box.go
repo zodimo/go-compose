@@ -31,7 +31,8 @@ func boxWidgetConstructor(options BoxOptions) layoutnode.LayoutNodeWidgetConstru
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 
-			stackChildren := []StackChild{}
+			// Build framework-owned StackChild values.
+			var gioChildren []layout.StackChild
 			for _, child := range node.Children() {
 
 				childLayoutNode := child.(layoutnode.NodeCoordinator)
@@ -39,22 +40,23 @@ func boxWidgetConstructor(options BoxOptions) layoutnode.LayoutNodeWidgetConstru
 				matchParent := childLayoutNode.Elements().GetElement(MatchParentSizeKey)
 
 				if matchParent.IsSome() {
-					stackChildren = append(stackChildren, layout.Expanded(func(gtx layout.Context) layout.Dimensions {
+					gioChildren = append(gioChildren, layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 						// MatchParentSize implies matching the size of the container, which is passed in Min constraints
 						// by the Stack layout for Expanded children.
 						gtx.Constraints.Max = gtx.Constraints.Min
 						return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContext(&gtx)))
 					}))
 				} else {
-					stackChildren = append(stackChildren, layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+					gioChildren = append(gioChildren, layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 						return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContext(&gtx)))
 					}))
 				}
 			}
 
-			return layoutnode.FromGioDimensions(Stack{
-				Alignment: options.Alignment,
-			}.Layout(*gtx.ToGio(), stackChildren...))
+			// Convert framework-owned Direction to gio layout.Direction at the seam.
+			return layoutnode.FromGioDimensions(layout.Stack{
+				Alignment: layout.Direction(options.Alignment),
+			}.Layout(*gtx.ToGio(), gioChildren...))
 		}
 	})
 

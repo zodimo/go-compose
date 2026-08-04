@@ -15,7 +15,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/weight"
 	"github.com/zodimo/go-compose/pkg/api"
 
-	"gioui.org/layout"
 )
 
 // SingleRowTopAppBar is an internal component to layout the TopAppBar content in a single row.
@@ -40,7 +39,7 @@ func SingleRowTopAppBar(
 								surface.WithContentColor(colors.NavigationIconContentColor),
 								surface.WithColor(graphics.ColorTransparent), // Transparent background
 							),
-							box.WithAlignment(layout.W),
+					box.WithAlignment(box.W),
 							box.WithModifier(padding.Padding(4, 0, 0, 0)), // Start(4)
 						),
 					),
@@ -60,7 +59,7 @@ func SingleRowTopAppBar(
 						box.WithModifier(size.WrapContentWidth().
 							Then(padding.Horizontal(16, 16)), // Horizontal(16, 16)
 						),
-						box.WithAlignment(layout.W), // Align text to start
+					box.WithAlignment(box.W), // Align text to start
 
 					),
 					spacer.Weight(1),
@@ -143,7 +142,7 @@ func CenterAlignedTopAppBar(
 										surface.WithContentColor(opts.Colors.NavigationIconContentColor),
 										surface.WithColor(graphics.ColorTransparent),
 									),
-									box.WithAlignment(layout.W),
+					box.WithAlignment(box.W),
 									box.WithModifier(padding.Padding(4, 0, 0, 0)),
 								),
 							),
@@ -176,7 +175,7 @@ func CenterAlignedTopAppBar(
 								),
 							),
 						),
-						box.WithAlignment(layout.Center),
+				box.WithAlignment(box.Center),
 						box.WithModifier(size.FillMax()), // Consume space to allow centering
 					),
 				),
@@ -243,7 +242,7 @@ func TwoRowsTopAppBar(
 							Then(padding.Padding(16, 0, 16, titleBottomPadding)),
 						),
 
-						box.WithAlignment(layout.SW), // Start, Bottom
+				box.WithAlignment(box.SW), // Start, Bottom
 					),
 				),
 				column.WithModifier(size.FillMaxWidth().Then(size.Height(maxHeight))),

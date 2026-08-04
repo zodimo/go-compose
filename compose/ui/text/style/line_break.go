@@ -2,24 +2,20 @@ package style
 
 import (
 	"fmt"
-
-	gioText "gioui.org/text"
 )
 
-// LineBreak configures strategies for choosing where to break lines of text for line
-type LineBreak gioText.WrapPolicy
+// LineBreak configures strategies for choosing where to break lines of text.
+type LineBreak int
 
-// Basic, fast line breaking. Ideal for text input fields, as it will cause minimal text
-// reflow when editing.
-var LineBreakSimple LineBreak = LineBreak(gioText.WrapGraphemes)
+var LineBreakSimple LineBreak = 2 // WrapGraphemes
 
 // Looser breaking rules, suitable for short text such as titles or narrow newspaper
 // columns. For longer lines of text, use [Paragraph] for improved readability.
-var LineBreakHeading LineBreak = LineBreak(gioText.WrapWords)
+var LineBreakHeading LineBreak = 1 // WrapWords
 
 // Slower, higher quality line breaking for improved readability. Suitable for larger
 // amounts of text.
-var LineBreakParagraph LineBreak = LineBreak(gioText.WrapHeuristically)
+var LineBreakParagraph LineBreak = 0 // WrapHeuristically
 
 // This represents an unset value, a usual replacement for "null" when a primitive value is
 // desired.

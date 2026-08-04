@@ -4,7 +4,7 @@ import (
 	"image"
 
 	"github.com/zodimo/go-compose/compose"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/internal/unitconvert"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/render"
 	"github.com/zodimo/go-compose/pkg/api"
@@ -31,7 +31,7 @@ func (r *runtime) Run(ctx any, composer api.Composer, ui api.Composable) render.
 
 	gtx.ToGio().Constraints.Min = image.Point{X: 0, Y: 0}
 
-	density := unit.DensityFromLayoutContext(*gtx.ToGio())
+	density := unitconvert.DensityFromLayoutContext(*gtx.ToGio())
 
 	composer.StartFrame()
 	defer composer.EndFrame()

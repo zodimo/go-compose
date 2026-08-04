@@ -14,8 +14,9 @@ import (
 
 	"github.com/zodimo/go-compose/compose/foundation/next/text/widget"
 	"github.com/zodimo/go-compose/compose/ui/next/text"
-	uiFont "github.com/zodimo/go-compose/compose/ui/next/text/font"
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
+	"github.com/zodimo/go-compose/internal/textconvert"
+	"github.com/zodimo/go-compose/internal/unitconvert"
 )
 
 // TextLayoutController manages text layout state and bridges between
@@ -128,7 +129,7 @@ func (c *TextLayoutController) PaintText(gtx layout.Context, textMaterial gioOp.
 func (c *TextLayoutController) LayoutAndPaint(gtx layout.Context, shaper *gioText.Shaper, textMaterial gioOp.CallOp) layout.Dimensions {
 	gioFont := c.GetFont()
 	size := c.GetFontSize()
-	c.view.Layout(gtx, shaper, gioFont, unit.TextUnitToGioSpUnsafe(size))
+	c.view.Layout(gtx, shaper, gioFont, unitconvert.TextUnitToGioSpUnsafe(size))
 	c.PaintText(gtx, textMaterial)
 	return c.view.Dimensions()
 }
@@ -210,7 +211,7 @@ func (c *TextLayoutController) GetFont() font.Font {
 	if c.textStyle == nil {
 		return font.Font{}
 	}
-	return uiFont.ToGioFont(
+	return textconvert.ToGioFontNext(
 		c.textStyle.FontFamily(),
 		c.textStyle.FontWeight(),
 		c.textStyle.FontStyle(),

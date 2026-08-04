@@ -25,7 +25,6 @@ import (
 
 	"github.com/zodimo/go-compose/pkg/api"
 
-	"gioui.org/widget"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
@@ -138,7 +137,7 @@ func UI() api.Composable {
 											Then(size.Height(48)). // Minimum touch target height
 											Then(clickable.OnClick(func() {
 												drawerOpen.Set(true)
-											}, clickable.WithClickable(c.State("menu_click", func() any { return &widget.Clickable{} }).Get().(*widget.Clickable)))),
+									}, clickable.WithClickable(c.State("menu_click", func() any { return clickable.NewGioClickable() }).Get().(*clickable.GioClickable)))),
 									),
 								)(c)
 							},

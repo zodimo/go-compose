@@ -4,17 +4,22 @@ import (
 	"fmt"
 	"image"
 
-	"gioui.org/op"
-	"gioui.org/op/clip"
-	gioUnit "gioui.org/unit"
+	"github.com/zodimo/go-compose/internal/clipconvert"
 )
 
 // https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Shape
 
+// Metric provides density information for shape outline creation.
+// It mirrors gioui.org/unit.Metric but is framework-owned.
+type Metric struct {
+	PxPerDp float32
+	PxPerSp float32
+}
+
 type ShapeOption func(Shape)
 
 type Shape interface {
-	CreateOutline(size image.Point, metric gioUnit.Metric) Outline
+	CreateOutline(size image.Point, metric Metric) Outline
 	mergeShape(other Shape) Shape
 	sameShape(other Shape) bool
 	semanticEqualShape(other Shape) bool
@@ -23,9 +28,9 @@ type Shape interface {
 }
 
 type Outline interface {
-	Push(ops *op.Ops) clip.Stack
-	Op(ops *op.Ops) clip.Op
-	Path(ops *op.Ops) clip.PathSpec
+	Push(ops *clipconvert.Ops) clipconvert.Stack
+	ClipOp(ops *clipconvert.Ops) clipconvert.ClipOp
+	Path(ops *clipconvert.Ops) clipconvert.PathSpec
 }
 
 func IsSpecifiedShape(s Shape) bool {

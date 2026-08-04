@@ -64,8 +64,8 @@ func columnWidgetConstructor(options ColumnOptions) layoutnode.LayoutNodeWidgetC
 
 		return layoutnode.FromGioDimensions(layout.Flex{
 			Axis:      layout.Vertical,
-			Spacing:   options.Spacing,
-			Alignment: options.Alignment,
+			Spacing:   layout.Spacing(options.Spacing),
+			Alignment: layout.Alignment(options.Alignment),
 		}.Layout(*gtx.ToGio(), flexedChildren...))
 		}
 	})

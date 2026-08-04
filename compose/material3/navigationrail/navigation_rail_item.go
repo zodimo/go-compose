@@ -20,7 +20,6 @@ import (
 
 	"github.com/zodimo/go-compose/compose/ui/unit"
 
-	"gioui.org/widget"
 )
 
 // NavigationRailItem represents an item within a NavigationRail.
@@ -43,8 +42,8 @@ func NavigationRailItem(
 		key := c.GenerateID()
 		path := c.GetPath()
 		clickStatePath := fmt.Sprintf("%d/%s/railitem_click", key, path)
-		clickValue := c.State(clickStatePath, func() any { return &widget.Clickable{} })
-		clickWidget := clickValue.Get().(*widget.Clickable)
+	clickValue := c.State(clickStatePath, func() any { return clickable.NewGioClickable() })
+	clickWidget := clickValue.Get().(*clickable.GioClickable)
 
 		// Define indicator styling (pill shape)
 		// Usually 56x32dp or similar for indicator.

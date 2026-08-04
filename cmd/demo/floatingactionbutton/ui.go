@@ -11,7 +11,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
 
-	"gioui.org/layout"
 	"golang.org/x/exp/shiny/materialdesign/icons"
 )
 
@@ -27,7 +26,7 @@ func UI() api.Composable {
 					text.BodyLarge(
 						fmt.Sprintf("FAB Clicked: %d", count.Get().(int)),
 					),
-					box.WithAlignment(layout.Center),
+				box.WithAlignment(box.Center),
 					box.WithModifier(size.FillMax()),
 				)(c)
 			},

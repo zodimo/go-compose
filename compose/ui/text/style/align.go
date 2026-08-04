@@ -2,15 +2,12 @@ package style
 
 import (
 	"fmt"
-
-	gioText "gioui.org/text"
 )
 
 // TextAlign defines how to align text horizontally.
 // TextAlign controls how text aligns in the space it appears.
-type TextAlign gioText.Alignment
+type TextAlign int
 
-// TextAlign constants
 const (
 	// TextAlignUnspecified represents an unset value, a usual replacement for "null"
 	// when a primitive value is desired.
@@ -19,15 +16,15 @@ const (
 	// TextAlignStart aligns the text on the leading edge of the container.
 	// For Left to Right text, this is the left edge.
 	// For Right to Left text, like Arabic, this is the right edge.
-	TextAlignStart TextAlign = TextAlign(gioText.Start)
+	TextAlignStart TextAlign = 0
 
 	// TextAlignEnd aligns the text on the trailing edge of the container.
 	// For Left to Right text, this is the right edge.
 	// For Right to Left text, like Arabic, this is the left edge.
-	TextAlignEnd TextAlign = TextAlign(gioText.End)
+	TextAlignEnd TextAlign = 1
 
 	// TextAlignCenter aligns the text in the center of the container.
-	TextAlignMiddle TextAlign = TextAlign(gioText.Middle)
+	TextAlignMiddle TextAlign = 2
 )
 
 // String returns the string representation of the TextAlign.

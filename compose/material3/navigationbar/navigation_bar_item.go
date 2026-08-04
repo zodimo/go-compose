@@ -17,8 +17,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/weight"
 	"github.com/zodimo/go-ternary"
 
-	"gioui.org/layout"
-	"gioui.org/widget"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
@@ -51,8 +49,8 @@ func NavigationBarItem(
 		key := c.GenerateID()
 		path := c.GetPath()
 		clickStatePath := fmt.Sprintf("%d/%s/navitem_click", key, path)
-		clickValue := c.State(clickStatePath, func() any { return &widget.Clickable{} })
-		clickWidget := clickValue.Get().(*widget.Clickable)
+		clickValue := c.State(clickStatePath, func() any { return clickable.NewGioClickable() })
+		clickWidget := clickValue.Get().(*clickable.GioClickable)
 
 		// Defaults
 		colors := NavigationBarDefaults.Colors(c)
@@ -67,7 +65,7 @@ func NavigationBarItem(
 						func(c Composer) Composer {
 							return box.Box(
 								icon,
-								box.WithAlignment(layout.Center),
+					box.WithAlignment(box.Center),
 							)(c)
 						},
 						surface.WithColor(ternary.Ternary(
@@ -87,7 +85,7 @@ func NavigationBarItem(
 								Then(size.Height(32)).
 								Then(clip.Clip(&shape.RoundedCornerShape{Radius: unit.Dp(16)})),
 						),
-						surface.WithAlignment(layout.Center),
+					surface.WithAlignment(box.Center),
 					),
 					// Label
 					c.When(
@@ -112,7 +110,7 @@ func NavigationBarItem(
 						}
 					}, clickable.WithClickable(clickWidget))),
 			),
-			box.WithAlignment(layout.Center), // Center the Column within the allocated slot
+		box.WithAlignment(box.Center), // Center the Column within the allocated slot
 		)(c)
 	}
 }

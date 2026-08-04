@@ -42,7 +42,7 @@ func Filled(
 	}
 
 	return func(c Composer) Composer {
-		theme := material.Theme(c)
+		_ = material.Theme(c) // keep theme resolved for ResolveTextFieldColors
 
 		opts.Colors = ResolveTextFieldColors(c, opts.Colors)
 		opts.SupportingText = sentinel.TakeOrElseString(opts.SupportingText, "")
@@ -107,7 +107,9 @@ func Filled(
 			c.WithComposable(opts.TrailingIcon)
 		}
 
-		c.SetWidgetConstructor(filledTextFieldWidgetConstructor(w, value, opts, handlerWrapper, onSubmitWrapper, tracker, theme))
+		gioTh := material.GioThemeForEngine(c).(*gioMaterial.Theme)
+
+		c.SetWidgetConstructor(filledTextFieldWidgetConstructor(w, value, opts, handlerWrapper, onSubmitWrapper, tracker, gioTh))
 
 		return c.EndBlock()
 	}
@@ -120,7 +122,7 @@ func filledTextFieldWidgetConstructor(
 	handler *HandlerWrapper,
 	onSubmitHandler *OnSubmitWrapper,
 	tracker *TextFieldStateTracker,
-	theme material.ThemeInterface,
+	theme *gioMaterial.Theme,
 ) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
@@ -176,8 +178,7 @@ func filledTextFieldWidgetConstructor(
 				tracker.LastValue = value
 			}
 
-			// 2. Events
-			th := theme.GioMaterialTheme()
+			// theme is already *gioMaterial.Theme from GioThemeForEngine
 			for {
 				ev, ok := w.Editor.Update(*gtx.ToGio())
 				if !ok {
@@ -224,7 +225,7 @@ func filledTextFieldWidgetConstructor(
 			w.Colors = opts.Colors
 
 			// 4. Layout
-			return layoutnode.FromGioDimensions(w.Layout(*gtx.ToGio(), th, opts.Label))
+			return layoutnode.FromGioDimensions(w.Layout(*gtx.ToGio(), theme, opts.Label))
 		}
 	})
 }

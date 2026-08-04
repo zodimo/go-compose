@@ -6,6 +6,7 @@ import (
 
 	"gioui.org/app"
 	"gioui.org/op"
+	"gioui.org/layout"
 
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/pkg/api"
@@ -46,7 +47,7 @@ func run(window *app.Window) error {
 			return e.Err
 		case app.FrameEvent:
 			gtx := app.NewContext(&ops, e)
-			gtx = themeManager.Material3ThemeInit(gtx)
+			gtx = themeManager.Material3ThemeInit(gtx).(layout.Context)
 
 			composer := compose.NewComposer(api.ComposerWithStore(store))
 			cmd := runtime.Run(gtx, composer, UI())

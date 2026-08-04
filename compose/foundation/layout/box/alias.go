@@ -5,8 +5,6 @@ import (
 	"github.com/zodimo/go-compose/modifiers/box"
 
 	"github.com/zodimo/go-compose/pkg/api"
-
-	"gioui.org/layout"
 )
 
 type Composable = api.Composable
@@ -14,23 +12,35 @@ type Composer = api.Composer
 
 var MatchParentSizeKey = box.MatchParentSizeKey
 
-// Direction is the alignment of widgets relative to a containing
-// space.
-type Direction = layout.Direction
+// Direction is the alignment of widgets relative to a containing space.
+// Defined as a framework-owned type to avoid leaking gioui types.
+type Direction uint8
 
 const (
-	NW     Direction = layout.NW
-	N      Direction = layout.N
-	NE     Direction = layout.NE
-	E      Direction = layout.E
-	SE     Direction = layout.SE
-	S      Direction = layout.S
-	SW     Direction = layout.SW
-	W      Direction = layout.W
-	Center Direction = layout.Center
+	NW     Direction = iota
+	N
+	NE
+	E
+	SE
+	S
+	SW
+	W
+	Center
 )
 
-type Stack = layout.Stack
-type StackChild = layout.StackChild
+// Stack lays out child elements on top of each other, according to an alignment direction.
+type Stack struct {
+	// Alignment is the direction to align children smaller than the available space.
+	Alignment Direction
+}
+
+// StackChild represents a child for a Stack layout.
+type StackChild struct {
+	// Expanded indicates whether the child fills remaining space.
+	Expanded bool
+	// Widget is the layout function for this child.
+	Widget func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions
+}
+
 type LayoutContext = layoutnode.LayoutContext
 type LayoutDimensions = layoutnode.LayoutDimensions

@@ -17,8 +17,9 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/unit"
 
 	"github.com/zodimo/go-compose/compose/ui/text"
-	uiFont "github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/internal/textconvert"
+	"github.com/zodimo/go-compose/internal/unitconvert"
 )
 
 // EditableTextLayoutController manages editable text layout state and bridges between
@@ -114,7 +115,7 @@ func (c *EditableTextLayoutController) SetReadOnly(readOnly bool) {
 
 // SetAlignment sets text alignment.
 func (c *EditableTextLayoutController) SetAlignment(alignment style.TextAlign) {
-	c.alignment = style.TextAlignToGioTextAlignment(alignment)
+	c.alignment = textconvert.TextAlignToGioTextAlignment(alignment)
 	c.editor.Alignment = c.alignment
 }
 
@@ -156,8 +157,8 @@ func (c *EditableTextLayoutController) ConfigureFromTextStyle(ts *text.TextStyle
 	}
 	c.textStyle = ts
 	c.SetAlignment(ts.TextAlign())
-	c.SetLineHeight(unit.TextUnitToGioSpUnsafe(ts.LineHeight()))
-	c.SetWrapPolicy(style.LineBreakToGioWrapPolicy(ts.LineBreak()))
+	c.SetLineHeight(unitconvert.TextUnitToGioSpUnsafe(ts.LineHeight()))
+	c.SetWrapPolicy(textconvert.LineBreakToGioWrapPolicy(ts.LineBreak()))
 }
 
 // Update processes input events and syncs state.
@@ -213,7 +214,7 @@ func (c *EditableTextLayoutController) Update(gtx layout.Context) {
 func (c *EditableTextLayoutController) Layout(gtx layout.Context, shaper *gioText.Shaper, textMaterial, selectMaterial gioOp.CallOp) layout.Dimensions {
 	gioFont := c.GetFont()
 	size := c.GetFontSize()
-	return c.editor.Layout(gtx, shaper, gioFont, unit.TextUnitToGioSpUnsafe(size), textMaterial, selectMaterial)
+	return c.editor.Layout(gtx, shaper, gioFont, unitconvert.TextUnitToGioSpUnsafe(size), textMaterial, selectMaterial)
 }
 
 // LayoutAndPaint performs update, layout and paints the text in one call.
@@ -290,14 +291,12 @@ func (c *EditableTextLayoutController) GetFont() font.Font {
 	if c.textStyle == nil {
 		return font.Font{}
 	}
-	return uiFont.ToGioFont(
+	return textconvert.ToGioFont(
 		c.textStyle.FontFamily(),
 		c.textStyle.FontWeight(),
 		c.textStyle.FontStyle(),
 	)
 }
-
-// GetFontSize returns the font size in Sp.
 func (c *EditableTextLayoutController) GetFontSize() unit.TextUnit {
 	if c.textStyle == nil {
 		return unit.Sp(14) // Default font size

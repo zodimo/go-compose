@@ -2,6 +2,8 @@ package background
 
 import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
+	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
+	"github.com/zodimo/go-compose/internal/clipconvert"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	node "github.com/zodimo/go-compose/internal/node"
 
@@ -36,7 +38,7 @@ func NewBackGroundNode(background BackgroundData) ChainNode {
 								func(gtx layout.Context) layout.Dimensions {
 									// shape
 									// color
-									defer background.Shape.CreateOutline(gtx.Constraints.Min, gtx.Metric).Push(gtx.Ops).Pop()
+							defer background.Shape.CreateOutline(gtx.Constraints.Min, shape.Metric{PxPerDp: gtx.Metric.PxPerDp, PxPerSp: gtx.Metric.PxPerSp}).Push(clipconvert.NewOps(gtx.Ops)).Pop()
 
 									paint.Fill(gtx.Ops, nrgba)
 

@@ -3,6 +3,7 @@ package image
 import (
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
+	"gioui.org/op/paint"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/pkg/api"
 )
@@ -38,7 +39,7 @@ func imageWidgetConstructor(resource ImageResource, options ImageOptions) layout
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 
 			widget := ImageWidget{
-				Src:          resource.ImageOp,
+				Src:          paint.NewImageOp(resource.Image()),
 				ContentScale: options.ContentScale,
 				Alignment:    options.Alignment,
 				Alpha:        options.Alpha,

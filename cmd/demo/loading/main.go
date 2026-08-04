@@ -12,6 +12,7 @@ import (
 
 	"gioui.org/app"
 	"gioui.org/io/system"
+	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/unit"
 )
@@ -59,7 +60,7 @@ func Run(window *app.Window) error {
 			gtx.Locale = enLocale
 
 			// M3 Widget Requirement
-			gtx = themeManager.Material3ThemeInit(gtx)
+			gtx = themeManager.Material3ThemeInit(gtx).(layout.Context)
 
 			composer := compose.NewComposer(api.ComposerWithStore(store))
 

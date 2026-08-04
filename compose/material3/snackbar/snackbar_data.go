@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"gioui.org/widget"
+	"github.com/zodimo/go-compose/modifiers/clickable"
 )
 
 // SnackbarResult represents the outcome of a snackbar being shown.
@@ -67,8 +67,8 @@ type SnackbarData struct {
 	once     sync.Once
 
 	// Gio clickable state — persists across frames for immediate-mode rendering
-	ActionClickable  widget.Clickable
-	DismissClickable widget.Clickable
+	ActionClickable  *clickable.GioClickable
+	DismissClickable *clickable.GioClickable
 }
 
 // newSnackbarData creates a new SnackbarData with a result channel and optional callback.

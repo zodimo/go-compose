@@ -17,7 +17,7 @@ func TestSurfaceColorResolution(t *testing.T) {
 	}
 	// Force initialization (might need to reset execution state if singleton persists across tests, but simple init usually works)
 	// Material3ThemeInit checks if theme is nil.
-	tm.Material3ThemeInit(gtx)
+	gtx = tm.Material3ThemeInit(gtx).(layout.Context)
 
 	// Get Surface Descriptor
 	surfaceDesc := theme.ColorHelper.ColorSelector().SurfaceRoles.Surface

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"gioui.org/app"
 	"gioui.org/x/explorer"
 	"github.com/zodimo/go-compose/compose/effect"
 	"github.com/zodimo/go-compose/compose/ui/platform"
@@ -22,7 +23,7 @@ func RememberExplorer(c api.Composer, explorerAction func(expl *explorer.Explore
 
 	expl := state.MustRemember(c, rememberKeyPrefix+"explorer",
 		func() *explorer.Explorer {
-			return explorer.NewExplorer(window)
+			return explorer.NewExplorer(window.PlatformWindow().(*app.Window))
 		},
 	).Get()
 

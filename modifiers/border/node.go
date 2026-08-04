@@ -3,9 +3,10 @@ package border
 import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/internal/clipconvert"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	node "github.com/zodimo/go-compose/internal/node"
+	"github.com/zodimo/go-compose/internal/unitconvert"
 
 	"gioui.org/op"
 	"gioui.org/op/clip"
@@ -49,12 +50,12 @@ func NewBorderNode(element BorderElement) *BorderNode {
 					if !shape.IsSpecifiedShape(n.borderData.Shape) {
 						panic("BorderNode: Shape is not specified")
 					}
-						outline := n.borderData.Shape.CreateOutline(dims.Size, gtx.ToGio().Metric)
+					outline := n.borderData.Shape.CreateOutline(dims.Size, shape.Metric{PxPerDp: gtx.ToGio().Metric.PxPerDp, PxPerSp: gtx.ToGio().Metric.PxPerSp})
 						macro := op.Record(gtx.ToGio().Ops)
 
-						strokeWidth := float32(gtx.ToGio().Metric.Dp(unit.DpToGioUnitUnsafe(width)))
+					strokeWidth := float32(gtx.ToGio().Metric.Dp(unitconvert.DpToGioUnitUnsafe(width)))
 
-						pathSpec := outline.Path(gtx.ToGio().Ops)
+					pathSpec := outline.Path(clipconvert.NewOps(gtx.ToGio().Ops)).ToClipPathSpec()
 
 					// Create stroke op
 					strokeOp := clip.Stroke{

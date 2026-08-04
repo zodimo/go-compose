@@ -1,7 +1,8 @@
 package material3
 
 import (
-	"gioui.org/layout"
+	"github.com/zodimo/go-compose/internal/layoutnode"
+
 	"git.sr.ht/~schnwalter/gio-mw/token"
 	"git.sr.ht/~schnwalter/gio-mw/wdk"
 )
@@ -18,12 +19,14 @@ func WithColorSchemeOptions(options ...TokenColorSchemeOptions) TokenColorScheme
 	}
 }
 
-func UpdateTokenTheme(gtx layout.Context, schemeOptions []TokenColorSchemeOptions) {
-	theme := *wdk.GetMaterialTheme(gtx)
+func UpdateTokenTheme(gtx layoutnode.LayoutContext, schemeOptions []TokenColorSchemeOptions) {
+	// Convert framework LayoutContext to engine layout.Context at the seam.
+	gioCtx := gtx.ToGio()
+	theme := *wdk.GetMaterialTheme(*gioCtx)
 	scheme := *theme.Scheme
 	for _, option := range schemeOptions {
 		option(&scheme)
 	}
 	theme.Scheme = &scheme
-	wdk.InitMaterialThemeInContext(gtx, &theme)
+	wdk.InitMaterialThemeInContext(*gioCtx, &theme)
 }

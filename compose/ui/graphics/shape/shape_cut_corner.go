@@ -4,10 +4,9 @@ import (
 	"image"
 
 	"gioui.org/f32"
-	"gioui.org/op"
 	"gioui.org/op/clip"
-	gioUnit "gioui.org/unit"
 	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/internal/clipconvert"
 )
 
 var CutCornerShapeUnspecified = &CutCornerShape{
@@ -20,7 +19,7 @@ type CutCornerShape struct {
 	Radius unit.Dp
 }
 
-func (c *CutCornerShape) CreateOutline(size image.Point, metric gioUnit.Metric) Outline {
+func (c *CutCornerShape) CreateOutline(size image.Point, metric Metric) Outline {
 	radius := float32(c.Radius) * metric.PxPerDp
 	if radius <= 0 {
 		return rectOutline{clip.Rect{Max: size}}
@@ -74,12 +73,13 @@ type cutCornerOutline struct {
 	radius float32
 }
 
-func (c *cutCornerOutline) generatePath(ops *op.Ops) clip.PathSpec {
+func (c *cutCornerOutline) generatePath(ops *clipconvert.Ops) clip.PathSpec {
+	gtx := ops.ToGio()
 	w, h := float32(c.size.X), float32(c.size.Y)
 	r := c.radius
 
 	var p clip.Path
-	p.Begin(ops)
+	p.Begin(gtx)
 	p.MoveTo(f32.Pt(r, 0))
 	p.LineTo(f32.Pt(w-r, 0))
 	p.LineTo(f32.Pt(w, r))
@@ -92,14 +92,14 @@ func (c *cutCornerOutline) generatePath(ops *op.Ops) clip.PathSpec {
 	return p.End()
 }
 
-func (c *cutCornerOutline) Push(ops *op.Ops) clip.Stack {
-	return clip.Outline{Path: c.generatePath(ops)}.Op().Push(ops)
+func (c *cutCornerOutline) Push(ops *clipconvert.Ops) clipconvert.Stack {
+	return clipconvert.NewStack(clip.Outline{Path: c.generatePath(ops)}.Op().Push(ops.ToGio()))
 }
 
-func (c *cutCornerOutline) Op(ops *op.Ops) clip.Op {
-	return clip.Outline{Path: c.generatePath(ops)}.Op()
+func (c *cutCornerOutline) ClipOp(ops *clipconvert.Ops) clipconvert.ClipOp {
+	return clipconvert.NewClipOp(clip.Outline{Path: c.generatePath(ops)}.Op())
 }
 
-func (c *cutCornerOutline) Path(ops *op.Ops) clip.PathSpec {
-	return c.generatePath(ops)
+func (c *cutCornerOutline) Path(ops *clipconvert.Ops) clipconvert.PathSpec {
+	return clipconvert.NewPathSpec(c.generatePath(ops))
 }

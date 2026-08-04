@@ -17,8 +17,9 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/unit"
 
 	"github.com/zodimo/go-compose/compose/ui/next/text"
-	uiFont "github.com/zodimo/go-compose/compose/ui/next/text/font"
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
+	"github.com/zodimo/go-compose/internal/textconvert"
+	"github.com/zodimo/go-compose/internal/unitconvert"
 )
 
 // EditableTextLayoutController manages editable text layout state and bridges between
@@ -213,7 +214,7 @@ func (c *EditableTextLayoutController) Update(gtx layout.Context) {
 func (c *EditableTextLayoutController) Layout(gtx layout.Context, shaper *gioText.Shaper, textMaterial, selectMaterial gioOp.CallOp) layout.Dimensions {
 	gioFont := c.GetFont()
 	size := c.GetFontSize()
-	return c.editor.Layout(gtx, shaper, gioFont, unit.TextUnitToGioSpUnsafe(size), textMaterial, selectMaterial)
+	return c.editor.Layout(gtx, shaper, gioFont, unitconvert.TextUnitToGioSpUnsafe(size), textMaterial, selectMaterial)
 }
 
 // LayoutAndPaint performs update, layout and paints the text in one call.
@@ -290,7 +291,7 @@ func (c *EditableTextLayoutController) GetFont() font.Font {
 	if c.textStyle == nil {
 		return font.Font{}
 	}
-	return uiFont.ToGioFont(
+	return textconvert.ToGioFontNext(
 		c.textStyle.FontFamily(),
 		c.textStyle.FontWeight(),
 		c.textStyle.FontStyle(),
