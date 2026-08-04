@@ -1,0 +1,558 @@
+[
+  {
+    "Op": "BeginFrame",
+    "Rect": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 400,
+        "Y": 400
+      }
+    },
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Point": {
+      "X": 0,
+      "Y": 0
+    },
+    "ScaleX": 0,
+    "ScaleY": 0,
+    "Alpha": 0,
+    "Shape": {
+      "Kind": 0,
+      "Bounds": {
+        "Min": {
+          "X": 0,
+          "Y": 0
+        },
+        "Max": {
+          "X": 0,
+          "Y": 0
+        }
+      },
+      "Radius": {
+        "TL": 0,
+        "TR": 0,
+        "BL": 0,
+        "BR": 0
+      }
+    },
+    "TextLayout": {
+      "Width": 0,
+      "Height": 0
+    },
+    "Image": {
+      "Src": null
+    },
+    "Src": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "Dst": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "CornerRadius": {
+      "TL": 0,
+      "TR": 0,
+      "BL": 0,
+      "BR": 0
+    },
+    "PathOps": null,
+    "Count": 0
+  },
+  {
+    "Op": "Save",
+    "Rect": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Point": {
+      "X": 0,
+      "Y": 0
+    },
+    "ScaleX": 0,
+    "ScaleY": 0,
+    "Alpha": 0,
+    "Shape": {
+      "Kind": 0,
+      "Bounds": {
+        "Min": {
+          "X": 0,
+          "Y": 0
+        },
+        "Max": {
+          "X": 0,
+          "Y": 0
+        }
+      },
+      "Radius": {
+        "TL": 0,
+        "TR": 0,
+        "BL": 0,
+        "BR": 0
+      }
+    },
+    "TextLayout": {
+      "Width": 0,
+      "Height": 0
+    },
+    "Image": {
+      "Src": null
+    },
+    "Src": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "Dst": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "CornerRadius": {
+      "TL": 0,
+      "TR": 0,
+      "BL": 0,
+      "BR": 0
+    },
+    "PathOps": null,
+    "Count": 0
+  },
+  {
+    "Op": "FillShape",
+    "Rect": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 1,
+      "A": 1
+    },
+    "Point": {
+      "X": 0,
+      "Y": 0
+    },
+    "ScaleX": 0,
+    "ScaleY": 0,
+    "Alpha": 0,
+    "Shape": {
+      "Kind": 0,
+      "Bounds": {
+        "Min": {
+          "X": 0,
+          "Y": 0
+        },
+        "Max": {
+          "X": 200,
+          "Y": 200
+        }
+      },
+      "Radius": {
+        "TL": 0,
+        "TR": 0,
+        "BL": 0,
+        "BR": 0
+      }
+    },
+    "TextLayout": {
+      "Width": 0,
+      "Height": 0
+    },
+    "Image": {
+      "Src": null
+    },
+    "Src": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "Dst": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "CornerRadius": {
+      "TL": 0,
+      "TR": 0,
+      "BL": 0,
+      "BR": 0
+    },
+    "PathOps": null,
+    "Count": 0
+  },
+  {
+    "Op": "ClipPath",
+    "Rect": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Point": {
+      "X": 0,
+      "Y": 0
+    },
+    "ScaleX": 0,
+    "ScaleY": 0,
+    "Alpha": 0,
+    "Shape": {
+      "Kind": 0,
+      "Bounds": {
+        "Min": {
+          "X": 0,
+          "Y": 0
+        },
+        "Max": {
+          "X": 0,
+          "Y": 0
+        }
+      },
+      "Radius": {
+        "TL": 0,
+        "TR": 0,
+        "BL": 0,
+        "BR": 0
+      }
+    },
+    "TextLayout": {
+      "Width": 0,
+      "Height": 0
+    },
+    "Image": {
+      "Src": null
+    },
+    "Src": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "Dst": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "CornerRadius": {
+      "TL": 0,
+      "TR": 0,
+      "BL": 0,
+      "BR": 0
+    },
+    "PathOps": [
+      {
+        "Op": 0,
+        "Point": {
+          "X": 0,
+          "Y": 0
+        },
+        "Control1": {
+          "X": 0,
+          "Y": 0
+        },
+        "Control2": {
+          "X": 0,
+          "Y": 0
+        }
+      },
+      {
+        "Op": 1,
+        "Point": {
+          "X": 200,
+          "Y": 0
+        },
+        "Control1": {
+          "X": 0,
+          "Y": 0
+        },
+        "Control2": {
+          "X": 0,
+          "Y": 0
+        }
+      },
+      {
+        "Op": 1,
+        "Point": {
+          "X": 200,
+          "Y": 200
+        },
+        "Control1": {
+          "X": 0,
+          "Y": 0
+        },
+        "Control2": {
+          "X": 0,
+          "Y": 0
+        }
+      },
+      {
+        "Op": 1,
+        "Point": {
+          "X": 0,
+          "Y": 200
+        },
+        "Control1": {
+          "X": 0,
+          "Y": 0
+        },
+        "Control2": {
+          "X": 0,
+          "Y": 0
+        }
+      },
+      {
+        "Op": 4,
+        "Point": {
+          "X": 0,
+          "Y": 0
+        },
+        "Control1": {
+          "X": 0,
+          "Y": 0
+        },
+        "Control2": {
+          "X": 0,
+          "Y": 0
+        }
+      }
+    ],
+    "Count": 0
+  },
+  {
+    "Op": "FillShape",
+    "Rect": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 1,
+      "A": 1
+    },
+    "Point": {
+      "X": 0,
+      "Y": 0
+    },
+    "ScaleX": 0,
+    "ScaleY": 0,
+    "Alpha": 0,
+    "Shape": {
+      "Kind": 0,
+      "Bounds": {
+        "Min": {
+          "X": 0,
+          "Y": 0
+        },
+        "Max": {
+          "X": 200,
+          "Y": 200
+        }
+      },
+      "Radius": {
+        "TL": 0,
+        "TR": 0,
+        "BL": 0,
+        "BR": 0
+      }
+    },
+    "TextLayout": {
+      "Width": 0,
+      "Height": 0
+    },
+    "Image": {
+      "Src": null
+    },
+    "Src": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "Dst": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "CornerRadius": {
+      "TL": 0,
+      "TR": 0,
+      "BL": 0,
+      "BR": 0
+    },
+    "PathOps": null,
+    "Count": 0
+  },
+  {
+    "Op": "Restore",
+    "Rect": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "Color": {
+      "R": 0,
+      "G": 0,
+      "B": 0,
+      "A": 0
+    },
+    "Point": {
+      "X": 0,
+      "Y": 0
+    },
+    "ScaleX": 0,
+    "ScaleY": 0,
+    "Alpha": 0,
+    "Shape": {
+      "Kind": 0,
+      "Bounds": {
+        "Min": {
+          "X": 0,
+          "Y": 0
+        },
+        "Max": {
+          "X": 0,
+          "Y": 0
+        }
+      },
+      "Radius": {
+        "TL": 0,
+        "TR": 0,
+        "BL": 0,
+        "BR": 0
+      }
+    },
+    "TextLayout": {
+      "Width": 0,
+      "Height": 0
+    },
+    "Image": {
+      "Src": null
+    },
+    "Src": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "Dst": {
+      "Min": {
+        "X": 0,
+        "Y": 0
+      },
+      "Max": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    "CornerRadius": {
+      "TL": 0,
+      "TR": 0,
+      "BL": 0,
+      "BR": 0
+    },
+    "PathOps": null,
+    "Count": 1
+  }
+]
