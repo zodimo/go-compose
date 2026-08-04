@@ -1,31 +1,30 @@
 module github.com/zodimo/go-compose
 
-go 1.24.4
-
-toolchain go1.24.11
+go 1.25.0
 
 require (
-	gioui.org v0.9.0
-	gioui.org/x v0.9.0
-	git.sr.ht/~schnwalter/gio-mw v0.0.0-20250713180710-9d8d98474447
-	github.com/go-text/typesetting v0.3.2
-	github.com/zodimo/go-maybe v0.1.6
+	gioui.org v0.10.0
+	gioui.org/x v0.10.0
+	git.sr.ht/~schnwalter/gio-mw v0.0.0-20260221053317-be0445f63b48
+	github.com/go-text/typesetting v0.3.4
+	github.com/zodimo/go-maybe v0.1.9
 	github.com/zodimo/go-ternary v0.2.0
 	github.com/zodimo/go-zero-hash v0.1.0
-	golang.org/x/exp/shiny v0.0.0-20260112195511-716be5621a96
-	golang.org/x/image v0.35.0
-	golang.org/x/sync v0.19.0
-	golang.org/x/text v0.33.0
-	golang.org/x/tools v0.41.0
+	golang.org/x/exp/shiny v0.0.0-20260611194520-c48552f49976
+	golang.org/x/image v0.42.0
+	golang.org/x/sync v0.21.0
+	golang.org/x/text v0.38.0
+	golang.org/x/tools v0.46.0
 )
 
 require (
 	gioui.org/shader v1.0.8 // indirect
-	git.wow.st/gmp/jni v0.0.0-20210610011705-34026c7e22d0 // indirect
-	github.com/godbus/dbus/v5 v5.0.6 // indirect
+	git.wow.st/gmp/jni v0.0.0-20260127013417-d142949d346a // indirect
+	github.com/godbus/dbus/v5 v5.2.2 // indirect
 	github.com/zodimo/go-lazy v0.1.1 // indirect
-	golang.org/x/mod v0.32.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/mod v0.37.0 // indirect
+	golang.org/x/net v0.56.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
 )
 
 // required for android builds - contains the fix
