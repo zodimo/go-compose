@@ -25,7 +25,7 @@ func NewScaleNode(data ScaleData) *ScaleNode {
 			no := t.(layoutnode.LayoutModifierNode)
 			no.AttachLayoutModifier(func(widget layoutnode.LayoutWidget) layoutnode.LayoutWidget {
 				return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-					macro := op.Record(gtx.Ops)
+					macro := op.Record(gtx.ToGio().Ops)
 					dims := widget.Layout(gtx)
 					call := macro.Stop()
 
@@ -36,8 +36,8 @@ func NewScaleNode(data ScaleData) *ScaleNode {
 					// Use captured n.data to support updates
 					t := f32.AffineId().Scale(center, f32.Pt(n.data.ScaleX, n.data.ScaleY))
 
-					stack := op.Affine(t).Push(gtx.Ops)
-					call.Add(gtx.Ops)
+					stack := op.Affine(t).Push(gtx.ToGio().Ops)
+					call.Add(gtx.ToGio().Ops)
 					stack.Pop()
 
 					return dims

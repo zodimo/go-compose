@@ -133,7 +133,8 @@ func outlinedTextFieldWidgetConstructor(
 
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 			if !opts.Enabled {
-				gtx = gtx.Disabled()
+				d := gtx.ToGio().Disabled()
+				gtx = layoutnode.NewLayoutContext(&d)
 			}
 			// Map children to slots (Must be done here, after WrapChildren)
 			children := node.Children()
@@ -144,7 +145,7 @@ func outlinedTextFieldWidgetConstructor(
 				child := children[childIdx]
 				if coord, ok := child.(layoutnode.NodeCoordinator); ok {
 					w.Prefix = func(gtx layout.Context) layout.Dimensions {
-						return coord.Layout(gtx)
+						return layoutnode.ToGioDimensions(coord.Layout(layoutnode.NewLayoutContext(&gtx)))
 					}
 				}
 				childIdx++
@@ -155,7 +156,7 @@ func outlinedTextFieldWidgetConstructor(
 				child := children[childIdx]
 				if coord, ok := child.(layoutnode.NodeCoordinator); ok {
 					w.Suffix = func(gtx layout.Context) layout.Dimensions {
-						return coord.Layout(gtx)
+						return layoutnode.ToGioDimensions(coord.Layout(layoutnode.NewLayoutContext(&gtx)))
 					}
 				}
 				childIdx++
@@ -187,7 +188,7 @@ func outlinedTextFieldWidgetConstructor(
 			th := theme.GioMaterialTheme()
 			// Check for submit events
 			for {
-				ev, ok := w.Editor.Update(gtx)
+				ev, ok := w.Editor.Update(*gtx.ToGio())
 				if !ok {
 					break
 				}
@@ -231,7 +232,7 @@ func outlinedTextFieldWidgetConstructor(
 
 			w.Colors = opts.Colors
 
-			return w.Layout(gtx, th, opts.Label)
+			return layoutnode.FromGioDimensions(w.Layout(*gtx.ToGio(), th, opts.Label))
 		}
 	})
 }

@@ -55,12 +55,12 @@ func Run(window *app.Window) error {
 
 			composer := compose.NewComposer(api.ComposerWithStore(store))
 
-			callOp := runtime.Run(gtx, composer, compose.CompositionLocalProvider1(
+			cmd := runtime.Run(gtx, composer, compose.CompositionLocalProvider1(
 				platform.LocalWindow,
 				window,
 				UI(),
 			))
-			callOp.Add(gtx.Ops)
+			cmd.Apply(gtx.Ops)
 			frameEvent.Frame(gtx.Ops)
 		}
 	}

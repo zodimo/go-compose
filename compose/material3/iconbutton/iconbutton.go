@@ -129,7 +129,7 @@ func iconButtonWidgetConstructor(_ IconButtonOptions, constructorArgs IconButton
 
 			button := constructorArgs.Button
 			onClick := constructorArgs.OnClick
-			if button.Clicked(gtx) {
+			if button.Clicked(*gtx.ToGio()) {
 				onClick()
 			}
 
@@ -144,7 +144,7 @@ func iconButtonWidgetConstructor(_ IconButtonOptions, constructorArgs IconButton
 				return iconWidget.Layout(gtx, c.AsNRGBA())
 			}
 
-			return button.LayoutIconOnly(gtx, constructorArgs.Description, mwIconWidget)
+			return layoutnode.FromGioDimensions(button.LayoutIconOnly(*gtx.ToGio(), constructorArgs.Description, mwIconWidget))
 		}
 	})
 }

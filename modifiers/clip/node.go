@@ -31,20 +31,20 @@ func NewClipNode(element ClipElement) ChainNode {
 				no.AttachDrawModifier(func(widget LayoutWidget) layoutnode.LayoutWidget {
 					return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 						//clip to the shape
-						macro := op.Record(gtx.Ops)
+						macro := op.Record(gtx.ToGio().Ops)
 						dimensions := widget.Layout(gtx)
 						callOp := macro.Stop()
 						// Clip Shape here
 						clipDimensions := dimensions
 						if element.clipData.ClipToBounds {
 							clipDimensions = layoutnode.LayoutDimensions{
-								Size: gtx.Constraints.Max,
+								Size: gtx.ToGio().Constraints.Max,
 							}
 						}
 
-						stack := ClipShape(element.clipData.Shape, gtx, clipDimensions)
+						stack := ClipShape(element.clipData.Shape, *gtx.ToGio(), clipDimensions)
 
-						callOp.Add(gtx.Ops)
+						callOp.Add(gtx.ToGio().Ops)
 						stack.Pop()
 
 						return dimensions

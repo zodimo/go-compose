@@ -54,8 +54,8 @@ func Run(window *app.Window) error {
 			gtx = themeManager.Material3ThemeInit(gtx)
 
 			composer := compose.NewComposer(api.ComposerWithStore(store))
-			callOp := runtime.Run(gtx, composer, UI())
-			callOp.Add(gtx.Ops)
+			cmd := runtime.Run(gtx, composer, UI())
+			cmd.Apply(gtx.Ops)
 			frameEvent.Frame(gtx.Ops)
 		}
 	}

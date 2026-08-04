@@ -125,7 +125,8 @@ func filledTextFieldWidgetConstructor(
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 			if !opts.Enabled {
-				gtx = gtx.Disabled()
+				d := gtx.ToGio().Disabled()
+				gtx = layoutnode.NewLayoutContext(&d)
 			}
 			// Map children to slots (Must be done here, after WrapChildren)
 			children := node.Children()
@@ -136,7 +137,7 @@ func filledTextFieldWidgetConstructor(
 				child := children[childIdx]
 				if coord, ok := child.(layoutnode.NodeCoordinator); ok {
 					w.Prefix = func(gtx layout.Context) layout.Dimensions {
-						return coord.Layout(gtx)
+						return layoutnode.ToGioDimensions(coord.Layout(layoutnode.NewLayoutContext(&gtx)))
 					}
 				}
 				childIdx++
@@ -147,7 +148,7 @@ func filledTextFieldWidgetConstructor(
 				child := children[childIdx]
 				if coord, ok := child.(layoutnode.NodeCoordinator); ok {
 					w.Suffix = func(gtx layout.Context) layout.Dimensions {
-						return coord.Layout(gtx)
+						return layoutnode.ToGioDimensions(coord.Layout(layoutnode.NewLayoutContext(&gtx)))
 					}
 				}
 				childIdx++
@@ -178,7 +179,7 @@ func filledTextFieldWidgetConstructor(
 			// 2. Events
 			th := theme.GioMaterialTheme()
 			for {
-				ev, ok := w.Editor.Update(gtx)
+				ev, ok := w.Editor.Update(*gtx.ToGio())
 				if !ok {
 					break
 				}
@@ -223,7 +224,7 @@ func filledTextFieldWidgetConstructor(
 			w.Colors = opts.Colors
 
 			// 4. Layout
-			return w.Layout(gtx, th, opts.Label)
+			return layoutnode.FromGioDimensions(w.Layout(*gtx.ToGio(), th, opts.Label))
 		}
 	})
 }

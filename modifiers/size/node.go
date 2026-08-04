@@ -37,16 +37,15 @@ func NewSizeNode(sizeData SizeData) ChainNode {
 					return layoutnode.NewLayoutWidget(
 						func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 							// 1. Calculate constraints to pass to child.
-							childConstraints := ApplySizeDataToConstraints(gtx.Constraints, sizeData)
+						childConstraints := ApplySizeDataToConstraints(gtx.ToGio().Constraints, sizeData)
 
 							// 2. Measure child.
-							macro := op.Record(gtx.Ops)
-							// Create a context with modified constraints for the child
-							childGtx := gtx
-							childGtx.Constraints = childConstraints
-							childDims := widget.Layout(childGtx)
-							call := macro.Stop()
-
+						macro := op.Record(gtx.ToGio().Ops)
+						// Create a context with modified constraints for the child
+						g := *gtx.ToGio()
+						g.Constraints = childConstraints
+						childDims := widget.Layout(layoutnode.NewLayoutContext(&g))
+						call := macro.Stop()
 							// 3. Determine my size.
 							mySize := image.Point{
 								X: childDims.Size.X,
@@ -59,21 +58,21 @@ func NewSizeNode(sizeData SizeData) ChainNode {
 								mySize.X = sizeData.Width
 							} else if sizeData.FillMaxWidth || sizeData.FillMax {
 								// Fill behavior uses max constraints
-								mySize.X = gtx.Constraints.Max.X
+							mySize.X = gtx.ToGio().Constraints.Max.X
 							} else {
 								// Default/Wrap behavior: respect incoming constraints
 								// If we are wrapping, we wanted min=0 for child, but our size
 								// must still respect our parent's min constraints.
-								mySize.X = Clamp(mySize.X, gtx.Constraints.Min.X, gtx.Constraints.Max.X)
+							mySize.X = Clamp(mySize.X, gtx.ToGio().Constraints.Min.X, gtx.ToGio().Constraints.Max.X)
 							}
 
 							// Handle Height overrides
 							if sizeData.Height != NotSet {
 								mySize.Y = sizeData.Height
 							} else if sizeData.FillMaxHeight || sizeData.FillMax {
-								mySize.Y = gtx.Constraints.Max.Y
+							mySize.Y = gtx.ToGio().Constraints.Max.Y
 							} else {
-								mySize.Y = Clamp(mySize.Y, gtx.Constraints.Min.Y, gtx.Constraints.Max.Y)
+							mySize.Y = Clamp(mySize.Y, gtx.ToGio().Constraints.Min.Y, gtx.ToGio().Constraints.Max.Y)
 							}
 
 							// 4. Align
@@ -83,17 +82,17 @@ func NewSizeNode(sizeData SizeData) ChainNode {
 
 								// Apply offset
 								// We put the offset operation before replaying the child recording
-								defer op.Offset(offset).Push(gtx.Ops).Pop()
+						defer op.Offset(offset).Push(gtx.ToGio().Ops).Pop()
 							}
 
 							// Add the child operations
-							call.Add(gtx.Ops)
+						call.Add(gtx.ToGio().Ops)
 
-							return layout.Dimensions{
-								Size: mySize,
-								// We should probably merge baselines here if needed, but keeping simple for now
-								Baseline: childDims.Baseline,
-							}
+						return layoutnode.LayoutDimensions{
+							Size: mySize,
+							// We should probably merge baselines here if needed, but keeping simple for now
+							Baseline: childDims.Baseline,
+						}
 						},
 					)
 				})

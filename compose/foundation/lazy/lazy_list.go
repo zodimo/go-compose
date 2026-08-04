@@ -13,8 +13,8 @@ import (
 	"gioui.org/op/clip"
 )
 
-type C = layout.Context
-type D = layout.Dimensions
+type C = layoutnode.LayoutContext
+type D = layoutnode.LayoutDimensions
 
 type lazyChildInfo struct {
 	size int
@@ -88,23 +88,23 @@ func lazyListWidgetConstructor(state *LazyListState, axis layout.Axis, stickyInd
 
 			itemSizes := make(map[int]int)
 
-			dims := state.List.List.Layout(gtx, len(node.Children()), func(gtx C, i int) D {
+			dims := layoutnode.FromGioDimensions(state.List.List.Layout(*gtx.ToGio(), len(node.Children()), func(innerGtx layout.Context, i int) layout.Dimensions {
 				if i < 0 || i >= len(node.Children()) {
-					return D{}
+					return layout.Dimensions{}
 				}
+				childGtx := layoutnode.NewLayoutContext(&innerGtx)
 				child := node.Children()[i].(layoutnode.NodeCoordinator)
-				d := child.Layout(gtx)
-
+				d := child.Layout(childGtx)
 				size := d.Size.Y
 				if axis == layout.Horizontal {
 					size = d.Size.X
 				}
 				itemSizes[i] = size
-				return d
-			})
+				return layoutnode.ToGioDimensions(d)
+			}))
 
 			if scrollbar {
-				layoutScrollbar(gtx, &state.List, axis, len(node.Children()), dims)
+				layoutScrollbar(*gtx.ToGio(), &state.List, axis, len(node.Children()), layoutnode.ToGioDimensions(dims))
 			}
 
 			// Handle Sticky Header
@@ -155,16 +155,16 @@ func lazyListWidgetConstructor(state *LazyListState, axis layout.Axis, stickyInd
 					// Refined approach:
 					// Always measure active sticky header first.
 					// Reset min constraints to allow header to be smaller than the list height
-					headerGtx := gtx
+					hdrGtx := *gtx.ToGio()
 					if axis == layout.Vertical {
-						headerGtx.Constraints.Min.Y = 0
+						hdrGtx.Constraints.Min.Y = 0
 					} else {
-						headerGtx.Constraints.Min.X = 0
+						hdrGtx.Constraints.Min.X = 0
 					}
 
-					macro := op.Record(gtx.Ops)
+					macro := op.Record(gtx.ToGio().Ops)
 					headerNode := node.Children()[stickyIdx].(layoutnode.NodeCoordinator)
-					headerDims := headerNode.Layout(headerGtx)
+					headerDims := headerNode.Layout(layoutnode.NewLayoutContext(&hdrGtx))
 					call := macro.Stop()
 
 					headerSize := headerDims.Size.Y
@@ -223,14 +223,14 @@ func lazyListWidgetConstructor(state *LazyListState, axis layout.Axis, stickyInd
 
 					// Draw
 					// apply offset
-					defer clip.Rect{Max: dims.Size}.Push(gtx.Ops).Pop()
+					defer clip.Rect{Max: dims.Size}.Push(gtx.ToGio().Ops).Pop()
 
 					pt := image.Pt(0, headerOffset)
 					if axis == layout.Horizontal {
 						pt = image.Pt(headerOffset, 0)
 					}
-					op.Offset(pt).Add(gtx.Ops)
-					call.Add(gtx.Ops)
+					op.Offset(pt).Add(gtx.ToGio().Ops)
+					call.Add(gtx.ToGio().Ops)
 
 					return dims
 				}

@@ -28,23 +28,23 @@ func NewAnimatedHeightNode(element AnimatedHeightElement) node.ChainNode {
 					anim := n.element.Anim
 
 					// Calculate progress
-					progress := anim.Revealed(gtx)
+					progress := anim.Revealed(*gtx.ToGio())
 					if progress == 0 && !anim.Visible() {
 						return layoutnode.LayoutDimensions{}
 					}
 
 					// Measure content first
-					macro := op.Record(gtx.Ops)
+					macro := op.Record(gtx.ToGio().Ops)
 					// Apply max height constraint constraint
-					childConstraints := gtx.Constraints
+					childConstraints := gtx.ToGio().Constraints
 					if n.element.MaxHeight > 0 {
-						childConstraints.Max.Y = gtx.Dp(gioUnit.Dp(n.element.MaxHeight))
+						childConstraints.Max.Y = gtx.ToGio().Dp(gioUnit.Dp(n.element.MaxHeight))
 					}
-					// Pass modified constraints
-					gtxChild := gtx
-					gtxChild.Constraints = childConstraints
+					// Pass modified constraints (copy semantics: the wrapper holds a pointer)
+					g := *gtx.ToGio()
+					g.Constraints = childConstraints
 
-					dims := widget.Layout(gtxChild)
+					dims := widget.Layout(layoutnode.NewLayoutContext(&g))
 					call := macro.Stop()
 
 					// Apply animation to height
@@ -55,11 +55,11 @@ func NewAnimatedHeightNode(element AnimatedHeightElement) node.ChainNode {
 					// Only clip if we are animating. If fully visible (progress=1.0), avoid clipping
 					// to prevent cutting off shadows or hover effects that might extend outside bounds.
 					if progress < 1.0 {
-						defer clip.Rect{Max: image.Point{X: dims.Size.X, Y: currentHeight}}.Push(gtx.Ops).Pop()
+						defer clip.Rect{Max: image.Point{X: dims.Size.X, Y: currentHeight}}.Push(gtx.ToGio().Ops).Pop()
 					}
 
 					// Draw Child
-					call.Add(gtx.Ops)
+					call.Add(gtx.ToGio().Ops)
 
 					return layoutnode.LayoutDimensions{
 						Size:     image.Point{X: dims.Size.X, Y: currentHeight},

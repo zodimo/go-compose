@@ -47,7 +47,7 @@ func LoadingIndicator(options ...IndicatorOption) Composable {
 
 		c.SetWidgetConstructor(layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 			return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-				return drawLoadingIndicator(gtx, animState, opts)
+				return layoutnode.FromGioDimensions(drawLoadingIndicator(*gtx.ToGio(), animState, opts))
 			}
 		}))
 

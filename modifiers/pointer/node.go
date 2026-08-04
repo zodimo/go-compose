@@ -29,13 +29,13 @@ func NewInputBlockerNode(element InputBlockerElement) node.ChainNode {
 						dims := widget.Layout(gtx)
 
 						// Block all input events within the dimensions of the widget
-						area := clip.Rect{Max: dims.Size}.Push(gtx.Ops)
-						event.Op(gtx.Ops, tag)
+						area := clip.Rect{Max: dims.Size}.Push(gtx.ToGio().Ops)
+						event.Op(gtx.ToGio().Ops, tag)
 						defer area.Pop()
 
 						// Drain events to block them effectively
 						for {
-							_, ok := gtx.Event(pointer.Filter{
+							_, ok := gtx.ToGio().Event(pointer.Filter{
 								Target: tag,
 								Kinds:  pointer.Press | pointer.Release | pointer.Move | pointer.Drag | pointer.Scroll | pointer.Enter | pointer.Leave,
 							})

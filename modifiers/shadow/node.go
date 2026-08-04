@@ -38,20 +38,20 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 					// 2. Draw shadow based on content size.
 					// 3. Draw content.
 
-					macro := op.Record(gtx.Ops)
+					macro := op.Record(gtx.ToGio().Ops)
 					dims := widget.Layout(gtx)
 					call := macro.Stop()
 
 					elevation := n.shadowData.Elevation
 					if elevation <= 0 {
-						call.Add(gtx.Ops)
+						call.Add(gtx.ToGio().Ops)
 						return dims
 					}
 
 					// Draw Shadow
 					// Adapted from gio-mw wdk.Elevation.Layout
 
-					shadowSize := float32(gtx.Metric.Dp(unit.DpToGioUnitUnsafe(elevation)))
+					shadowSize := float32(gtx.ToGio().Metric.Dp(unit.DpToGioUnitUnsafe(elevation)))
 
 					//@TODO get shadow from theme, for now default to black
 					col := graphics.ColorToNRGBA(n.shadowData.AmbientColor.TakeOrElse(graphics.ColorBlack))
@@ -68,11 +68,11 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 
 					// Create Outline for the shape
 					// We need the outline path.
-					outline := n.shadowData.Shape.CreateOutline(dims.Size, gtx.Metric)
+					outline := n.shadowData.Shape.CreateOutline(dims.Size, gtx.ToGio().Metric)
 
 					// Draw base layer
-					baseMacro := op.Record(gtx.Ops)
-					paint.FillShape(gtx.Ops, col, outline.Op(gtx.Ops))
+					baseMacro := op.Record(gtx.ToGio().Ops)
+					paint.FillShape(gtx.ToGio().Ops, col, outline.Op(gtx.ToGio().Ops))
 					baseCall := baseMacro.Stop()
 
 					var stack op.TransformStack
@@ -100,13 +100,13 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 						scaleOrigin := f32.Point{X: scaleFactor.X / 2, Y: 0}
 						sOffset := f32.Pt(xOffset, yOffset)
 
-						stack = op.Affine(f32.AffineId().Offset(sOffset).Scale(scaleOrigin, scaleFactor)).Push(gtx.Ops)
-						baseCall.Add(gtx.Ops)
+						stack = op.Affine(f32.AffineId().Offset(sOffset).Scale(scaleOrigin, scaleFactor)).Push(gtx.ToGio().Ops)
+						baseCall.Add(gtx.ToGio().Ops)
 						stack.Pop()
 					}
 
 					// Draw content on top
-					call.Add(gtx.Ops)
+					call.Add(gtx.ToGio().Ops)
 
 					return dims
 				})

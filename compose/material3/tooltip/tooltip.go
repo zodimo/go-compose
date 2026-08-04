@@ -54,7 +54,7 @@ func tooltipWidgetConstructor(text string, hovered *bool) layoutnode.LayoutNodeW
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 			children := node.Children()
 			if len(children) == 0 {
-				return layout.Dimensions{}
+			return layoutnode.LayoutDimensions{}
 			}
 
 			contentNode := children[0].(layoutnode.NodeCoordinator)
@@ -67,18 +67,18 @@ func tooltipWidgetConstructor(text string, hovered *bool) layoutnode.LayoutNodeW
 			}
 
 			// Measure content
-			macroContent := op.Record(gtx.Ops)
+			macroContent := op.Record(gtx.ToGio().Ops)
 			dimsContent := contentNode.Layout(gtx)
 			callContent := macroContent.Stop()
 
 			// Hover detection
-			checkHover(gtx, dimsContent.Size, hovered)
+			checkHover(*gtx.ToGio(), dimsContent.Size, hovered)
 
 			// Layout gio-mw tooltip
-			return gioTooltip.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+			return layoutnode.FromGioDimensions(gioTooltip.Layout(*gtx.ToGio(), func(gtx layout.Context) layout.Dimensions {
 				callContent.Add(gtx.Ops)
-				return dimsContent
-			}, *hovered)
+				return layout.Dimensions{Size: dimsContent.Size, Baseline: dimsContent.Baseline}
+			}, *hovered))
 		}
 	})
 }

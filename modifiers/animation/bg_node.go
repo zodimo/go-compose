@@ -31,7 +31,7 @@ func NewAnimatedBackgroundNode(element AnimatedBackgroundElement) *AnimatedBackg
 			no.AttachLayoutModifier(func(widget layoutnode.LayoutWidget) layoutnode.LayoutWidget {
 				return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 					// 1. Logic
-					progress := n.element.Anim.Revealed(gtx)
+					progress := n.element.Anim.Revealed(*gtx.ToGio())
 
 					// 2. Layout Child
 					dims := widget.Layout(gtx)
@@ -112,7 +112,7 @@ func NewAnimatedBackgroundNode(element AnimatedBackgroundElement) *AnimatedBackg
 					// So checking child order doesn't matter much if child is empty.
 					// But for correctness, background should be behind.
 
-					paint.FillShape(gtx.Ops, nrgba, clip.Rect(rect).Op())
+					paint.FillShape(gtx.ToGio().Ops, nrgba, clip.Rect(rect).Op())
 
 					return dims
 				})

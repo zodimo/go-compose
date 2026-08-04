@@ -41,7 +41,7 @@ type pointerWidget struct {
 
 func (dw pointerWidget) Update(gtx LayoutContext) {
 	//capture and discard if draw operations where to happen here
-	defer op.Record(gtx.Ops).Stop()
+	defer op.Record(gtx.ToGio().Ops).Stop()
 	dw.innerWidget(gtx)
 }
 

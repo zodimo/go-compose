@@ -78,7 +78,7 @@ func VerticalDivider(options ...DividerOption) api.Composable {
 func widgetConstructor(options DividerOptions, isHorizontal bool) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-			thickness := gtx.Dp(gioUnit.Dp(options.Thickness))
+			thickness := gtx.ToGio().Dp(gioUnit.Dp(options.Thickness))
 			if thickness < 1 {
 				thickness = 1
 			}
@@ -88,16 +88,16 @@ func widgetConstructor(options DividerOptions, isHorizontal bool) layoutnode.Lay
 
 			if isHorizontal {
 				// Dividers fill the width
-				width := gtx.Constraints.Min.X
-				if gtx.Constraints.Max.X > width {
-					width = gtx.Constraints.Max.X // Or Min/Max strategy? Usually divider fills parent width.
+				width := gtx.ToGio().Constraints.Min.X
+				if gtx.ToGio().Constraints.Max.X > width {
+					width = gtx.ToGio().Constraints.Max.X // Or Min/Max strategy? Usually divider fills parent width.
 				}
 				size = image.Pt(width, thickness)
 			} else {
 				// Dividers fill the height
-				height := gtx.Constraints.Min.Y
-				if gtx.Constraints.Max.Y > height {
-					height = gtx.Constraints.Max.Y // Usually divider fills parent height.
+				height := gtx.ToGio().Constraints.Min.Y
+				if gtx.ToGio().Constraints.Max.Y > height {
+					height = gtx.ToGio().Constraints.Max.Y // Usually divider fills parent height.
 				}
 				size = image.Pt(thickness, height)
 			}
@@ -106,9 +106,9 @@ func widgetConstructor(options DividerOptions, isHorizontal bool) layoutnode.Lay
 			resolvedColor := graphics.ColorToNRGBA(options.Color)
 
 			// Draw
-			shape := clip.Rect{Max: size}.Push(gtx.Ops)
-			paint.ColorOp{Color: resolvedColor}.Add(gtx.Ops)
-			paint.PaintOp{}.Add(gtx.Ops)
+			shape := clip.Rect{Max: size}.Push(gtx.ToGio().Ops)
+			paint.ColorOp{Color: resolvedColor}.Add(gtx.ToGio().Ops)
+			paint.PaintOp{}.Add(gtx.ToGio().Ops)
 			shape.Pop()
 
 			return layoutnode.LayoutDimensions{Size: size}

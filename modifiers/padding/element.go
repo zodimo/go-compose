@@ -41,18 +41,20 @@ func (pe paddingElement) Create() Node {
 
 						if pe.padding.RtlAware {
 							// if RTL then we should swap left and right
-							if gtx.Locale.Direction == RTL {
+						if gtx.ToGio().Locale.Direction == RTL {
 								left = gioUnit.Dp(pe.padding.End)
 								right = gioUnit.Dp(pe.padding.Start)
 							}
 						}
 
-						return layout.Inset{
+						return layoutnode.FromGioDimensions(layout.Inset{
 							Top:    gioUnit.Dp(pe.padding.Top),
 							Bottom: gioUnit.Dp(pe.padding.Bottom),
 							Left:   left,
 							Right:  right,
-						}.Layout(gtx, widget.Layout)
+						}.Layout(*gtx.ToGio(), func(gtx layout.Context) layout.Dimensions {
+							return layoutnode.ToGioDimensions(widget.Layout(layoutnode.NewLayoutContext(&gtx)))
+						}))
 					})
 				})
 

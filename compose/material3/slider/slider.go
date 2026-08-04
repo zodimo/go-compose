@@ -133,24 +133,24 @@ func sliderWidgetConstructor(args sliderConstructorArgs) layoutnode.LayoutNodeWi
 				}
 			}
 			// Layout Constants
-			trackHeight := gtx.Dp(TrackHeight)
+			trackHeight := gtx.ToGio().Dp(TrackHeight)
 			tSize := ThumbSize
 			if wFloat.Dragging() {
 				tSize = ActiveThumbSize
 			}
-			thumbSize := gtx.Dp(tSize)
+			thumbSize := gtx.ToGio().Dp(tSize)
 
 			// Main Axis: Max width, fixed height (thumb size or min touch size)
 			// Cross Axis: Thumb size
 
 			// Minimum touch target size (48dp usually)
-			minTouchSize := gtx.Dp(gioUnit.Dp(48))
+			minTouchSize := gtx.ToGio().Dp(gioUnit.Dp(48))
 			height := max(thumbSize, minTouchSize)
 
-			size := image.Pt(gtx.Constraints.Max.X, height)
+			size := image.Pt(gtx.ToGio().Constraints.Max.X, height)
 
 			// Center the component vertically
-			centerOffset := op.Offset(image.Pt(0, (height-thumbSize)/2)).Push(gtx.Ops)
+			centerOffset := op.Offset(image.Pt(0, (height-thumbSize)/2)).Push(gtx.ToGio().Ops)
 
 			// Draw Track
 			trackY := (thumbSize - trackHeight) / 2
@@ -179,9 +179,9 @@ func sliderWidgetConstructor(args sliderConstructorArgs) layoutnode.LayoutNodeWi
 			inactiveTrackClip := clip.RRect{
 				Rect: inactiveTrackRect,
 				SE:   roundedCorners, SW: roundedCorners, NW: roundedCorners, NE: roundedCorners,
-			}.Push(gtx.Ops)
-			paint.ColorOp{Color: trackColor}.Add(gtx.Ops)
-			paint.PaintOp{}.Add(gtx.Ops)
+			}.Push(gtx.ToGio().Ops)
+			paint.ColorOp{Color: trackColor}.Add(gtx.ToGio().Ops)
+			paint.PaintOp{}.Add(gtx.ToGio().Ops)
 			inactiveTrackClip.Pop()
 
 			// Active Track (Overlay)
@@ -192,9 +192,9 @@ func sliderWidgetConstructor(args sliderConstructorArgs) layoutnode.LayoutNodeWi
 				activeTrackClip := clip.RRect{
 					Rect: activeTrackRect,
 					SE:   roundedCorners, SW: roundedCorners, NW: roundedCorners, NE: roundedCorners,
-				}.Push(gtx.Ops)
-				paint.ColorOp{Color: activeColor}.Add(gtx.Ops)
-				paint.PaintOp{}.Add(gtx.Ops)
+				}.Push(gtx.ToGio().Ops)
+				paint.ColorOp{Color: activeColor}.Add(gtx.ToGio().Ops)
+				paint.PaintOp{}.Add(gtx.ToGio().Ops)
 				activeTrackClip.Pop()
 			}
 
@@ -204,7 +204,7 @@ func sliderWidgetConstructor(args sliderConstructorArgs) layoutnode.LayoutNodeWi
 
 				inactiveTickColor := graphics.ColorToNRGBA(args.Colors.Tick(args.Enabled, false))
 
-				tickSizePx := gtx.Dp(TickSize)
+				tickSizePx := gtx.ToGio().Dp(TickSize)
 				stepSizePx := float32(trackWidth) / float32(args.Steps+1)
 
 				for i := 0; i <= args.Steps+1; i++ {
@@ -224,9 +224,9 @@ func sliderWidgetConstructor(args sliderConstructorArgs) layoutnode.LayoutNodeWi
 						Min: tickRect.Min,
 						Max: tickRect.Max,
 					}
-					tickClip := tickCircle.Push(gtx.Ops)
-					paint.ColorOp{Color: c}.Add(gtx.Ops)
-					paint.PaintOp{}.Add(gtx.Ops)
+					tickClip := tickCircle.Push(gtx.ToGio().Ops)
+					paint.ColorOp{Color: c}.Add(gtx.ToGio().Ops)
+					paint.PaintOp{}.Add(gtx.ToGio().Ops)
 					tickClip.Pop()
 				}
 			}
@@ -240,9 +240,9 @@ func sliderWidgetConstructor(args sliderConstructorArgs) layoutnode.LayoutNodeWi
 			thumbClip := clip.Ellipse{
 				Min: thumbRect.Min,
 				Max: thumbRect.Max,
-			}.Push(gtx.Ops)
-			paint.ColorOp{Color: thumbColor}.Add(gtx.Ops)
-			paint.PaintOp{}.Add(gtx.Ops)
+			}.Push(gtx.ToGio().Ops)
+			paint.ColorOp{Color: thumbColor}.Add(gtx.ToGio().Ops)
+			paint.PaintOp{}.Add(gtx.ToGio().Ops)
 			thumbClip.Pop()
 
 			centerOffset.Pop()
@@ -259,7 +259,8 @@ func sliderWidgetConstructor(args sliderConstructorArgs) layoutnode.LayoutNodeWi
 			// widget.Float.Layout returns dimensions.
 
 			// Set constraints for input to match our laid out track area (with touch target padding)
-			gtx.Constraints.Min = size
+			g := *gtx.ToGio()
+			g.Constraints.Min = size
 
 			// Use layout.Stack to ensure input covers everything?
 			// Actually widget.Float assumes it fills the area provided.
@@ -271,7 +272,7 @@ func sliderWidgetConstructor(args sliderConstructorArgs) layoutnode.LayoutNodeWi
 				// We need to ensure it processes input over the full 'size'
 				// The widget.Float implementation uses axis.Convert(size) for length calculation.
 				wasDragging := wFloat.Dragging()
-				wFloat.Layout(gtx, layout.Horizontal, gioUnit.Dp(0))
+				wFloat.Layout(g, layout.Horizontal, gioUnit.Dp(0))
 				if wasDragging && !wFloat.Dragging() && args.OnValueChangeFinished != nil {
 					args.OnValueChangeFinished()
 				}

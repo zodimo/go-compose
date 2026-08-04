@@ -92,9 +92,9 @@ func lazyGridWidgetConstructor(
 			var spacing int = 0
 
 			if axis == layout.Vertical {
-				availableSpace = gtx.Constraints.Max.X
+				availableSpace = gtx.ToGio().Constraints.Max.X
 			} else {
-				availableSpace = gtx.Constraints.Max.Y
+				availableSpace = gtx.ToGio().Constraints.Max.Y
 			}
 
 			cellCount := cells.calculateCrossAxisCellCount(availableSpace, spacing)
@@ -107,7 +107,7 @@ func lazyGridWidgetConstructor(
 
 			state.List.List.Axis = axis
 
-			dims := state.List.List.Layout(gtx, rowCount, func(gtx C, rowIndex int) D {
+			dims := layoutnode.FromGioDimensions(state.List.List.Layout(*gtx.ToGio(), rowCount, func(innerGtx layout.Context, rowIndex int) layout.Dimensions {
 				// Calculate range of items for this row
 				startIdx := rowIndex * cellCount
 				endIdx := startIdx + cellCount
@@ -126,7 +126,7 @@ func lazyGridWidgetConstructor(
 					capturedCoordinator := childCoordinator
 					capturedCellSizeInPx := density.DpRoundToPx(unit.Dp(float32(cellSize)))
 
-					flexChildren = append(flexChildren, layout.Rigid(func(gtx C) D {
+					flexChildren = append(flexChildren, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						// Constrain cell size in the cross-axis direction
 						if axis == layout.Vertical {
 							gtx.Constraints.Min.X = capturedCellSizeInPx
@@ -136,18 +136,19 @@ func lazyGridWidgetConstructor(
 							gtx.Constraints.Max.Y = capturedCellSizeInPx
 						}
 
-						return capturedCoordinator.Layout(gtx)
+						childGtx := layoutnode.NewLayoutContext(&gtx)
+						return layoutnode.ToGioDimensions(capturedCoordinator.Layout(childGtx))
 					}))
 				}
 
 				// Add empty spacers for trailing empty cells to maintain alignment
 				for i := endIdx - startIdx; i < cellCount; i++ {
 					capturedCellSizeInPx := density.DpRoundToPx(unit.Dp(float32(cellSize)))
-					flexChildren = append(flexChildren, layout.Rigid(func(gtx C) D {
+					flexChildren = append(flexChildren, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 						if axis == layout.Vertical {
-							return D{Size: image.Point{X: capturedCellSizeInPx, Y: 0}}
+							return layout.Dimensions{Size: image.Point{X: capturedCellSizeInPx, Y: 0}}
 						}
-						return D{Size: image.Point{X: 0, Y: capturedCellSizeInPx}}
+						return layout.Dimensions{Size: image.Point{X: 0, Y: capturedCellSizeInPx}}
 					}))
 				}
 
@@ -159,11 +160,11 @@ func lazyGridWidgetConstructor(
 					rowAxis = layout.Vertical
 				}
 
-				return layout.Flex{Axis: rowAxis}.Layout(gtx, flexChildren...)
-			})
+				return layout.Flex{Axis: rowAxis}.Layout(innerGtx, flexChildren...)
+			}))
 
 			if scrollbar {
-				layoutGridScrollbar(gtx, &state.List, axis, rowCount, dims)
+				layoutGridScrollbar(*gtx.ToGio(), &state.List, axis, rowCount, layoutnode.ToGioDimensions(dims))
 			}
 
 			return dims

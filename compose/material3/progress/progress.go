@@ -58,8 +58,8 @@ func indicatorComposable(defaultIndicator *indicator.Indicator, progress float32
 
 func indicatorWidgetConstructor(ind *indicator.Indicator) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
-		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-			return ind.Layout(gtx)
-		}
+	return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+		return layoutnode.FromGioDimensions(ind.Layout(*gtx.ToGio()))
+	}
 	})
 }

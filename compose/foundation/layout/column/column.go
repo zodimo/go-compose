@@ -49,24 +49,24 @@ func columnWidgetConstructor(options ColumnOptions) layoutnode.LayoutNodeWidgetC
 
 				maybeWeightElement := elementStore.GetElement(weight.WeightElementKey)
 				if maybeWeightElement.IsNone() {
-					flexedChildren = append(flexedChildren, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
-						// Compose behavior: Cross axis constraints Min is 0
-						gtx.Constraints.Min.X = 0
-						return childLayoutNode.Layout(gtx)
-					}))
+				flexedChildren = append(flexedChildren, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
+					// Compose behavior: Cross axis constraints Min is 0
+					gtx.Constraints.Min.X = 0
+					return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContext(&gtx)))
+				}))
 				} else {
 					weightElement := maybeWeightElement.UnwrapUnsafe().(weight.WeightElement)
-					flexedChildren = append(flexedChildren, layout.Flexed(weightElement.WeightData().Weight, func(gtx layout.Context) layout.Dimensions {
-						return childLayoutNode.Layout(gtx)
-					}))
+				flexedChildren = append(flexedChildren, layout.Flexed(weightElement.WeightData().Weight, func(gtx layout.Context) layout.Dimensions {
+					return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContext(&gtx)))
+				}))
 				}
 			}
 
-			return layout.Flex{
-				Axis:      layout.Vertical,
-				Spacing:   options.Spacing,
-				Alignment: options.Alignment,
-			}.Layout(gtx, flexedChildren...)
+		return layoutnode.FromGioDimensions(layout.Flex{
+			Axis:      layout.Vertical,
+			Spacing:   options.Spacing,
+			Alignment: options.Alignment,
+		}.Layout(*gtx.ToGio(), flexedChildren...))
 		}
 	})
 

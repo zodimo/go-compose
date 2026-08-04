@@ -168,12 +168,12 @@ func textFieldWidgetConstructor(args BasicTextFieldConstructorArgs) layoutnode.L
 
 			resolvedTextColor := graphics.ColorToNRGBA(textStyle.Color())
 			// Create text color material
-			textColorMacro := op.Record(gtx.Ops)
-			paint.ColorOp{Color: resolvedTextColor}.Add(gtx.Ops)
+			textColorMacro := op.Record(gtx.ToGio().Ops)
+			paint.ColorOp{Color: resolvedTextColor}.Add(gtx.ToGio().Ops)
 			textMaterial := textColorMacro.Stop()
 
 			// Use the controller to layout and paint the text
-			dims := controller.LayoutAndPaint(gtx, args.textShaper.Shaper, textMaterial)
+			dims := layoutnode.FromGioDimensions(controller.LayoutAndPaint(*gtx.ToGio(), args.textShaper.Shaper, textMaterial))
 
 			return dims
 		}

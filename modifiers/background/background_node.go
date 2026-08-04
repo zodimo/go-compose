@@ -32,21 +32,21 @@ func NewBackGroundNode(background BackgroundData) ChainNode {
 
 					return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 						nrgba := graphics.ColorToNRGBA(background.Color)
-						return layout.Background{}.Layout(gtx,
-							func(gtx layout.Context) layout.Dimensions {
-								// shape
-								// color
-								defer background.Shape.CreateOutline(gtx.Constraints.Min, gtx.Metric).Push(gtx.Ops).Pop()
+							return layoutnode.FromGioDimensions(layout.Background{}.Layout(*gtx.ToGio(),
+								func(gtx layout.Context) layout.Dimensions {
+									// shape
+									// color
+									defer background.Shape.CreateOutline(gtx.Constraints.Min, gtx.Metric).Push(gtx.Ops).Pop()
 
-								paint.Fill(gtx.Ops, nrgba)
+									paint.Fill(gtx.Ops, nrgba)
 
-								return layout.Dimensions{Size: gtx.Constraints.Min}
+									return layout.Dimensions{Size: gtx.Constraints.Min}
 
+								},
+								func(gtx layout.Context) layout.Dimensions {
+									return layoutnode.ToGioDimensions(widget.Layout(layoutnode.NewLayoutContext(&gtx)))
 							},
-							func(gtx layout.Context) layout.Dimensions {
-								return widget.Layout(gtx)
-							},
-						)
+						))
 					})
 				})
 

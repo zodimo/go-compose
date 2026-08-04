@@ -23,21 +23,21 @@ func NewAnimatedWidthNode(element AnimatedWidthElement) *AnimatedWidthNode {
 			no.AttachLayoutModifier(func(widget layoutnode.LayoutWidget) layoutnode.LayoutWidget {
 				return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 					// Logic
-					progress := n.element.Anim.Revealed(gtx)
+					progress := n.element.Anim.Revealed(*gtx.ToGio())
 
 					width := int(float32(n.element.MaxWidth) * progress)
 
 					// Apply width constraint
 					// We force the width to be exactly 'width'
-					c := gtx.Constraints
+					c := gtx.ToGio().Constraints
 					c.Min.X = width
 					c.Max.X = width
 
-					// Override Gtx
-					childGtx := gtx
-					childGtx.Constraints = c
+					// Override Gtx (copy semantics: the wrapper holds a pointer)
+					g := *gtx.ToGio()
+					g.Constraints = c
 
-					dims := widget.Layout(childGtx)
+					dims := widget.Layout(layoutnode.NewLayoutContext(&g))
 
 					return dims
 				})

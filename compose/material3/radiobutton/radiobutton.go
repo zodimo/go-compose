@@ -82,7 +82,7 @@ func radioButtonWidgetConstructor(
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 			if !enabled {
 				// We don't enable the clickable if disabled
-			} else if clickable.Clicked(gtx) {
+			} else if clickable.Clicked(*gtx.ToGio()) {
 				if handler.Func != nil {
 					handler.Func()
 				}
@@ -105,13 +105,13 @@ func radioButtonWidgetConstructor(
 			)
 
 			sizeDp := gioUnit.Dp(stateLayerSize)
-			sizePx := gtx.Dp(sizeDp)
+			sizePx := gtx.ToGio().Dp(sizeDp)
 
 			// Center the icon within the state layer
-			iconSizePx := gtx.Dp(gioUnit.Dp(iconSize))
+			iconSizePx := gtx.ToGio().Dp(gioUnit.Dp(iconSize))
 			iconOffset := (sizePx - iconSizePx) / 2
 
-			return layout.Stack{}.Layout(gtx,
+			return layoutnode.FromGioDimensions(layout.Stack{}.Layout(*gtx.ToGio(),
 				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 					// Draw state layer (hover/press)
 					if enabled {
@@ -194,7 +194,7 @@ func radioButtonWidgetConstructor(
 
 					return layout.Dimensions{Size: image.Pt(sizePx, sizePx)}
 				}),
-			)
+			))
 		}
 	})
 }

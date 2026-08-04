@@ -90,7 +90,7 @@ func (nc *nodeCoordinator) AttachParentDataModifier(attach func(elements Element
 	nc.elementStore = attach(nc.elementStore)
 }
 func (nc *nodeCoordinator) PointerPhase(gtx LayoutContext) {
-	defer op.Record(gtx.Ops).Stop()
+	defer op.Record(gtx.ToGio().Ops).Stop()
 	nc.pointerCallChain.Layout(gtx)
 }
 
@@ -108,7 +108,7 @@ func (nc *nodeCoordinator) Layout(gtx LayoutContext) LayoutDimensions {
 }
 
 func (nc *nodeCoordinator) Draw(gtx LayoutContext) DrawOp {
-	macro := op.Record(gtx.Ops)
+	macro := op.Record(gtx.ToGio().Ops)
 	nc.layoutCallChain.Layout(gtx)
 	return macro.Stop()
 }
@@ -118,7 +118,7 @@ func (n *nodeCoordinator) GetWidget() GioLayoutWidget {
 	if maybeLayoutResult.IsSome() {
 		return func(gtx LayoutContext) LayoutDimensions {
 			layoutResult := maybeLayoutResult.UnwrapUnsafe()
-			layoutResult.DrawOp.Add(gtx.Ops)
+			layoutResult.DrawOp.Add(gtx.ToGio().Ops)
 			return layoutResult.Dimensions
 		}
 	}

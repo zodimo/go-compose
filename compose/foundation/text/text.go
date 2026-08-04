@@ -98,12 +98,12 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 			resolvedTextColor := graphics.ColorToNRGBA(textStyle.Color().TakeOrElse(graphics.ColorBlack))
 			resolvedSelectColor := graphics.ColorToNRGBA(constructorArgs.textSelectionColor)
 
-			textColorMacro := op.Record(gtx.Ops)
-			paint.ColorOp{Color: resolvedTextColor}.Add(gtx.Ops)
+			textColorMacro := op.Record(gtx.ToGio().Ops)
+			paint.ColorOp{Color: resolvedTextColor}.Add(gtx.ToGio().Ops)
 			textColor := textColorMacro.Stop()
 
-			selectColorMacro := op.Record(gtx.Ops)
-			paint.ColorOp{Color: resolvedSelectColor}.Add(gtx.Ops)
+			selectColorMacro := op.Record(gtx.ToGio().Ops)
+			paint.ColorOp{Color: resolvedSelectColor}.Add(gtx.ToGio().Ops)
 			_ = selectColorMacro.Stop()
 
 			var dims layoutnode.LayoutDimensions
@@ -139,7 +139,7 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 			}
 
 			// fmt.Printf("textStyle [%s]: %s\n", textValue, text.StringTextStyle(textStyle))
-			dims = widget.Label{
+			dims = layoutnode.FromGioDimensions(widget.Label{
 				Alignment:       style.TextAlignToGioTextAlignment(textStyle.TextAlign()),
 				MaxLines:        textOptions.MaxLines,
 				Truncator:       textOptions.Truncator,
@@ -147,7 +147,7 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 				LineHeight:      textStyle.LineHeight().AsGioSp(),
 				LineHeightScale: 0, // TODO how should this be handled?
 			}.Layout(
-				gtx,
+				*gtx.ToGio(),
 				constructorArgs.textShaper.Shaper,
 				font.ToGioFont(
 					textStyle.FontFamily(),
@@ -157,7 +157,7 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 				textStyle.FontSize().AsGioSp(),
 				textValue,
 				textColor,
-			)
+			))
 			// }
 
 			textDecoration := style.TakeOrElseTextDecoration(textOptions.TextStyle.TextDecoration(), style.TextDecorationNone)
@@ -168,7 +168,7 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 					lineHeight := 1
 					y := dims.Size.Y / 2
 					rect := image.Rect(0, y, dims.Size.X, y+lineHeight)
-					paint.FillShape(gtx.Ops, resolvedTextColor, clip.Rect(rect).Op())
+				paint.FillShape(gtx.ToGio().Ops, resolvedTextColor, clip.Rect(rect).Op())
 				}
 			}
 

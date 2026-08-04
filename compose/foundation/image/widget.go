@@ -27,7 +27,7 @@ type ImageWidget struct {
 
 func (im ImageWidget) Layout(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 	srcSize := im.Src.Size()
-	dstSize := gtx.Constraints.Max
+	dstSize := gtx.ToGio().Constraints.Max
 
 	srcDim := layoutnode.LayoutDimensions{Size: srcSize}
 	dstDim := layoutnode.LayoutDimensions{Size: dstSize}
@@ -41,29 +41,29 @@ func (im ImageWidget) Layout(gtx layoutnode.LayoutContext) layoutnode.LayoutDime
 	scaledSize := image.Point{X: scaledW, Y: scaledH}
 
 	// Constrain to reported size
-	reportedSize := gtx.Constraints.Constrain(scaledSize)
+	reportedSize := gtx.ToGio().Constraints.Constrain(scaledSize)
 
 	// Calculate alignment offset
 	offset := im.Alignment.Align(scaledSize, reportedSize, layoutnode.LayoutDirectionLTR)
 
 	// Clip to reported bounds
-	defer clip.Rect{Max: reportedSize}.Push(gtx.Ops).Pop()
+	defer clip.Rect{Max: reportedSize}.Push(gtx.ToGio().Ops).Pop()
 
 	// Apply transform (scale + offset)
 	trans := f32.NewAffine2D(
 		scaleFactor.ScaleX, 0, float32(offset.X),
 		0, scaleFactor.ScaleY, float32(offset.Y),
 	)
-	defer op.Affine(trans).Push(gtx.Ops).Pop()
+	defer op.Affine(trans).Push(gtx.ToGio().Ops).Pop()
 
 	// Apply alpha
 	if im.Alpha < 1.0 {
-		defer paint.PushOpacity(gtx.Ops, im.Alpha).Pop()
+		defer paint.PushOpacity(gtx.ToGio().Ops, im.Alpha).Pop()
 	}
 
 	// Draw image
-	im.Src.Add(gtx.Ops)
-	paint.PaintOp{}.Add(gtx.Ops)
+	im.Src.Add(gtx.ToGio().Ops)
+	paint.PaintOp{}.Add(gtx.ToGio().Ops)
 
 	return layoutnode.LayoutDimensions{Size: reportedSize}
 }

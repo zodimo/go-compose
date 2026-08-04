@@ -31,7 +31,7 @@ func NewAlphaNode(element AlphaElement) ChainNode {
 
 				no.AttachDrawModifier(func(widget LayoutWidget) layoutnode.LayoutWidget {
 					return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-						macro := paint.PushOpacity(gtx.Ops, state.Alpha)
+						macro := paint.PushOpacity(gtx.ToGio().Ops, state.Alpha)
 						defer macro.Pop()
 						return widget.Layout(gtx)
 					})

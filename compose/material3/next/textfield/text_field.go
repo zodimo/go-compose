@@ -17,13 +17,14 @@ import (
 	"gioui.org/widget"
 	"gioui.org/widget/material"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-compose/internal/layoutnode"
 
 	gioUnit "gioui.org/unit"
 )
 
-type C = layout.Context
+type C = layoutnode.LayoutContext
 
-type D = layout.Dimensions
+type D = layoutnode.LayoutDimensions
 
 // TextFieldComponent implements the Material Design Text Field
 // described here: https://material.io/components/text-fields
@@ -97,15 +98,18 @@ func (in *TextFieldComponent) TextTooLong() bool {
 }
 
 func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
-	disabled := gtx.Source == (input.Source{})
+	// Make a local copy of the engine context for value semantics (the old code
+	// received layout.Context by value, so mutations were local).
+	g := *gtx.ToGio()
+	disabled := g.Source == (input.Source{})
 	for {
-		ev, ok := in.click.Update(gtx.Source)
+		ev, ok := in.click.Update(g.Source)
 		if !ok {
 			break
 		}
 		switch ev.Kind {
 		case gesture.KindPress:
-			gtx.Execute(key.FocusCmd{Tag: &in.Editor})
+			g.Execute(key.FocusCmd{Tag: &in.Editor})
 		}
 	}
 	in.state = inactive
@@ -116,7 +120,7 @@ func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
 	if hasContents {
 		in.state = activated
 	}
-	if gtx.Source.Focused(&in.Editor) && !disabled {
+	if g.Source.Focused(&in.Editor) && !disabled {
 		in.state = focused
 	}
 	const (
@@ -126,18 +130,18 @@ func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
 		in.anim = &Progress{}
 	}
 	if in.state == activated || hasContents {
-		in.anim.Start(gtx.Now, Forward, 0)
+		in.anim.Start(g.Now, Forward, 0)
 	}
 	if in.state == focused && !hasContents && !in.anim.Started() {
-		in.anim.Start(gtx.Now, Forward, duration)
+		in.anim.Start(g.Now, Forward, duration)
 	}
 	if in.state == inactive && !hasContents && in.anim.Finished() {
-		in.anim.Start(gtx.Now, Reverse, duration)
+		in.anim.Start(g.Now, Reverse, duration)
 	}
 	if in.anim.Started() {
-		gtx.Execute(op.InvalidateCmd{})
+		g.Execute(op.InvalidateCmd{})
 	}
-	in.anim.Update(gtx.Now)
+	in.anim.Update(g.Now)
 	var (
 		// Text size transitions.
 		textNormal = th.TextSize
@@ -174,8 +178,8 @@ func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
 	// Calculate the dimensions of the smallest label size and store the
 	// result for use in clipping.
 	// Hack: Reset min constraint to 0 to avoid min == max.
-	gtx.Constraints.Min.X = 0
-	macro := op.Record(gtx.Ops)
+	g.Constraints.Min.X = 0
+	macro := op.Record(g.Ops)
 	var spacing gioUnit.Dp
 	if len(hint) > 0 {
 		spacing = 4
@@ -183,12 +187,12 @@ func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
 	in.label.Smallest = layout.Inset{
 		Left:  spacing,
 		Right: spacing,
-	}.Layout(gtx, func(gtx C) D {
+	}.Layout(g, func(gtx layout.Context) layout.Dimensions {
 		return material.Label(th, textSmall, hint).Layout(gtx)
 	})
 	macro.Stop()
 	labelTopInsetNormal := float32(in.label.Smallest.Size.Y) - float32(in.label.Smallest.Size.Y/4)
-	topInsetDP := gioUnit.Dp(labelTopInsetNormal / gtx.Metric.PxPerDp)
+	topInsetDP := gioUnit.Dp(labelTopInsetNormal / g.Metric.PxPerDp)
 	topInsetActiveDP := (topInsetDP / 2 * -1) - gioUnit.Dp(in.border.Thickness)
 	in.label.Inset = layout.Inset{
 		Top:  gioUnit.Dp(lerp.Between32(float32(topInsetDP), float32(topInsetActiveDP), in.anim.Progress())),
@@ -199,14 +203,14 @@ func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
 func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 	in.Update(gtx, th, hint)
 	// Offset accounts for label height, which sticks above the border dimensions.
-	defer op.Offset(image.Pt(0, in.label.Smallest.Size.Y/2)).Push(gtx.Ops).Pop()
+	defer op.Offset(image.Pt(0, in.label.Smallest.Size.Y/2)).Push(gtx.ToGio().Ops).Pop()
 	in.label.Inset.Layout(
-		gtx,
-		func(gtx C) D {
+		*gtx.ToGio(),
+		func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{
 				Left:  gioUnit.Dp(4),
 				Right: gioUnit.Dp(4),
-			}.Layout(gtx, func(gtx C) D {
+			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 				label := material.Label(th, gioUnit.Sp(in.label.TextSize), hint)
 				label.Color = in.border.Color
 				return label.Layout(gtx)
@@ -216,14 +220,14 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 	dims := layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(
-		gtx,
-		layout.Rigid(func(gtx C) D {
+		*gtx.ToGio(),
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Stack{}.Layout(
 				gtx,
-				layout.Expanded(func(gtx C) D {
+				layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 					cornerRadius := gioUnit.Dp(4)
-					dimsFunc := func(gtx C) D {
-						return D{Size: image.Point{
+					dimsFunc := func(gtx layout.Context) layout.Dimensions {
+						return layout.Dimensions{Size: image.Point{
 							X: gtx.Constraints.Max.X,
 							Y: gtx.Constraints.Min.Y,
 						}}
@@ -272,78 +276,78 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 					}
 					return border.Layout(gtx, dimsFunc)
 				}),
-				layout.Stacked(func(gtx C) D {
+				layout.Stacked(func(gtx layout.Context) layout.Dimensions {
 					return layout.UniformInset(gioUnit.Dp(12)).Layout(
 						gtx,
-						func(gtx C) D {
+						func(gtx layout.Context) layout.Dimensions {
 							gtx.Constraints.Min.X = gtx.Constraints.Max.X
 							return layout.Flex{
 								Axis:      layout.Horizontal,
 								Alignment: layout.Middle,
 							}.Layout(
 								gtx,
-								layout.Rigid(func(gtx C) D {
+								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									if in.IsActive() && in.Prefix != nil {
 										return in.Prefix(gtx)
 									}
-									return D{}
+									return layout.Dimensions{}
 								}),
-								layout.Flexed(1, func(gtx C) D {
+								layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
 									return material.Editor(th, &in.Editor, "").Layout(gtx)
 								}),
-								layout.Rigid(func(gtx C) D {
+								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									if in.IsActive() && in.Suffix != nil {
 										return in.Suffix(gtx)
 									}
-									return D{}
+									return layout.Dimensions{}
 								}),
 							)
 						},
 					)
 				}),
-				layout.Expanded(func(gtx C) D {
+				layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 					defer pointer.PassOp{}.Push(gtx.Ops).Pop()
 					defer clip.Rect(image.Rectangle{
 						Max: gtx.Constraints.Min,
 					}).Push(gtx.Ops).Pop()
 					in.click.Add(gtx.Ops)
-					return D{}
+					return layout.Dimensions{}
 				}),
 			)
 		}),
-		layout.Rigid(func(gtx C) D {
+		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Flex{
 				Axis:      layout.Horizontal,
 				Alignment: layout.Middle,
 				Spacing:   layout.SpaceBetween,
 			}.Layout(
 				gtx,
-				layout.Rigid(func(gtx C) D {
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					if in.helper.Text == "" {
-						return D{}
+						return layout.Dimensions{}
 					}
 					return layout.Inset{
 						Top:  gioUnit.Dp(4),
 						Left: gioUnit.Dp(10),
 					}.Layout(
 						gtx,
-						func(gtx C) D {
+						func(gtx layout.Context) layout.Dimensions {
 							helper := material.Label(th, gioUnit.Sp(12), in.helper.Text)
 							helper.Color = in.helper.Color
 							return helper.Layout(gtx)
 						},
 					)
 				}),
-				layout.Rigid(func(gtx C) D {
+				layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					if in.CharLimit == 0 {
-						return D{}
+						return layout.Dimensions{}
 					}
 					return layout.Inset{
 						Top:   gioUnit.Dp(4),
 						Right: gioUnit.Dp(10),
 					}.Layout(
 						gtx,
-						func(gtx C) D {
+						func(gtx layout.Context) layout.Dimensions {
 							count := material.Label(
 								th,
 								gioUnit.Sp(12),
@@ -357,8 +361,7 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 			)
 		}),
 	)
-	return D{
-		Size: image.Point{
+						return D{Size: image.Point{
 			X: dims.Size.X,
 			Y: dims.Size.Y + in.label.Smallest.Size.Y/2,
 		},

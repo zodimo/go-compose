@@ -62,7 +62,7 @@ func BenchmarkUI_Layout(b *testing.B) {
 		// gtx = themeManager.Material3ThemeInit(gtx)
 		gtx = themeManager.Material3ThemeInit(gtx)
 
-		callOp := rt.Run(gtx, composer, UI())
-		callOp.Add(gtx.Ops)
+		cmd := rt.Run(gtx, composer, UI())
+		cmd.Apply(gtx.Ops)
 	}
 }

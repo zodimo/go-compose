@@ -39,22 +39,22 @@ func boxWidgetConstructor(options BoxOptions) layoutnode.LayoutNodeWidgetConstru
 				matchParent := childLayoutNode.Elements().GetElement(MatchParentSizeKey)
 
 				if matchParent.IsSome() {
-					stackChildren = append(stackChildren, layout.Expanded(func(gtx LayoutContext) LayoutDimensions {
+					stackChildren = append(stackChildren, layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 						// MatchParentSize implies matching the size of the container, which is passed in Min constraints
 						// by the Stack layout for Expanded children.
 						gtx.Constraints.Max = gtx.Constraints.Min
-						return childLayoutNode.Layout(gtx)
+						return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContext(&gtx)))
 					}))
 				} else {
-					stackChildren = append(stackChildren, layout.Stacked(func(gtx LayoutContext) LayoutDimensions {
-						return childLayoutNode.Layout(gtx)
+					stackChildren = append(stackChildren, layout.Stacked(func(gtx layout.Context) layout.Dimensions {
+						return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContext(&gtx)))
 					}))
 				}
 			}
 
-			return Stack{
+			return layoutnode.FromGioDimensions(Stack{
 				Alignment: options.Alignment,
-			}.Layout(gtx, stackChildren...)
+			}.Layout(*gtx.ToGio(), stackChildren...))
 		}
 	})
 

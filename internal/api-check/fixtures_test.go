@@ -5,7 +5,22 @@ import (
 	"testing"
 )
 
-
+// fixedLeaks are former leak sites already resolved by the cleanup: the
+// alias wall is now framework-owned (box/overlay re-export the defined
+// layoutnode types; lazy/next-textfield C/D point at them) and runtime.Run is
+// engine-agnostic (opaque ctx + render.DrawCommand). These MUST NOT be
+// flagged — the analyzer is green on them (see TestFixedLeaksAreClean).
+var fixedLeaks = []fixture{
+	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/box", symbol: "LayoutContext"},
+	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/box", symbol: "LayoutDimensions"},
+	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/overlay", symbol: "LayoutContext"},
+	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/overlay", symbol: "LayoutDimensions"},
+	{pkg: "github.com/zodimo/go-compose/compose/foundation/lazy", symbol: "C"},
+	{pkg: "github.com/zodimo/go-compose/compose/foundation/lazy", symbol: "D"},
+	{pkg: "github.com/zodimo/go-compose/compose/material3/next/textfield", symbol: "C"},
+	{pkg: "github.com/zodimo/go-compose/compose/material3/next/textfield", symbol: "D"},
+	{pkg: "github.com/zodimo/go-compose/runtime", symbol: "Runtime.Run"},
+}
 
 // fixture is a known gioui leak site captured before the cleanup.
 type fixture struct {
@@ -80,17 +95,12 @@ var knownLeaks = []fixture{
 	{pkg: "github.com/zodimo/go-compose/compose/material", symbol: "LocalGioMaterialTheme"},
 
 	// compose/foundation/layout — box/column/row/overlay aliases.
-	{pkg: "github.com/zodimo/go-compose/runtime", symbol: "Runtime.Run"},
+	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/box", symbol: "Direction"},
 	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/box", symbol: "Stack"},
 	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/box", symbol: "StackChild"},
-	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/box", symbol: "LayoutContext"},
-	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/box", symbol: "LayoutDimensions"},
 	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/column", symbol: "Spacing"},
-	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/column", symbol: "Alignment"},
 	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/row", symbol: "Spacing"},
 	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/row", symbol: "Alignment"},
-	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/overlay", symbol: "LayoutContext"},
-	{pkg: "github.com/zodimo/go-compose/compose/foundation/layout/overlay", symbol: "LayoutDimensions"},
 
 	// compose/foundation/text + next/text — enum aliases.
 	{pkg: "github.com/zodimo/go-compose/compose/foundation/text", symbol: "Alignment"},
@@ -101,14 +111,10 @@ var knownLeaks = []fixture{
 	// compose/foundation/lazy — state structs + C/D aliases.
 	{pkg: "github.com/zodimo/go-compose/compose/foundation/lazy", symbol: "LazyListState"},
 	{pkg: "github.com/zodimo/go-compose/compose/foundation/lazy", symbol: "LazyGridState"},
-	{pkg: "github.com/zodimo/go-compose/compose/foundation/lazy", symbol: "C"},
-	{pkg: "github.com/zodimo/go-compose/compose/foundation/lazy", symbol: "D"},
 
 	// compose/material3/next/textfield — models + C/D aliases.
 	{pkg: "github.com/zodimo/go-compose/compose/material3/next/textfield", symbol: "TextFieldWidget"},
 	{pkg: "github.com/zodimo/go-compose/compose/material3/next/textfield", symbol: "TextFieldComponent"},
-	{pkg: "github.com/zodimo/go-compose/compose/material3/next/textfield", symbol: "C"},
-	{pkg: "github.com/zodimo/go-compose/compose/material3/next/textfield", symbol: "D"},
 
 	// compose/material3/textfield — widget structs embedding editor/click.
 	{pkg: "github.com/zodimo/go-compose/compose/material3/textfield", symbol: "TextFieldWidget"},
@@ -125,9 +131,6 @@ var knownLeaks = []fixture{
 	// compose/material3/snackbar — SnackbarData clickable fields.
 	{pkg: "github.com/zodimo/go-compose/compose/material3/snackbar", symbol: "SnackbarData"},
 
-	// runtime — Runtime.Run returns op.CallOp.
-	{pkg: "github.com/zodimo/go-compose/runtime", symbol: "Runtime.Run"},
-
 	// pkg/x/fileexplorer — RememberExplorer callback param.
 	{pkg: "github.com/zodimo/go-compose/pkg/x/fileexplorer", symbol: "RememberExplorer"},
 }
@@ -135,7 +138,7 @@ var knownLeaks = []fixture{
 // TestKnownLeaksAreFlagged asserts the analyzer is in RED state: every known
 // leak site captured as a fixture is flagged. This is the "fixtures first"
 // step of the change — it passes while the leaks exist and must be flipped to
-// a negative assertion (TestKnownLeaksAreClean) once Phase 2 removes them.
+// a negative assertion once Phase 2 removes them.
 func TestKnownLeaksAreFlagged(t *testing.T) {
 	violations, err := Check(Options{})
 	if err != nil {
@@ -160,4 +163,30 @@ func TestKnownLeaksAreFlagged(t *testing.T) {
 			len(missing), strings.Join(missing, "\n  "))
 	}
 	t.Logf("analyzer flagged %d signature violation(s) total", len(flagged))
+}
+
+// TestFixedLeaksAreClean asserts former leak sites that the cleanup has
+// already resolved are no longer flagged (negative regression fixtures).
+func TestFixedLeaksAreClean(t *testing.T) {
+	violations, err := Check(Options{})
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+
+	flagged := map[fixture]bool{}
+	for _, v := range violations {
+		if v.Kind == KindSignature {
+			flagged[fixture{pkg: v.Pkg, symbol: v.Symbol}] = true
+		}
+	}
+
+	var stillFlagged []string
+	for _, f := range fixedLeaks {
+		if flagged[f] {
+			stillFlagged = append(stillFlagged, f.pkg+" "+f.symbol)
+		}
+	}
+	if len(stillFlagged) > 0 {
+		t.Errorf("fixed leak fixture(s) still flagged:\n  %s", strings.Join(stillFlagged, "\n  "))
+	}
 }

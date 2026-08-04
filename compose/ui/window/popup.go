@@ -10,7 +10,7 @@ import (
 	"gioui.org/gesture"
 	"gioui.org/io/event"
 	"gioui.org/io/pointer"
-	"gioui.org/layout"
+
 	"gioui.org/op"
 	"gioui.org/op/clip"
 )
@@ -55,7 +55,7 @@ func popupWidgetConstructor(opts PopupOptions) layoutnode.LayoutNodeWidgetConstr
 			// Handle dismiss events
 			if opts.OnDismissRequest != nil {
 				for {
-					e, ok := dismissClick.Update(gtx.Source)
+				e, ok := dismissClick.Update(gtx.ToGio().Source)
 					if !ok {
 						break
 					}
@@ -66,17 +66,19 @@ func popupWidgetConstructor(opts PopupOptions) layoutnode.LayoutNodeWidgetConstr
 			}
 
 			// 1. Record the content layout
-			contentMacro := op.Record(gtx.Ops)
+			contentMacro := op.Record(gtx.ToGio().Ops)
 
 			// Prepare context for popup content
-			pGtx := gtx
-			pGtx.Constraints.Min = image.Point{}
+			g := *gtx.ToGio()
+			g.Constraints.Min = image.Point{}
+
+			pGtx := layoutnode.NewLayoutContext(&g)
 
 			// Apply offset if needed
-			xPx := pGtx.Dp(unit.DpToGioUnitUnsafe(opts.OffsetX))
-			yPx := pGtx.Dp(unit.DpToGioUnitUnsafe(opts.OffsetY))
+			xPx := pGtx.ToGio().Dp(unit.DpToGioUnitUnsafe(opts.OffsetX))
+			yPx := pGtx.ToGio().Dp(unit.DpToGioUnitUnsafe(opts.OffsetY))
 
-			op.Offset(image.Pt(xPx, yPx)).Add(pGtx.Ops)
+			op.Offset(image.Pt(xPx, yPx)).Add(pGtx.ToGio().Ops)
 
 			// Layout children and track content size
 			var contentSize image.Point
@@ -93,10 +95,10 @@ func popupWidgetConstructor(opts PopupOptions) layoutnode.LayoutNodeWidgetConstr
 
 			// Add blocking handler at the popup content area
 			if contentSize.X > 0 && contentSize.Y > 0 {
-				passStack := pointer.PassOp{}.Push(pGtx.Ops)
-				stack := clip.Rect{Max: contentSize}.Push(pGtx.Ops)
-				popupClick.Add(pGtx.Ops)
-				event.Op(pGtx.Ops, node)
+				passStack := pointer.PassOp{}.Push(pGtx.ToGio().Ops)
+				stack := clip.Rect{Max: contentSize}.Push(pGtx.ToGio().Ops)
+				popupClick.Add(pGtx.ToGio().Ops)
+				event.Op(pGtx.ToGio().Ops, node)
 				stack.Pop()
 				passStack.Pop()
 			}
@@ -104,7 +106,7 @@ func popupWidgetConstructor(opts PopupOptions) layoutnode.LayoutNodeWidgetConstr
 			contentCall := contentMacro.Stop()
 
 			// 2. Wrap in Scrim + Content
-			finalMacro := op.Record(gtx.Ops)
+			finalMacro := op.Record(gtx.ToGio().Ops)
 
 			// Add Scrim (Dismiss Layer)
 			if opts.OnDismissRequest != nil {
@@ -114,29 +116,30 @@ func popupWidgetConstructor(opts PopupOptions) layoutnode.LayoutNodeWidgetConstr
 				// Center the large rect on the anchor
 				offset := image.Pt(-maxSize/2, -maxSize/2)
 
-				op.Offset(offset).Add(gtx.Ops)
+				op.Offset(offset).Add(gtx.ToGio().Ops)
 
-				passStack := pointer.PassOp{}.Push(gtx.Ops)
+				passStack := pointer.PassOp{}.Push(gtx.ToGio().Ops)
 				fullRect := clip.Rect{Max: rectSize}
-				clipStack := fullRect.Push(gtx.Ops)
-				dismissClick.Add(gtx.Ops)
-				event.Op(gtx.Ops, dismissClick)
+				clipStack := fullRect.Push(gtx.ToGio().Ops)
+				dismissClick.Add(gtx.ToGio().Ops)
+				event.Op(gtx.ToGio().Ops, dismissClick)
 				clipStack.Pop()
 				passStack.Pop()
 
 				// Restore offset for content
-				op.Offset(offset.Mul(-1)).Add(gtx.Ops)
+				op.Offset(offset.Mul(-1)).Add(gtx.ToGio().Ops)
 			}
 
 			// Add Content (on top of scrim)
-			contentCall.Add(gtx.Ops)
+			contentCall.Add(gtx.ToGio().Ops)
 
 			finalCall := finalMacro.Stop()
 
 			// 3. Defer the execution (draws on top of UI)
-			op.Defer(gtx.Ops, finalCall)
+			op.Defer(gtx.ToGio().Ops, finalCall)
 
-			return layout.Dimensions{}
+			return layoutnode.LayoutDimensions{}
+
 		}
 	})
 }

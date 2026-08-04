@@ -206,12 +206,12 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 			resolvedTextColor := graphics.ColorToNRGBA(constructorArgs.color.TakeOrElse(textStyle.Color()))
 
 			// Create text color material
-			textColorMacro := op.Record(gtx.Ops)
-			paint.ColorOp{Color: resolvedTextColor}.Add(gtx.Ops)
+			textColorMacro := op.Record(gtx.ToGio().Ops)
+			paint.ColorOp{Color: resolvedTextColor}.Add(gtx.ToGio().Ops)
 			textColor := textColorMacro.Stop()
 
 			// Use the controller to layout and paint the text
-			dims := controller.LayoutAndPaint(gtx, constructorArgs.textShaper.Shaper, textColor)
+			dims := layoutnode.FromGioDimensions(controller.LayoutAndPaint(*gtx.ToGio(), constructorArgs.textShaper.Shaper, textColor))
 
 			return dims
 		}

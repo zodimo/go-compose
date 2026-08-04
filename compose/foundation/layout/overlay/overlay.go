@@ -50,10 +50,10 @@ func overlayWidgetConstructor(options OverlayOptions) layoutnode.LayoutNodeWidge
 			// Resolve ScrimColor to NRGBA
 			scrimColor := graphics.ColorToNRGBA(options.ScrimColor)
 
-			parentSize := gtx.Constraints.Max
+			parentSize := gtx.ToGio().Constraints.Max
 
 			// Layout with Stack - center content
-			dims := layout.Stack{Alignment: layout.Center}.Layout(gtx,
+			dims := layout.Stack{Alignment: layout.Center}.Layout(*gtx.ToGio(),
 				// Layer 0: Scrim background
 				layout.Expanded(func(gtx layout.Context) layout.Dimensions {
 					paint.Fill(gtx.Ops, scrimColor)
@@ -103,13 +103,13 @@ func overlayWidgetConstructor(options OverlayOptions) layoutnode.LayoutNodeWidge
 					children := node.Children()
 					if len(children) > 0 {
 						child := children[0].(layoutnode.NodeCoordinator)
-						return child.Layout(gtx)
+						return layoutnode.ToGioDimensions(child.Layout(layoutnode.NewLayoutContext(&gtx)))
 					}
 					return layout.Dimensions{}
 				}),
 			)
 
-			return dims
+			return layoutnode.FromGioDimensions(dims)
 		}
 	})
 }

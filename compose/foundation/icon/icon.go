@@ -106,13 +106,13 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIc
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 
 			// set gtx.Constraints.Min.X = fontSize
-			gtx.Constraints.Min.X = iconSizeInPx
+			gtx.ToGio().Constraints.Min.X = iconSizeInPx
 
 			nrgba := graphics.ColorToNRGBA(options.Color)
 
 			key := cacheKey{
 				dataHash:    dataHash,
-				constraints: gtx.Constraints,
+				constraints: gtx.ToGio().Constraints,
 				color:       nrgba,
 			}
 
@@ -121,10 +121,10 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIc
 				cache.list.MoveToFront(elem)
 				entry := elem.Value.(*cacheEntry)
 				// Replay the cached op
-				entry.call.Add(gtx.Ops)
+				entry.call.Add(gtx.ToGio().Ops)
 				cache.mu.Unlock()
 				// fmt.Println("GLOBAL CACHE HIT")
-				return entry.dims
+				return layoutnode.FromGioDimensions(entry.dims)
 			}
 			cache.mu.Unlock()
 
@@ -136,10 +136,10 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIc
 			macro := op.Record(entryOps)
 
 			// Use a context targeting the entryOps
-			gtxCache := gtx
-			gtxCache.Ops = entryOps
+			g := *gtx.ToGio()
+			g.Ops = entryOps
 
-			dims := iconWidget(gtxCache, nrgba)
+			dims := iconWidget(g, nrgba)
 			call := macro.Stop()
 
 			// Store in cache
@@ -165,9 +165,9 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIc
 			cache.mu.Unlock()
 
 			// Add to current frame
-			call.Add(gtx.Ops)
+			call.Add(gtx.ToGio().Ops)
 
-			return dims
+			return layoutnode.FromGioDimensions(dims)
 		}
 	})
 }

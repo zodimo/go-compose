@@ -1,6 +1,7 @@
 package box
 
 import (
+	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/modifiers/box"
 
 	"github.com/zodimo/go-compose/pkg/api"
@@ -31,5 +32,5 @@ const (
 
 type Stack = layout.Stack
 type StackChild = layout.StackChild
-type LayoutContext = layout.Context
-type LayoutDimensions = layout.Dimensions
+type LayoutContext = layoutnode.LayoutContext
+type LayoutDimensions = layoutnode.LayoutDimensions

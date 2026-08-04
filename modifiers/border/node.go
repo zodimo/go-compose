@@ -49,12 +49,12 @@ func NewBorderNode(element BorderElement) *BorderNode {
 					if !shape.IsSpecifiedShape(n.borderData.Shape) {
 						panic("BorderNode: Shape is not specified")
 					}
-					outline := n.borderData.Shape.CreateOutline(dims.Size, gtx.Metric)
-					macro := op.Record(gtx.Ops)
+						outline := n.borderData.Shape.CreateOutline(dims.Size, gtx.ToGio().Metric)
+						macro := op.Record(gtx.ToGio().Ops)
 
-					strokeWidth := float32(gtx.Metric.Dp(unit.DpToGioUnitUnsafe(width)))
+						strokeWidth := float32(gtx.ToGio().Metric.Dp(unit.DpToGioUnitUnsafe(width)))
 
-					pathSpec := outline.Path(gtx.Ops)
+						pathSpec := outline.Path(gtx.ToGio().Ops)
 
 					// Create stroke op
 					strokeOp := clip.Stroke{
@@ -65,10 +65,10 @@ func NewBorderNode(element BorderElement) *BorderNode {
 					nrgba := graphics.ColorToNRGBA(n.borderData.Color)
 
 					// Paint the stroke
-					paint.FillShape(gtx.Ops, nrgba, strokeOp)
+						paint.FillShape(gtx.ToGio().Ops, nrgba, strokeOp)
 
 					call := macro.Stop()
-					call.Add(gtx.Ops)
+						call.Add(gtx.ToGio().Ops)
 
 					return dims
 				})

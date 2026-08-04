@@ -106,11 +106,11 @@ func buttonWidgetConstructor(_ ButtonOptions, constructorArgs ButtonConstructorA
 
 			button := constructorArgs.Button
 			onClick := constructorArgs.OnClick
-			if button.Clicked(gtx) {
+			if button.Clicked(*gtx.ToGio()) {
 				onClick()
 			}
 
-			return button.Layout(gtx, constructorArgs.LabelContent)
+			return layoutnode.FromGioDimensions(button.Layout(*gtx.ToGio(), constructorArgs.LabelContent))
 
 		}
 	})

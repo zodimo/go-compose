@@ -61,8 +61,8 @@ func Run(window *app.Window) error {
 
 			composer := compose.NewComposer(api.ComposerWithStore(store))
 
-			callOp := runtime.Run(gtx, composer, DemoUI())
-			callOp.Add(gtx.Ops)
+			cmd := runtime.Run(gtx, composer, DemoUI())
+			cmd.Apply(gtx.Ops)
 			frameEvent.Frame(gtx.Ops)
 		}
 	}

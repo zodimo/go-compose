@@ -141,7 +141,7 @@ func outlinedTextFieldWidgetConstructor(args TextEditorConstructorArgs) layoutno
 
 			// Check for submit events
 			for {
-				ev, ok := w.Editor.Update(gtx)
+					ev, ok := w.Editor.Update(*gtx.ToGio())
 				if !ok {
 					break
 				}
@@ -162,7 +162,7 @@ func outlinedTextFieldWidgetConstructor(args TextEditorConstructorArgs) layoutno
 
 			w.Colors = args.Opts.Colors
 
-			return w.Layout(gtx, th, args.Opts.Label)
+			return layoutnode.FromGioDimensions(w.Layout(*gtx.ToGio(), th, args.Opts.Label))
 		}
 	})
 }

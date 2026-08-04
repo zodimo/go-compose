@@ -5,20 +5,10 @@ import (
 	"github.com/zodimo/go-compose/internal/modifier"
 	node "github.com/zodimo/go-compose/internal/node"
 	"github.com/zodimo/go-compose/state"
-
-	"gioui.org/layout"
-	"gioui.org/op"
 )
 
 type TreeNode = node.TreeNode
 type ChainNode = node.ChainNode
-
-type LayoutContext = layout.Context
-type LayoutDimensions = layout.Dimensions
-type LayoutConstraints = layout.Constraints
-type GioLayoutWidget = layout.Widget
-
-type DrawOp = op.CallOp
 
 type NodeID = node.NodeID
 

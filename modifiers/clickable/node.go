@@ -47,19 +47,21 @@ func NewClickableNode(element ClickableElement) ChainNode {
 					return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 						clickable := element.clickableData.Clickable
 						onClick := element.clickableData.OnClick
-						if clickable.Clicked(gtx) {
+						if clickable.Clicked(*gtx.ToGio()) {
 							onClick()
 						}
 
-						return layout.Background{}.Layout(gtx,
+						return layoutnode.FromGioDimensions(layout.Background{}.Layout(*gtx.ToGio(),
 							func(gtx layout.Context) layout.Dimensions {
-								backgroundWidget := func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+								backgroundWidget := func(gtx layout.Context) layout.Dimensions {
 									return layout.Dimensions{Size: gtx.Constraints.Min}
 								}
 								return material.Clickable(gtx, clickable, backgroundWidget)
 							},
-							widget.Layout,
-						)
+							func(gtx layout.Context) layout.Dimensions {
+								return layoutnode.ToGioDimensions(widget.Layout(layoutnode.NewLayoutContext(&gtx)))
+							},
+						))
 					})
 				})
 

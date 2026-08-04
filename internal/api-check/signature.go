@@ -98,8 +98,12 @@ func checkTypeName(pkg *packages.Package, o *types.TypeName) []Violation {
 	}
 
 	// 2. types pass: struct fields (exported and embedded), methods, and
-	// interface methods. findGio on the declared type also catches exported
-	// aliases when go/types represents them as *types.Alias.
+	// interface methods. Aliases inherit the target type's checks (done at the
+	// target's own definition site, or exempt for seam types), so aliases and
+	// types that resolve through an alias chain are skipped here.
+	if types.Unalias(o.Type()) != o.Type() {
+		return out
+	}
 	named, ok := o.Type().(*types.Named)
 	if !ok {
 		return out
@@ -216,7 +220,14 @@ func findGio(t types.Type) (string, bool) {
 					}
 				}
 			}
-			return walk(tt.Underlying())
+			// Do NOT recurse into the underlying type of a named type. A defined
+			// type whose declared RHS is a go-compose type (e.g. the seam's
+			// LayoutContext wrapping an engine pointer in an unexported field) is
+			// clean at the signature level; its internals are checked at the type's
+			// own definition site (exported structs are field-walked there) or are
+			// exempt (seam packages). Recursing would false-positive on seam-defined
+			// wrapper types re-exported by public packages.
+			return "", false
 		case *types.Pointer:
 			return walk(tt.Elem())
 		case *types.Slice:

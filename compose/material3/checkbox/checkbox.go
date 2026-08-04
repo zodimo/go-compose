@@ -104,7 +104,7 @@ func checkboxWidgetConstructor(cb *checkbox.Checkboxes[string]) layoutnode.Layou
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 			// Update processes events and calls onChange
-			cb.Update(gtx)
+			cb.Update(*gtx.ToGio())
 
 			// Layout
 			// We need to pass labels map
@@ -116,7 +116,7 @@ func checkboxWidgetConstructor(cb *checkbox.Checkboxes[string]) layoutnode.Layou
 			// gio-mw Checkboxes renders the set.
 			// LayoutWithKind(gtx, LeadingKind, labels)
 
-			return cb.LayoutWithKind(gtx, checkbox.ButtonKind, labels)
+			return layoutnode.FromGioDimensions(cb.LayoutWithKind(*gtx.ToGio(), checkbox.ButtonKind, labels))
 		}
 	})
 }
