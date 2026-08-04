@@ -3,6 +3,9 @@
 // for bridging between Compose input APIs and Gio widget.Editor rendering.
 
 package input
+// Engine-bound (Door 2): this component's public API is gioui-free; its
+// implementation uses the engine directly behind the seam (internal/render).
+
 
 import (
 	"image/color"

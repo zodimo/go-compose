@@ -13,34 +13,35 @@ Reference: design.md (how), specs/{public-api-purity,render-backend-seam,api-pur
 
 ## 2. Phase 1: Public API Boundary Cleanup
 
-- [ ] 2.1 Create `internal/render` stub package: opaque `DrawCommand` type + `CallOp` type (no behavior yet); add to analyzer whitelist
-- [ ] 2.2 Redefine `style.TextAlign` and `style.LineBreak` as go-compose-owned enum types with own constants; move `TextAlignToGio*`/`LineBreakToGio*`/`FromGio*` conversions to `internal/` (spec: public-api-purity — "Text enum types are distinct", "Engine conversion helpers are not public")
-- [ ] 2.3 Redefine `intl.Locale` as own type (drop `system.Locale` alias) and `padding.RTL` as own constant; update `compose/ui/text/intl` + `compose/ui/next/text/intl`
-- [ ] 2.4 Redefine `theme.BasicTheme` as framework-owned theme type; refactor `theme.ThemeManager` methods to not use `*material.Theme`
-- [ ] 2.5 Replace `compose/material` `ThemeInterface.GioMaterialTheme()` and `LocalGioMaterialTheme` with a framework-owned theme interface/provider (no `*gioMaterial.Theme` in signatures)
-- [ ] 2.6 Replace `box.Direction`/`box.Stack`/`box.StackChild` and `column.Spacing`/`column.Alignment` with go-compose-owned types + mirrored constants (`box.NW`, `box.NE`, …); move gioui conversions to the seam
-- [ ] 2.7 Replace `card.GioImage` and `clickable.GioClickable` aliases with go-compose-owned types
-- [ ] 2.8 Move `compose/ui/unit/gio_helpers.go` conversions (`DpToGioUnit*`, `TextUnitToGio*`) into `internal/`; remove exported `AsGioSp` from `TextUnit`
-- [ ] 2.9 Move text/font conversions (`ToGioFont`, `FromGioFont`, `ToGioWeight`, `ToGioStyle`, `FromGioTypeface`, `TextStyleFromGioFont`, `ToGioFont(ts *TextStyle)`) out of `compose/ui/text{,/font,style}` into `internal/`
-- [ ] 2.10 Redefine `shape.Shape`/`shape.Outline` so no method returns `clip.Stack`/`clip.Op`/`clip.PathSpec`; introduce framework-owned outline types with seam conversion
-- [ ] 2.11 Replace `platform.LocalWindow` (`*app.Window`) with an opaque framework-owned window type
-- [ ] 2.12 Reshape `TextFieldWidget`/`FilledTextFieldWidget`, `LazyListState`/`LazyGridState`, and `SnackbarData` to drop embedded/field gioui types (`widget.Editor`, `gesture.Click`, `widget.List`, `widget.Clickable`); expose framework-owned state types
-- [ ] 2.13 Change `runtime.Runtime.Run` to return `render.DrawCommand` (opaque) instead of `op.CallOp`; implement the gioui application path internally
-- [ ] 2.14 Migrate all in-repo consumers: `cmd/demo/*/main.go`, `cmd/go-compose`, `pkg/x/fileexplorer` (`RememberExplorer` no longer takes `*explorer.Explorer`), tests
-- [ ] 2.15 Run analyzer to GREEN: all former fixtures pass, exit zero (spec: api-purity-analyzer — "Fixture coverage after cleanup", public-api-purity)
+- [x] 2.1 Create `internal/render` stub package: opaque `DrawCommand` type + `CallOp` type (no behavior yet); add to analyzer whitelist
+- [x] 2.2 Redefine `style.TextAlign` and `style.LineBreak` as go-compose-owned enum types with own constants; move `TextAlignToGio*`/`LineBreakToGio*`/`FromGio*` conversions to `internal/` (spec: public-api-purity — "Text enum types are distinct", "Engine conversion helpers are not public")
+- [x] 2.3 Redefine `intl.Locale` as own type (drop `system.Locale` alias) and `padding.RTL` as own constant; update `compose/ui/text/intl` + `compose/ui/next/text/intl`
+- [x] 2.4 Redefine `theme.BasicTheme` as framework-owned theme type; refactor `theme.ThemeManager` methods to not use `*material.Theme`
+- [x] 2.5 Replace `compose/material` `ThemeInterface.GioMaterialTheme()` and `LocalGioMaterialTheme` with a framework-owned theme interface/provider (no `*gioMaterial.Theme` in signatures)
+- [x] 2.6 Replace `box.Direction`/`box.Stack`/`box.StackChild` and `column.Spacing`/`column.Alignment` with go-compose-owned types + mirrored constants (`box.NW`, `box.NE`, …); move gioui conversions to the seam
+- [x] 2.7 Replace `card.GioImage` and `clickable.GioClickable` aliases with go-compose-owned types
+- [x] 2.8 Move `compose/ui/unit/gio_helpers.go` conversions (`DpToGioUnit*`, `TextUnitToGio*`) into `internal/`; remove exported `AsGioSp` from `TextUnit`
+- [x] 2.9 Move text/font conversions (`ToGioFont`, `FromGioFont`, `ToGioWeight`, `ToGioStyle`, `FromGioTypeface`, `TextStyleFromGioFont`, `ToGioFont(ts *TextStyle)`) out of `compose/ui/text{,/font,style}` into `internal/`
+- [x] 2.10 Redefine `shape.Shape`/`shape.Outline` so no method returns `clip.Stack`/`clip.Op`/`clip.PathSpec`; introduce framework-owned outline types with seam conversion
+- [x] 2.11 Replace `platform.LocalWindow` (`*app.Window`) with an opaque framework-owned window type
+- [x] 2.12 Reshape `TextFieldWidget`/`FilledTextFieldWidget`, `LazyListState`/`LazyGridState`, and `SnackbarData` to drop embedded/field gioui types (`widget.Editor`, `gesture.Click`, `widget.List`, `widget.Clickable`); expose framework-owned state types
+- [x] 2.13 Change `runtime.Runtime.Run` to return `render.DrawCommand` (opaque) instead of `op.CallOp`; implement the gioui application path internally
+- [x] 2.14 Migrate all in-repo consumers: `cmd/demo/*/main.go`, `cmd/go-compose`, `pkg/x/fileexplorer` (`RememberExplorer` no longer takes `*explorer.Explorer`), tests
+- [x] 2.15 Run analyzer to GREEN: all former fixtures pass, exit zero (spec: api-purity-analyzer — "Fixture coverage after cleanup", public-api-purity)
 
 ## 3. Phase 2: Alias Wall → Defined Types
 
-- [ ] 3.1 Define `LayoutContext` as a framework-owned defined type (no gioui fields); introduce per-frame construction inside the runtime
-- [ ] 3.2 Define `LayoutDimensions`, `LayoutConstraints`, and `GioLayoutWidget` as defined types (not aliases)
-- [ ] 3.3 Introduce `ToGio()` conversions in `internal/layoutnode` (seam-only, frame-token guarded per design EC1)
-- [ ] 3.4 Convert `internal/layoutnode` internals (`models.go`, `constructor.go`, `widget_models.go`, `layout_node.go`) to the defined types
-- [ ] 3.5 Convert `modifiers/*` node.go files package-by-package (compiler-driven; keep tree green between packages)
-- [ ] 3.6 Convert `compose/foundation` (layout/box, column, row, overlay, text, lazy, image, icon) to the defined types
-- [ ] 3.7 Convert `compose/material3` components; where a gioui-bound component is cheaper to rewrite as pure composition, do so following the `next/` pattern
-- [ ] 3.8 Classify remaining engine-hungry components (slider, textfield, radiobutton, progress, badge, `next/text` editor) as engine-bound (Door 2) with explicit code comments; their public APIs stay clean
-- [ ] 3.9 Ensure non-seam packages no longer directly import `gioui.org/layout`, `op`, `widget`, `text`, `font` (analyzer import rule green; spec: render-backend-seam — "Seam packages are the only engine-type importers")
-- [ ] 3.10 Full `make test` green; `make check-api` green (spec: render-backend-seam — "Framework context is engine-agnostic", "Conversion to engine types is confined to the seam")
+- [x] 3.1 Define `LayoutContext` as a framework-owned defined type (no gioui fields); introduce per-frame construction inside the runtime
+- [x] 3.2 Define `LayoutDimensions`, `LayoutConstraints`, and `GioLayoutWidget` as defined types (not aliases)
+- [x] 3.3 Introduce `ToGio()` conversions in `internal/layoutnode` (seam-only, frame-token guarded per design EC1)
+- [x] 3.4 Convert `internal/layoutnode` internals (`models.go`, `constructor.go`, `widget_models.go`, `layout_node.go`) to the defined types
+- [x] 3.5 Convert `modifiers/*` node.go files package-by-package (compiler-driven; keep tree green between packages)
+- [x] 3.6 Convert `compose/foundation` (layout/box, column, row, overlay, text, lazy, image, icon) to the defined types
+- [x] 3.7 Convert `compose/material3` components; where a gioui-bound component is cheaper to rewrite as pure composition, do so following the `next/` pattern
+- [x] 3.8 Classify remaining engine-hungry components (slider, textfield, radiobutton, progress, badge, `next/text` editor) as engine-bound (Door 2) with explicit code comments; their public APIs stay clean
+- [~] 3.9 Ensure non-seam packages no longer directly import `gioui.org/layout`, `op`, `widget`, `text`, `font` (analyzer import rule green; spec: render-backend-seam — "Seam packages are the only engine-type importers")
+  - INTERPRETATION: the import rule (Rule B) is implemented in the analyzer (`-all` mode, seam whitelist) but NOT enforced by `make check-api`, which gates on Rule A (public signature purity). Engine-bound components (slider, textfield, radiobutton, progress, badge, next/text editor) are classified Door 2 and legitimately import engine packages internally (design D3: "internal implementation files should use gioui"). Enforcing Rule B repo-wide would contradict Door 2; `make check-api -all` remains available as a stricter audit.
+- [x] 3.10 Full `make test` green; `make check-api` green (spec: render-backend-seam — "Framework context is engine-agnostic", "Conversion to engine types is confined to the seam")
 
 ## 4. Phase 3: Draw IR + Software Backend
 

@@ -1,4 +1,7 @@
 package slider
+// Engine-bound (Door 2): this component's public API is gioui-free; its
+// implementation uses the engine directly behind the seam (internal/render).
+
 
 import (
 	"fmt"
