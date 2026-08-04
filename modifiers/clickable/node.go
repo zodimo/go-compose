@@ -47,19 +47,22 @@ func NewClickableNode(element ClickableElement) ChainNode {
 					return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 						clickable := element.clickableData.Clickable
 						onClick := element.clickableData.OnClick
-					if clickable.Clicked(gtx) {
+						if clickable.Clicked(gtx) {
 							onClick()
 						}
+
+						// Capture the backend before entering layout.Inset callback
+						backend := gtx.DrawBackend()
 
 						return layoutnode.FromGioDimensions(layout.Background{}.Layout(*gtx.ToGio(),
 							func(gtx layout.Context) layout.Dimensions {
 								backgroundWidget := func(gtx layout.Context) layout.Dimensions {
 									return layout.Dimensions{Size: gtx.Constraints.Min}
 								}
-						return material.Clickable(gtx, clickable.impl.W, backgroundWidget)
+								return material.Clickable(gtx, clickable.impl.W, backgroundWidget)
 							},
 							func(gtx layout.Context) layout.Dimensions {
-								return layoutnode.ToGioDimensions(widget.Layout(layoutnode.NewLayoutContext(&gtx)))
+								return layoutnode.ToGioDimensions(widget.Layout(layoutnode.NewLayoutContextWithBackend(&gtx, backend)))
 							},
 						))
 					})

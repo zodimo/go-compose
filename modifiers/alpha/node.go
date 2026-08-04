@@ -31,6 +31,16 @@ func NewAlphaNode(element AlphaElement) ChainNode {
 
 				no.AttachDrawModifier(func(widget LayoutWidget) layoutnode.LayoutWidget {
 					return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+						if b := gtx.DrawBackend(); b != nil {
+							// Software path: emit PushOpacity through Backend,
+							// then layout child inside the opacity layer.
+							saveLevel := b.Save()
+							b.PushOpacity(state.Alpha)
+							dims := widget.Layout(gtx)
+							b.Restore(saveLevel)
+							return dims
+						}
+						// Gio path: unchanged.
 						macro := paint.PushOpacity(gtx.ToGio().Ops, state.Alpha)
 						defer macro.Pop()
 						return widget.Layout(gtx)

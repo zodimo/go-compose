@@ -3,9 +3,9 @@ package offset
 import (
 	"image"
 
-	"github.com/zodimo/go-compose/internal/unitconvert"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	node "github.com/zodimo/go-compose/internal/node"
+	"github.com/zodimo/go-compose/internal/unitconvert"
 
 	"gioui.org/op"
 )
@@ -28,9 +28,20 @@ func NewOffsetNode(data OffsetData) *OffsetNode {
 			no.AttachLayoutModifier(func(widget layoutnode.LayoutWidget) layoutnode.LayoutWidget {
 				return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 					// Convert dp to pixels
-				offsetX := gtx.ToGio().Dp(unitconvert.DpToGioUnitUnsafe(n.data.X))
-				offsetY := gtx.ToGio().Dp(unitconvert.DpToGioUnitUnsafe(n.data.Y))
+					offsetX := gtx.ToGio().Dp(unitconvert.DpToGioUnitUnsafe(n.data.X))
+					offsetY := gtx.ToGio().Dp(unitconvert.DpToGioUnitUnsafe(n.data.Y))
 
+					if b := gtx.DrawBackend(); b != nil {
+						// Software path: emit a Translate through the Backend so
+						// the golden harness captures the offset.
+						saveLevel := b.Save()
+						b.Translate(float32(offsetX), float32(offsetY))
+						dims := widget.Layout(gtx)
+						b.Restore(saveLevel)
+						return dims
+					}
+
+					// Gio path: unchanged.
 					// Apply translation offset using op.Offset
 					stack := op.Offset(image.Point{X: offsetX, Y: offsetY}).Push(gtx.ToGio().Ops)
 
@@ -39,7 +50,6 @@ func NewOffsetNode(data OffsetData) *OffsetNode {
 
 					stack.Pop()
 
-					// Return original dimensions (offset doesn't change the element's size)
 					return dims
 				})
 			})

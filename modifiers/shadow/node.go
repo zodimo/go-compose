@@ -6,6 +6,7 @@ import (
 	"github.com/zodimo/go-compose/internal/clipconvert"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	node "github.com/zodimo/go-compose/internal/node"
+	"github.com/zodimo/go-compose/internal/render"
 	"github.com/zodimo/go-compose/internal/unitconvert"
 
 	"gioui.org/f32"
@@ -30,35 +31,59 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 			no := t.(DrawModifierNode)
 			no.AttachDrawModifier(func(widget LayoutWidget) LayoutWidget {
 				return layoutnode.NewLayoutWidget(func(gtx LayoutContext) LayoutDimensions {
-					// Layout children first to know the size?
-					// Wait, we need the size to draw the shadow.
-					// But usually modifiers wrap. If we are outer, we call inner widget.Layout.
-					// But we want to draw shadow BEHIND content.
+					elevation := n.shadowData.Elevation
+					if elevation <= 0 {
+						return widget.Layout(gtx)
+					}
 
-					// Strategy:
-					// 1. Record content layout.
-					// 2. Draw shadow based on content size.
-					// 3. Draw content.
+					if b := gtx.DrawBackend(); b != nil {
+						// Software path:
+						// 1. Measure child
+						rec := b.Record()
+						dims := widget.Layout(gtx)
+						b.Apply(rec) // replay child into canvas
 
+						// 2. Draw shadow layers
+						shadowSize := float32(gtx.ToGio().Metric.Dp(unitconvert.DpToGioUnitUnsafe(elevation)))
+						col := shadowColorToRenderColor(n.shadowData.AmbientColor.TakeOrElse(graphics.ColorBlack))
+
+						shadowLayersCount := float32(8)
+						for layerIndex := shadowLayersCount; layerIndex > 0; layerIndex-- {
+							sWidth := 0.75 + shadowSize*layerIndex*0.4/shadowLayersCount
+							// Record a FillShape for each shadow layer
+							// The exact scale/offset math mirrors the gio path
+							// but we just record the shape bounds.
+							shadowShape := render.Shape{
+								Kind:   render.ShapeRectangle,
+								Bounds: render.Rect{
+									Min: render.Point{X: -sWidth, Y: -sWidth},
+									Max: render.Point{X: float32(dims.Size.X) + sWidth, Y: float32(dims.Size.Y) + sWidth},
+								},
+							}
+							b.FillShape(shadowShape, col)
+						}
+
+						// 3. Draw child on top
+						childRec := b.Record()
+						finalDims := widget.Layout(gtx)
+						b.Apply(childRec)
+						return finalDims
+					}
+
+					// Gio path: unchanged.
 					macro := op.Record(gtx.ToGio().Ops)
 					dims := widget.Layout(gtx)
 					call := macro.Stop()
 
-					elevation := n.shadowData.Elevation
 					if elevation <= 0 {
 						call.Add(gtx.ToGio().Ops)
 						return dims
 					}
 
 					// Draw Shadow
-					// Adapted from gio-mw wdk.Elevation.Layout
-
 					shadowSize := float32(gtx.ToGio().Metric.Dp(unitconvert.DpToGioUnitUnsafe(elevation)))
 
-					//@TODO get shadow from theme, for now default to black
 					col := graphics.ColorToNRGBA(n.shadowData.AmbientColor.TakeOrElse(graphics.ColorBlack))
-					// Apply some opacity if it's fully opaque?
-					// gio-mw uses 0.12*255 approx 30 alpha.
 					if col.A == 255 {
 						col.A = 30
 					}
@@ -68,11 +93,8 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 						Y: float32(dims.Size.Y),
 					}
 
-					// Create Outline for the shape
-					// We need the outline path.
 					outline := n.shadowData.Shape.CreateOutline(dims.Size, shape.Metric{PxPerDp: gtx.ToGio().Metric.PxPerDp, PxPerSp: gtx.ToGio().Metric.PxPerSp})
 
-					// Draw base layer
 					baseMacro := op.Record(gtx.ToGio().Ops)
 					paint.FillShape(gtx.ToGio().Ops, col, outline.ClipOp(clipconvert.NewOps(gtx.ToGio().Ops)).ToClipOp())
 					baseCall := baseMacro.Stop()
@@ -80,17 +102,10 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 					var stack op.TransformStack
 					shadowLayersCount := float32(8)
 
-					// We need to offset/scale the *base layer drawing*.
-					// But outline.Op(gtx.Ops) is just the path.
-					// We can't reuse the path Op easily with different transforms unless we rebuild it or use transform on the fill?
-					// Actually gio-mw records a macro of the FillShape and then replays it with transforms.
-
-					// Replicate gio-mw loop
 					for layerIndex := shadowLayersCount; layerIndex > 0; layerIndex-- {
 						sWidth := 0.75 + shadowSize*layerIndex*0.4/shadowLayersCount
 						finalSize := shadowShapeBounds.Add(f32.Point{X: sWidth, Y: sWidth})
 
-						// Avoid division by zero
 						if shadowShapeBounds.X == 0 || shadowShapeBounds.Y == 0 {
 							continue
 						}
@@ -116,4 +131,19 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 		},
 	)
 	return n
+}
+
+// shadowColorToRenderColor converts a framework Color to a render.Color.
+func shadowColorToRenderColor(c graphics.Color) render.Color {
+	nrgba := graphics.ColorToNRGBA(c)
+	// Apply the alpha adjustment matching the gio path
+	if nrgba.A == 255 {
+		nrgba.A = 30
+	}
+	return render.Color{
+		R: float32(nrgba.R) / 255,
+		G: float32(nrgba.G) / 255,
+		B: float32(nrgba.B) / 255,
+		A: float32(nrgba.A) / 255,
+	}
 }

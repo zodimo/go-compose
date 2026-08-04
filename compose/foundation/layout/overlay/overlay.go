@@ -52,6 +52,9 @@ func overlayWidgetConstructor(options OverlayOptions) layoutnode.LayoutNodeWidge
 
 			parentSize := gtx.ToGio().Constraints.Max
 
+			// Capture backend before entering layout.Stack callback
+			backend := gtx.DrawBackend()
+
 			// Layout with Stack - center content
 			dims := layout.Stack{Alignment: layout.Center}.Layout(*gtx.ToGio(),
 				// Layer 0: Scrim background
@@ -103,7 +106,7 @@ func overlayWidgetConstructor(options OverlayOptions) layoutnode.LayoutNodeWidge
 					children := node.Children()
 					if len(children) > 0 {
 						child := children[0].(layoutnode.NodeCoordinator)
-						return layoutnode.ToGioDimensions(child.Layout(layoutnode.NewLayoutContext(&gtx)))
+						return layoutnode.ToGioDimensions(child.Layout(layoutnode.NewLayoutContextWithBackend(&gtx, backend)))
 					}
 					return layout.Dimensions{}
 				}),

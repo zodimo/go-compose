@@ -34,19 +34,43 @@ func NewBackGroundNode(background BackgroundData) ChainNode {
 
 					return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 						nrgba := graphics.ColorToNRGBA(background.Color)
-							return layoutnode.FromGioDimensions(layout.Background{}.Layout(*gtx.ToGio(),
-								func(gtx layout.Context) layout.Dimensions {
-									// shape
-									// color
-							defer background.Shape.CreateOutline(gtx.Constraints.Min, shape.Metric{PxPerDp: gtx.Metric.PxPerDp, PxPerSp: gtx.Metric.PxPerSp}).Push(clipconvert.NewOps(gtx.Ops)).Pop()
 
-									paint.Fill(gtx.Ops, nrgba)
+						if b := gtx.DrawBackend(); b != nil {
+							// Software path:
+							// 1. Measure child (record into a throwaway recording)
+							childRec := b.Record()
+							childDims := widget.Layout(gtx)
+							b.Apply(childRec) // replay child into canvas
 
-									return layout.Dimensions{Size: gtx.Constraints.Min}
+							// 2. Compute shape bounds from child dimensions
+							sz := childDims.Size
+							if sz.X == 0 && sz.Y == 0 {
+								sz = gtx.ToGio().Constraints.Min
+							}
+							metric := shape.Metric{
+								PxPerDp: gtx.ToGio().Metric.PxPerDp,
+								PxPerSp: gtx.ToGio().Metric.PxPerSp,
+							}
+							rShape := toRenderShape(background.Shape, sz, metric)
+							rColor := toRenderColor(background.Color)
+							b.FillShape(rShape, rColor)
+							return childDims
+						}
 
-								},
-								func(gtx layout.Context) layout.Dimensions {
-									return layoutnode.ToGioDimensions(widget.Layout(layoutnode.NewLayoutContext(&gtx)))
+						// Gio path: unchanged.
+						return layoutnode.FromGioDimensions(layout.Background{}.Layout(*gtx.ToGio(),
+							func(gtx layout.Context) layout.Dimensions {
+								// shape
+								// color
+								defer background.Shape.CreateOutline(gtx.Constraints.Min, shape.Metric{PxPerDp: gtx.Metric.PxPerDp, PxPerSp: gtx.Metric.PxPerSp}).Push(clipconvert.NewOps(gtx.Ops)).Pop()
+
+								paint.Fill(gtx.Ops, nrgba)
+
+								return layout.Dimensions{Size: gtx.Constraints.Min}
+
+							},
+							func(gtx layout.Context) layout.Dimensions {
+								return layoutnode.ToGioDimensions(widget.Layout(layoutnode.NewLayoutContext(&gtx)))
 							},
 						))
 					})

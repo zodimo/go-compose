@@ -31,6 +31,9 @@ func boxWidgetConstructor(options BoxOptions) layoutnode.LayoutNodeWidgetConstru
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 
+			// Capture backend before entering layout.Stack callbacks
+			backend := gtx.DrawBackend()
+
 			// Build framework-owned StackChild values.
 			var gioChildren []layout.StackChild
 			for _, child := range node.Children() {
@@ -44,11 +47,11 @@ func boxWidgetConstructor(options BoxOptions) layoutnode.LayoutNodeWidgetConstru
 						// MatchParentSize implies matching the size of the container, which is passed in Min constraints
 						// by the Stack layout for Expanded children.
 						gtx.Constraints.Max = gtx.Constraints.Min
-						return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContext(&gtx)))
+						return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContextWithBackend(&gtx, backend)))
 					}))
 				} else {
 					gioChildren = append(gioChildren, layout.Stacked(func(gtx layout.Context) layout.Dimensions {
-						return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContext(&gtx)))
+						return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContextWithBackend(&gtx, backend)))
 					}))
 				}
 			}

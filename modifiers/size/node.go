@@ -43,7 +43,7 @@ func NewSizeNode(sizeData SizeData) ChainNode {
 						// Create a context with modified constraints for the child
 						g := *gtx.ToGio()
 						g.Constraints = layoutnode.ToGioConstraints(childConstraints)
-						childDims := widget.Layout(layoutnode.NewLayoutContext(&g))
+						childDims := widget.Layout(layoutnode.NewLayoutContextWithBackend(&g, gtx.DrawBackend()))
 						call := macro.Stop()
 							// 3. Determine my size.
 							mySize := image.Point{

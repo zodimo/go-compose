@@ -5,6 +5,7 @@ import (
 
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	node "github.com/zodimo/go-compose/internal/node"
+	"github.com/zodimo/go-compose/internal/render"
 
 	"gioui.org/op"
 	"gioui.org/op/clip"
@@ -33,6 +34,43 @@ func NewAnimatedHeightNode(element AnimatedHeightElement) node.ChainNode {
 						return layoutnode.LayoutDimensions{}
 					}
 
+					if b := gtx.DrawBackend(); b != nil {
+						// Software path:
+						// 1. Record child layout (captures into a recording)
+						childRec := b.Record()
+						// Apply max height constraint
+						childConstraints := gtx.ToGio().Constraints
+						if n.element.MaxHeight > 0 {
+							childConstraints.Max.Y = gtx.ToGio().Dp(gioUnit.Dp(n.element.MaxHeight))
+						}
+						g := *gtx.ToGio()
+						g.Constraints = childConstraints
+						dims := widget.Layout(layoutnode.NewLayoutContextWithBackend(&g, gtx.DrawBackend()))
+						// childRec is not yet Applied
+
+						targetHeight := dims.Size.Y
+						currentHeight := int(float32(targetHeight) * progress)
+
+						if progress < 1.0 {
+							// Push clip for animated height
+							saveLevel := b.Save()
+							b.ClipRect(render.Rect{
+								Min: render.Point{},
+								Max: render.Point{X: float32(dims.Size.X), Y: float32(currentHeight)},
+							}, render.CornerRadius{})
+							b.Apply(childRec)
+							b.Restore(saveLevel)
+						} else {
+							b.Apply(childRec)
+						}
+
+						return layoutnode.LayoutDimensions{
+							Size:     image.Point{X: dims.Size.X, Y: currentHeight},
+							Baseline: dims.Baseline,
+						}
+					}
+
+					// Gio path: unchanged.
 					// Measure content first
 					macro := op.Record(gtx.ToGio().Ops)
 					// Apply max height constraint constraint
@@ -44,7 +82,7 @@ func NewAnimatedHeightNode(element AnimatedHeightElement) node.ChainNode {
 					g := *gtx.ToGio()
 					g.Constraints = childConstraints
 
-					dims := widget.Layout(layoutnode.NewLayoutContext(&g))
+					dims := widget.Layout(layoutnode.NewLayoutContextWithBackend(&g, gtx.DrawBackend()))
 					call := macro.Stop()
 
 					// Apply animation to height
@@ -52,8 +90,6 @@ func NewAnimatedHeightNode(element AnimatedHeightElement) node.ChainNode {
 					currentHeight := int(float32(targetHeight) * progress)
 
 					// Clip to current height
-					// Only clip if we are animating. If fully visible (progress=1.0), avoid clipping
-					// to prevent cutting off shadows or hover effects that might extend outside bounds.
 					if progress < 1.0 {
 						defer clip.Rect{Max: image.Point{X: dims.Size.X, Y: currentHeight}}.Push(gtx.ToGio().Ops).Pop()
 					}

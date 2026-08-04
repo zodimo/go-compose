@@ -37,7 +37,7 @@ func NewAnimatedWidthNode(element AnimatedWidthElement) *AnimatedWidthNode {
 					g := *gtx.ToGio()
 					g.Constraints = c
 
-					dims := widget.Layout(layoutnode.NewLayoutContext(&g))
+					dims := widget.Layout(layoutnode.NewLayoutContextWithBackend(&g, gtx.DrawBackend()))
 
 					return dims
 				})

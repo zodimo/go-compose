@@ -7,6 +7,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/layout"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/internal/render"
 	"github.com/zodimo/go-compose/pkg/api"
 
 	"gioui.org/op/clip"
@@ -105,7 +106,25 @@ func widgetConstructor(options DividerOptions, isHorizontal bool) layoutnode.Lay
 			// Resolve Color
 			resolvedColor := graphics.ColorToNRGBA(options.Color)
 
-			// Draw
+			if b := gtx.DrawBackend(); b != nil {
+				// Software path: emit a FillRect through the Backend so the
+				// golden harness captures the divider draw call.
+				b.FillRect(
+					render.Rect{
+						Min: render.Point{},
+						Max: render.Point{X: float32(size.X), Y: float32(size.Y)},
+					},
+					render.Color{
+						R: float32(resolvedColor.R) / 255,
+						G: float32(resolvedColor.G) / 255,
+						B: float32(resolvedColor.B) / 255,
+						A: float32(resolvedColor.A) / 255,
+					},
+				)
+				return layoutnode.LayoutDimensions{Size: size}
+			}
+
+			// Gio path: unchanged.
 			shape := clip.Rect{Max: size}.Push(gtx.ToGio().Ops)
 			paint.ColorOp{Color: resolvedColor}.Add(gtx.ToGio().Ops)
 			paint.PaintOp{}.Add(gtx.ToGio().Ops)

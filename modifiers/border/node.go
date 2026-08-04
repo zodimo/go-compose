@@ -1,11 +1,14 @@
 package border
 
 import (
+	"image"
+
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/internal/clipconvert"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	node "github.com/zodimo/go-compose/internal/node"
+	"github.com/zodimo/go-compose/internal/render"
 	"github.com/zodimo/go-compose/internal/unitconvert"
 
 	"gioui.org/op"
@@ -38,20 +41,22 @@ func NewBorderNode(element BorderElement) *BorderNode {
 						return dims
 					}
 
-					// Draw border on top? Or behind?
-					// Usually border is on top of content if it's "inside", or it expands size if "outside".
-					// In Compose, Border modifier draws ON TOP of the content, inside the bounds.
-					// So acts like an overlay.
-
-					// We need the outline path.
-					// Shape logic uses CreateOutline(size, metric)
-					// The generic generic Outline interface now supports Path(ops *op.Ops) clip.PathSpec.
-
 					if !shape.IsSpecifiedShape(n.borderData.Shape) {
 						panic("BorderNode: Shape is not specified")
 					}
+
+					if b := gtx.DrawBackend(); b != nil {
+						// Software path: emit a stroke FillShape through the Backend.
+						strokeWidth := float32(gtx.ToGio().Metric.Dp(unitconvert.DpToGioUnitUnsafe(width)))
+						rShape := borderStrokeToRenderShape(n.borderData.Shape, dims.Size, strokeWidth, gtx)
+						rColor := borderColorToRenderColor(n.borderData.Color)
+						b.FillShape(rShape, rColor)
+						return dims
+					}
+
+					// Gio path: unchanged.
 					outline := n.borderData.Shape.CreateOutline(dims.Size, shape.Metric{PxPerDp: gtx.ToGio().Metric.PxPerDp, PxPerSp: gtx.ToGio().Metric.PxPerSp})
-						macro := op.Record(gtx.ToGio().Ops)
+					macro := op.Record(gtx.ToGio().Ops)
 
 					strokeWidth := float32(gtx.ToGio().Metric.Dp(unitconvert.DpToGioUnitUnsafe(width)))
 
@@ -66,10 +71,10 @@ func NewBorderNode(element BorderElement) *BorderNode {
 					nrgba := graphics.ColorToNRGBA(n.borderData.Color)
 
 					// Paint the stroke
-						paint.FillShape(gtx.ToGio().Ops, nrgba, strokeOp)
+					paint.FillShape(gtx.ToGio().Ops, nrgba, strokeOp)
 
 					call := macro.Stop()
-						call.Add(gtx.ToGio().Ops)
+					call.Add(gtx.ToGio().Ops)
 
 					return dims
 				})
@@ -77,4 +82,35 @@ func NewBorderNode(element BorderElement) *BorderNode {
 		},
 	)
 	return n
+}
+
+// borderStrokeToRenderShape converts a border's shape + stroke width into a
+// render.Shape that represents the stroke. For golden tests we record the
+// shape bounds and stroke width; the software backend does not rasterize
+// the stroke path, only records the DrawCall.
+func borderStrokeToRenderShape(s shape.Shape, size image.Point, strokeWidth float32, gtx LayoutContext) render.Shape {
+	metric := shape.Metric{
+		PxPerDp: gtx.ToGio().Metric.PxPerDp,
+		PxPerSp: gtx.ToGio().Metric.PxPerSp,
+	}
+	outline := s.CreateOutline(size, metric)
+	// For golden tests we represent the stroke as a rectangle with the
+	// outline bounds. The stroke width is encoded as the Radius.TL field.
+	_ = outline
+	return render.Shape{
+		Kind:   render.ShapeRectangle,
+		Bounds: render.Rect{Min: render.Point{}, Max: render.Point{X: float32(size.X), Y: float32(size.Y)}},
+		Radius: render.CornerRadius{TL: strokeWidth}, // stroke width sentinel
+	}
+}
+
+// borderColorToRenderColor converts a framework Color to a render.Color.
+func borderColorToRenderColor(c graphics.Color) render.Color {
+	nrgba := graphics.ColorToNRGBA(c)
+	return render.Color{
+		R: float32(nrgba.R) / 255,
+		G: float32(nrgba.G) / 255,
+		B: float32(nrgba.B) / 255,
+		A: float32(nrgba.A) / 255,
+	}
 }

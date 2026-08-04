@@ -3,6 +3,8 @@ package layoutnode
 import (
 	"image"
 
+	"github.com/zodimo/go-compose/internal/render"
+
 	"gioui.org/layout"
 	"gioui.org/op"
 )
@@ -23,13 +25,28 @@ import (
 // and modifiers. It wraps the engine context; ToGio is the only sanctioned
 // crossing from framework types to engine types.
 type LayoutContext struct {
-	gtx *layout.Context
+	gtx     *layout.Context
+	backend render.Backend // nil on the gio path; set on the software path
 }
 
 // NewLayoutContext wraps a gio layout.Context into a framework-owned
 // LayoutContext. It must be called during the frame that owns gtx.
 func NewLayoutContext(gtx *layout.Context) LayoutContext {
 	return LayoutContext{gtx: gtx}
+}
+
+// NewLayoutContextWithBackend wraps a gio layout.Context with an active
+// draw backend. The backend is threaded through modifier draw calls so
+// the software backend can capture draw operations for golden tests.
+func NewLayoutContextWithBackend(gtx *layout.Context, backend render.Backend) LayoutContext {
+	return LayoutContext{gtx: gtx, backend: backend}
+}
+
+// DrawBackend returns the active draw backend, or nil on the gio path.
+// Draw modifiers check this to decide whether to emit Backend calls
+// (software path) or gio ops directly (gio path).
+func (c LayoutContext) DrawBackend() render.Backend {
+	return c.backend
 }
 
 // ToGio returns the underlying engine context. It is seam-only: nothing above

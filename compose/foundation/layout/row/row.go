@@ -39,6 +39,10 @@ func Row(content Composable, options ...RowOption) Composable {
 func rowWidgetConstructor(options RowOptions) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+
+			// Capture backend before entering layout.Flex callbacks
+			backend := gtx.DrawBackend()
+
 			flexedChildren := []layout.FlexChild{}
 			for _, child := range node.Children() {
 
@@ -51,12 +55,12 @@ func rowWidgetConstructor(options RowOptions) layoutnode.LayoutNodeWidgetConstru
 				flexedChildren = append(flexedChildren, layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 					// Compose behavior: Cross axis constraints Min is 0
 					gtx.Constraints.Min.Y = 0
-					return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContext(&gtx)))
+					return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContextWithBackend(&gtx, backend)))
 				}))
 				} else {
 					weightElement := maybeWeightElement.UnwrapUnsafe().(weight.WeightElement)
 				flexedChildren = append(flexedChildren, layout.Flexed(weightElement.WeightData().Weight, func(gtx layout.Context) layout.Dimensions {
-					return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContext(&gtx)))
+					return layoutnode.ToGioDimensions(childLayoutNode.Layout(layoutnode.NewLayoutContextWithBackend(&gtx, backend)))
 				}))
 				}
 			}

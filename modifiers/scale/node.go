@@ -25,6 +25,15 @@ func NewScaleNode(data ScaleData) *ScaleNode {
 			no := t.(layoutnode.LayoutModifierNode)
 			no.AttachLayoutModifier(func(widget layoutnode.LayoutWidget) layoutnode.LayoutWidget {
 				return layoutnode.NewLayoutWidget(func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+					if b := gtx.DrawBackend(); b != nil {
+						// Software path: push scale transform, layout child, restore.
+						saveLevel := b.Save()
+						b.Scale(n.data.ScaleX, n.data.ScaleY)
+						dims := widget.Layout(gtx)
+						b.Restore(saveLevel)
+						return dims
+					}
+					// Gio path: unchanged.
 					macro := op.Record(gtx.ToGio().Ops)
 					dims := widget.Layout(gtx)
 					call := macro.Stop()

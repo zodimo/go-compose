@@ -47,3 +47,33 @@ func (d *gioDrawCommand) Apply(ops *op.Ops) {
 func (d *gioDrawCommand) applyTo(b Backend) {
 	// intentionally empty — current path uses Apply(*op.Ops) directly
 }
+
+// --- Backend-based DrawCommand (software / future backends) ---
+
+// backendDrawCommand wraps a render.Backend for the software rendering path.
+// On the software path, DrawCommand.Apply is never called by the app shell;
+// instead the harness reads the backend Canvas() directly. Apply is a no-op.
+type backendDrawCommand struct {
+	backend Backend
+}
+
+// Compile-time check that backendDrawCommand implements DrawCommand.
+var _ DrawCommand = (*backendDrawCommand)(nil)
+
+// NewDrawCommandForBackend creates a DrawCommand from any Backend.
+// For the software backend the app shell reads Canvas() directly;
+// Apply is provided only to satisfy the interface.
+func NewDrawCommandForBackend(b Backend) DrawCommand {
+	return &backendDrawCommand{backend: b}
+}
+
+// Apply is a no-op on the software path. The app shell does not call it;
+// the harness reads Canvas() from the software backend directly.
+func (d *backendDrawCommand) Apply(ops *op.Ops) {
+	// intentionally empty — software path uses Canvas() directly
+}
+
+// applyTo is unused on the software path.
+func (d *backendDrawCommand) applyTo(b Backend) {
+	// intentionally empty
+}
