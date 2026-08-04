@@ -4,12 +4,12 @@ Reference: design.md (how), specs/{public-api-purity,render-backend-seam,api-pur
 
 ## 1. API-Purity Analyzer (fixtures first — red state)
 
-- [ ] 1.1 Scaffold `internal/api-check` package: load public packages (`compose/...`, `modifiers/...`, `theme/...`, `runtime/`, `pkg/...`) via `go/packages` (uses `golang.org/x/tools`, already a dependency)
-- [ ] 1.2 Implement exported-signature inspector: params, returns, struct fields, embedded types, type aliases, and underlying types of defined types; flag any type whose package path starts with `gioui.org`
-- [ ] 1.3 Implement seam whitelist: `internal/layoutnode`, `internal/render`, and subpackages are exempt from the import rule but still subject to the exported-signature rule
-- [ ] 1.4 Seed regression fixtures from the known leak inventory: every pre-cleanup leak site (unit gio_helpers, text/font converters, theme aliases, box/column aliases, intl.Locale, padding.RTL, card.GioClickable, clickable.GioClickable, shape.Outline, LocalWindow, TextFieldWidget, LazyListState/GridState, SnackbarData, runtime.Run) must be flagged
-- [ ] 1.5 Add `make check-api` target invoking the analyzer; document exit behavior (non-zero on violation)
-- [ ] 1.6 Verify analyzer is in RED state: flags every fixture, exits non-zero (spec: api-purity-analyzer — "Known leaks are regression fixtures")
+- [x] 1.1 Scaffold `internal/api-check` package: load public packages (`compose/...`, `modifiers/...`, `theme/...`, `runtime/`, `pkg/...`) via `go/packages` (uses `golang.org/x/tools`, already a dependency)
+- [x] 1.2 Implement exported-signature inspector: params, returns, struct fields, embedded types, type aliases, and underlying types of defined types; flag any type whose package path starts with `gioui.org`
+- [x] 1.3 Implement seam whitelist: `internal/layoutnode`, `internal/render`, and subpackages are exempt from the import rule but still subject to the exported-signature rule
+- [x] 1.4 Seed regression fixtures from the known leak inventory: every pre-cleanup leak site (unit gio_helpers, text/font converters, theme aliases, box/column aliases, intl.Locale, padding.RTL, card.GioClickable, clickable.GioClickable, shape.Outline, LocalWindow, TextFieldWidget, LazyListState/GridState, SnackbarData, runtime.Run) must be flagged
+- [x] 1.5 Add `make check-api` target invoking the analyzer; document exit behavior (non-zero on violation)
+- [x] 1.6 Verify analyzer is in RED state: flags every fixture, exits non-zero (spec: api-purity-analyzer — "Known leaks are regression fixtures")
 
 ## 2. Phase 1: Public API Boundary Cleanup
 

@@ -1,10 +1,11 @@
-.PHONY: help version tag-patch tag-minor tag-major test generate-icons
+.PHONY: help version tag-patch tag-minor tag-major test generate-icons check-api
 
 help:
 	@echo "Available targets:"
 	@echo "  version        - Show current version"
 	@echo "  generate-icons - Regenerate Material Symbol icon constants"
 	@echo "  test           - Run tests"
+	@echo "  check-api      - Verify public API is gioui-free (exits non-zero on violation)"
 	@echo "  tag-patch      - Increment patch version (v0.0.X -> v0.0.X+1)"
 	@echo "  tag-minor      - Increment minor version (v0.X.0 -> v0.X+1.0)"
 	@echo "  tag-major      - Increment major version (vX.0.0 -> vX+1.0.0)"
@@ -53,3 +54,10 @@ generate-icons:
 
 test:
 	go test ./...
+
+# Enforce public API purity: exits non-zero when any exported symbol in the
+# public package trees references a gioui.org type.
+# Phase 3 note: switch to `go run ./cmd/api-check -all` once non-seam
+# packages stop importing engine packages (render-backend-seam).
+check-api:
+	go run ./cmd/api-check
