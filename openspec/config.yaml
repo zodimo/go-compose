@@ -1,0 +1,16 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+context: |
+  ## OpenSpec Workflow Guidelines
+
+  When acting in the OpenSpec workflow (e.g. `/openspec-propose` or exploring), adhere to the following documentation boundaries:
+
+  1. **`proposal.md`**: Strictly focus on the **WHAT** and **WHY**. Outline the motivation, the specific capabilities changing, and breaking impacts.
+  2. **`specs/**/*.md`**: Strictly focus on **BEHAVIORAL CONTRACTS**. Write testable scenarios (WHEN/THEN). Do NOT include code implementation details, mock structs, or internal mechanics here.
+  3. **`design.md`**: This is the **HOW**. You **MUST** include deep technical context so an implementer reading it in isolation can build it. Include:
+     - Specific data structures (e.g., Go `struct` mockups)
+     - Architectural diagrams (using ASCII or Mermaid) illustrating the flow of logic
+     - Edge case explanations (e.g., "how ghost nodes form and how the pruning loop kills them")
+     - Do NOT just write brief bullet points. Over-explain the underlying computer science or framework mechanisms.
