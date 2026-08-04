@@ -42,3 +42,14 @@ The system SHALL commit golden baselines for covered components so regressions a
 #### Scenario: Baseline available in repo
 - **WHEN** a developer runs the test suite
 - **THEN** golden baselines for covered components exist in the repository and are compared automatically
+
+### Requirement: Covered components are an explicit, extensible scope
+The system SHALL define the set of components covered by golden baselines explicitly (a documented "covered set"), so the scope can be reviewed and extended incrementally without renegotiating the harness. Engine-bound (Door 2) components — slider, textfield, radiobutton, progress, badge, icon, tooltip — are EXCLUDED from the initial covered set; their draw calls remain gio-emitted until a later scope expansion routes them through the backend.
+
+#### Scenario: Covered set is documented
+- **WHEN** a developer reviews the golden-test harness
+- **THEN** the set of components with committed baselines is enumerated in the harness or its documentation, and each component not covered is known to be excluded by the Door-2 carve-out
+
+#### Scenario: Covered set can grow
+- **WHEN** a Door-2 component is later routed through the render.Backend emission path
+- **THEN** adding it to the covered set requires only emitting through the backend and committing its baseline — no harness redesign
