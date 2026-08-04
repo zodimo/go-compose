@@ -2,3 +2,7 @@
 /.cursor
 /.gemini
 /.sisyphus
+# compiled demo binaries
+/cmd/demo/*/*
+!/cmd/demo/*/*.go
+!/cmd/demo/*/go.mod
