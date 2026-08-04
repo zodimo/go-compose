@@ -1,9 +1,8 @@
 package textfield
 
 import (
-	"gioui.org/gesture"
-	"gioui.org/layout"
-	"gioui.org/widget"
+	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/internal/textinput"
 )
 
 const Material3TextFieldNodeID = "Material3TextField"
@@ -38,14 +37,14 @@ func TextField(
 	return Filled(value, onValueChange, options...)
 }
 
-// TextField implements the Material Design Text Field
+// TextFieldWidget implements the Material Design Text Field
 // described here: https://material.io/components/text-fields
 type TextFieldWidget struct {
 	// Editor contains the edit buffer.
-	widget.Editor
+	Editor *textinput.Editor
 	// click detects when the mouse pointer clicks or hovers
 	// within the textfield.
-	click gesture.Click
+	click textinput.Click
 
 	// Helper text to give additional context to a field.
 	Helper string
@@ -53,9 +52,9 @@ type TextFieldWidget struct {
 	// will allow. Zero means "no limit".
 	CharLimit uint
 	// Prefix appears before the content of the text input.
-	Prefix layout.Widget
+	Prefix layoutnode.GioLayoutWidget
 	// Suffix appears after the content of the text input.
-	Suffix layout.Widget
+	Suffix layoutnode.GioLayoutWidget
 
 	// Animation state.
 	state

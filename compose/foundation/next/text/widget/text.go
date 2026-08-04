@@ -19,6 +19,12 @@ import (
 	"gioui.org/text"
 	gioUnit "gioui.org/unit"
 	"golang.org/x/image/math/fixed"
+
+	"github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/internal/unitconvert"
+	tw "github.com/zodimo/go-compose/internal/textwidget"
 )
 
 // TextSource provides text data for use in widgets. If the underlying data type
@@ -43,10 +49,10 @@ type TextSource interface {
 // It provides methods for configuring a viewport onto the shaped text which can
 // be scrolled, and for configuring and drawing text selection boxes.
 type TextView struct {
-	Alignment text.Alignment
+	Alignment style.TextAlign
 	// LineHeight controls the distance between the baselines of lines of text.
 	// If zero, a sensible default will be used.
-	LineHeight gioUnit.Sp
+	LineHeight unit.TextUnit
 	// LineHeightScale applies a scaling factor to the LineHeight. If zero, a
 	// sensible default will be used.
 	LineHeightScale float32
@@ -60,7 +66,7 @@ type TextView struct {
 	// line if MaxLines is exceeded. Defaults to "…" if empty.
 	Truncator string
 	// WrapPolicy configures how displayed text will be broken into lines.
-	WrapPolicy text.WrapPolicy
+	WrapPolicy style.LineBreak
 	// DisableSpaceTrim configures whether trailing whitespace on a line will have its
 	// width zeroed. Set to true for editors, but false for non-editable text.
 	DisableSpaceTrim bool
@@ -69,8 +75,8 @@ type TextView struct {
 	// are accessed by Len, Text, and SetText.
 	Mask rune
 
-	params     text.Parameters
-	shaper     *text.Shaper
+	params     tw.Params
+	shaper     *tw.Shaper
 	seekCursor int64
 	rr         TextSource
 	maskReader maskReader
@@ -82,7 +88,7 @@ type TextView struct {
 	viewSize        image.Point
 	valid           bool
 	regions         []Region
-	dims            layout.Dimensions
+	dims            layoutnode.LayoutDimensions
 
 	// offIndex is an index of rune index to byte offsets.
 	offIndex []offEntry
@@ -104,19 +110,37 @@ type TextView struct {
 	scrollOff image.Point
 }
 
+// paramsPtr returns a pointer to the underlying text.Parameters for internal use.
+func (e *TextView) paramsPtr() *text.Parameters {
+	return &e.params.P
+}
+
+// shaperGio returns the underlying gio text.Shaper for internal use.
+func (e *TextView) shaperGio() *text.Shaper {
+	if e.shaper == nil {
+		return nil
+	}
+	return e.shaper.ToGio()
+}
+
+// setShaperGio sets the underlying gio text.Shaper for internal use.
+func (e *TextView) setShaperGio(s *text.Shaper) {
+	e.shaper = tw.NewShaper(s)
+}
+
 func (e *TextView) Changed() bool {
 	return e.rr.Changed()
 }
 
 // Dimensions returns the dimensions of the visible text.
-func (e *TextView) Dimensions() layout.Dimensions {
+func (e *TextView) Dimensions() layoutnode.LayoutDimensions {
 	basePos := e.dims.Size.Y - e.dims.Baseline
-	return layout.Dimensions{Size: e.viewSize, Baseline: e.viewSize.Y - basePos}
+	return layoutnode.LayoutDimensions{Size: e.viewSize, Baseline: e.viewSize.Y - basePos}
 }
 
 // FullDimensions returns the dimensions of all shaped text, including
 // text that isn't visible within the current viewport.
-func (e *TextView) FullDimensions() layout.Dimensions {
+func (e *TextView) FullDimensions() layoutnode.LayoutDimensions {
 	return e.dims
 }
 
@@ -158,7 +182,7 @@ func (e *TextView) makeValid() {
 	if e.valid {
 		return
 	}
-	e.layoutText(e.shaper)
+	e.layoutText(e.shaperGio())
 	e.valid = true
 }
 
@@ -232,64 +256,71 @@ func (e *TextView) calculateViewSize(gtx layout.Context) image.Point {
 }
 
 // Layout the text, reshaping it as necessary.
-func (e *TextView) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, size gioUnit.Sp) {
-	if e.params.Locale != gtx.Locale {
-		e.params.Locale = gtx.Locale
+func (e *TextView) Layout(gtx layoutnode.LayoutContext, lt *tw.Shaper, font tw.FontSpec, size unit.TextUnit) {
+	e.layoutImpl(*gtx.ToGio(), lt.ToGio(), tw.ToGioFont(font), unitconvert.TextUnitToGioSpUnsafe(size))
+}
+
+// layoutImpl is the internal Layout implementation using gioui types.
+func (e *TextView) layoutImpl(gtx layout.Context, lt *text.Shaper, font font.Font, size gioUnit.Sp) {
+	p := e.paramsPtr()
+	if p.Locale != gtx.Locale {
+		p.Locale = gtx.Locale
 		e.invalidate()
 	}
 	textSize := fixed.I(gtx.Sp(size))
-	if e.params.Font != font || e.params.PxPerEm != textSize {
+	if p.Font != font || p.PxPerEm != textSize {
 		e.invalidate()
-		e.params.Font = font
-		e.params.PxPerEm = textSize
+		p.Font = font
+		p.PxPerEm = textSize
 	}
 	maxWidth := gtx.Constraints.Max.X
 	if e.SingleLine {
 		maxWidth = math.MaxInt
 	}
 	minWidth := gtx.Constraints.Min.X
-	if maxWidth != e.params.MaxWidth {
-		e.params.MaxWidth = maxWidth
+	if maxWidth != p.MaxWidth {
+		p.MaxWidth = maxWidth
 		e.invalidate()
 	}
-	if minWidth != e.params.MinWidth {
-		e.params.MinWidth = minWidth
+	if minWidth != p.MinWidth {
+		p.MinWidth = minWidth
 		e.invalidate()
 	}
-	if lt != e.shaper {
-		e.shaper = lt
+	if lt != e.shaperGio() {
+		e.setShaperGio(lt)
 		e.invalidate()
 	}
 	if e.Mask != e.lastMask {
 		e.lastMask = e.Mask
 		e.invalidate()
 	}
-	if e.Alignment != e.params.Alignment {
-		e.params.Alignment = e.Alignment
+	// Alignment is compared as int values since style.TextAlign wraps an int.
+	if text.Alignment(e.Alignment) != p.Alignment {
+		p.Alignment = text.Alignment(e.Alignment)
 		e.invalidate()
 	}
-	if e.Truncator != e.params.Truncator {
-		e.params.Truncator = e.Truncator
+	if e.Truncator != p.Truncator {
+		p.Truncator = e.Truncator
 		e.invalidate()
 	}
-	if e.MaxLines != e.params.MaxLines {
-		e.params.MaxLines = e.MaxLines
+	if e.MaxLines != p.MaxLines {
+		p.MaxLines = e.MaxLines
 		e.invalidate()
 	}
-	if e.WrapPolicy != e.params.WrapPolicy {
-		e.params.WrapPolicy = e.WrapPolicy
+	if text.WrapPolicy(e.WrapPolicy) != p.WrapPolicy {
+		p.WrapPolicy = text.WrapPolicy(e.WrapPolicy)
 		e.invalidate()
 	}
-	if lh := fixed.I(gtx.Sp(e.LineHeight)); lh != e.params.LineHeight {
-		e.params.LineHeight = lh
+	if lh := fixed.I(gtx.Sp(unitconvert.TextUnitToGioSpUnsafe(e.LineHeight))); lh != p.LineHeight {
+		p.LineHeight = lh
 		e.invalidate()
 	}
-	if e.LineHeightScale != e.params.LineHeightScale {
-		e.params.LineHeightScale = e.LineHeightScale
+	if e.LineHeightScale != p.LineHeightScale {
+		p.LineHeightScale = e.LineHeightScale
 		e.invalidate()
 	}
-	if e.DisableSpaceTrim != e.params.DisableSpaceTrim {
-		e.params.DisableSpaceTrim = e.DisableSpaceTrim
+	if e.DisableSpaceTrim != p.DisableSpaceTrim {
+		p.DisableSpaceTrim = e.DisableSpaceTrim
 		e.invalidate()
 	}
 
@@ -304,7 +335,11 @@ func (e *TextView) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, s
 
 // PaintSelection clips and paints the visible text selection rectangles using
 // the provided material to fill the rectangles.
-func (e *TextView) PaintSelection(gtx layout.Context, material op.CallOp) {
+func (e *TextView) PaintSelection(gtx layoutnode.LayoutContext, material tw.DrawOp) {
+	e.paintSelection(*gtx.ToGio(), material.O)
+}
+
+func (e *TextView) paintSelection(gtx layout.Context, material op.CallOp) {
 	localViewport := image.Rectangle{Max: e.viewSize}
 	docViewport := image.Rectangle{Max: e.viewSize}.Add(e.scrollOff)
 	defer clip.Rect(localViewport).Push(gtx.Ops).Pop()
@@ -319,7 +354,11 @@ func (e *TextView) PaintSelection(gtx layout.Context, material op.CallOp) {
 
 // PaintText clips and paints the visible text glyph outlines using the provided
 // material to fill the glyphs.
-func (e *TextView) PaintText(gtx layout.Context, material op.CallOp) {
+func (e *TextView) PaintText(gtx layoutnode.LayoutContext, material tw.DrawOp) {
+	e.paintText(*gtx.ToGio(), material.O)
+}
+
+func (e *TextView) paintText(gtx layout.Context, material op.CallOp) {
 	m := op.Record(gtx.Ops)
 	viewport := image.Rectangle{
 		Min: e.scrollOff,
@@ -341,7 +380,7 @@ func (e *TextView) PaintText(gtx layout.Context, material op.CallOp) {
 	line := glyphs[:0]
 	for _, g := range e.index.glyphs[startGlyph:] {
 		var ok bool
-		if line, ok = it.paintGlyph(gtx, e.shaper, g, line); !ok {
+		if line, ok = it.paintGlyph(gtx, e.shaperGio(), g, line); !ok {
 			break
 		}
 	}
@@ -365,7 +404,11 @@ func (e *TextView) caretWidth(gtx layout.Context) int {
 
 // PaintCaret clips and paints the caret rectangle, adding material immediately
 // before painting to set the appropriate paint material.
-func (e *TextView) PaintCaret(gtx layout.Context, material op.CallOp) {
+func (e *TextView) PaintCaret(gtx layoutnode.LayoutContext, material tw.DrawOp) {
+	e.paintCaret(*gtx.ToGio(), material.O)
+}
+
+func (e *TextView) paintCaret(gtx layout.Context, material op.CallOp) {
 	carWidth2 := e.caretWidth(gtx)
 	caretPos, carAsc, carDesc := e.CaretInfo()
 
@@ -492,7 +535,7 @@ func (e *TextView) layoutText(lt *text.Shaper) {
 	e.index.reset()
 	it := textIterator{viewport: image.Rectangle{Max: image.Point{X: math.MaxInt, Y: math.MaxInt}}}
 	if lt != nil {
-		lt.Layout(e.params, r)
+		lt.Layout(e.params.P, r)
 		for {
 			g, ok := lt.NextGlyph()
 			if !it.processGlyph(g, ok) {
@@ -517,9 +560,7 @@ func (e *TextView) layoutText(lt *text.Shaper) {
 		}
 		e.graphemes = append(e.graphemes, g...)
 	}
-	dims := layout.Dimensions{Size: it.bounds.Size()}
-	dims.Baseline = dims.Size.Y - it.baseline
-	e.dims = dims
+	e.dims = layoutnode.LayoutDimensions{Size: it.bounds.Size(), Baseline: it.bounds.Size().Y - it.baseline}
 }
 
 // CaretPos returns the line & column numbers of the caret.
@@ -530,9 +571,9 @@ func (e *TextView) CaretPos() (line, col int) {
 
 // CaretCoords returns the coordinates of the caret, relative to the
 // editor itself.
-func (e *TextView) CaretCoords() f32.Point {
+func (e *TextView) CaretCoords() tw.Point {
 	pos := e.closestToRune(e.caret.start)
-	return f32.Pt(float32(pos.x)/64-float32(e.scrollOff.X), float32(pos.y-e.scrollOff.Y))
+	return tw.FromGioPoint(f32.Pt(float32(pos.x)/64-float32(e.scrollOff.X), float32(pos.y-e.scrollOff.Y)))
 }
 
 // indexRune returns the latest rune index and byte offset no later than r.
@@ -660,7 +701,7 @@ func (e *TextView) MoveTextStart(selAct selectionAction) {
 func (e *TextView) MoveTextEnd(selAct selectionAction) {
 	caret := e.closestToRune(math.MaxInt)
 	e.caret.start = caret.runes
-	e.caret.xoff = fixed.I(e.params.MaxWidth) - caret.x
+	e.caret.xoff = fixed.I(e.params.P.MaxWidth) - caret.x
 	e.updateSelection(selAct)
 	e.clampCursorToGraphemes()
 }
@@ -682,7 +723,7 @@ func (e *TextView) MoveLineEnd(selAct selectionAction) {
 	caret := e.closestToRune(e.caret.start)
 	caret = e.closestToLineCol(caret.lineCol.line, math.MaxInt)
 	e.caret.start = caret.runes
-	e.caret.xoff = fixed.I(e.params.MaxWidth) - caret.x
+	e.caret.xoff = fixed.I(e.params.P.MaxWidth) - caret.x
 	e.updateSelection(selAct)
 	e.clampCursorToGraphemes()
 }

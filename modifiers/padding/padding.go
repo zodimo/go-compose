@@ -1,12 +1,16 @@
 package padding
 
-import (
-	"gioui.org/io/system"
-)
+import "github.com/zodimo/go-compose/internal/layoutnode"
 
 const NotSet = -1
 
-const RTL = system.RTL
+// TextDirection represents text direction for RTL awareness.
+type TextDirection layoutnode.LayoutDirection
+
+const (
+	// RTL indicates right-to-left text direction.
+	RTL TextDirection = TextDirection(layoutnode.LayoutDirectionRTL)
+)
 
 type PaddingData struct {
 	Start    int

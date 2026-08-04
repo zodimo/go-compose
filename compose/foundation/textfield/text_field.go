@@ -14,6 +14,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	tw "github.com/zodimo/go-compose/internal/textwidget"
 	"github.com/zodimo/go-compose/internal/modifier"
 )
 
@@ -167,7 +168,7 @@ func textFieldWidgetConstructor(args BasicTextFieldConstructorArgs) layoutnode.L
 			textMaterial := textColorMacro.Stop()
 
 			// Use the controller to layout and paint the text
-			dims := layoutnode.FromGioDimensions(controller.LayoutAndPaint(*gtx.ToGio(), args.textShaper.Shaper, textMaterial))
+			dims := controller.LayoutAndPaint(gtx, tw.NewShaper(args.textShaper.Shaper().ToGio()), tw.NewDrawOp(textMaterial))
 
 			return dims
 		}

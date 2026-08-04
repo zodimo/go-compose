@@ -1,8 +1,8 @@
 package slider
 
 import (
-	gioUnit "gioui.org/unit"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // SliderDefaults holds default values for the Slider component.
@@ -27,11 +27,10 @@ func (d sliderDefaults) Colors() SliderColors {
 }
 
 // Dimensions constants
-// @TODO this should be compose.ui.unit
 var (
-	TrackHeight     = gioUnit.Dp(4)
-	ThumbSize       = gioUnit.Dp(20)
-	ActiveThumbSize = gioUnit.Dp(28) // M3 State Layer/Enlarged handle
-	TickSize        = gioUnit.Dp(2)
-	ThumbTrackGap   = gioUnit.Dp(6) // Approximate
+	TrackHeight     = unit.Dp(4)
+	ThumbSize       = unit.Dp(20)
+	ActiveThumbSize = unit.Dp(28) // M3 State Layer/Enlarged handle
+	TickSize        = unit.Dp(2)
+	ThumbTrackGap   = unit.Dp(6) // Approximate
 )

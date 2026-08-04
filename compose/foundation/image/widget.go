@@ -15,8 +15,9 @@ import (
 
 // ImageWidget is a widget that displays an image with scaling, alignment, and opacity.
 type ImageWidget struct {
-	// Src is the image to display.
-	Src paint.ImageOp
+	// img is the source image to display. A paint.ImageOp is built from it
+	// at draw time via engine-bound code.
+	img image.Image
 	// ContentScale specifies how to scale the image to the constraints.
 	ContentScale layout.ContentScale
 	// Alignment specifies where to position the image within the constraints.
@@ -26,7 +27,8 @@ type ImageWidget struct {
 }
 
 func (im ImageWidget) Layout(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-	srcSize := im.Src.Size()
+	src := paint.NewImageOp(im.img)
+	srcSize := src.Size()
 	dstSize := gtx.ToGio().Constraints.Max
 
 	srcDim := layoutnode.LayoutDimensions{Size: srcSize}
@@ -62,7 +64,7 @@ func (im ImageWidget) Layout(gtx layoutnode.LayoutContext) layoutnode.LayoutDime
 	}
 
 	// Draw image
-	im.Src.Add(gtx.ToGio().Ops)
+	src.Add(gtx.ToGio().Ops)
 	paint.PaintOp{}.Add(gtx.ToGio().Ops)
 
 	return layoutnode.LayoutDimensions{Size: reportedSize}

@@ -105,9 +105,9 @@ func lazyGridWidgetConstructor(
 				return D{}
 			}
 
-			state.List.List.Axis = axis
+			state.List.L.Axis = axis
 
-			dims := layoutnode.FromGioDimensions(state.List.List.Layout(*gtx.ToGio(), rowCount, func(innerGtx layout.Context, rowIndex int) layout.Dimensions {
+			dims := layoutnode.FromGioDimensions(state.List.L.Layout(*gtx.ToGio(), rowCount, func(innerGtx layout.Context, rowIndex int) layout.Dimensions {
 				// Calculate range of items for this row
 				startIdx := rowIndex * cellCount
 				endIdx := startIdx + cellCount
@@ -164,7 +164,7 @@ func lazyGridWidgetConstructor(
 			}))
 
 			if scrollbar {
-				layoutGridScrollbar(*gtx.ToGio(), &state.List, axis, rowCount, layoutnode.ToGioDimensions(dims))
+				layoutGridScrollbar(*gtx.ToGio(), &state.List.L, axis, rowCount, layoutnode.ToGioDimensions(dims))
 			}
 
 			return dims

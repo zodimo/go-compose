@@ -6,9 +6,7 @@ import (
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	node "github.com/zodimo/go-compose/internal/node"
 
-	"gioui.org/layout"
 	"gioui.org/op"
-	"gioui.org/op/clip"
 )
 
 type ClipNode struct {
@@ -43,10 +41,10 @@ func NewClipNode(element ClipElement) ChainNode {
 							}
 						}
 
-						stack := ClipShape(element.clipData.Shape, *gtx.ToGio(), clipDimensions)
+				stack := ClipShape(element.clipData.Shape, gtx, clipDimensions)
 
-						callOp.Add(gtx.ToGio().Ops)
-						stack.Pop()
+				callOp.Add(gtx.ToGio().Ops)
+				stack.Pop()
 
 						return dimensions
 					})
@@ -58,7 +56,7 @@ func NewClipNode(element ClipElement) ChainNode {
 	}
 }
 
-func ClipShape(s shape.Shape, gtx layout.Context, dimensions layoutnode.LayoutDimensions) clip.Stack {
-	outline := s.CreateOutline(dimensions.Size, shape.Metric{PxPerDp: gtx.Metric.PxPerDp, PxPerSp: gtx.Metric.PxPerSp})
-	return outline.Push(clipconvert.NewOps(gtx.Ops)).ToGio()
+func ClipShape(s shape.Shape, gtx layoutnode.LayoutContext, dimensions layoutnode.LayoutDimensions) clipconvert.Stack {
+	outline := s.CreateOutline(dimensions.Size, shape.Metric{PxPerDp: gtx.ToGio().Metric.PxPerDp, PxPerSp: gtx.ToGio().Metric.PxPerSp})
+	return clipconvert.NewStack(outline.Push(clipconvert.NewOps(gtx.ToGio().Ops)).ToGio())
 }

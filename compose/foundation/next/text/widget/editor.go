@@ -12,8 +12,6 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"gioui.org/f32"
-	"gioui.org/font"
 	"gioui.org/gesture"
 	"gioui.org/io/clipboard"
 	"gioui.org/io/event"
@@ -25,8 +23,11 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
-	"gioui.org/text"
-	gioUnit "gioui.org/unit"
+
+	"github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/internal/layoutnode"
+	tw "github.com/zodimo/go-compose/internal/textwidget"
 )
 
 // Editor implements an editable and scrollable text area.
@@ -35,10 +36,10 @@ type Editor struct {
 	// services.
 	text TextView
 	// Alignment controls the alignment of text within the editor.
-	Alignment text.Alignment
+	Alignment style.TextAlign
 	// LineHeight determines the gap between baselines of text. If zero, a sensible
 	// default will be used.
-	LineHeight gioUnit.Sp
+	LineHeight unit.TextUnit
 	// LineHeightScale is multiplied by LineHeight to determine the final gap
 	// between baselines. If zero, a sensible default will be used.
 	LineHeightScale float32
@@ -58,14 +59,14 @@ type Editor struct {
 	// are accessed by Len, Text, and SetText.
 	Mask rune
 	// InputHint specifies the type of on-screen keyboard to be displayed.
-	InputHint key.InputHint
+	InputHint tw.InputHint
 	// MaxLen limits the editor content to a maximum length. Zero means no limit.
 	MaxLen int
 	// Filter is the list of characters allowed in the Editor. If Filter is empty,
 	// all characters are allowed.
 	Filter string
 	// WrapPolicy configures how displayed text will be broken into lines.
-	WrapPolicy text.WrapPolicy
+	WrapPolicy style.LineBreak
 
 	buffer *editBuffer
 	// scratch is a byte buffer that is reused to efficiently read portions of text
@@ -80,12 +81,12 @@ type Editor struct {
 	}
 
 	dragging    bool
-	dragger     gesture.Drag
-	scroller    gesture.Scroll
+	dragger     tw.Dragger
+	scroller    tw.Scroller
 	scrollCaret bool
 	showCaret   bool
 
-	clicker gesture.Click
+	clicker tw.Clicker
 
 	// history contains undo history.
 	history []modification
@@ -613,13 +614,14 @@ func (e *Editor) initBuffer() {
 	e.text.DisableSpaceTrim = true
 }
 
-// Update the state of the editor in response to input events. Update consumes editor
-// input events until there are no remaining events or an editor event is generated.
-// To fully update the state of the editor, callers should call Update until it returns
-// false.
-func (e *Editor) Update(gtx layout.Context) (EditorEvent, bool) {
+// Update the state of the editor in response to input events.
+func (e *Editor) Update(gtx layoutnode.LayoutContext) (EditorEvent, bool) {
+	return e.update(*gtx.ToGio())
+}
+
+func (e *Editor) update(gtx layout.Context) (EditorEvent, bool) {
 	e.initBuffer()
-	event, ok := e.processEvents(gtx)
+	ev, ok := e.processEvents(gtx)
 	// Notify IME of selection if it changed.
 	newSel := e.ime.selection
 	start, end := e.text.Selection()
@@ -639,22 +641,22 @@ func (e *Editor) Update(gtx layout.Context) (EditorEvent, bool) {
 	}
 
 	e.updateSnippet(gtx, e.ime.start, e.ime.end)
-	return event, ok
+	return ev, ok
 }
 
 // Layout lays out the editor using the provided textMaterial as the paint material
 // for the text glyphs+caret and the selectMaterial as the paint material for the
 // selection rectangle.
-func (e *Editor) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, size gioUnit.Sp, textMaterial, selectMaterial op.CallOp) layout.Dimensions {
+func (e *Editor) Layout(gtx layoutnode.LayoutContext, lt *tw.Shaper, font tw.FontSpec, size unit.TextUnit, textMaterial, selectMaterial tw.DrawOp) layoutnode.LayoutDimensions {
+	giogtx := *gtx.ToGio()
 	for {
-		_, ok := e.Update(gtx)
+		_, ok := e.update(giogtx)
 		if !ok {
 			break
 		}
 	}
-
 	e.text.Layout(gtx, lt, font, size)
-	return e.layout(gtx, textMaterial, selectMaterial)
+	return layoutnode.FromGioDimensions(e.layout(giogtx, textMaterial.O, selectMaterial.O))
 }
 
 // updateSnippet queues a key.SnippetCmd if the snippet content or position
@@ -713,7 +715,7 @@ func (e *Editor) layout(gtx layout.Context, textMaterial, selectMaterial op.Call
 	defer clip.Rect(image.Rectangle{Max: visibleDims.Size}).Push(gtx.Ops).Pop()
 	pointer.CursorText.Add(gtx.Ops)
 	event.Op(gtx.Ops, e)
-	key.InputHintOp{Tag: e, Hint: e.InputHint}.Add(gtx.Ops)
+	key.InputHintOp{Tag: e, Hint: e.InputHint.ToGio()}.Add(gtx.Ops)
 
 	e.scroller.Add(gtx.Ops)
 
@@ -739,7 +741,7 @@ func (e *Editor) layout(gtx layout.Context, textMaterial, selectMaterial op.Call
 	if gtx.Enabled() {
 		e.paintCaret(gtx, textMaterial)
 	}
-	return visibleDims
+	return layoutnode.ToGioDimensions(visibleDims)
 }
 
 // paintSelection paints the contrasting background for selected text using the provided
@@ -749,14 +751,14 @@ func (e *Editor) paintSelection(gtx layout.Context, material op.CallOp) {
 	if !gtx.Focused(e) {
 		return
 	}
-	e.text.PaintSelection(gtx, material)
+	e.text.PaintSelection(layoutnode.NewLayoutContext(&gtx), tw.NewDrawOp(material))
 }
 
 // paintText paints the text glyphs using the provided material to set the fill of the
 // glyphs.
 func (e *Editor) paintText(gtx layout.Context, material op.CallOp) {
 	e.initBuffer()
-	e.text.PaintText(gtx, material)
+	e.text.PaintText(layoutnode.NewLayoutContext(&gtx), tw.NewDrawOp(material))
 }
 
 // paintCaret paints the text glyphs using the provided material to set the fill material
@@ -766,7 +768,7 @@ func (e *Editor) paintCaret(gtx layout.Context, material op.CallOp) {
 	if !e.showCaret || e.ReadOnly {
 		return
 	}
-	e.text.PaintCaret(gtx, material)
+	e.text.PaintCaret(layoutnode.NewLayoutContext(&gtx), tw.NewDrawOp(material))
 }
 
 // Len is the length of the editor contents, in runes.
@@ -800,7 +802,7 @@ func (e *Editor) CaretPos() (line, col int) {
 
 // CaretCoords returns the coordinates of the caret, relative to the
 // editor itself.
-func (e *Editor) CaretCoords() f32.Point {
+func (e *Editor) CaretCoords() tw.Point {
 	e.initBuffer()
 	return e.text.CaretCoords()
 }

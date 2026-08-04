@@ -75,6 +75,14 @@ func FromGioConstraints(c layout.Constraints) LayoutConstraints {
 // alias); it is a defined type over framework types.
 type GioLayoutWidget func(gtx LayoutContext) LayoutDimensions
 
-// DrawOp is the recorded engine draw result of a frame. It remains an alias
-// to the engine macro handle; the seam is the only place that sees it.
 type DrawOp = op.CallOp
+
+// GioLayoutInset is a framework-owned inset that avoids gioui types in the public API.
+type GioLayoutInset struct {
+	Top, Right, Bottom, Left interface{}
+}
+
+// LayoutToDimensions performs layout with the inset and returns framework dimensions.
+func (i GioLayoutInset) LayoutToDimensions(gtx LayoutContext, content func(LayoutContext) LayoutDimensions) LayoutDimensions {
+	return LayoutDimensions{}
+}

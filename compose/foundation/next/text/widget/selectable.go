@@ -6,7 +6,6 @@ import (
 	"math"
 	"strings"
 
-	"gioui.org/font"
 	"gioui.org/gesture"
 	"gioui.org/io/clipboard"
 	"gioui.org/io/event"
@@ -16,8 +15,11 @@ import (
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
-	"gioui.org/text"
-	gioUnit "gioui.org/unit"
+
+	"github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/internal/layoutnode"
+	tw "github.com/zodimo/go-compose/internal/textwidget"
 )
 
 // stringSource is an immutable textSource with a fixed string
@@ -53,17 +55,17 @@ func (s stringSource) ReplaceRunes(byteOffset, runeCount int64, str string) {
 // Selectable displays selectable text.
 type Selectable struct {
 	// Alignment controls the alignment of the text.
-	Alignment text.Alignment
+	Alignment style.TextAlign
 	// MaxLines is the maximum number of lines of text to be displayed.
 	MaxLines int
 	// Truncator is the symbol to use at the end of the final line of text
 	// if text was cut off. Defaults to "…" if left empty.
 	Truncator string
 	// WrapPolicy configures how displayed text will be broken into lines.
-	WrapPolicy text.WrapPolicy
+	WrapPolicy style.LineBreak
 	// LineHeight controls the distance between the baselines of lines of text.
 	// If zero, a sensible default will be used.
-	LineHeight gioUnit.Sp
+	LineHeight unit.TextUnit
 	// LineHeightScale applies a scaling factor to the LineHeight. If zero, a
 	// sensible default will be used.
 	LineHeightScale float32
@@ -76,9 +78,8 @@ type Selectable struct {
 	text      TextView
 	focused   bool
 	dragging  bool
-	dragger   gesture.Drag
-
-	clicker gesture.Click
+	dragger   tw.Dragger
+	clicker   tw.Clicker
 }
 
 // initialize must be called at the beginning of any exported method that
@@ -103,13 +104,13 @@ func (l *Selectable) paintSelection(gtx layout.Context, material op.CallOp) {
 	if !l.focused {
 		return
 	}
-	l.text.PaintSelection(gtx, material)
+	l.text.PaintSelection(layoutnode.NewLayoutContext(&gtx), tw.NewDrawOp(material))
 }
 
 // paintText paints the text glyphs with the provided material.
 func (l *Selectable) paintText(gtx layout.Context, material op.CallOp) {
 	l.initialize()
-	l.text.PaintText(gtx, material)
+	l.text.PaintText(layoutnode.NewLayoutContext(&gtx), tw.NewDrawOp(material))
 }
 
 // SelectionLen returns the length of the selection, in runes; it is
@@ -173,7 +174,12 @@ func (l *Selectable) Truncated() bool {
 
 // Update the state of the selectable in response to input events. It returns whether the
 // text selection changed during event processing.
-func (l *Selectable) Update(gtx layout.Context) bool {
+func (l *Selectable) Update(gtx layoutnode.LayoutContext) bool {
+	l.initialize()
+	return l.handleEvents(*gtx.ToGio())
+}
+
+func (l *Selectable) update(gtx layout.Context) bool {
 	l.initialize()
 	return l.handleEvents(gtx)
 }
@@ -181,8 +187,9 @@ func (l *Selectable) Update(gtx layout.Context) bool {
 // Layout clips to the dimensions of the selectable, updates the shaped text, configures input handling, and paints
 // the text and selection rectangles. The provided textMaterial and selectionMaterial ops are used to set the
 // paint material for the text and selection rectangles, respectively.
-func (l *Selectable) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, size gioUnit.Sp, textMaterial, selectionMaterial op.CallOp) layout.Dimensions {
-	l.Update(gtx)
+func (l *Selectable) Layout(gtx layoutnode.LayoutContext, lt *tw.Shaper, font tw.FontSpec, size unit.TextUnit, textMaterial, selectionMaterial tw.DrawOp) layoutnode.LayoutDimensions {
+	giogtx := *gtx.ToGio()
+	l.update(giogtx)
 	l.text.LineHeight = l.LineHeight
 	l.text.LineHeightScale = l.LineHeightScale
 	l.text.Alignment = l.Alignment
@@ -191,15 +198,15 @@ func (l *Selectable) Layout(gtx layout.Context, lt *text.Shaper, font font.Font,
 	l.text.WrapPolicy = l.WrapPolicy
 	l.text.Layout(gtx, lt, font, size)
 	dims := l.text.Dimensions()
-	defer clip.Rect(image.Rectangle{Max: dims.Size}).Push(gtx.Ops).Pop()
-	pointer.CursorText.Add(gtx.Ops)
-	event.Op(gtx.Ops, l)
+	defer clip.Rect(image.Rectangle{Max: dims.Size}).Push(giogtx.Ops).Pop()
+	pointer.CursorText.Add(giogtx.Ops)
+	event.Op(giogtx.Ops, l)
 
-	l.clicker.Add(gtx.Ops)
-	l.dragger.Add(gtx.Ops)
+	l.clicker.Add(giogtx.Ops)
+	l.dragger.Add(giogtx.Ops)
 
-	l.paintSelection(gtx, selectionMaterial)
-	l.paintText(gtx, textMaterial)
+	l.paintSelection(giogtx, selectionMaterial.O)
+	l.paintText(giogtx, textMaterial.O)
 	return dims
 }
 

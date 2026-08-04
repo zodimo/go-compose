@@ -149,7 +149,7 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 				LineHeightScale: 0, // TODO how should this be handled?
 			}.Layout(
 				*gtx.ToGio(),
-				constructorArgs.textShaper.Shaper,
+				constructorArgs.textShaper.Shaper().ToGio(),
 			textconvert.ToGioFont(
 				textStyle.FontFamily(),
 				textStyle.FontWeight(),

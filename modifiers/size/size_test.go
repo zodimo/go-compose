@@ -1,6 +1,7 @@
 package size
 
 import (
+	"github.com/zodimo/go-compose/internal/layoutnode"
 	"image"
 	"testing"
 
@@ -8,7 +9,7 @@ import (
 )
 
 func TestApplySizeDataToConstraints(t *testing.T) {
-	initial := layout.Constraints{
+	initialGio := layout.Constraints{
 		Min: image.Point{X: 100, Y: 100},
 		Max: image.Point{X: 200, Y: 200},
 	}
@@ -16,7 +17,7 @@ func TestApplySizeDataToConstraints(t *testing.T) {
 	tests := []struct {
 		name     string
 		data     SizeData
-		expected layout.Constraints
+		expected layoutnode.LayoutConstraints
 	}{
 		{
 			name: "WrapWidth",
@@ -24,7 +25,7 @@ func TestApplySizeDataToConstraints(t *testing.T) {
 				Width: NotSet, Height: NotSet, // Important initialization
 				WrapWidth: true,
 			},
-			expected: layout.Constraints{
+			expected: layoutnode.LayoutConstraints{
 				Min: image.Point{X: 0, Y: 100},
 				Max: image.Point{X: 200, Y: 200},
 			},
@@ -35,7 +36,7 @@ func TestApplySizeDataToConstraints(t *testing.T) {
 				Width: NotSet, Height: NotSet,
 				WrapHeight: true,
 			},
-			expected: layout.Constraints{
+			expected: layoutnode.LayoutConstraints{
 				Min: image.Point{X: 100, Y: 0},
 				Max: image.Point{X: 200, Y: 200},
 			},
@@ -46,7 +47,7 @@ func TestApplySizeDataToConstraints(t *testing.T) {
 				Width: NotSet, Height: NotSet,
 				WrapWidth: true, Unbounded: true,
 			},
-			expected: layout.Constraints{
+			expected: layoutnode.LayoutConstraints{
 				Min: image.Point{X: 0, Y: 100},
 				Max: image.Point{X: 1000000, Y: 200},
 			},
@@ -72,13 +73,14 @@ func TestApplySizeDataToConstraints(t *testing.T) {
 				Width: NotSet, Height: NotSet,
 				FillMaxWidth: true, WrapWidth: true,
 			},
-			expected: layout.Constraints{
+			expected: layoutnode.LayoutConstraints{
 				Min: image.Point{X: 0, Y: 100},
 				Max: image.Point{X: 200, Y: 200},
 			},
 		},
 	}
 
+	initial := layoutnode.FromGioConstraints(initialGio)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := ApplySizeDataToConstraints(initial, tt.data)

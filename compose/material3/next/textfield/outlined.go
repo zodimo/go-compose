@@ -8,9 +8,9 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/platform"
 	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/internal/textinput"
 	"github.com/zodimo/go-compose/pkg/sentinel"
 
-	"gioui.org/widget"
 	"gioui.org/widget/material"
 )
 
@@ -37,6 +37,7 @@ func Outlined(
 		textStyle := material3.LocalTextStyle.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 		textStyle = text.TextStyleResolveDefaults(textStyle, layoutDirection)
+		_ = textStyle // used for future text styling
 
 		key := c.GenerateID()
 		path := c.GetPath()
@@ -61,18 +62,9 @@ func Outlined(
 		// Custom Outlined Widget State
 		widgetStatePath := fmt.Sprintf("%d/%s/outlined_widget/s%v", key, path, opts.SingleLine)
 		editorVal := c.State(widgetStatePath, func() any {
-			// return &TextFieldWidget{
-			// 	Editor: &widget.Editor{
-			// 		SingleLine: opts.SingleLine,
-			// 		Submit:     opts.OnSubmit != nil,
-			// 	},
-			// }
-			return &widget.Editor{
-				SingleLine: opts.SingleLine,
-				Submit:     opts.OnSubmit != nil,
-			}
+			return textinput.NewEditor(opts.SingleLine, opts.OnSubmit != nil, 0)
 		})
-		outEditor := editorVal.Get().(*widget.Editor)
+		outEditor := editorVal.Get().(*textinput.Editor)
 
 		// State tracker for synchronization
 		trackerState := c.State(fmt.Sprintf("%d/%s/tracker/s%v", key, path, opts.SingleLine), func() any {
@@ -102,7 +94,7 @@ func Outlined(
 }
 
 type TextEditorConstructorArgs struct {
-	Editor          *widget.Editor
+	Editor          *textinput.Editor
 	Value           string
 	Opts            TextFieldOptions
 	Handler         *HandlerWrapper
@@ -117,14 +109,10 @@ func outlinedTextFieldWidgetConstructor(args TextEditorConstructorArgs) layoutno
 	}
 
 	// Update static properties
-	w.Editor.SingleLine = args.Opts.SingleLine
-	w.Editor.Submit = args.Opts.OnSubmit != nil
-	// outWidget.CharLimit = opts.CharLimit
-	// outWidget.Prefix = opts.Prefix
-	// outWidget.Suffix = opts.Suffix
+	w.Editor.SetSingleLine(args.Opts.SingleLine)
+	w.Editor.SetSubmit(args.Opts.OnSubmit != nil)
 	w.Helper = args.Opts.SupportingText
-	// outWidget.Colors = opts.Colors
-	w.SetError(args.Opts.IsError, args.Opts.SupportingText) // Use SupportingText as error message if Error is true
+	w.SetError(args.Opts.IsError, args.Opts.SupportingText)
 
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
@@ -138,17 +126,13 @@ func outlinedTextFieldWidgetConstructor(args TextEditorConstructorArgs) layoutno
 
 			// 2. Events & Layout
 			th := material.NewTheme() // Fallback TODO: real theme
+			thWrapper := textinput.NewTheme(th)
 
 			// Check for submit events
-			for {
-					ev, ok := w.Editor.Update(*gtx.ToGio())
-				if !ok {
-					break
-				}
-				if _, ok := ev.(widget.SubmitEvent); ok {
-					if args.OnSubmitHandler != nil && args.OnSubmitHandler.Func != nil {
-						args.OnSubmitHandler.Func()
-					}
+			hasSubmit := w.Editor.ProcessEvents(gtx)
+			if hasSubmit {
+				if args.OnSubmitHandler != nil && args.OnSubmitHandler.Func != nil {
+					args.OnSubmitHandler.Func()
 				}
 			}
 
@@ -162,7 +146,7 @@ func outlinedTextFieldWidgetConstructor(args TextEditorConstructorArgs) layoutno
 
 			w.Colors = args.Opts.Colors
 
-			return layoutnode.FromGioDimensions(w.Layout(*gtx.ToGio(), th, args.Opts.Label))
+			return w.Layout(gtx, thWrapper, args.Opts.Label)
 		}
 	})
 }

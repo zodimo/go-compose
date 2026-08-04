@@ -41,7 +41,7 @@ func (pe paddingElement) Create() Node {
 
 						if pe.padding.RtlAware {
 							// if RTL then we should swap left and right
-						if gtx.ToGio().Locale.Direction == RTL {
+						if TextDirection(gtx.ToGio().Locale.Direction) == RTL {
 								left = gioUnit.Dp(pe.padding.End)
 								right = gioUnit.Dp(pe.padding.Start)
 							}

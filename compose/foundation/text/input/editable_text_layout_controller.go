@@ -8,17 +8,15 @@ import (
 	"image/color"
 
 	"gioui.org/font"
-	"gioui.org/layout"
-	gioOp "gioui.org/op"
-	"gioui.org/op/paint"
-	gioText "gioui.org/text"
-	gioUnit "gioui.org/unit"
-	"gioui.org/widget"
+
 	"github.com/zodimo/go-compose/compose/ui/unit"
 
 	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/textconvert"
+	"github.com/zodimo/go-compose/internal/textinput"
+	tw "github.com/zodimo/go-compose/internal/textwidget"
 	"github.com/zodimo/go-compose/internal/unitconvert"
 )
 
@@ -33,7 +31,7 @@ import (
 // - Undo/redo
 type EditableTextLayoutController struct {
 	// Internal editor for input handling and rendering
-	editor widget.Editor
+	editor *textinput.Editor
 
 	// TextFieldState for Compose-style state management
 	state *TextFieldState
@@ -50,8 +48,8 @@ type EditableTextLayoutController struct {
 	softWrap   bool
 	singleLine bool
 	readOnly   bool
-	alignment  gioText.Alignment
-	wrapPolicy gioText.WrapPolicy
+	alignment  style.TextAlign
+	wrapPolicy style.LineBreak
 
 	// Input transformation to apply on changes
 	inputTransformation InputTransformation
@@ -65,18 +63,19 @@ type EditableTextLayoutController struct {
 
 // NewEditableTextLayoutController creates a new EditableTextLayoutController.
 func NewEditableTextLayoutController(state *TextFieldState) *EditableTextLayoutController {
+	editor := textinput.NewEditor(false, false, 0)
+	editor.SetText(state.Text())
 	c := &EditableTextLayoutController{
-		state:          state,
-		maxLines:       0, // 0 means unlimited
-		minLines:       1,
-		softWrap:       true,
-		singleLine:     false,
-		readOnly:       false,
-		lastStateText:  state.Text(),
-		selectionColor: color.NRGBA{R: 100, G: 149, B: 237, A: 128}, // Cornflower blue
+		editor:          editor,
+		state:           state,
+		maxLines:        0, // 0 means unlimited
+		minLines:        1,
+		softWrap:        true,
+		singleLine:      false,
+		readOnly:        false,
+		lastStateText:   state.Text(),
+		selectionColor:  color.NRGBA{R: 100, G: 149, B: 237, A: 128}, // Cornflower blue
 	}
-	// Initialize editor with current state text
-	c.editor.SetText(state.Text())
 	return c
 }
 
@@ -88,7 +87,7 @@ func (c *EditableTextLayoutController) SetTextStyle(textStyle *text.TextStyle) {
 // SetMaxLines sets the maximum number of lines.
 func (c *EditableTextLayoutController) SetMaxLines(maxLines int) {
 	c.maxLines = maxLines
-	c.editor.MaxLen = 0 // MaxLen is in runes, not lines - we don't limit this way
+	c.editor.SetMaxLen(0) // MaxLen is in runes, not lines - we don't limit this way
 }
 
 // SetMinLines sets the minimum number of lines.
@@ -104,35 +103,35 @@ func (c *EditableTextLayoutController) SetSoftWrap(softWrap bool) {
 // SetSingleLine enables or disables single line mode.
 func (c *EditableTextLayoutController) SetSingleLine(singleLine bool) {
 	c.singleLine = singleLine
-	c.editor.SingleLine = singleLine
+	c.editor.SetSingleLine(singleLine)
 }
 
 // SetReadOnly enables or disables read-only mode.
 func (c *EditableTextLayoutController) SetReadOnly(readOnly bool) {
 	c.readOnly = readOnly
-	c.editor.ReadOnly = readOnly
+	c.editor.SetReadOnly(readOnly)
 }
 
 // SetAlignment sets text alignment.
 func (c *EditableTextLayoutController) SetAlignment(alignment style.TextAlign) {
-	c.alignment = textconvert.TextAlignToGioTextAlignment(alignment)
-	c.editor.Alignment = c.alignment
+	c.alignment = alignment
+	c.editor.E.Alignment = textconvert.TextAlignToGioTextAlignment(alignment)
 }
 
 // SetWrapPolicy sets the line wrap policy.
-func (c *EditableTextLayoutController) SetWrapPolicy(wrapPolicy gioText.WrapPolicy) {
+func (c *EditableTextLayoutController) SetWrapPolicy(wrapPolicy style.LineBreak) {
 	c.wrapPolicy = wrapPolicy
-	c.editor.WrapPolicy = wrapPolicy
+	c.editor.E.WrapPolicy = textconvert.LineBreakToGioWrapPolicy(wrapPolicy)
 }
 
 // SetLineHeight sets the line height.
-func (c *EditableTextLayoutController) SetLineHeight(lineHeight gioUnit.Sp) {
-	c.editor.LineHeight = lineHeight
+func (c *EditableTextLayoutController) SetLineHeight(lineHeight unit.TextUnit) {
+	c.editor.E.LineHeight = unitconvert.TextUnitToGioSpUnsafe(lineHeight)
 }
 
 // SetLineHeightScale sets the line height scale.
 func (c *EditableTextLayoutController) SetLineHeightScale(scale float32) {
-	c.editor.LineHeightScale = scale
+	c.editor.SetLineHeightScale(scale)
 }
 
 // SetInputTransformation sets the input transformation.
@@ -157,8 +156,8 @@ func (c *EditableTextLayoutController) ConfigureFromTextStyle(ts *text.TextStyle
 	}
 	c.textStyle = ts
 	c.SetAlignment(ts.TextAlign())
-	c.SetLineHeight(unitconvert.TextUnitToGioSpUnsafe(ts.LineHeight()))
-	c.SetWrapPolicy(textconvert.LineBreakToGioWrapPolicy(ts.LineBreak()))
+	c.SetLineHeight(ts.LineHeight())
+	c.SetWrapPolicy(ts.LineBreak())
 }
 
 // Update processes input events and syncs state.
@@ -167,66 +166,43 @@ func (c *EditableTextLayoutController) ConfigureFromTextStyle(ts *text.TextStyle
 // This implements the controlled component pattern from Jetpack Compose:
 // 1. Process editor events and call onValueChange with new text
 // 2. Sync editor FROM state - if state wasn't updated by callback, editor reverts
-func (c *EditableTextLayoutController) Update(gtx layout.Context) {
+func (c *EditableTextLayoutController) Update(gtx layoutnode.LayoutContext) {
 	// Process editor events and notify via callback
-	for {
-		event, ok := c.editor.Update(gtx)
-		if !ok {
-			break
+	c.editor.Update(gtx, func() {
+		newText := c.editor.Text()
+		// Apply input transformation if present
+		if c.inputTransformation != nil {
+			buffer := NewTextFieldBuffer(NewTextFieldCharSequence(newText, c.state.Selection()))
+			c.inputTransformation.TransformInput(buffer)
+			newText = buffer.String()
 		}
-		if _, isChange := event.(widget.ChangeEvent); isChange {
-			newText := c.editor.Text()
-			// Apply input transformation if present
-			if c.inputTransformation != nil {
-				buffer := NewTextFieldBuffer(NewTextFieldCharSequence(newText, c.state.Selection()))
-				c.inputTransformation.TransformInput(buffer)
-				newText = buffer.String()
-			}
-			// Call the change callback - this is where the user updates state
-			if c.onValueChange != nil {
-				c.onValueChange(newText)
-			}
+		// Call the change callback - this is where the user updates state
+		if c.onValueChange != nil {
+			c.onValueChange(newText)
 		}
-	}
+	})
 
 	// Controlled component pattern: Always sync Editor FROM TextFieldState
 	// This ensures if the callback didn't update state, the editor reverts
-	stateText := c.state.Text()
-	if c.editor.Text() != stateText {
-		// Save cursor position before SetText (which resets it)
-		caretStart, caretEnd := c.editor.Selection()
-
-		c.editor.SetText(stateText)
-
-		// Restore cursor position, clamped to valid range
-		textLen := c.editor.Len()
-		if caretStart > textLen {
-			caretStart = textLen
-		}
-		if caretEnd > textLen {
-			caretEnd = textLen
-		}
-		c.editor.SetCaret(caretStart, caretEnd)
-	}
+	c.editor.UpdateState(c.state.Text())
 }
 
 // Layout performs text layout and returns dimensions.
-func (c *EditableTextLayoutController) Layout(gtx layout.Context, shaper *gioText.Shaper, textMaterial, selectMaterial gioOp.CallOp) layout.Dimensions {
-	gioFont := c.GetFont()
+func (c *EditableTextLayoutController) Layout(gtx layoutnode.LayoutContext, shaper *tw.Shaper, textMaterial, selectMaterial tw.DrawOp) layoutnode.LayoutDimensions {
+	fontSpec := c.getFontSpec()
 	size := c.GetFontSize()
-	return c.editor.Layout(gtx, shaper, gioFont, unitconvert.TextUnitToGioSpUnsafe(size), textMaterial, selectMaterial)
+	dims := c.editor.E.Layout(*gtx.ToGio(), shaper.S, tw.ToGioFont(fontSpec), unitconvert.TextUnitToGioSpUnsafe(size), textMaterial.O, selectMaterial.O)
+	return layoutnode.FromGioDimensions(dims)
 }
 
 // LayoutAndPaint performs update, layout and paints the text in one call.
 // This is the main entry point for rendering editable text.
-func (c *EditableTextLayoutController) LayoutAndPaint(gtx layout.Context, shaper *gioText.Shaper, textMaterial gioOp.CallOp) layout.Dimensions {
+func (c *EditableTextLayoutController) LayoutAndPaint(gtx layoutnode.LayoutContext, shaper *tw.Shaper, textMaterial tw.DrawOp) layoutnode.LayoutDimensions {
 	// Update state first
 	c.Update(gtx)
 
 	// Create selection material
-	selectionColorMacro := gioOp.Record(gtx.Ops)
-	paint.ColorOp{Color: c.selectionColor}.Add(gtx.Ops)
-	selectMaterial := selectionColorMacro.Stop()
+	selectMaterial := textinput.NewColorDrawOp(gtx, c.selectionColor)
 
 	return c.Layout(gtx, shaper, textMaterial, selectMaterial)
 }
@@ -276,9 +252,9 @@ func (c *EditableTextLayoutController) Delete(graphemeClusters int) int {
 	return c.editor.Delete(graphemeClusters)
 }
 
-// Editor returns the underlying widget.Editor for advanced use cases.
-func (c *EditableTextLayoutController) Editor() *widget.Editor {
-	return &c.editor
+// Editor returns the internal editor wrapper for advanced use cases.
+func (c *EditableTextLayoutController) Editor() *textinput.Editor {
+	return c.editor
 }
 
 // State returns the underlying TextFieldState.
@@ -286,8 +262,20 @@ func (c *EditableTextLayoutController) State() *TextFieldState {
 	return c.state
 }
 
-// GetFont returns a Gio font from the current text style.
-func (c *EditableTextLayoutController) GetFont() font.Font {
+// getFontSpec returns a FontSpec from the current text style.
+func (c *EditableTextLayoutController) getFontSpec() tw.FontSpec {
+	if c.textStyle == nil {
+		return tw.DefaultFontSpec()
+	}
+	return textinput.ToFontSpec(
+		c.textStyle.FontFamily(),
+		c.textStyle.FontWeight(),
+		c.textStyle.FontStyle(),
+	)
+}
+
+// getFont returns a Gio font from the current text style (for internal use).
+func (c *EditableTextLayoutController) getFont() font.Font {
 	if c.textStyle == nil {
 		return font.Font{}
 	}
@@ -297,6 +285,8 @@ func (c *EditableTextLayoutController) GetFont() font.Font {
 		c.textStyle.FontStyle(),
 	)
 }
+
+// GetFontSize returns the font size.
 func (c *EditableTextLayoutController) GetFontSize() unit.TextUnit {
 	if c.textStyle == nil {
 		return unit.Sp(14) // Default font size

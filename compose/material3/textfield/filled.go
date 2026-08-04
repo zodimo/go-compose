@@ -6,22 +6,20 @@ import (
 	"image/color"
 	"time"
 
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/internal/textinput"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 	"github.com/zodimo/go-compose/pkg/sentinel"
 
-	"gioui.org/gesture"
-	"gioui.org/io/input"
-	"gioui.org/io/key"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	gioUnit "gioui.org/unit"
-	"gioui.org/widget"
 	gioMaterial "gioui.org/widget/material"
 	"github.com/zodimo/go-compose/compose/material"
 )
@@ -71,11 +69,7 @@ func Filled(
 		widgetStatePath := fmt.Sprintf("%d/%s/filled_widget/s%v", key, path, opts.SingleLine)
 		widgetVal := c.State(widgetStatePath, func() any {
 			return &FilledTextFieldWidget{
-				Editor: widget.Editor{
-					SingleLine: opts.SingleLine,
-					Submit:     opts.OnSubmit != nil,
-					Mask:       opts.Mask,
-				},
+				Editor: textinput.NewEditor(opts.SingleLine, opts.OnSubmit != nil, opts.Mask),
 			}
 		})
 		w := widgetVal.Get().(*FilledTextFieldWidget)
@@ -87,11 +81,11 @@ func Filled(
 		tracker := trackerState.Get().(*TextFieldStateTracker)
 
 		// Update properties
-		w.Editor.SingleLine = opts.SingleLine
-		w.Editor.Submit = opts.OnSubmit != nil
-		w.Editor.Mask = opts.Mask
+		w.Editor.SetSingleLine(opts.SingleLine)
+		w.Editor.SetSubmit(opts.OnSubmit != nil)
+		w.Editor.SetMask(opts.Mask)
 		w.Helper = opts.SupportingText
-		w.ReadOnly = opts.ReadOnly
+		w.Editor.SetReadOnly(opts.ReadOnly)
 		w.SetError(opts.IsError, opts.SupportingText)
 
 		c.StartBlock(Material3FilledTextFieldNodeID)
@@ -108,8 +102,9 @@ func Filled(
 		}
 
 		gioTh := material.GioThemeForEngine(c).(*gioMaterial.Theme)
+		th := textinput.NewTheme(gioTh)
 
-		c.SetWidgetConstructor(filledTextFieldWidgetConstructor(w, value, opts, handlerWrapper, onSubmitWrapper, tracker, gioTh))
+		c.SetWidgetConstructor(filledTextFieldWidgetConstructor(w, value, opts, handlerWrapper, onSubmitWrapper, tracker, th))
 
 		return c.EndBlock()
 	}
@@ -122,7 +117,7 @@ func filledTextFieldWidgetConstructor(
 	handler *HandlerWrapper,
 	onSubmitHandler *OnSubmitWrapper,
 	tracker *TextFieldStateTracker,
-	theme *gioMaterial.Theme,
+	theme *textinput.Theme,
 ) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
@@ -138,8 +133,8 @@ func filledTextFieldWidgetConstructor(
 			if opts.LeadingIcon != nil && childIdx < len(children) {
 				child := children[childIdx]
 				if coord, ok := child.(layoutnode.NodeCoordinator); ok {
-					w.Prefix = func(gtx layout.Context) layout.Dimensions {
-						return layoutnode.ToGioDimensions(coord.Layout(layoutnode.NewLayoutContext(&gtx)))
+					w.Prefix = func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+						return coord.Layout(gtx)
 					}
 				}
 				childIdx++
@@ -149,8 +144,8 @@ func filledTextFieldWidgetConstructor(
 			if opts.TrailingIcon != nil && childIdx < len(children) {
 				child := children[childIdx]
 				if coord, ok := child.(layoutnode.NodeCoordinator); ok {
-					w.Suffix = func(gtx layout.Context) layout.Dimensions {
-						return layoutnode.ToGioDimensions(coord.Layout(layoutnode.NewLayoutContext(&gtx)))
+					w.Suffix = func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+						return coord.Layout(gtx)
 					}
 				}
 				childIdx++
@@ -178,24 +173,15 @@ func filledTextFieldWidgetConstructor(
 				tracker.LastValue = value
 			}
 
-			// theme is already *gioMaterial.Theme from GioThemeForEngine
-			for {
-				ev, ok := w.Editor.Update(*gtx.ToGio())
-				if !ok {
-					break
-				}
-				if _, ok := ev.(widget.SubmitEvent); ok {
-					if onSubmitHandler != nil && onSubmitHandler.Func != nil {
-						onSubmitHandler.Func()
-					}
+			// theme is already wrapped *textinput.Theme
+			hasSubmit := w.Editor.ProcessEvents(gtx)
+			if hasSubmit {
+				if onSubmitHandler != nil && onSubmitHandler.Func != nil {
+					onSubmitHandler.Func()
 				}
 			}
 
 			// 3. Change Detection
-			// Following Jetpack Compose semantics: the text field's internal state
-			// should only reflect what the external value shows.
-			// Fire the callback if provided, then always revert to external value.
-			// If the callback updates state, tracker will sync the new value next frame.
 			currentText := w.Editor.Text()
 			if currentText != value {
 				// Save intended caret position before reverting
@@ -208,8 +194,7 @@ func filledTextFieldWidgetConstructor(
 				if handler.Func != nil {
 					handler.Func(currentText)
 				}
-				// Always revert to external value - proper state updates will
-				// sync back through the tracker when 'value' changes
+				// Always revert to external value
 				w.Editor.SetText(value)
 				// Clamp caret for immediate display
 				maxPos := len(value)
@@ -225,20 +210,20 @@ func filledTextFieldWidgetConstructor(
 			w.Colors = opts.Colors
 
 			// 4. Layout
-			return layoutnode.FromGioDimensions(w.Layout(*gtx.ToGio(), theme, opts.Label))
+			return w.Layout(gtx, theme, opts.Label)
 		}
 	})
 }
 
 // FilledTextFieldWidget is the local implementation of the Filled text field.
 type FilledTextFieldWidget struct {
-	widget.Editor
-	click gesture.Click
+	Editor *textinput.Editor
+	click  textinput.Click
 
 	Helper string
 	Colors TextFieldColors
-	Prefix layout.Widget
-	Suffix layout.Widget
+	Prefix layoutnode.GioLayoutWidget
+	Suffix layoutnode.GioLayoutWidget
 
 	state
 	label  label
@@ -246,24 +231,28 @@ type FilledTextFieldWidget struct {
 	helper helper
 	anim   *Progress
 
-	editorInset layout.Inset
+	editorInset struct {
+		Top, Right, Bottom, Left unit.Dp
+	}
 
 	errored bool
 }
 
-func (in *FilledTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Theme, hint string) layout.Dimensions {
+func (in *FilledTextFieldWidget) Layout(gtx layoutnode.LayoutContext, th *textinput.Theme, hint string) layoutnode.LayoutDimensions {
 	in.update(gtx, th, hint)
 
+	g := *gtx.ToGio()
+
 	// Helper function to draw box
-	drawBox := func(gtx layout.Context, size image.Point, color color.NRGBA) {
-		defer clip.Rect{Max: size}.Push(gtx.Ops).Pop()
-		paint.Fill(gtx.Ops, color)
+	drawBox := func(g layout.Context, size image.Point, color color.NRGBA) {
+		defer clip.Rect{Max: size}.Push(g.Ops).Pop()
+		paint.Fill(g.Ops, color)
 	}
 
 	dims := layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(
-		gtx,
+		g,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Stack{}.Layout(
 				gtx,
@@ -305,19 +294,25 @@ func (in *FilledTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Them
 								gtx,
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									if in.Prefix != nil {
-										return in.Prefix(gtx)
+										return layoutnode.ToGioDimensions(in.Prefix(layoutnode.NewLayoutContext(&gtx)))
 									}
 									return layout.Dimensions{}
 								}),
 								layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-									return in.editorInset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
+									inset := layout.Inset{
+										Top:    gioUnit.Dp(in.editorInset.Top),
+										Right:  gioUnit.Dp(in.editorInset.Right),
+										Bottom: gioUnit.Dp(in.editorInset.Bottom),
+										Left:   gioUnit.Dp(in.editorInset.Left),
+									}
+									return inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 										textColor := graphics.ColorToNRGBA(in.Colors.TextColor)
 										if !gtx.Enabled() {
 											textColor = graphics.ColorToNRGBA(in.Colors.DisabledTextColor)
 										}
 										selectionColor := graphics.ColorToNRGBA(in.Colors.SelectionColor)
 
-										ed := gioMaterial.Editor(th, &in.Editor, "")
+										ed := gioMaterial.Editor(th.T, &in.Editor.E, "")
 										ed.Color = textColor
 										ed.SelectionColor = selectionColor
 										return ed.Layout(gtx)
@@ -325,7 +320,7 @@ func (in *FilledTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Them
 								}),
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									if in.Suffix != nil {
-										return in.Suffix(gtx)
+										return layoutnode.ToGioDimensions(in.Suffix(layoutnode.NewLayoutContext(&gtx)))
 									}
 									return layout.Dimensions{}
 								}),
@@ -352,7 +347,7 @@ func (in *FilledTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Them
 				Top:  gioUnit.Dp(4),
 				Left: gioUnit.Dp(16),
 			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				helper := gioMaterial.Label(th, gioUnit.Sp(12), in.helper.Text)
+				helper := gioMaterial.Label(th.T, gioUnit.Sp(12), in.helper.Text)
 				helper.Color = in.helper.Color
 				return helper.Layout(gtx)
 			})
@@ -360,9 +355,9 @@ func (in *FilledTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Them
 	)
 
 	// Layout Label on top
-	macro := op.Record(gtx.Ops)
-	in.label.Inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		l := gioMaterial.Label(th, in.label.TextSize, hint)
+	macro := op.Record(g.Ops)
+	in.label.Inset.Layout(g, func(gtx layout.Context) layout.Dimensions {
+		l := gioMaterial.Label(th.T, in.label.TextSize, hint)
 		l.Color = in.border.Color
 		if in.IsErrored() {
 			l.Color = graphics.ColorToNRGBA(in.Colors.ErrorLabelColor)
@@ -374,23 +369,14 @@ func (in *FilledTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Them
 
 		return l.Layout(gtx)
 	})
-	op.Defer(gtx.Ops, macro.Stop())
+	op.Defer(g.Ops, macro.Stop())
 
-	return dims
+	return layoutnode.LayoutDimensions{Size: dims.Size, Baseline: dims.Baseline}
 }
 
-func (in *FilledTextFieldWidget) update(gtx layout.Context, th *gioMaterial.Theme, hint string) {
-	disabled := gtx.Source == (input.Source{})
-	for {
-		ev, ok := in.click.Update(gtx.Source)
-		if !ok {
-			break
-		}
-		switch ev.Kind {
-		case gesture.KindPress:
-			gtx.Execute(key.FocusCmd{Tag: &in.Editor})
-		}
-	}
+func (in *FilledTextFieldWidget) update(gtx layoutnode.LayoutContext, th *textinput.Theme, hint string) {
+	disabled := textinput.Disabled(gtx)
+	in.click.ProcessEvents(gtx, in.Editor.FocusTag())
 
 	in.state = inactive
 	if in.click.Hovered() && !disabled {
@@ -399,7 +385,7 @@ func (in *FilledTextFieldWidget) update(gtx layout.Context, th *gioMaterial.Them
 	if in.Editor.Len() > 0 {
 		in.state = activated
 	}
-	if gtx.Source.Focused(&in.Editor) && !disabled {
+	if in.Editor.SourceFocused(gtx.ToGio().Source) && !disabled {
 		in.state = focused
 	}
 
@@ -408,14 +394,14 @@ func (in *FilledTextFieldWidget) update(gtx layout.Context, th *gioMaterial.Them
 	}
 	// Animation logic
 	if in.state == activated || in.Editor.Len() > 0 || (in.state == focused && in.Editor.Len() == 0) {
-		in.anim.Start(gtx.Now, Forward, time.Millisecond*100)
+		in.anim.Start(gtx.ToGio().Now, Forward, time.Millisecond*100)
 	} else if in.state == inactive && in.Editor.Len() == 0 {
-		in.anim.Start(gtx.Now, Reverse, time.Millisecond*100)
+		in.anim.Start(gtx.ToGio().Now, Reverse, time.Millisecond*100)
 	}
 	if in.anim.Started() {
-		gtx.Execute(op.InvalidateCmd{})
+		gtx.ToGio().Execute(op.InvalidateCmd{})
 	}
-	in.anim.Update(gtx.Now)
+	in.anim.Update(gtx.ToGio().Now)
 
 	in.border.Color = graphics.ColorToNRGBA(in.Colors.UnfocusedIndicatorColor)
 	in.helper.Color = graphics.ColorToNRGBA(in.Colors.SupportingTextColor)
@@ -428,25 +414,28 @@ func (in *FilledTextFieldWidget) update(gtx layout.Context, th *gioMaterial.Them
 		in.helper.Color = graphics.ColorToNRGBA(in.Colors.ErrorSupportingTextColor)
 	}
 
-	textNormal := th.TextSize
-	textSmall := th.TextSize * 0.75
+	g := *gtx.ToGio()
+	textNormal := th.T.TextSize
+	textSmall := th.T.TextSize * 0.75
 	in.label.TextSize = gioUnit.Sp(lerp.Between32(float32(textNormal), float32(textSmall), in.anim.Progress()))
 
-	startTop := float32(gtx.Dp(16))
-	endTop := float32(gtx.Dp(8))
+	startTop := float32(g.Dp(16))
+	endTop := float32(g.Dp(8))
 	in.label.Inset = layout.Inset{
 		Top:  gioUnit.Dp(lerp.Between32(startTop, endTop, in.anim.Progress())),
 		Left: gioUnit.Dp(16),
 	}
 
-	startEditorTop := float32(gtx.Dp(16))
-	endEditorTop := float32(gtx.Dp(24))
-	startEditorBottom := float32(gtx.Dp(16))
-	endEditorBottom := float32(gtx.Dp(8))
+	startEditorTop := float32(g.Dp(16))
+	endEditorTop := float32(g.Dp(24))
+	startEditorBottom := float32(g.Dp(16))
+	endEditorBottom := float32(g.Dp(8))
 
-	in.editorInset = layout.Inset{
-		Top:    gioUnit.Dp(lerp.Between32(startEditorTop, endEditorTop, in.anim.Progress())),
-		Bottom: gioUnit.Dp(lerp.Between32(startEditorBottom, endEditorBottom, in.anim.Progress())),
+	in.editorInset = struct {
+		Top, Right, Bottom, Left unit.Dp
+	}{
+		Top:    unit.Dp(lerp.Between32(startEditorTop, endEditorTop, in.anim.Progress())),
+		Bottom: unit.Dp(lerp.Between32(startEditorBottom, endEditorBottom, in.anim.Progress())),
 	}
 }
 

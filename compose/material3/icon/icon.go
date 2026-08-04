@@ -214,7 +214,7 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIc
 			g2 := g
 			g2.Ops = entryOps
 
-			dims := iconWidget(g2, nrgba)
+			dims := iconWidget(layoutnode.NewLayoutContext(&g2), nrgba)
 			call := macro.Stop()
 
 			// Store in cache
@@ -233,7 +233,7 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIc
 				key:  key,
 				ops:  entryOps,
 				call: call,
-				dims: dims,
+				dims: layoutnode.ToGioDimensions(dims),
 			}
 			elem := cache.list.PushFront(newEntry)
 			cache.cache[key] = elem
@@ -242,7 +242,7 @@ func iconWidgetConstructor(options IconOptions, iconByte []byte, cache *GlobalIc
 			// Add to current frame
 			call.Add(gtx.ToGio().Ops)
 
-			return layoutnode.FromGioDimensions(dims)
+			return dims
 		}
 	})
 }
@@ -252,7 +252,7 @@ func requireIconWidget(data []byte) IconWidget {
 	if err != nil {
 		panic(err)
 	}
-	return func(gtx layout.Context, foreground color.NRGBA) layout.Dimensions {
-		return iconWidget.Layout(gtx, foreground)
+	return func(gtx layoutnode.LayoutContext, foreground color.NRGBA) layoutnode.LayoutDimensions {
+		return layoutnode.FromGioDimensions(iconWidget.Layout(*gtx.ToGio(), foreground))
 	}
 }

@@ -133,12 +133,12 @@ func sliderWidgetConstructor(args sliderConstructorArgs) layoutnode.LayoutNodeWi
 				}
 			}
 			// Layout Constants
-			trackHeight := gtx.ToGio().Dp(TrackHeight)
+			trackHeight := gtx.ToGio().Dp(gioUnit.Dp(TrackHeight))
 			tSize := ThumbSize
 			if wFloat.Dragging() {
 				tSize = ActiveThumbSize
 			}
-			thumbSize := gtx.ToGio().Dp(tSize)
+			thumbSize := gtx.ToGio().Dp(gioUnit.Dp(tSize))
 
 			// Main Axis: Max width, fixed height (thumb size or min touch size)
 			// Cross Axis: Thumb size
@@ -204,7 +204,7 @@ func sliderWidgetConstructor(args sliderConstructorArgs) layoutnode.LayoutNodeWi
 
 				inactiveTickColor := graphics.ColorToNRGBA(args.Colors.Tick(args.Enabled, false))
 
-				tickSizePx := gtx.ToGio().Dp(TickSize)
+				tickSizePx := gtx.ToGio().Dp(gioUnit.Dp(TickSize))
 				stepSizePx := float32(trackWidth) / float32(args.Steps+1)
 
 				for i := 0; i <= args.Steps+1; i++ {

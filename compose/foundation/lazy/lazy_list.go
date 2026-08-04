@@ -84,11 +84,11 @@ func lazyList(axis layout.Axis, content func(LazyListScope), options ...LazyList
 func lazyListWidgetConstructor(state *LazyListState, axis layout.Axis, stickyIndices []int, scrollbar bool) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 		return func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
-			state.List.List.Axis = axis
+			state.List.L.Axis = axis
 
 			itemSizes := make(map[int]int)
 
-			dims := layoutnode.FromGioDimensions(state.List.List.Layout(*gtx.ToGio(), len(node.Children()), func(innerGtx layout.Context, i int) layout.Dimensions {
+			dims := layoutnode.FromGioDimensions(state.List.L.Layout(*gtx.ToGio(), len(node.Children()), func(innerGtx layout.Context, i int) layout.Dimensions {
 				if i < 0 || i >= len(node.Children()) {
 					return layout.Dimensions{}
 				}
@@ -104,12 +104,12 @@ func lazyListWidgetConstructor(state *LazyListState, axis layout.Axis, stickyInd
 			}))
 
 			if scrollbar {
-				layoutScrollbar(*gtx.ToGio(), &state.List, axis, len(node.Children()), layoutnode.ToGioDimensions(dims))
+				layoutScrollbar(*gtx.ToGio(), &state.List.L, axis, len(node.Children()), layoutnode.ToGioDimensions(dims))
 			}
 
 			// Handle Sticky Header
 			if len(stickyIndices) > 0 {
-				first := state.List.List.Position.First
+				first := state.List.L.Position.First
 
 				// Find the active sticky header (last one <= first)
 				stickyIdx := -1
@@ -175,7 +175,7 @@ func lazyListWidgetConstructor(state *LazyListState, axis layout.Axis, stickyInd
 					if nextStickyIdx != -1 {
 						// Calculate position of nextStickyIdx relative to top
 						// Start from First/Offset
-						pos := state.List.List.Position.Offset
+						pos := state.List.L.Position.Offset
 						found := false
 
 						// We need to traverse from First to nextStickyIdx-1

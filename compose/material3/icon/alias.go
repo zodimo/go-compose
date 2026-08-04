@@ -3,16 +3,15 @@ package icon
 import (
 	"image/color"
 
+	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/pkg/api"
-
-	"gioui.org/layout"
 )
 
 type Composable = api.Composable
 type Composer = api.Composer
 
-type layoutContext = layout.Context
-type layoutDimensions = layout.Dimensions
+type layoutContext = layoutnode.LayoutContext
+type layoutDimensions = layoutnode.LayoutDimensions
 type IconWidget = func(gtx layoutContext, foreground color.NRGBA) layoutDimensions
 
 // IconSource represents a source for icon data.

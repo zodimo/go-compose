@@ -6,7 +6,6 @@ import (
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	node "github.com/zodimo/go-compose/internal/node"
 
-	"gioui.org/layout"
 	"gioui.org/op"
 )
 
@@ -37,13 +36,13 @@ func NewSizeNode(sizeData SizeData) ChainNode {
 					return layoutnode.NewLayoutWidget(
 						func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
 							// 1. Calculate constraints to pass to child.
-						childConstraints := ApplySizeDataToConstraints(gtx.ToGio().Constraints, sizeData)
+						childConstraints := ApplySizeDataToConstraints(layoutnode.FromGioConstraints(gtx.ToGio().Constraints), sizeData)
 
 							// 2. Measure child.
 						macro := op.Record(gtx.ToGio().Ops)
 						// Create a context with modified constraints for the child
 						g := *gtx.ToGio()
-						g.Constraints = childConstraints
+						g.Constraints = layoutnode.ToGioConstraints(childConstraints)
 						childDims := widget.Layout(layoutnode.NewLayoutContext(&g))
 						call := macro.Stop()
 							// 3. Determine my size.
@@ -103,11 +102,7 @@ func NewSizeNode(sizeData SizeData) ChainNode {
 	}
 }
 
-func GetSizeConstraintsAndSizeData(constraints layout.Constraints, sizeData SizeData) image.Point {
-	// This function seems to be legacy or used for strict size calculation.
-	// The logic is now embedded in NewSizeNode.
-	// We keep it for backward compatibility if used elsewhere,
-	// but purely based on constraints (ignoring child).
+func GetSizeConstraintsAndSizeData(constraints layoutnode.LayoutConstraints, sizeData SizeData) image.Point {
 	size := image.Point{
 		X: constraints.Min.X,
 		Y: constraints.Min.Y,
@@ -143,9 +138,7 @@ func GetSizeConstraintsAndSizeData(constraints layout.Constraints, sizeData Size
 
 }
 
-func ApplySizeDataToConstraints(constraints layout.Constraints, sizeData SizeData) layout.Constraints {
-
-	// Start with incoming constraints
+func ApplySizeDataToConstraints(constraints layoutnode.LayoutConstraints, sizeData SizeData) layoutnode.LayoutConstraints {
 	c := constraints
 
 	// Apply Fixed Width/Height Logic to Min/Max

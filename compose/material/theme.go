@@ -38,7 +38,7 @@ type themeImpl struct {
 func (t themeImpl) GioMaterialTheme() *BasicTheme {
 	gioTheme := localGioMaterialTheme.Current(t.composer)
 	shaper := compose.LocalTextShaper.Current(t.composer)
-	gioTheme.Shaper = shaper.Shaper
+	 gioTheme.Shaper = shaper.Shaper().ToGio()
 	return &BasicTheme{
 		Bg:         gioTheme.Bg,
 		Fg:         gioTheme.Fg,

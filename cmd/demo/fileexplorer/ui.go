@@ -9,7 +9,6 @@ import (
 	"image/png"
 	"io"
 
-	"gioui.org/x/explorer"
 	fImage "github.com/zodimo/go-compose/compose/foundation/image"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
@@ -21,6 +20,7 @@ import (
 
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	uilayout "github.com/zodimo/go-compose/compose/ui/layout"
+	"github.com/zodimo/go-compose/internal/explorerwrap"
 	"github.com/zodimo/go-compose/modifiers/border"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/pkg/api"
@@ -80,9 +80,9 @@ func UI() api.Composable {
 			isSubscribedSaveResult.Set(true)
 		}
 
-		onOpenFile, launchedOpenFile := fileexplorer.RememberExplorer(c, func(expl *explorer.Explorer) {
+		onOpenFile, launchedOpenFile := fileexplorer.RememberExplorer(c, func(expl *explorerwrap.Explorer) {
 
-			file, err := expl.ChooseFile("png", "jpeg", "jpg")
+			file, err := expl.ToGio().ChooseFile("png", "jpeg", "jpg")
 			if err != nil {
 				err = fmt.Errorf("failed opening image file: %w", err)
 				maybeImageResult.Set(maybe.Some(ImageResult{Error: err}))
@@ -120,7 +120,7 @@ func UI() api.Composable {
 			}))
 		})
 
-		onSaveFile, launchedSaveFile := fileexplorer.RememberExplorer(c, func(expl *explorer.Explorer) {
+		onSaveFile, launchedSaveFile := fileexplorer.RememberExplorer(c, func(expl *explorerwrap.Explorer) {
 
 			if maybeImageResult.Get().IsNone() {
 				fmt.Println("no image loaded, cannot save")
@@ -139,7 +139,7 @@ func UI() api.Composable {
 				case "png":
 					extension = "png"
 				}
-				file, err := expl.CreateFile("file." + extension)
+			file, err := expl.ToGio().CreateFile("file." + extension)
 				if err != nil {
 					maybeSaveResult.Set(maybe.Some(fmt.Errorf("failed exporting image file: %w", err)))
 					return

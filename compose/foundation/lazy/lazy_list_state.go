@@ -4,20 +4,23 @@ import (
 	"fmt"
 
 	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/internal/widgetstate"
 
 	"gioui.org/layout"
 	"gioui.org/widget"
 )
 
 type LazyListState struct {
-	List widget.List
+	List *widgetstate.List
 }
 
 func NewLazyListState() *LazyListState {
 	return &LazyListState{
-		List: widget.List{
-			List: layout.List{
-				Axis: layout.Vertical,
+		List: &widgetstate.List{
+			L: widget.List{
+				List: layout.List{
+					Axis: layout.Vertical,
+				},
 			},
 		},
 	}

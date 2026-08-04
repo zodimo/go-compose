@@ -6,13 +6,14 @@ import (
 
 	"gioui.org/app"
 	"gioui.org/x/explorer"
-	"github.com/zodimo/go-compose/compose/effect"
+"github.com/zodimo/go-compose/compose/effect"
 	"github.com/zodimo/go-compose/compose/ui/platform"
+	"github.com/zodimo/go-compose/internal/explorerwrap"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/state"
 )
 
-func RememberExplorer(c api.Composer, explorerAction func(expl *explorer.Explorer)) (onClick func(), launchedEffect api.Composable) {
+func RememberExplorer(c api.Composer, explorerAction func(expl *explorerwrap.Explorer)) (onClick func(), launchedEffect api.Composable) {
 
 	key := c.GenerateID()
 	path := c.GetPath()
@@ -22,8 +23,8 @@ func RememberExplorer(c api.Composer, explorerAction func(expl *explorer.Explore
 	window := platform.LocalWindow.Current(c)
 
 	expl := state.MustRemember(c, rememberKeyPrefix+"explorer",
-		func() *explorer.Explorer {
-			return explorer.NewExplorer(window.PlatformWindow().(*app.Window))
+		func() *explorerwrap.Explorer {
+			return explorerwrap.NewExplorer(explorer.NewExplorer(window.PlatformWindow().(*app.Window)))
 		},
 	).Get()
 

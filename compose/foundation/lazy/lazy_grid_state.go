@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/internal/widgetstate"
 
 	"gioui.org/layout"
 	"gioui.org/widget"
@@ -11,15 +12,17 @@ import (
 
 // LazyGridState holds the state for a lazy grid, including scroll position.
 type LazyGridState struct {
-	List widget.List
+	List *widgetstate.List
 }
 
 // NewLazyGridState creates a new LazyGridState with default configuration.
 func NewLazyGridState() *LazyGridState {
 	return &LazyGridState{
-		List: widget.List{
-			List: layout.List{
-				Axis: layout.Vertical,
+		List: &widgetstate.List{
+			L: widget.List{
+				List: layout.List{
+					Axis: layout.Vertical,
+				},
 			},
 		},
 	}

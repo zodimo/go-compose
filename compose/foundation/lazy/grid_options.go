@@ -2,7 +2,6 @@ package lazy
 
 import (
 	"github.com/zodimo/go-compose/compose/ui"
-	"github.com/zodimo/go-compose/internal/modifier"
 )
 
 // LazyGridOption is a functional option for configuring lazy grids.
@@ -18,7 +17,7 @@ type LazyGridOptions struct {
 // DefaultLazyGridOptions returns the default options for a lazy grid.
 func DefaultLazyGridOptions() LazyGridOptions {
 	return LazyGridOptions{
-		Modifier:  modifier.EmptyModifier,
+		Modifier:  ui.EmptyModifier,
 		State:     nil,
 		Scrollbar: true,
 	}

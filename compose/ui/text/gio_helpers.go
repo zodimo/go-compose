@@ -2,25 +2,24 @@ package text
 
 import (
 	gioFont "gioui.org/font"
+
+	"github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/internal/textconvert"
 )
 
-// TextStyleFromGioFont converts a gio font.Font to a TextStyle.
-// This is useful for integrating with Gio's font system.
-func TextStyleFromGioFont(gf gioFont.Font) *TextStyle {
-	fontFamily, fontWeight, fontStyle := textconvert.FromGioFont(gf)
-
+// TextStyleFromGioFont creates a TextStyle from a framework font.Font descriptor.
+// This is useful for integrating with font resources.
+func TextStyleFromGioFont(f font.Font) *TextStyle {
 	return TextStyleFromOptions(
-		WithFontFamily(fontFamily),
-		WithFontWeight(fontWeight),
-		WithFontStyle(fontStyle),
+		WithFontFamily(font.ToFontFamily(f)),
+		WithFontWeight(f.Weight()),
+		WithFontStyle(f.Style()),
 	)
 }
 
-// ToGioFont converts a TextStyle to a gio font.Font.
-// This extracts the font family, weight, and style from the TextStyle
-// and converts them to Gio's font representation.
-func ToGioFont(ts *TextStyle) gioFont.Font {
+// toGioFont converts a TextStyle to a gio font.Font.
+// This is seam-only; it returns a gioui type.
+func toGioFont(ts *TextStyle) gioFont.Font {
 	ts = CoalesceTextStyle(ts, TextStyleUnspecified)
 
 	return textconvert.ToGioFont(

@@ -6,17 +6,16 @@ package input
 
 import (
 	"gioui.org/font"
-	"gioui.org/layout"
-	gioOp "gioui.org/op"
-	gioText "gioui.org/text"
-	gioUnit "gioui.org/unit"
-	"github.com/zodimo/go-compose/compose/ui/unit"
 
 	"github.com/zodimo/go-compose/compose/foundation/next/text/widget"
 	"github.com/zodimo/go-compose/compose/ui/next/text"
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
+	wstyle "github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/textconvert"
-	"github.com/zodimo/go-compose/internal/unitconvert"
+	"github.com/zodimo/go-compose/internal/textinput"
+	tw "github.com/zodimo/go-compose/internal/textwidget"
 )
 
 // TextLayoutController manages text layout state and bridges between
@@ -40,8 +39,8 @@ type TextLayoutController struct {
 	softWrap   bool
 	singleLine bool
 	truncator  string
-	alignment  gioText.Alignment
-	wrapPolicy gioText.WrapPolicy
+	alignment  style.TextAlign
+	wrapPolicy style.LineBreak
 }
 
 // NewTextLayoutController creates a new TextLayoutController.
@@ -93,18 +92,20 @@ func (c *TextLayoutController) SetTruncator(truncator string) {
 
 // SetAlignment sets text alignment.
 func (c *TextLayoutController) SetAlignment(alignment style.TextAlign) {
-	c.alignment = textAlignToGioAlign(alignment)
-	c.view.Alignment = c.alignment
+	c.alignment = alignment
+	// Convert next/text/style.TextAlign to widget's style.TextAlign
+	c.view.Alignment = textAlignToWidgetAlign(alignment)
 }
 
 // SetWrapPolicy sets the line wrap policy.
-func (c *TextLayoutController) SetWrapPolicy(wrapPolicy gioText.WrapPolicy) {
+func (c *TextLayoutController) SetWrapPolicy(wrapPolicy style.LineBreak) {
 	c.wrapPolicy = wrapPolicy
-	c.view.WrapPolicy = wrapPolicy
+	// Convert next/text/style.LineBreak to widget's style.LineBreak
+	c.view.WrapPolicy = lineBreakToWidgetPolicy(wrapPolicy)
 }
 
 // SetLineHeight sets the line height.
-func (c *TextLayoutController) SetLineHeight(lineHeight gioUnit.Sp) {
+func (c *TextLayoutController) SetLineHeight(lineHeight unit.TextUnit) {
 	c.view.LineHeight = lineHeight
 }
 
@@ -114,23 +115,25 @@ func (c *TextLayoutController) SetLineHeightScale(scale float32) {
 }
 
 // Layout performs text layout and returns dimensions.
-func (c *TextLayoutController) Layout(gtx layout.Context, shaper *gioText.Shaper, gioFont font.Font, size gioUnit.Sp) layout.Dimensions {
-	c.view.Layout(gtx, shaper, gioFont, size)
+func (c *TextLayoutController) Layout(gtx layoutnode.LayoutContext, shaper *tw.Shaper) layoutnode.LayoutDimensions {
+	fontSpec := c.getFontSpec()
+	size := c.GetFontSize()
+	c.view.Layout(gtx, shaper, fontSpec, size)
 	return c.view.Dimensions()
 }
 
 // PaintText clips and paints the text glyphs using the provided material.
-func (c *TextLayoutController) PaintText(gtx layout.Context, textMaterial gioOp.CallOp) {
+func (c *TextLayoutController) PaintText(gtx layoutnode.LayoutContext, textMaterial tw.DrawOp) {
 	c.view.PaintText(gtx, textMaterial)
 }
 
 // LayoutAndPaint performs layout and paints the text in one call.
 // This is the main entry point for rendering text.
-func (c *TextLayoutController) LayoutAndPaint(gtx layout.Context, shaper *gioText.Shaper, textMaterial gioOp.CallOp) layout.Dimensions {
-	gioFont := c.GetFont()
+func (c *TextLayoutController) LayoutAndPaint(gtx layoutnode.LayoutContext, shaper *tw.Shaper, textMaterial tw.DrawOp) layoutnode.LayoutDimensions {
+	fontSpec := c.getFontSpec()
 	size := c.GetFontSize()
-	c.view.Layout(gtx, shaper, gioFont, unitconvert.TextUnitToGioSpUnsafe(size))
-	c.PaintText(gtx, textMaterial)
+	c.view.Layout(gtx, shaper, fontSpec, size)
+	c.view.PaintText(gtx, textMaterial)
 	return c.view.Dimensions()
 }
 
@@ -164,23 +167,6 @@ func (c *TextLayoutController) Source() *TextSourceAdapter {
 	return c.source
 }
 
-// textAlignToGioAlign converts compose TextAlign to gio text.Alignment.
-func textAlignToGioAlign(textAlign style.TextAlign) gioText.Alignment {
-	switch textAlign {
-	case style.TextAlignLeft:
-		return gioText.Start
-	case style.TextAlignCenter:
-		return gioText.Middle
-	case style.TextAlignRight:
-		return gioText.End
-	case style.TextAlignJustify:
-		// Gio doesn't support justify, fall back to Start
-		return gioText.Start
-	default:
-		return gioText.Start
-	}
-}
-
 // ConfigureFromTextStyle applies settings from a TextStyle.
 func (c *TextLayoutController) ConfigureFromTextStyle(ts *text.TextStyle) {
 	if ts == nil {
@@ -188,26 +174,32 @@ func (c *TextLayoutController) ConfigureFromTextStyle(ts *text.TextStyle) {
 	}
 	c.textStyle = ts
 	c.SetAlignment(ts.TextAlign())
-	c.SetLineHeight(unitconvert.TextUnitToGioSpUnsafe(ts.LineHeight()))
-	c.SetWrapPolicy(lineBreakToGioWrapPolicy(ts.LineBreak()))
+	c.SetLineHeight(ts.LineHeight())
+	c.SetWrapPolicy(ts.LineBreak())
 }
 
-// lineBreakToGioWrapPolicy converts compose LineBreak to gio WrapPolicy.
-func lineBreakToGioWrapPolicy(lineBreak style.LineBreak) gioText.WrapPolicy {
-	switch lineBreak {
-	case style.LineBreakSimple:
-		return gioText.WrapGraphemes
-	case style.LineBreakHeading:
-		return gioText.WrapWords
-	case style.LineBreakParagraph:
-		return gioText.WrapHeuristically
-	default:
-		return gioText.WrapWords
+// getFontSpec returns a FontSpec from the current text style.
+func (c *TextLayoutController) getFontSpec() tw.FontSpec {
+	if c.textStyle == nil {
+		return tw.DefaultFontSpec()
 	}
+	return textinput.ToFontSpecNext(
+		c.textStyle.FontFamily(),
+		c.textStyle.FontWeight(),
+		c.textStyle.FontStyle(),
+	)
 }
 
-// GetFont returns a Gio font from the current text style.
-func (c *TextLayoutController) GetFont() font.Font {
+// GetFontSize returns the font size.
+func (c *TextLayoutController) GetFontSize() unit.TextUnit {
+	if c.textStyle == nil {
+		return unit.Sp(14) // Default font size
+	}
+	return c.textStyle.FontSize()
+}
+
+// getFont returns a Gio font from the current text style (for internal use).
+func (c *TextLayoutController) getFont() font.Font {
 	if c.textStyle == nil {
 		return font.Font{}
 	}
@@ -217,9 +209,13 @@ func (c *TextLayoutController) GetFont() font.Font {
 		c.textStyle.FontStyle(),
 	)
 }
-func (c *TextLayoutController) GetFontSize() unit.TextUnit {
-	if c.textStyle == nil {
-		return unit.Sp(14) // Default font size
-	}
-	return c.textStyle.FontSize()
+
+// textAlignToWidgetAlign converts next/text/style.TextAlign to widget's style.TextAlign.
+func textAlignToWidgetAlign(textAlign style.TextAlign) wstyle.TextAlign {
+	return wstyle.TextAlign(textAlign)
+}
+
+// lineBreakToWidgetPolicy converts next/text/style.LineBreak to widget's style.LineBreak.
+func lineBreakToWidgetPolicy(lineBreak style.LineBreak) wstyle.LineBreak {
+	return wstyle.LineBreak(lineBreak)
 }

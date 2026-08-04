@@ -7,19 +7,17 @@ import (
 	"time"
 
 	"gioui.org/f32"
-	"gioui.org/gesture"
 	"gioui.org/io/input"
-	"gioui.org/io/key"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
 	"gioui.org/widget"
+	gioUnit "gioui.org/unit"
 	"gioui.org/widget/material"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 	"github.com/zodimo/go-compose/internal/layoutnode"
-
-	gioUnit "gioui.org/unit"
+	"github.com/zodimo/go-compose/internal/textinput"
 )
 
 type C = layoutnode.LayoutContext
@@ -30,10 +28,10 @@ type D = layoutnode.LayoutDimensions
 // described here: https://material.io/components/text-fields
 type TextFieldComponent struct {
 	// Editor contains the edit buffer.
-	widget.Editor
+	Editor *textinput.Editor
 	// click detects when the mouse pointer clicks or hovers
 	// within the textfield.
-	click gesture.Click
+	click textinput.Click
 
 	// Helper text to give additional context to a field.
 	Helper string
@@ -41,9 +39,9 @@ type TextFieldComponent struct {
 	// will allow. Zero means "no limit".
 	CharLimit uint
 	// Prefix appears before the content of the text input.
-	Prefix layout.Widget
+	Prefix layoutnode.GioLayoutWidget
 	// Suffix appears after the content of the text input.
-	Suffix layout.Widget
+	Suffix layoutnode.GioLayoutWidget
 
 	// Animation state.
 	state
@@ -97,21 +95,11 @@ func (in *TextFieldComponent) TextTooLong() bool {
 	return !(in.CharLimit == 0 || uint(len(in.Editor.Text())) < in.CharLimit)
 }
 
-func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
-	// Make a local copy of the engine context for value semantics (the old code
-	// received layout.Context by value, so mutations were local).
+func (in *TextFieldComponent) Update(gtx C, th *textinput.Theme, hint string) {
+	// Make a local copy of the engine context for value semantics
 	g := *gtx.ToGio()
 	disabled := g.Source == (input.Source{})
-	for {
-		ev, ok := in.click.Update(g.Source)
-		if !ok {
-			break
-		}
-		switch ev.Kind {
-		case gesture.KindPress:
-			g.Execute(key.FocusCmd{Tag: &in.Editor})
-		}
-	}
+	in.click.ProcessEvents(gtx, in.Editor.FocusTag())
 	in.state = inactive
 	if in.click.Hovered() && !disabled {
 		in.state = hovered
@@ -120,7 +108,7 @@ func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
 	if hasContents {
 		in.state = activated
 	}
-	if g.Source.Focused(&in.Editor) && !disabled {
+	if in.Editor.SourceFocused(g.Source) && !disabled {
 		in.state = focused
 	}
 	const (
@@ -142,14 +130,20 @@ func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
 		g.Execute(op.InvalidateCmd{})
 	}
 	in.anim.Update(g.Now)
+
+	// Theme colors
+	thColor := func(c color.NRGBA) color.NRGBA { return c }
+
+	_ = thColor // placeholder for theme resolution
+
 	var (
 		// Text size transitions.
-		textNormal = th.TextSize
-		textSmall  = th.TextSize * 0.8
+		textNormal = th.T.TextSize
+		textSmall  = th.T.TextSize * 0.8
 		// Border color transitions.
-		borderColor        = WithAlpha(th.Palette.Fg, 128)
-		borderColorHovered = WithAlpha(th.Palette.Fg, 221)
-		borderColorActive  = th.Palette.ContrastBg
+		borderColor        = withAlpha(th.T.Palette.Fg, 128)
+		borderColorHovered = withAlpha(th.T.Palette.Fg, 221)
+		borderColorActive  = th.T.Palette.ContrastBg
 		// TODO: derive from Theme.Error or Theme.Danger
 		dangerColor = color.NRGBA{R: 200, A: 255}
 		// Border thickness transitions.
@@ -188,7 +182,7 @@ func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
 		Left:  spacing,
 		Right: spacing,
 	}.Layout(g, func(gtx layout.Context) layout.Dimensions {
-		return material.Label(th, textSmall, hint).Layout(gtx)
+		return material.Label(th.T, textSmall, hint).Layout(gtx)
 	})
 	macro.Stop()
 	labelTopInsetNormal := float32(in.label.Smallest.Size.Y) - float32(in.label.Smallest.Size.Y/4)
@@ -200,7 +194,7 @@ func (in *TextFieldComponent) Update(gtx C, th *material.Theme, hint string) {
 	}
 }
 
-func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
+func (in *TextFieldComponent) Layout(gtx C, th *textinput.Theme, hint string) D {
 	in.Update(gtx, th, hint)
 	// Offset accounts for label height, which sticks above the border dimensions.
 	defer op.Offset(image.Pt(0, in.label.Smallest.Size.Y/2)).Push(gtx.ToGio().Ops).Pop()
@@ -211,7 +205,7 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 				Left:  gioUnit.Dp(4),
 				Right: gioUnit.Dp(4),
 			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				label := material.Label(th, gioUnit.Sp(in.label.TextSize), hint)
+				label := material.Label(th.T, gioUnit.Sp(in.label.TextSize), hint)
 				label.Color = in.border.Color
 				return label.Layout(gtx)
 			})
@@ -237,10 +231,9 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 						Width:        gioUnit.Dp(in.border.Thickness),
 						CornerRadius: cornerRadius,
 					}
-					if gtx.Source.Focused(&in.Editor) || in.Editor.Len() > 0 {
+					if gtx.Source.Focused(&in.Editor.E) || in.Editor.Len() > 0 {
 						visibleBorder := clip.Path{}
 						visibleBorder.Begin(gtx.Ops)
-						// Move from the origin to the beginning of the
 						visibleBorder.LineTo(f32.Point{
 							Y: float32(gtx.Constraints.Min.Y),
 						})
@@ -288,16 +281,16 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 								gtx,
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									if in.IsActive() && in.Prefix != nil {
-										return in.Prefix(gtx)
+										return layoutnode.ToGioDimensions(in.Prefix(layoutnode.NewLayoutContext(&gtx)))
 									}
 									return layout.Dimensions{}
 								}),
 								layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-									return material.Editor(th, &in.Editor, "").Layout(gtx)
+									return material.Editor(th.T, &in.Editor.E, "").Layout(gtx)
 								}),
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									if in.IsActive() && in.Suffix != nil {
-										return in.Suffix(gtx)
+										return layoutnode.ToGioDimensions(in.Suffix(layoutnode.NewLayoutContext(&gtx)))
 									}
 									return layout.Dimensions{}
 								}),
@@ -310,7 +303,7 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 					defer clip.Rect(image.Rectangle{
 						Max: gtx.Constraints.Min,
 					}).Push(gtx.Ops).Pop()
-					in.click.Add(gtx.Ops)
+					in.click.C.Add(gtx.Ops)
 					return layout.Dimensions{}
 				}),
 			)
@@ -332,7 +325,7 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 					}.Layout(
 						gtx,
 						func(gtx layout.Context) layout.Dimensions {
-							helper := material.Label(th, gioUnit.Sp(12), in.helper.Text)
+							helper := material.Label(th.T, gioUnit.Sp(12), in.helper.Text)
 							helper.Color = in.helper.Color
 							return helper.Layout(gtx)
 						},
@@ -349,7 +342,7 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 						gtx,
 						func(gtx layout.Context) layout.Dimensions {
 							count := material.Label(
-								th,
+								th.T,
 								gioUnit.Sp(12),
 								strconv.Itoa(in.Editor.Len())+"/"+strconv.Itoa(int(in.CharLimit)),
 							)
@@ -361,16 +354,16 @@ func (in *TextFieldComponent) Layout(gtx C, th *material.Theme, hint string) D {
 			)
 		}),
 	)
-						return D{Size: image.Point{
-			X: dims.Size.X,
-			Y: dims.Size.Y + in.label.Smallest.Size.Y/2,
-		},
+	return D{Size: image.Point{
+		X: dims.Size.X,
+		Y: dims.Size.Y + in.label.Smallest.Size.Y/2,
+	},
 		Baseline: dims.Baseline,
 	}
 }
 
-// WithAlpha returns the input color with the new alpha value.
-func WithAlpha(c color.NRGBA, a uint8) color.NRGBA {
+// withAlpha returns the input color with the new alpha value.
+func withAlpha(c color.NRGBA, a uint8) color.NRGBA {
 	return color.NRGBA{
 		R: c.R,
 		G: c.G,

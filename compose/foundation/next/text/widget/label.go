@@ -16,30 +16,36 @@ import (
 	gioUnit "gioui.org/unit"
 
 	"golang.org/x/image/math/fixed"
+
+	"github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/internal/layoutnode"
+	tw "github.com/zodimo/go-compose/internal/textwidget"
+	"github.com/zodimo/go-compose/internal/unitconvert"
 )
 
 // Label is a widget for laying out and drawing text. Labels are always
 // non-interactive text. They cannot be selected or copied.
 type Label struct {
 	// Alignment specifies the text alignment.
-	Alignment text.Alignment
+	Alignment style.TextAlign
 	// MaxLines limits the number of lines. Zero means no limit.
 	MaxLines int
 	// Truncator is the text that will be shown at the end of the final
 	// line if MaxLines is exceeded. Defaults to "…" if empty.
 	Truncator string
 	// WrapPolicy configures how displayed text will be broken into lines.
-	WrapPolicy text.WrapPolicy
+	WrapPolicy style.LineBreak
 	// LineHeight controls the distance between the baselines of lines of text.
 	// If zero, a sensible default will be used.
-	LineHeight gioUnit.Sp
+	LineHeight unit.TextUnit
 	// LineHeightScale applies a scaling factor to the LineHeight. If zero, a
 	// sensible default will be used.
 	LineHeightScale float32
 }
 
 // Layout the label with the given shaper, font, size, text, and material.
-func (l Label) Layout(gtx layout.Context, lt *text.Shaper, font font.Font, size gioUnit.Sp, txt string, textMaterial op.CallOp) layout.Dimensions {
+func (l Label) Layout(gtx layoutnode.LayoutContext, lt *tw.Shaper, font tw.FontSpec, size unit.TextUnit, txt string, textMaterial tw.DrawOp) layoutnode.LayoutDimensions {
 	dims, _ := l.LayoutDetailed(gtx, lt, font, size, txt, textMaterial)
 	return dims
 }
@@ -52,17 +58,22 @@ type TextInfo struct {
 }
 
 // Layout the label with the given shaper, font, size, text, and material, returning metadata about the shaped text.
-func (l Label) LayoutDetailed(gtx layout.Context, lt *text.Shaper, font font.Font, size gioUnit.Sp, txt string, textMaterial op.CallOp) (layout.Dimensions, TextInfo) {
+func (l Label) LayoutDetailed(gtx layoutnode.LayoutContext, lt *tw.Shaper, font tw.FontSpec, size unit.TextUnit, txt string, textMaterial tw.DrawOp) (layoutnode.LayoutDimensions, TextInfo) {
+	dims, info := l.layoutDetailed(*gtx.ToGio(), lt.ToGio(), tw.ToGioFont(font), unitconvert.TextUnitToGioSpUnsafe(size), txt, textMaterial.O)
+	return layoutnode.FromGioDimensions(dims), info
+}
+
+func (l Label) layoutDetailed(gtx layout.Context, lt *text.Shaper, font font.Font, size gioUnit.Sp, txt string, textMaterial op.CallOp) (layout.Dimensions, TextInfo) {
 	cs := gtx.Constraints
 	textSize := fixed.I(gtx.Sp(size))
-	lineHeight := fixed.I(gtx.Sp(l.LineHeight))
+	lineHeight := fixed.I(gtx.Sp(unitconvert.TextUnitToGioSpUnsafe(l.LineHeight)))
 	lt.LayoutString(text.Parameters{
 		Font:            font,
 		PxPerEm:         textSize,
 		MaxLines:        l.MaxLines,
 		Truncator:       l.Truncator,
-		Alignment:       l.Alignment,
-		WrapPolicy:      l.WrapPolicy,
+		Alignment:       text.Alignment(l.Alignment),
+		WrapPolicy:      text.WrapPolicy(l.WrapPolicy),
 		MaxWidth:        cs.Max.X,
 		MinWidth:        cs.Min.X,
 		Locale:          gtx.Locale,

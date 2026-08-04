@@ -2,7 +2,6 @@ package lazy
 
 import (
 	"github.com/zodimo/go-compose/compose/ui"
-	"github.com/zodimo/go-compose/internal/modifier"
 )
 
 type LazyListOption func(*LazyListOptions)
@@ -15,7 +14,7 @@ type LazyListOptions struct {
 
 func DefaultLazyListOptions() LazyListOptions {
 	return LazyListOptions{
-		Modifier:  modifier.EmptyModifier,
+		Modifier:  ui.EmptyModifier,
 		State:     nil,
 		Scrollbar: true,
 	}

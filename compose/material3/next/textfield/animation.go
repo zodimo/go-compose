@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"gioui.org/layout"
+	"github.com/zodimo/go-compose/internal/layoutnode"
 	"gioui.org/op"
 )
 
@@ -28,14 +28,14 @@ type VisibilityAnimation struct {
 // If the animation is in the process of animating, calling Revealed will automatically add
 // an InvalidateOp to the provided layout.Context to ensure that the next frame will be generated
 // promptly.
-func (v *VisibilityAnimation) Revealed(gtx layout.Context) float32 {
+func (v *VisibilityAnimation) Revealed(gtx layoutnode.LayoutContext) float32 {
 	if v.Animating() {
-		gtx.Execute(op.InvalidateCmd{})
+		gtx.ToGio().Execute(op.InvalidateCmd{})
 	}
 	if v.Duration == time.Duration(0) {
 		v.Duration = time.Second
 	}
-	progress := float32(gtx.Now.Sub(v.Started).Milliseconds()) / float32(v.Milliseconds())
+	progress := float32(gtx.ToGio().Now.Sub(v.Started).Milliseconds()) / float32(v.Milliseconds())
 	if progress >= 1 {
 		if v.State == Appearing {
 			v.State = Visible
@@ -96,7 +96,7 @@ func (v *VisibilityAnimation) ToggleVisibility(now time.Time) {
 	}
 }
 
-func (v *VisibilityAnimation) String(gtx layout.Context) string {
+func (v *VisibilityAnimation) String(gtx layoutnode.LayoutContext) string {
 	return fmt.Sprintf(
 		"State: %v, Revealed: %f, Duration: %v, Started: %v",
 		v.State,

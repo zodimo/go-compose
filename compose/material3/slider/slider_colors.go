@@ -1,9 +1,8 @@
 package slider
 
 import (
-	"gioui.org/layout"
-
 	"github.com/zodimo/go-compose/compose/ui/graphics"
+	"github.com/zodimo/go-compose/internal/layoutnode"
 )
 
 // SliderColors represents the colors used by a Slider in different states.
@@ -56,6 +55,6 @@ func (c SliderColors) Tick(enabled, active bool) graphics.Color {
 	return c.DisabledInactiveTick
 }
 
-func (c SliderColors) Layout(gtx layout.Context) layout.Dimensions {
-	return layout.Dimensions{}
+func (c SliderColors) Layout(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+	return layoutnode.LayoutDimensions{}
 }

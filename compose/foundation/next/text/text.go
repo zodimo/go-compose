@@ -21,6 +21,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	tw "github.com/zodimo/go-compose/internal/textwidget"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-ternary"
 )
@@ -211,7 +212,7 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 			textColor := textColorMacro.Stop()
 
 			// Use the controller to layout and paint the text
-			dims := layoutnode.FromGioDimensions(controller.LayoutAndPaint(*gtx.ToGio(), constructorArgs.textShaper.Shaper, textColor))
+			dims := controller.LayoutAndPaint(gtx, tw.NewShaper(constructorArgs.textShaper.Shaper().ToGio()), tw.NewDrawOp(textColor))
 
 			return dims
 		}

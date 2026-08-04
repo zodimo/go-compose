@@ -7,16 +7,15 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/internal/textinput"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 	"github.com/zodimo/go-compose/pkg/sentinel"
 
 	"gioui.org/f32"
-	"gioui.org/gesture"
-	"gioui.org/io/input"
-	"gioui.org/io/key"
 	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -43,7 +42,6 @@ func Outlined(
 	}
 
 	return func(c Composer) Composer {
-
 
 		opts.Colors = ResolveTextFieldColors(c, opts.Colors)
 		opts.SupportingText = sentinel.TakeOrElseString(opts.SupportingText, "")
@@ -73,10 +71,7 @@ func Outlined(
 		widgetStatePath := fmt.Sprintf("%d/%s/outlined_widget/s%v", key, path, opts.SingleLine)
 		widgetVal := c.State(widgetStatePath, func() any {
 			return &OutlinedTextFieldWidget{
-				Editor: widget.Editor{
-					SingleLine: opts.SingleLine,
-					Submit:     opts.OnSubmit != nil,
-				},
+				Editor: textinput.NewEditor(opts.SingleLine, opts.OnSubmit != nil, 0),
 			}
 		})
 		outWidget := widgetVal.Get().(*OutlinedTextFieldWidget)
@@ -88,16 +83,12 @@ func Outlined(
 		tracker := trackerState.Get().(*TextFieldStateTracker)
 
 		// Update static properties
-		outWidget.Editor.SingleLine = opts.SingleLine
-		outWidget.Editor.Submit = opts.OnSubmit != nil
-		outWidget.Editor.Mask = opts.Mask
-		// outWidget.CharLimit = opts.CharLimit
-		// outWidget.Prefix = opts.Prefix
-		// outWidget.Suffix = opts.Suffix
+		outWidget.Editor.SetSingleLine(opts.SingleLine)
+		outWidget.Editor.SetSubmit(opts.OnSubmit != nil)
+		outWidget.Editor.SetMask(opts.Mask)
 		outWidget.Helper = opts.SupportingText
-		outWidget.ReadOnly = opts.ReadOnly
-		// outWidget.Colors = opts.Colors
-		outWidget.SetError(opts.IsError, opts.SupportingText) // Use SupportingText as error message if Error is true
+		outWidget.Editor.SetReadOnly(opts.ReadOnly)
+		outWidget.SetError(opts.IsError, opts.SupportingText)
 
 		c.StartBlock(Material3OutlinedTextFieldNodeID)
 		c.Modifier(func(m ui.Modifier) ui.Modifier {
@@ -114,8 +105,9 @@ func Outlined(
 
 		// Constructor
 		gioTh := material.GioThemeForEngine(c).(*gioMaterial.Theme)
+		th := textinput.NewTheme(gioTh)
 
-		c.SetWidgetConstructor(outlinedTextFieldWidgetConstructor(outWidget, value, opts, handlerWrapper, onSubmitWrapper, tracker, gioTh))
+		c.SetWidgetConstructor(outlinedTextFieldWidgetConstructor(outWidget, value, opts, handlerWrapper, onSubmitWrapper, tracker, th))
 
 		return c.EndBlock()
 	}
@@ -128,7 +120,7 @@ func outlinedTextFieldWidgetConstructor(
 	handler *HandlerWrapper,
 	onSubmitHandler *OnSubmitWrapper,
 	tracker *TextFieldStateTracker,
-	theme *gioMaterial.Theme,
+	theme *textinput.Theme,
 ) layoutnode.LayoutNodeWidgetConstructor {
 	return layoutnode.NewLayoutNodeWidgetConstructor(func(node layoutnode.LayoutNode) layoutnode.GioLayoutWidget {
 
@@ -145,8 +137,8 @@ func outlinedTextFieldWidgetConstructor(
 			if opts.LeadingIcon != nil && childIdx < len(children) {
 				child := children[childIdx]
 				if coord, ok := child.(layoutnode.NodeCoordinator); ok {
-					w.Prefix = func(gtx layout.Context) layout.Dimensions {
-						return layoutnode.ToGioDimensions(coord.Layout(layoutnode.NewLayoutContext(&gtx)))
+					w.Prefix = func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+						return coord.Layout(gtx)
 					}
 				}
 				childIdx++
@@ -156,8 +148,8 @@ func outlinedTextFieldWidgetConstructor(
 			if opts.TrailingIcon != nil && childIdx < len(children) {
 				child := children[childIdx]
 				if coord, ok := child.(layoutnode.NodeCoordinator); ok {
-					w.Suffix = func(gtx layout.Context) layout.Dimensions {
-						return layoutnode.ToGioDimensions(coord.Layout(layoutnode.NewLayoutContext(&gtx)))
+					w.Suffix = func(gtx layoutnode.LayoutContext) layoutnode.LayoutDimensions {
+						return coord.Layout(gtx)
 					}
 				}
 				childIdx++
@@ -167,9 +159,7 @@ func outlinedTextFieldWidgetConstructor(
 			if value != tracker.LastValue {
 				if w.Editor.Text() != value {
 					w.Editor.SetText(value)
-					// Use pending caret position if available, otherwise keep current
 					if tracker.HasPendingCaret {
-						// Clamp to valid range
 						maxPos := len(value)
 						start, end := tracker.CaretStart, tracker.CaretEnd
 						if start > maxPos {
@@ -185,40 +175,26 @@ func outlinedTextFieldWidgetConstructor(
 				tracker.LastValue = value
 			}
 
-		// Check for submit events
-			for {
-				ev, ok := w.Editor.Update(*gtx.ToGio())
-				if !ok {
-					break
-				}
-				if _, ok := ev.(widget.SubmitEvent); ok {
-					if onSubmitHandler != nil && onSubmitHandler.Func != nil {
-						onSubmitHandler.Func()
-					}
+			// Check for submit events
+			hasSubmit := w.Editor.ProcessEvents(gtx)
+			if hasSubmit {
+				if onSubmitHandler != nil && onSubmitHandler.Func != nil {
+					onSubmitHandler.Func()
 				}
 			}
 
 			// Check for text changes
-			// Following Jetpack Compose semantics: the text field's internal state
-			// should only reflect what the external value shows.
-			// Fire the callback if provided, then always revert to external value.
-			// If the callback updates state, tracker will sync the new value next frame.
 			currentText := w.Editor.Text()
 			if currentText != value {
-				// Save intended caret position before reverting
 				start, end := w.Editor.Selection()
 				tracker.CaretStart = start
 				tracker.CaretEnd = end
 				tracker.HasPendingCaret = true
 
-				// Fire callback to notify of the change attempt
 				if handler.Func != nil {
 					handler.Func(currentText)
 				}
-				// Always revert to external value - proper state updates will
-				// sync back through the tracker when 'value' changes
 				w.Editor.SetText(value)
-				// Clamp caret for immediate display
 				maxPos := len(value)
 				if start > maxPos {
 					start = maxPos
@@ -231,7 +207,7 @@ func outlinedTextFieldWidgetConstructor(
 
 			w.Colors = opts.Colors
 
-			return layoutnode.FromGioDimensions(w.Layout(*gtx.ToGio(), theme, opts.Label))
+			return w.Layout(gtx, theme, opts.Label)
 		}
 	})
 }
@@ -239,14 +215,14 @@ func outlinedTextFieldWidgetConstructor(
 // --- Adapted from gio-x/component/text_field.go ---
 
 type OutlinedTextFieldWidget struct {
-	widget.Editor
-	click gesture.Click
+	Editor *textinput.Editor
+	click  textinput.Click
 
 	// Config
 	Helper    string
 	CharLimit uint
-	Prefix    layout.Widget
-	Suffix    layout.Widget
+	Prefix    layoutnode.GioLayoutWidget
+	Suffix    layoutnode.GioLayoutWidget
 	Colors    TextFieldColors
 
 	// Animation state
@@ -256,7 +232,9 @@ type OutlinedTextFieldWidget struct {
 	helper helper
 	anim   *Progress
 
-	editorInset layout.Inset
+	editorInset struct {
+		Top, Right, Bottom, Left unit.Dp
+	}
 
 	errored bool
 }
@@ -321,22 +299,24 @@ func (in *OutlinedTextFieldWidget) TextTooLong() bool {
 	return !(in.CharLimit == 0 || uint(len(in.Editor.Text())) < in.CharLimit)
 }
 
-func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Theme, hint string) layout.Dimensions {
+func (in *OutlinedTextFieldWidget) Layout(gtx layoutnode.LayoutContext, th *textinput.Theme, hint string) layoutnode.LayoutDimensions {
 	// Logic from gio-x Update + Layout
 	in.update(gtx, th, hint)
 
+	g := *gtx.ToGio()
+
 	// Offset accounts for label height, which sticks above the border dimensions.
-	defer op.Offset(image.Pt(0, in.label.Smallest.Size.Y/2)).Push(gtx.Ops).Pop()
+	defer op.Offset(image.Pt(0, in.label.Smallest.Size.Y/2)).Push(g.Ops).Pop()
 
 	// Draw Label
 	in.label.Inset.Layout(
-		gtx,
+		g,
 		func(gtx layout.Context) layout.Dimensions {
 			return layout.Inset{
 				Left:  gioUnit.Dp(4),
 				Right: gioUnit.Dp(4),
 			}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-				label := gioMaterial.Label(th, in.label.TextSize, hint)
+				label := gioMaterial.Label(th.T, in.label.TextSize, hint)
 				label.Color = in.border.Color
 				return label.Layout(gtx)
 			})
@@ -345,7 +325,7 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Th
 	dims := layout.Flex{
 		Axis: layout.Vertical,
 	}.Layout(
-		gtx,
+		g,
 		layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 			return layout.Stack{}.Layout(
 				gtx,
@@ -363,35 +343,27 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Th
 						CornerRadius: cornerRadius,
 					}
 					// Cutout logic
-					if gtx.Source.Focused(&in.Editor) || in.Editor.Len() > 0 {
+					if gtx.Source.Focused(&in.Editor.E) || in.Editor.Len() > 0 {
 						visibleBorder := clip.Path{}
 						visibleBorder.Begin(gtx.Ops)
-						// Helper to make points clearer
 						pt := func(x, y float32) f32.Point { return f32.Point{X: x, Y: y} }
 
-						const buffer = 1000.0 // Draw way outside to avoid clipping corners
-
-						// Start top-leftish (at label start)
 						labelStartX := float32(gtx.Dp(in.label.Inset.Left))
 						labelEndX := labelStartX + float32(in.label.Smallest.Size.X)
 						labelEndY := float32(in.label.Smallest.Size.Y)
-
-						// Trace the visible area (everything EXCEPT the label cutout)
-						// We use a large bounding box method or exact path.
-						// Current path: Start (0,0) -> Down -> Right -> Up -> Left(to LabelEnd) -> Down(cutout) -> Left -> Up -> Close.
 
 						minY := float32(gtx.Constraints.Min.Y)
 						maxX := float32(gtx.Constraints.Max.X)
 
 						visibleBorder.MoveTo(pt(0, 0))
-						visibleBorder.LineTo(pt(0, minY))    // Down to bottom-left
-						visibleBorder.LineTo(pt(maxX, minY)) // Right to bottom-right
-						visibleBorder.LineTo(pt(maxX, 0))    // Up to top-right
+						visibleBorder.LineTo(pt(0, minY))
+						visibleBorder.LineTo(pt(maxX, minY))
+						visibleBorder.LineTo(pt(maxX, 0))
 						visibleBorder.LineTo(pt(labelEndX, 0))
-						visibleBorder.LineTo(pt(labelEndX, labelEndY))   // Dip down
-						visibleBorder.LineTo(pt(labelStartX, labelEndY)) // Left across dip
-						visibleBorder.LineTo(pt(labelStartX, 0))         // Up from dip
-						visibleBorder.LineTo(pt(0, 0))                   // Back to start
+						visibleBorder.LineTo(pt(labelEndX, labelEndY))
+						visibleBorder.LineTo(pt(labelStartX, labelEndY))
+						visibleBorder.LineTo(pt(labelStartX, 0))
+						visibleBorder.LineTo(pt(0, 0))
 
 						visibleBorder.Close()
 						defer clip.Outline{
@@ -415,21 +387,25 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Th
 								gtx,
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									if in.Prefix != nil {
-										return in.Prefix(gtx)
+										return layoutnode.ToGioDimensions(in.Prefix(layoutnode.NewLayoutContext(&gtx)))
 									}
 									return layout.Dimensions{}
 								}),
-								// Prefix would go here
 								layout.Flexed(1, func(gtx layout.Context) layout.Dimensions {
-									return in.editorInset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-										// Resolve editor colors
+									inset := layout.Inset{
+										Top:    gioUnit.Dp(in.editorInset.Top),
+										Right:  gioUnit.Dp(in.editorInset.Right),
+										Bottom: gioUnit.Dp(in.editorInset.Bottom),
+										Left:   gioUnit.Dp(in.editorInset.Left),
+									}
+									return inset.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
 										textColor := graphics.ColorToNRGBA(in.Colors.TextColor)
 										if !gtx.Enabled() {
 											textColor = graphics.ColorToNRGBA(in.Colors.DisabledTextColor)
 										}
 										selectionColor := graphics.ColorToNRGBA(in.Colors.SelectionColor)
 
-										ed := gioMaterial.Editor(th, &in.Editor, "")
+										ed := gioMaterial.Editor(th.T, &in.Editor.E, "")
 										ed.Color = textColor
 										ed.SelectionColor = selectionColor
 
@@ -438,7 +414,7 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Th
 								}),
 								layout.Rigid(func(gtx layout.Context) layout.Dimensions {
 									if in.Suffix != nil {
-										return in.Suffix(gtx)
+										return layoutnode.ToGioDimensions(in.Suffix(layoutnode.NewLayoutContext(&gtx)))
 									}
 									return layout.Dimensions{}
 								}),
@@ -473,7 +449,7 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Th
 					}.Layout(
 						gtx,
 						func(gtx layout.Context) layout.Dimensions {
-							helper := gioMaterial.Label(th, gioUnit.Sp(12), in.helper.Text)
+							helper := gioMaterial.Label(th.T, gioUnit.Sp(12), in.helper.Text)
 							helper.Color = in.helper.Color
 							return helper.Layout(gtx)
 						},
@@ -490,7 +466,7 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Th
 						gtx,
 						func(gtx layout.Context) layout.Dimensions {
 							count := gioMaterial.Label(
-								th,
+								th.T,
 								gioUnit.Sp(12),
 								strconv.Itoa(in.Editor.Len())+"/"+strconv.Itoa(int(in.CharLimit)),
 							)
@@ -502,7 +478,7 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Th
 			)
 		}),
 	)
-	return layout.Dimensions{
+	return layoutnode.LayoutDimensions{
 		Size: image.Point{
 			X: dims.Size.X,
 			Y: dims.Size.Y + in.label.Smallest.Size.Y/2,
@@ -511,19 +487,10 @@ func (in *OutlinedTextFieldWidget) Layout(gtx layout.Context, th *gioMaterial.Th
 	}
 }
 
-func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *gioMaterial.Theme, hint string) {
+func (in *OutlinedTextFieldWidget) update(gtx layoutnode.LayoutContext, th *textinput.Theme, hint string) {
+	disabled := textinput.Disabled(gtx)
+	in.click.ProcessEvents(gtx, in.Editor.FocusTag())
 
-	disabled := gtx.Source == (input.Source{})
-	for {
-		ev, ok := in.click.Update(gtx.Source)
-		if !ok {
-			break
-		}
-		switch ev.Kind {
-		case gesture.KindPress:
-			gtx.Execute(key.FocusCmd{Tag: &in.Editor})
-		}
-	}
 	in.state = inactive
 	if in.click.Hovered() && !disabled {
 		in.state = hovered
@@ -532,7 +499,7 @@ func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *gioMaterial.Th
 	if hasContents {
 		in.state = activated
 	}
-	if gtx.Source.Focused(&in.Editor) && !disabled {
+	if in.Editor.SourceFocused(gtx.ToGio().Source) && !disabled {
 		in.state = focused
 	}
 	const (
@@ -542,18 +509,18 @@ func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *gioMaterial.Th
 		in.anim = &Progress{}
 	}
 	if in.state == activated || hasContents {
-		in.anim.Start(gtx.Now, Forward, 0)
+		in.anim.Start(gtx.ToGio().Now, Forward, 0)
 	}
 	if in.state == focused && !hasContents && !in.anim.Started() {
-		in.anim.Start(gtx.Now, Forward, duration)
+		in.anim.Start(gtx.ToGio().Now, Forward, duration)
 	}
 	if in.state == inactive && !hasContents && in.anim.Finished() {
-		in.anim.Start(gtx.Now, Reverse, duration)
+		in.anim.Start(gtx.ToGio().Now, Reverse, duration)
 	}
 	if in.anim.Started() {
-		gtx.Execute(op.InvalidateCmd{})
+		gtx.ToGio().Execute(op.InvalidateCmd{})
 	}
-	in.anim.Update(gtx.Now)
+	in.anim.Update(gtx.ToGio().Now)
 
 	// Colors
 	in.border.Color = graphics.ColorToNRGBA(in.Colors.UnfocusedIndicatorColor)
@@ -578,13 +545,14 @@ func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *gioMaterial.Th
 	}
 
 	// Label Logic
-	textNormal := th.TextSize
-	textSmall := th.TextSize * 0.8
+	g := *gtx.ToGio()
+	textNormal := th.T.TextSize
+	textSmall := th.T.TextSize * 0.8
 	in.label.TextSize = gioUnit.Sp(lerp.Between32(float32(textSmall), float32(textNormal), 1.0-in.anim.Progress()))
 
 	// Calculate smallest label for cutout
-	gtx.Constraints.Min.X = 0
-	macro := op.Record(gtx.Ops)
+	g.Constraints.Min.X = 0
+	macro := op.Record(g.Ops)
 	var spacing gioUnit.Dp
 	if len(hint) > 0 {
 		spacing = 4
@@ -592,17 +560,15 @@ func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *gioMaterial.Th
 	in.label.Smallest = layout.Inset{
 		Left:  spacing,
 		Right: spacing,
-	}.Layout(gtx, func(gtx layout.Context) layout.Dimensions {
-		l := gioMaterial.Label(th, textSmall, hint)
+	}.Layout(g, func(gtx layout.Context) layout.Dimensions {
+		l := gioMaterial.Label(th.T, textSmall, hint)
 		l.Color = in.border.Color
 		return l.Layout(gtx)
 	})
 	macro.Stop()
 
 	// Calculate label position
-	// Inactive: 16dp (matches text padding)
-	// Active: -Height/2 (sits on border)
-	startTop := float32(gtx.Dp(16))
+	startTop := float32(g.Dp(16))
 	endTop := float32(in.label.Smallest.Size.Y) / -2.0
 
 	in.label.Inset = layout.Inset{
@@ -611,8 +577,10 @@ func (in *OutlinedTextFieldWidget) update(gtx layout.Context, th *gioMaterial.Th
 	}
 
 	// Editor Inset
-	in.editorInset = layout.Inset{
-		Top:    gioUnit.Dp(16),
-		Bottom: gioUnit.Dp(16),
+	in.editorInset = struct {
+		Top, Right, Bottom, Left unit.Dp
+	}{
+		Top:    unit.Dp(16),
+		Bottom: unit.Dp(16),
 	}
 }
