@@ -201,14 +201,13 @@ func TestNewDrawCommandReturnsInterface(t *testing.T) {
 	}
 }
 
-func TestGioDrawCommandApplyIsCallable(t *testing.T) {
-	// Verify the interface is satisfied and the method exists.
+func TestGioDrawCommandApplyToGioIsCallable(t *testing.T) {
+	// Verify ApplyToGio replays into op.Ops.
 	cmd := NewDrawCommand(op.CallOp{})
-	_ = cmd // interface satisfied, Apply method available
+	var ops op.Ops
+	ApplyToGio(cmd, &ops)
 }
 
 // Ensure gioDrawCommand satisfies the DrawCommand interface at compile time.
 var _ DrawCommand = (*gioDrawCommand)(nil)
-
-// Ensure gioDrawCommand still satisfies the DrawCommand interface at compile time.
-var _ DrawCommand = (*gioDrawCommand)(nil)
+var _ DrawCommand = (*backendDrawCommand)(nil)

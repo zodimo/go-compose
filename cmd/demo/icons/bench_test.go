@@ -10,6 +10,7 @@ import (
 	"gioui.org/unit"
 
 	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/internal/render"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/runtime"
 	"github.com/zodimo/go-compose/store"
@@ -63,6 +64,6 @@ func BenchmarkUI_Layout(b *testing.B) {
 		gtx = themeManager.Material3ThemeInit(gtx).(layout.Context)
 
 		cmd := rt.Run(gtx, composer, UI())
-		cmd.Apply(gtx.Ops)
+		render.ApplyToGio(cmd, gtx.Ops)
 	}
 }

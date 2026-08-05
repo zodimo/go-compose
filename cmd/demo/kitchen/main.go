@@ -2,91 +2,28 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/zodimo/go-compose/compose"
-	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/runtime"
-	"github.com/zodimo/go-compose/store"
-	"github.com/zodimo/go-compose/theme"
-
-	"gioui.org/app"
-	"gioui.org/io/system"
-	"gioui.org/layout"
-	"gioui.org/op"
-	"gioui.org/unit"
 )
 
 func main() {
-
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	rootContext, cancelFunc := context.WithCancel(ctx)
+	err := runtime.App(
+		runtime.Title("Component Showcase"),
+		runtime.Size(unit.NewDpSize(1024, 768)),
+		runtime.Content(UI()),
+		runtime.WithRootContext(ctx),
+	).Run()
 
-	go func() {
-		defer cancelFunc()
-		w := new(app.Window)
-		w.Option(
-			app.Title("Component Showcase"),
-			app.Size(unit.Dp(1024), unit.Dp(768)),
-		)
-
-		if err := Run(rootContext, w); err != nil {
-			log.Fatal(err)
-		}
-
-	}()
-
-	go func() {
-		<-rootContext.Done()
-		fmt.Println("Root Context done")
-		os.Exit(0)
-	}()
-
-	app.Main()
-
-}
-
-func Run(rootContext context.Context, window *app.Window) error {
-
-	enLocale := system.Locale{Language: "en", Direction: system.LTR}
-
-	var ops op.Ops
-
-	store := store.NewPersistentState(
-		store.WithRootContext(rootContext),
-	)
-	store.Subscribe(func() {
-		window.Invalidate()
-	})
-
-	runtime := runtime.NewRuntime()
-
-	themeManager := theme.GetThemeManager()
-
-	for {
-		switch frameEvent := window.Event().(type) {
-		case app.DestroyEvent:
-			return frameEvent.Err
-		case app.FrameEvent:
-			gtx := app.NewContext(&ops, frameEvent)
-			gtx.Locale = enLocale
-
-			// M3 Widget Requirement
-			gtx = themeManager.Material3ThemeInit(gtx).(layout.Context)
-
-			composer := compose.NewComposer(api.ComposerWithStore(store))
-
-			cmd := runtime.Run(gtx, composer, UI())
-			cmd.Apply(gtx.Ops)
-			frameEvent.Frame(gtx.Ops)
-
-		}
+	if err != nil && !errors.Is(err, context.Canceled) {
+		log.Fatal(err)
 	}
-
 }

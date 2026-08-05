@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"gioui.org/unit"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/foundation/next/text/input"
@@ -41,20 +40,20 @@ func UI() api.Composable {
 				),
 				text.BodySmall(fmt.Sprintf("count: %d", len(filledText.Get().(string)))),
 
-				spacer.Height(int(unit.Dp(16))),
+				spacer.Height(16),
 				m3TextField.Filled(
 					filledText.Get().(string),
 					func(s string) { filledText.Set(s) },
 					m3TextField.WithSingleLine(true),
 				),
-				spacer.Height(int(unit.Dp(16))),
+				spacer.Height(16),
 				m3TextField.Filled(
 					filledText.Get().(string),
 					nil,
 					m3TextField.WithSingleLine(true),
 					m3TextField.WithPlaceholder("no label, not state"),
 				),
-				spacer.Height(int(unit.Dp(16))),
+				spacer.Height(16),
 				m3TextField.Filled(
 					filledText.Get().(string),
 					func(_ string) {},
@@ -62,7 +61,7 @@ func UI() api.Composable {
 					m3TextField.WithLabel("Filled Text Field with noop onchange"),
 				),
 
-				spacer.Height(int(unit.Dp(16))),
+				spacer.Height(16),
 				// Outlined
 				m3TextField.Outlined(
 					outlinedText.Get().(string),
@@ -72,20 +71,20 @@ func UI() api.Composable {
 				),
 				text.BodySmall(fmt.Sprintf("count: %d", len(outlinedText.Get().(string)))),
 
-				spacer.Height(int(unit.Dp(16))),
+				spacer.Height(16),
 				m3TextField.Outlined(
 					outlinedText.Get().(string),
 					func(s string) { outlinedText.Set(s) },
 					m3TextField.WithSingleLine(true),
 				),
-				spacer.Height(int(unit.Dp(16))),
+				spacer.Height(16),
 				m3TextField.Outlined(
 					outlinedText.Get().(string),
 					nil,
 					m3TextField.WithSingleLine(true),
 					m3TextField.WithPlaceholder("no label, not state"),
 				),
-				spacer.Height(int(unit.Dp(16))),
+				spacer.Height(16),
 				m3TextField.Outlined(
 					outlinedText.Get().(string),
 					func(_ string) {},
@@ -93,12 +92,12 @@ func UI() api.Composable {
 					m3TextField.WithLabel("Outlined Text Field with noop onchange"),
 				),
 
-				spacer.Height(int(unit.Dp(16))),
+				spacer.Height(16),
 				// Display values
 				m3text.BodyLarge(fmt.Sprintf("Filled value: %s", filledText.Get().(string))),
 				m3text.BodyLarge(fmt.Sprintf("Outlined value: %s", outlinedText.Get().(string))),
 
-				spacer.Height(int(unit.Dp(24))),
+				spacer.Height(24),
 				// foundation/next
 				text.TitleMedium("foundation/next"),
 				foundationTextField.BasicTextField(

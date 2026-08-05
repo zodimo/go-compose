@@ -9,15 +9,9 @@ import "gioui.org/op"
 // implement it (via the unexported applyTo method). This prevents
 // external packages from creating spurious DrawCommand implementations.
 type DrawCommand interface {
-	// Apply replays the recorded draw calls into gioui ops.
-	// This is the current runtime path's compatibility method:
-	// the app shell calls this to replay the frame's draw macro.
-	Apply(ops *op.Ops)
-
 	// applyTo applies the draw command to the active backend.
 	// This is the backend-agnostic path that will be used once the
-	// backend is wired in (task 4.5). It is unexported to seal
-	// the interface.
+	// backend is wired in. It is unexported to seal the interface.
 	applyTo(b Backend)
 }
 
@@ -35,24 +29,22 @@ func NewDrawCommand(callOp op.CallOp) DrawCommand {
 	return &gioDrawCommand{callOp: callOp}
 }
 
-// Apply replays the recorded draw calls into ops.
-// It is app-shell glue: the demo/CLI shell passes the gio Ops of the
-// current frame.
-func (d *gioDrawCommand) Apply(ops *op.Ops) {
-	d.callOp.Add(ops)
+// ApplyToGio replays the recorded draw calls into gioui ops.
+// It is package-level glue for runtime/ to replay the frame's draw macro.
+func ApplyToGio(cmd DrawCommand, ops *op.Ops) {
+	if d, ok := cmd.(*gioDrawCommand); ok {
+		d.callOp.Add(ops)
+	}
 }
 
-// applyTo is a no-op for the gio path. The real backend-driven wiring
-// happens in task 4.5 when runtime.Run calls the active backend directly.
+// applyTo is a no-op for the gio path.
 func (d *gioDrawCommand) applyTo(b Backend) {
-	// intentionally empty — current path uses Apply(*op.Ops) directly
+	// intentionally empty — current path uses ApplyToGio directly
 }
 
 // --- Backend-based DrawCommand (software / future backends) ---
 
 // backendDrawCommand wraps a render.Backend for the software rendering path.
-// On the software path, DrawCommand.Apply is never called by the app shell;
-// instead the harness reads the backend Canvas() directly. Apply is a no-op.
 type backendDrawCommand struct {
 	backend Backend
 }
@@ -61,16 +53,8 @@ type backendDrawCommand struct {
 var _ DrawCommand = (*backendDrawCommand)(nil)
 
 // NewDrawCommandForBackend creates a DrawCommand from any Backend.
-// For the software backend the app shell reads Canvas() directly;
-// Apply is provided only to satisfy the interface.
 func NewDrawCommandForBackend(b Backend) DrawCommand {
 	return &backendDrawCommand{backend: b}
-}
-
-// Apply is a no-op on the software path. The app shell does not call it;
-// the harness reads Canvas() from the software backend directly.
-func (d *backendDrawCommand) Apply(ops *op.Ops) {
-	// intentionally empty — software path uses Canvas() directly
 }
 
 // applyTo is unused on the software path.

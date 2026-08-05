@@ -1,7 +1,6 @@
 package main
 
 import (
-	"gioui.org/unit"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/material3/iconbutton"
@@ -40,7 +39,7 @@ func UI() api.Composable {
 
 		root := column.Column(
 			c.Sequence(
-				spacer.Height(int(unit.Dp(20))),
+				spacer.Height(20),
 
 				textfield.SecureTextField(
 					passwordVal,
@@ -50,7 +49,7 @@ func UI() api.Composable {
 					textfield.WithLabel("Password (Filled)"),
 				),
 
-				spacer.Height(int(unit.Dp(20))),
+				spacer.Height(20),
 
 				textfield.SecureTextField(
 					passwordVal,
@@ -62,7 +61,7 @@ func UI() api.Composable {
 					textfield.WithTrailingIcon(trailingIcon),
 				),
 
-				spacer.Height(int(unit.Dp(20))),
+				spacer.Height(20),
 
 				textfield.OutlinedSecureTextField(
 					passwordVal,
@@ -72,7 +71,7 @@ func UI() api.Composable {
 					textfield.WithLabel("Password (Outlined)"),
 				),
 
-				spacer.Height(int(unit.Dp(20))),
+				spacer.Height(20),
 
 				textfield.OutlinedSecureTextField(
 					passwordVal,

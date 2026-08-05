@@ -4,69 +4,26 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
-	"gioui.org/app"
-	"gioui.org/layout"
-	"gioui.org/op"
-	"gioui.org/unit"
-
-	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/effect"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/text"
 	"github.com/zodimo/go-compose/compose/material3/button"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/runtime"
-	"github.com/zodimo/go-compose/store"
-	"github.com/zodimo/go-compose/theme"
 )
 
 func main() {
-	go func() {
-		w := new(app.Window)
-		w.Option(
-			app.Title("LaunchedEffect Demo"),
-			app.Size(unit.Dp(800), unit.Dp(600)),
-		)
-		if err := Run(w); err != nil {
-			log.Fatal(err)
-		}
-		os.Exit(0)
-	}()
-	app.Main()
-}
-
-func Run(window *app.Window) error {
-	var ops op.Ops
-	store := store.NewPersistentState()
-	store.Subscribe(func() {
-		window.Invalidate()
-	})
-
-	runtime := runtime.NewRuntime()
-	themeManager := theme.GetThemeManager()
-
-	for {
-		switch frameEvent := window.Event().(type) {
-		case app.DestroyEvent:
-			return frameEvent.Err
-		case app.FrameEvent:
-			gtx := app.NewContext(&ops, frameEvent)
-
-			// Initialize Theme (M3)
-			gtx = themeManager.Material3ThemeInit(gtx).(layout.Context)
-
-			composer := compose.NewComposer(api.ComposerWithStore(store))
-
-			cmd := runtime.Run(gtx, composer, UI())
-			cmd.Apply(gtx.Ops)
-			frameEvent.Frame(gtx.Ops)
-			window.Invalidate()
-		}
+	if err := runtime.App(
+		runtime.Title("LaunchedEffect Demo"),
+		runtime.Size(unit.NewDpSize(800, 600)),
+		runtime.Content(UI()),
+	).Run(); err != nil {
+		log.Fatal(err)
 	}
 }
 

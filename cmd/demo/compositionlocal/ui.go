@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"gioui.org/unit"
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	m3text "github.com/zodimo/go-compose/compose/material3/text"
@@ -20,7 +19,7 @@ func UI() api.Composable {
 		val1 := LocalString.Current(c)
 		m3text.BodyLarge(fmt.Sprintf("1. Outer Value: %s", val1))(c)
 
-		spacer.Height(int(unit.Dp(16)))(c)
+		spacer.Height(16)(c)
 
 		// 2. Provide a new value
 		compose.CompositionLocalProvider(
@@ -29,7 +28,7 @@ func UI() api.Composable {
 				val2 := LocalString.Current(c)
 				m3text.BodyLarge(fmt.Sprintf("2. Inner Value: %s", val2))(c)
 
-				spacer.Height(int(unit.Dp(16)))(c)
+				spacer.Height(16)(c)
 
 				// 3. Nested Provider
 				compose.CompositionLocalProvider(
@@ -45,7 +44,7 @@ func UI() api.Composable {
 			},
 		)(c)
 
-		spacer.Height(int(unit.Dp(16)))(c)
+		spacer.Height(16)(c)
 
 		// 4. Verify value is back to default
 		val4 := LocalString.Current(c)
