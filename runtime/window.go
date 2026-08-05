@@ -10,6 +10,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/platform"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/render"
+	_ "github.com/zodimo/go-compose/internal/render/gio"
 	"github.com/zodimo/go-compose/internal/unitconvert"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/store"

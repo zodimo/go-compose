@@ -4,9 +4,10 @@ import (
 	"image"
 
 	"github.com/zodimo/go-compose/compose"
-	"github.com/zodimo/go-compose/internal/unitconvert"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/render"
+	_ "github.com/zodimo/go-compose/internal/render/gio"
+	"github.com/zodimo/go-compose/internal/unitconvert"
 	"github.com/zodimo/go-compose/pkg/api"
 
 	"gioui.org/layout"
@@ -27,7 +28,10 @@ func (r *runtime) Run(ctx any, composer api.Composer, ui api.Composable) render.
 		panic("runtime.Run: ctx must be a gioui layout.Context")
 	}
 
-	backend := render.ActiveBackend()
+	var backend render.Backend
+	if render.ActiveBackendName() != "gio" {
+		backend = render.ActiveBackend()
+	}
 	gtx := layoutnode.NewLayoutContextWithBackend(&gctx, backend)
 
 	density := unitconvert.DensityFromLayoutContext(*gtx.ToGio())
