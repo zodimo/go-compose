@@ -7,6 +7,8 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/foundation/lazy"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
+	"github.com/zodimo/go-compose/modifiers/background"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -35,7 +37,9 @@ func Tree(
 ) api.Composable {
 	opts := DefaultTreeOptions()
 	for _, opt := range options {
-		opt(&opts)
+		if opt != nil {
+			opt(&opts)
+		}
 	}
 
 	// Convert TreeOption modifier to lazy option if present
@@ -74,6 +78,12 @@ func (s *treeScopeImpl) Node(key any, content api.Composable) {
 	opts := s.options
 	state := s.state
 
+	isSelected := state.IsSelected(key)
+	rowBackground := graphics.ColorUnspecified
+	if isSelected {
+		rowBackground = graphics.Selected(s.options.SelectedNodeOnColor)
+	}
+
 	s.listScope.Item(key, func(c api.Composer) api.Composer {
 		return row.Row(
 			c.Sequence(
@@ -83,6 +93,9 @@ func (s *treeScopeImpl) Node(key any, content api.Composable) {
 				// spacer.Width(indentSize),
 				// Node content
 				content,
+			),
+			row.WithModifier(
+				background.Background(rowBackground),
 			),
 			row.WithAlignment(row.Middle),
 			row.WithModifier(
@@ -106,6 +119,12 @@ func (s *treeScopeImpl) Branch(key any, header api.Composable, children func(Tre
 	state := s.state
 	opts := s.options
 
+	isSelected := state.IsSelected(key)
+	rowBackground := graphics.ColorUnspecified
+	if isSelected {
+		rowBackground = graphics.Selected(s.options.SelectedBranchOnColor)
+	}
+
 	// Branch Header
 	s.listScope.Item(key, func(c api.Composer) api.Composer {
 		return row.Row(
@@ -123,6 +142,9 @@ func (s *treeScopeImpl) Branch(key any, header api.Composable, children func(Tre
 							opts.BranchIcons.ClosedIcon,
 						),
 					),
+					row.WithModifier(
+						background.Background(rowBackground),
+					),
 					row.WithAlignment(row.Middle),
 					row.WithModifier(
 						clickable.OnClick(func() {
@@ -138,6 +160,9 @@ func (s *treeScopeImpl) Branch(key any, header api.Composable, children func(Tre
 
 						// Header Content
 						header,
+					),
+					row.WithModifier(
+						background.Background(rowBackground),
 					),
 					row.WithAlignment(row.Middle),
 					row.WithModifier(

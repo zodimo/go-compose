@@ -3,6 +3,7 @@ package tree
 import (
 	"github.com/zodimo/go-compose/compose/material3/icon"
 	"github.com/zodimo/go-compose/compose/ui"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/pkg/api"
@@ -40,6 +41,10 @@ type TreeOptions struct {
 	OnBranchClosed func(id any)
 
 	BranchIcons *TreeBranchIcons
+
+	// surface color
+	SelectedBranchOnColor graphics.Color
+	SelectedNodeOnColor   graphics.Color
 }
 
 // DefaultTreeOptions returns the default TreeOptions.
@@ -53,6 +58,8 @@ func DefaultTreeOptions() TreeOptions {
 			icon.Icon(icon.SymbolIndeterminateCheckBox),
 			icon.Icon(icon.SymbolAddBox),
 		),
+		SelectedBranchOnColor: graphics.ColorWhite,
+		SelectedNodeOnColor:   graphics.ColorWhite,
 	}
 }
 
@@ -131,5 +138,17 @@ func WithBranchOpenIcon(open api.Composable) TreeOption {
 func WithBranchCloseIcon(closed api.Composable) TreeOption {
 	return func(o *TreeOptions) {
 		o.BranchIcons.ClosedIcon = closed
+	}
+}
+
+func WithSelectedBranchOnColor(col graphics.Color) TreeOption {
+	return func(o *TreeOptions) {
+		o.SelectedBranchOnColor = col
+	}
+}
+
+func WithSelectedNodeOnColor(col graphics.Color) TreeOption {
+	return func(o *TreeOptions) {
+		o.SelectedNodeOnColor = col
 	}
 }

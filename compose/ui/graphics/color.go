@@ -2,6 +2,7 @@ package graphics
 
 import (
 	"fmt"
+	"image/color"
 
 	"github.com/zodimo/go-compose/compose/ui/graphics/colorspace"
 	"github.com/zodimo/go-compose/compose/ui/util"
@@ -39,7 +40,7 @@ const (
 
 // Standard Colors
 const (
-	ColorBlack Color = 0xFF00000000000000 // sRGB Black? No, wait.
+	ColorBlack Color = 0xFF00000000000000 // sRGB Black
 	// Kotlin: Color(0xFF000000) for Black.
 	// In Kotlin, Color(int) creates an sRGB color.
 	// sRGB packing in Kotlin: (value.toULong() and 0xFFFFFFFFUL) shl 32
@@ -47,7 +48,7 @@ const (
 	// Wait, 0xFF000000 is ARGB. Alpha=255.
 	// 0xFF000000 << 32 = 0xFF00000000000000?
 	// 0xFF (Alpha) << 24 | 0x00 (R) << 16 ...
-	// Yes.
+
 	ColorDarkGray    Color = 0xFF44444400000000
 	ColorGray        Color = 0xFF88888800000000
 	ColorLightGray   Color = 0xFFCCCCCC00000000
@@ -282,6 +283,32 @@ func (c Color) Luminance() float32 {
 
 	lum := float32((0.2126 * r) + (0.7152 * g) + (0.0722 * b))
 	return util.FastCoerceIn(lum, 0.0, 1.0)
+}
+
+// mix mixes c1 and c2 weighted by (1 - weight/255) and weight/255 respectively.
+func (c Color) MixWithWeight(col Color, weight int) Color {
+
+	cs := c.ColorSpace()
+
+	// Require RGB color model
+	if cs.Model() != colorspace.ColorModelRgb {
+		panic(fmt.Sprintf("The specified color must be encoded in an RGB color space. The supplied color space is %v", cs.Model()))
+	}
+
+	mixColorComponent := func(a, b int, weight int) int {
+		if weight > 255 {
+			weight = 255
+		}
+
+		return (int(a)*weight + int(b)*(255-weight)) / 255
+	}
+
+	return FromNRGBA(color.NRGBA{
+		R: byte(mixColorComponent(int(c.Red()*255), int(col.Red())*255, weight)),
+		G: byte(mixColorComponent(int(c.Green()*255), int(col.Green())*255, weight)),
+		B: byte(mixColorComponent(int(c.Blue()*255), int(col.Blue())*255, weight)),
+		A: byte(mixColorComponent(int(c.Alpha()*255), int(col.Alpha())*255, weight)),
+	})
 }
 
 // NewColorLong creates a new sRGB Color from a 32-bit ARGB long.
