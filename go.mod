@@ -7,7 +7,7 @@ require (
 	gioui.org/x v0.10.0
 	git.sr.ht/~schnwalter/gio-mw v0.0.0-20260221053317-be0445f63b48
 	github.com/go-text/typesetting v0.3.4
-	github.com/zodimo/go-maybe v0.1.9
+	github.com/zodimo/go-maybe v0.2.1
 	github.com/zodimo/go-ternary v0.2.0
 	github.com/zodimo/go-zero-hash v0.1.0
 	golang.org/x/exp/shiny v0.0.0-20260611194520-c48552f49976
