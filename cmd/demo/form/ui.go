@@ -10,6 +10,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/state"
 
+	"github.com/zodimo/go-compose/compose/material3/next/button"
 	"github.com/zodimo/go-compose/compose/material3/text"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -33,8 +34,11 @@ func UI() api.Composable {
 							text.TitleLarge("This is a simple form."),
 							func(fs fform.FormScope) {
 								fs.Field("name", func(c api.Composer) api.Composer {
+
 									nameInputValue := state.MustRemember(c, "name-input", func() string { return "" })
+
 									formFieldState := fform.RememberFormFieldState(c, nameInputValue)
+
 									return components.TextFieldComponent(
 										formFieldState,
 										components.TextFieldWithLabel("Name"),
@@ -61,6 +65,10 @@ func UI() api.Composable {
 										),
 									)(c)
 								})
+
+								fs.Field("submit", button.Outlined(func() {
+
+								}, "submit"))
 							},
 						)
 					},

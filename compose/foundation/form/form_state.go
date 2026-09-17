@@ -7,7 +7,8 @@ import (
 	"github.com/zodimo/go-compose/state"
 )
 
-type FormState struct{}
+type FormState struct {
+}
 
 // RememberFormState creates a FormState that is remembered across compositions.
 func RememberFormState(c api.Composer) *FormState {
