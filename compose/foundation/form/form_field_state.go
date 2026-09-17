@@ -1,83 +1,101 @@
 package fform
 
 import (
-	"slices"
 	"sync"
 
-	"github.com/zodimo/go-maybe"
+	"github.com/zodimo/go-compose/state"
 )
 
-type FormFieldState struct {
+type FormFieldState[T any] struct {
 	id      string
-	value   maybe.Maybe[string]
+	value   state.MutableValueTyped[T]
 	touched bool
-	rules   []ValidationRule
 	mu      sync.Mutex
 
 	disabled bool
+	err      error
 }
 
-func NewFormFieldState(id string) *FormFieldState {
-	return &FormFieldState{
+func NewFormFieldState[T any](id string, value state.MutableValueTyped[T]) *FormFieldState[T] {
+	return &FormFieldState[T]{
 		id:       id,
-		value:    maybe.None[string](),
+		value:    value,
 		touched:  false,
-		rules:    []ValidationRule{},
 		disabled: false,
 	}
 }
 
-func (fs *FormFieldState) ID() string {
+func (fs *FormFieldState[T]) ID() string {
 	return fs.id
 }
 
-func (fs *FormFieldState) Value() maybe.Maybe[string] {
-	return fs.value
+func (fs *FormFieldState[T]) Value() T {
+	return fs.value.Get()
 }
 
-func (fs *FormFieldState) ValidationRules() []ValidationRule {
-	return slices.Clone(fs.rules)
+func (fs *FormFieldState[T]) SetValue(v T) *FormFieldState[T] {
+	fs.value.Set(v)
+	return fs
 }
 
-func (fs *FormFieldState) Touched() bool {
+func (fs *FormFieldState[T]) Error() error {
+	return fs.err
+}
+
+func (fs *FormFieldState[T]) SetError(err error) *FormFieldState[T] {
+	fs.err = err
+	return fs
+}
+
+func (fs *FormFieldState[T]) HasError() bool {
+	return fs.err != nil
+}
+
+func (fs *FormFieldState[T]) ClearError() *FormFieldState[T] {
+	fs.err = nil
+	return fs
+}
+
+func (fs *FormFieldState[T]) Touched() bool {
 	return fs.touched
 }
 
-func (fs *FormFieldState) Clone() *FormFieldState {
-	fs.mu.Lock()
-	defer fs.mu.Unlock()
-
-	return &FormFieldState{
-		id:      fs.id,
-		value:   fs.value,
-		touched: fs.touched,
-		rules:   slices.Clone(fs.rules),
-	}
+func (fs *FormFieldState[T]) Touch() *FormFieldState[T] {
+	fs.touched = true
+	return fs
 }
 
-func (fs *FormFieldState) Touch() *FormFieldState {
-	c := fs.Clone()
-	c.touched = true
-	return c
-}
-
-func (fs *FormFieldState) Disabled() bool {
+func (fs *FormFieldState[T]) Disabled() bool {
 	return fs.disabled
 }
 
-func (fs *FormFieldState) Disable() *FormFieldState {
-	c := fs.Clone()
-	c.disabled = true
-	return c
+func (fs *FormFieldState[T]) Disable() *FormFieldState[T] {
+	fs.disabled = true
+	return fs
 }
 
-func (fs *FormFieldState) Enable() *FormFieldState {
-	c := fs.Clone()
-	c.disabled = false
-	return c
+func (fs *FormFieldState[T]) Enable() *FormFieldState[T] {
+	fs.disabled = false
+	return fs
 }
 
-func (fs *FormFieldState) Update(f func(s *FormFieldState) *FormFieldState) *FormFieldState {
+func (fs *FormFieldState[T]) Update(f func(s *FormFieldState[T]) *FormFieldState[T]) *FormFieldState[T] {
+	fs.mu.Lock()
+	defer fs.mu.Unlock()
 	c := fs.Clone()
-	return f(c)
+	fs = f(c)
+	return fs
+}
+
+func (fs *FormFieldState[T]) Clone() *FormFieldState[T] {
+	fs.mu.Lock()
+	defer fs.mu.Unlock()
+
+	return &FormFieldState[T]{
+		id:       fs.id,
+		value:    fs.value,
+		touched:  fs.touched,
+		disabled: fs.disabled,
+		err:      fs.err,
+	}
 }

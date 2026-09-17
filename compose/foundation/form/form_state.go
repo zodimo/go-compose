@@ -1,11 +1,9 @@
 package fform
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/pkg/stateful"
 	"github.com/zodimo/go-compose/state"
 )
 
@@ -33,29 +31,15 @@ func RememberFormState(c api.Composer) *FormState {
 	}
 }
 
-func RememberFormItemState(c api.Composer) *FormItemState {
+func RememberFormFieldState[T any](c api.Composer, itemState state.MutableValueTyped[T]) *FormFieldState[T] {
 	key := c.GenerateID()
 	path := c.GetPath()
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
-	fieldID := fmt.Sprintf("%d/%s/fieldID", key, path)
-	onForgottenPath := fmt.Sprintf("%d/%s/onForgottenPath", key, path)
-	actorPath := fmt.Sprintf("%d/%s/actor", key, path)
+	fieldID := fmt.Sprintf("%d/%s/formField", key, path)
 
-	onForgotten := state.MustRemember(c, onForgottenPath, func() func() {
-		fmt.Println("FormItemState forgotten, calling cancel")
-		return cancel
+	formFieldState := state.MustRemember[*FormFieldState[T]](c, fieldID, func() *FormFieldState[T] {
+		return NewFormFieldState(fieldID, itemState)
 	})
 
-	actor := state.MustRemember(
-		c,
-		actorPath,
-		func() *stateful.Actor[*FormFieldState, stateful.Stateful[*FormFieldState]] {
-			return stateful.NewActor(ctx, stateful.NewStateful(NewFormFieldState(fieldID), func(s *FormFieldState) *FormFieldState { return s.Clone() }))
-		},
-		state.WithTypedOnForgotten[*stateful.Actor[*FormFieldState, stateful.Stateful[*FormFieldState]]](onForgotten.Get()),
-	)
-
-	return NewFormItemState(actor.Get())
+	return formFieldState.Get()
 }

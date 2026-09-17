@@ -20,7 +20,3 @@ const (
 	Horizontal Orientation = iota
 	Vertical
 )
-
-type Validator interface {
-	Validate(field any) bool
-}
