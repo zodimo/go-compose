@@ -19,7 +19,7 @@ import (
 func main() {
 	go func() {
 		w := new(app.Window)
-		w.Option(app.Title("Package CForms Demo"))
+		w.Option(app.Title("Form Engine Demo"))
 		w.Option(app.Size(unit.Dp(600), unit.Dp(800)))
 
 		if err := Run(w); err != nil {

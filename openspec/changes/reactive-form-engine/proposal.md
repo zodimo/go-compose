@@ -9,7 +9,7 @@ The current `compose/foundation/form` package is a UI shell without a state engi
 - **NEW** change notification — the engine uses `state.SubscriptionManager` for `OnValueChange` / `OnStatusChange` / `OnTouchChange`; group-level listeners actually fire when children change (fixing the no-op `updateAncestors` from the design sketch).
 - **NEW** `Form()` composable integration — `RememberFormState(c)` builds the tree; the composable subscribes to tree notifications and bumps a remembered version `MutableValue`, which drives recomposition through the existing store → `window.Invalidate()` loop.
 - **REPLACE** `FormFieldState[T]` — removed in favor of engine nodes + a `FormFieldBinding[T]` adapter. The public entry points used by `cmd/demo/form/ui.go` and `components/textfield.go` (`RememberFormState`, `RememberFormFieldState`, `Form`, `FormScope.Field/Form`, `TextFieldComponent`) keep working.
-- **ENHANCE** error UX — errors are gated on touched state: `WithError(control.HasErrors() && control.IsTouched())` + `WithSupportingText(firstError)`, replacing the hand-rolled red `BodySmall` below the field.
+- **ENHANCE** error UX — errors are gated on touched state: `WithError(control.HasErrors() && control.IsTouched())` + `WithSupportingText(all errors joined via errors.Join)`, replacing the hand-rolled red `BodySmall` below the field.
 - **DEAD-CODE MARKERS** — header comments added to `pkg/cforms/forms.go`, `pkg/cforms/errors.go`, `cmd/demo/form/form.go`, and the dead declarations in `types.go`/`options.go`/`components/textfield_options.go` (no deletion, per decision).
 
 ## Capabilities

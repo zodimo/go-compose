@@ -55,7 +55,7 @@ type ValueStore[T any] interface {
 Each node tracks `ownDisabled` and `inheritedDisabled` separately. `SetDisabled(x)` sets only `ownDisabled`; effective disabled is `own || parent.InheritedDisabled()`. `Group.SetDisabled(true)` no longer destroys child state — re-enabling the parent restores each child's own setting.
 
 ### D5. Validators return `error`, not `string`
-`ValidatorFunc[T] func(value T) error`, aggregated with `errors.Join` into `control.Errors()`. This matches the existing `ValidationRule[T]` convention and the `components/textfield.go` validate closure. The sketch's `func(value T, node *Control[T]) string` (which doesn't compile — `err != nil` on a string) is rejected. Validation runs on a **snapshot** of the value taken under `RLock`, then errors are stored under `Lock` — validators never run while the node lock is held (fixes reentrancy deadlock).
+`ValidatorFunc[T] func(value T) error`, aggregated with `errors.Join` into `control.Errors()` (all messages joined, so the UI can surface every failure). This matches the existing `ValidationRule[T]` convention and the `components/textfield.go` validate closure. The sketch's `func(value T, node *Control[T]) string` (which doesn't compile — `err != nil` on a string) is rejected. Validation runs on a **snapshot** of the value taken under `RLock`, then errors are stored under `Lock` — validators never run while the node lock is held (fixes reentrancy deadlock).
 
 ### D6. `FormNode` interface & node shapes
 ```go
@@ -63,7 +63,7 @@ type FormNode interface {
     // Status & validation
     Status() Status                       // VALID | INVALID | PENDING | DISABLED
     Validate() bool
-    Errors() map[string]string            // keyed by path for groups, first-error for controls
+    Errors() map[string]string            // keyed by path for groups; controls join all errors via errors.Join
 
     // Lifecycle
     IsTouched() bool
@@ -94,7 +94,7 @@ type FormNode interface {
 ```
 - `Control[T]`: leaf. Holds `valueStore ValueStore[T]`, `initialValue`, validators, `errors []error`, `ownDisabled`, `touched`, `dirty`. `RawValue()` returns `nil` when effectively disabled.
 - `Group`: `children map[string]FormNode`. `Status()`: `INVALID` if any child `INVALID`; `DISABLED` if *all* children disabled; `PENDING` if any child `PENDING`; else `VALID`. `RawValue()` returns `map[string]any` omitting disabled children.
-- `Array`: `children []FormNode` + `Add/Insert/Remove/Length/Get(index)`. Same status rules as Group. `RawValue()` returns `[]any` (ordered, omitting disabled). Removing/inserting shifts indices and fires `onChildChanged` up the chain.
+- `Array`: `children []FormNode` + `Add/Insert/Remove/Length/At(index)`. Same status rules as Group. `RawValue()` returns `[]any` (ordered, omitting disabled). Removing/inserting shifts indices and fires `onChildChanged` up the chain. (`Get` is reserved on the `FormNode` interface for path resolution, so indexed access is `At(index)`.)
 
 ### D7. Path resolver (`path.go`)
 Parse and resolve `a.b.c` and `items[0].name` (and mixed `group.items[2].field`):
@@ -123,18 +123,19 @@ func Form(state *FormState, content func(FormScope), options ...FormOption) api.
 ```go
 type FormFieldBinding[T any] struct {
     control *Control[T]
-    store   state.MutableValueTyped[T]   // remembered per-field, drives recomposition
 }
 ```
-`RememberFormFieldState(c, itemState)` becomes `RememberFormFieldBinding(c, itemState) *FormFieldBinding[T]` (alias kept for the demo). The binding:
+`FormFieldBinding` wraps a `*Control[T]` only; the remembered `MutableValueTyped[T]` store lives *inside* the control, wired through the `MutableValueValueStore` adapter at remember time (`RememberFormFieldBinding` builds `NewControl(NewMutableValueValueStore(itemState), itemState.Get())`). The binding:
 - reads `control.Value()/Errors()/IsTouched()` for the UI;
-- `SetValue` → `control.Set` (through the `MutableValueValueStore` adapter) + `Touch()`.
+- `SetValue` → `control.Set` (through the `MutableValueValueStore` adapter, driving recomposition) + `MarkAsTouched()`.
+
+`RememberFormFieldState(c, itemState)` is kept as a deprecated alias for `RememberFormFieldBinding(c, itemState)` so existing call sites keep working.
 
 ### D11. Touched-gated Material 3 errors
 `components/textfield.go` switches to:
 ```go
 textfield.WithError(control.HasErrors() && control.IsTouched())
-textfield.WithSupportingText(firstError)
+textfield.WithSupportingText(allErrors) // errors.Join of every validator failure
 ```
 and drops the hand-rolled red `BodySmall` error line (per user decision). `WithSupportingText` doubles as the error message (M3 convention, `outlined.go:98-101`).
 

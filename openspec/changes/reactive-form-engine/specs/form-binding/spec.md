@@ -34,7 +34,7 @@ The public API SHALL expose `FormFieldBinding[T]` (replacing `FormFieldState[T]`
 - **THEN** the control is set and touched, and the remembered store adapter triggers recomposition
 
 ### Requirement: Touched-gated error display
-Field components SHALL display Material 3 errors only after the control is touched: `WithError(control.HasErrors() && control.IsTouched())` with `WithSupportingText(firstError)` conveying the message. Untouched invalid controls SHALL NOT show error styling.
+Field components SHALL display Material 3 errors only after the control is touched: `WithError(control.HasErrors() && control.IsTouched())` with `WithSupportingText(all errors joined via errors.Join)` conveying the messages. Untouched invalid controls SHALL NOT show error styling.
 
 #### Scenario: Error hidden until touched
 - **WHEN** a bound field has validation errors but has not been touched
@@ -42,14 +42,14 @@ Field components SHALL display Material 3 errors only after the control is touch
 
 #### Scenario: Error shown after touch
 - **WHEN** the same field is then touched while still invalid
-- **THEN** the text field renders with error styling and the first error message as supporting text
+- **THEN** the text field renders with error styling and all error messages (joined) as supporting text
 
 #### Scenario: Error clears on valid input
 - **WHEN** a touched invalid field is corrected to a valid value
 - **THEN** error styling and supporting error text are removed
 
 ### Requirement: TextFieldComponent binds to the engine
-`components/textfield.go` SHALL consume a `FormFieldBinding[string]` and wire value, touch, validation, and error display through the control. The public signature and existing option names (`TextFieldWithLabel`, `TextFieldWithHintText`, `TextFieldWithValidators`) SHALL remain usable by the demo.
+`components/textfield.go` SHALL consume a `FormFieldBinding[string]` and wire value, touch, validation, and error display through the control. The public signature and existing option names (`TextFieldWithLabel`, `TextFieldWithHintText`) SHALL remain usable by the demo. The inert `TextFieldWithValidators` option was removed: validation is wired exclusively through the engine's validators at tree-build time.
 
 #### Scenario: Demo field uses the engine
 - **WHEN** `cmd/demo/form/ui.go` renders a field via `TextFieldComponent(binding, ...)`

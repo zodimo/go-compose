@@ -9,41 +9,54 @@ import (
 	"github.com/zodimo/go-compose/pkg/api"
 )
 
+// FormScope binds named nodes of the form tree to their rendering content.
 type FormScope interface {
-	Field(key any, content api.Composable)
-	Form(key any, header api.Composable, children func(FormScope))
+	// Field resolves key against the tree and passes the resolved node into content.
+	Field(key string, content func(node FormNode) api.Composable)
+	// Form resolves key against the tree and, when found, renders a header row
+	// then nests a child scope whose keys resolve relative to the subtree named
+	// by key. An unresolvable key renders nothing (the tree is the single source
+	// of truth).
+	Form(key string, header api.Composable, children func(FormScope))
 }
 
 var _ FormScope = (*formScopeImpl)(nil)
 
 type formScopeImpl struct {
 	listScope lazy.LazyListScope
-	state     *FormState
-	options   *FormOptions
+	tree      *Group
+	basePath  string
 }
 
-func (s *formScopeImpl) Field(key any, content api.Composable) {
-	// Capture state and options for closure
-	// state := s.state
-	// opts := s.options
+// Field resolves key relative to the scope's base path and, when found, renders
+// content with the resolved node. An unresolvable key renders nothing.
+func (s *formScopeImpl) Field(key string, content func(node FormNode) api.Composable) {
+	path := s.joinPath(s.basePath, key)
+	node, ok := ResolvePath(s.tree, path)
+	if !ok {
+		return
+	}
 
 	s.listScope.Item(key, func(c api.Composer) api.Composer {
-		return content(c)
+		return content(node)(c)
 	})
 }
-func (s *formScopeImpl) Form(key any, header api.Composable, children func(FormScope)) {
 
-	// Capture state and options for closure
-	// state := s.state
-	// opts := s.options
+// Form resolves key relative to the scope's base path and, when found, renders
+// the header row then nests a child scope resolving relative paths against the
+// subtree named by key. An unresolvable key renders nothing (the tree is the
+// single source of truth, matching Field).
+func (s *formScopeImpl) Form(key string, header api.Composable, children func(FormScope)) {
+	path := s.joinPath(s.basePath, key)
+	if _, ok := ResolvePath(s.tree, path); !ok {
+		return
+	}
 
-	// Branch Header
 	s.listScope.Item(key, func(c api.Composer) api.Composer {
 		return row.Row(
 			c.Sequence(
 				row.Row(
 					c.Sequence(
-						// Header Content
 						header,
 					),
 					row.WithAlignment(row.Middle),
@@ -60,11 +73,19 @@ func (s *formScopeImpl) Form(key any, header api.Composable, children func(FormS
 		)(c)
 	})
 
-	// Children
 	childScope := &formScopeImpl{
 		listScope: s.listScope,
-		state:     s.state,
-		options:   s.options,
+		tree:      s.tree,
+		basePath:  path,
 	}
 	children(childScope)
+}
+
+// joinPath joins a base path and key with a dot separator, returning key alone
+// when base is empty.
+func (s *formScopeImpl) joinPath(base, key string) string {
+	if base == "" {
+		return key
+	}
+	return base + "." + key
 }

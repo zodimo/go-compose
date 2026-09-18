@@ -9,7 +9,7 @@ The form engine SHALL model a form as a tree of nodes implementing the `FormNode
 
 #### Scenario: Array nodes support indexed children
 - **WHEN** an `Array` node has `Add`, `Insert`, `Remove`, and `Length` operations performed on it
-- **THEN** children are stored in order, indices shift correctly on insert/remove, and `Get(index)` returns the node at that position
+- **THEN** children are stored in order, indices shift correctly on insert/remove, and `At(index)` returns the node at that position
 
 #### Scenario: Parent pointer integrity
 - **WHEN** a node is added to a `Group` or `Array`
@@ -68,7 +68,7 @@ Nodes SHALL track `touched`, `dirty`, and `pristine` state. `IsPristine()` SHALL
 
 #### Scenario: Multiple validators aggregate errors
 - **WHEN** a control has a required validator and a length validator, and both fail
-- **THEN** `Errors()` returns both error messages and `Validate()` returns false
+- **THEN** `Errors()` exposes all error messages (joined via `errors.Join`) and `Validate()` returns false
 
 #### Scenario: Validation does not deadlock on reentrancy
 - **WHEN** a validator calls back into the control's read methods

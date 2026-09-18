@@ -31,18 +31,21 @@ func WithModifier(m ui.Modifier) FormOption {
 	}
 }
 
+// DEAD: superseded by the form engine (FormNode/Control/Group/Array)
 func WithTextStyle(style *text.TextStyle) FormOption {
 	return func(o *FormOptions) {
 		o.TextStyle = style
 	}
 }
 
+// DEAD: superseded by the form engine (FormNode/Control/Group/Array)
 func WithTextStyleOption(textStyleOption text.TextStyleOption) FormOption {
 	return func(o *FormOptions) {
 		o.TextStyle = text.CopyTextStyle(o.TextStyle, textStyleOption)
 	}
 }
 
+// DEAD: superseded by the form engine (FormNode/Control/Group/Array)
 func WithOrientation(orentation Orientation) FormOption {
 	return func(o *FormOptions) {
 		o.Orientation = orentation
