@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 
+	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/icon"
 	"github.com/zodimo/go-compose/compose/foundation/lazy"
+	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/material3/appbar"
 	"github.com/zodimo/go-compose/compose/material3/button"
 	"github.com/zodimo/go-compose/compose/material3/dialog"
@@ -52,77 +54,81 @@ func UI() api.Composable {
 			{"Typography", mdicons.ActionLabel},
 		}
 
-		c = c.Sequence(
-			// Scaffold with navigation
-			scaffold.Scaffold(
-				// Content area based on selected category
-				lazy.LazyColumn(
-					func(scope lazy.LazyListScope) {
-						scope.Item(nil, func(c api.Composer) api.Composer {
-							return c.Sequence(
-								//use Lazy to not invoke the composlable and keep it in memory
-								c.WhenLazy(currentCategory == CategoryActions, func() api.Composable { return ActionsScreen(c) }),
-								c.WhenLazy(currentCategory == CategorySelection, func() api.Composable { return SelectionScreen(c) }),
-								c.WhenLazy(currentCategory == CategoryFeedback, func() api.Composable { return FeedbackScreen(c, showDialog, snackbarHostState) }),
-								c.WhenLazy(currentCategory == CategoryInputs, func() api.Composable { return InputsScreen(c) }),
-								c.WhenLazy(currentCategory == CategoryTypography, func() api.Composable { return TypographyScreen(c) }),
-							)(c)
-						})
-					},
-					lazy.WithModifier(weight.Weight(1).Then(size.FillMaxWidth())),
-				),
-				scaffold.WithTopBar(
-					appbar.TopAppBar(
-						m3text.TitleLarge("Component Showcase"),
-					),
-				),
-				scaffold.WithBottomBar(
-					navigationbar.NavigationBar(
-						func(c api.Composer) api.Composer {
-							for i, item := range navItems {
-								idx := i
-								navigationbar.NavigationBarItem(
-									currentCategory == idx,
-									func() { selectedCategory.Set(idx) },
-									func(c api.Composer) api.Composer {
-										return icon.Icon(
-											item.Icon,
-											icon.WithSize(uiUnit.Dp(24)),
-										)(c)
-									},
-									func(c api.Composer) api.Composer {
-										return m3text.LabelMedium(item.Label)(c)
-									},
+		// m3 theme from compose
+		c = compose.CompositionLocalProvider(
+			[]api.ProvidedValue{material3.LocalColorSchemeNext.Provides(material3.LightColorScheme())},
+			c.Sequence(
+				// Scaffold with navigation
+				scaffold.Scaffold(
+					// Content area based on selected category
+					lazy.LazyColumn(
+						func(scope lazy.LazyListScope) {
+							scope.Item(nil, func(c api.Composer) api.Composer {
+								return c.Sequence(
+									//use Lazy to not invoke the composlable and keep it in memory
+									c.WhenLazy(currentCategory == CategoryActions, func() api.Composable { return ActionsScreen(c) }),
+									c.WhenLazy(currentCategory == CategorySelection, func() api.Composable { return SelectionScreen(c) }),
+									c.WhenLazy(currentCategory == CategoryFeedback, func() api.Composable { return FeedbackScreen(c, showDialog, snackbarHostState) }),
+									c.WhenLazy(currentCategory == CategoryInputs, func() api.Composable { return InputsScreen(c) }),
+									c.WhenLazy(currentCategory == CategoryTypography, func() api.Composable { return TypographyScreen(c) }),
 								)(c)
-							}
-							return c
+							})
 						},
+						lazy.WithModifier(weight.Weight(1).Then(size.FillMaxWidth())),
+					),
+					scaffold.WithTopBar(
+						appbar.TopAppBar(
+							m3text.TitleLarge("Component Showcase"),
+						),
+					),
+					scaffold.WithBottomBar(
+						navigationbar.NavigationBar(
+							func(c api.Composer) api.Composer {
+								for i, item := range navItems {
+									idx := i
+									navigationbar.NavigationBarItem(
+										currentCategory == idx,
+										func() { selectedCategory.Set(idx) },
+										func(c api.Composer) api.Composer {
+											return icon.Icon(
+												item.Icon,
+												icon.WithSize(uiUnit.Dp(24)),
+											)(c)
+										},
+										func(c api.Composer) api.Composer {
+											return m3text.LabelMedium(item.Label)(c)
+										},
+									)(c)
+								}
+								return c
+							},
+						),
+					),
+					scaffold.WithModifier(size.FillMax()),
+				),
+				// Dialog overlay
+				c.When(showDialog.Get(),
+					dialog.AlertDialog(
+						func() {
+							fmt.Println("Dialog Dismiss requested")
+							showDialog.Set(false)
+						},
+						button.Text(func() {
+							fmt.Println("Dialog Confirm button clicked")
+							showDialog.Set(false)
+						}, "Confirm"),
+						dialog.TextContent("This is an example AlertDialog demonstrating the Feedback category."),
+						dialog.WithTitleText("Example Dialog"),
+						dialog.WithDismissButton(button.Text(
+							func() {
+								fmt.Println("Dialog Dismis button clicked")
+								showDialog.Set(false)
+							}, "Cancel")),
 					),
 				),
-				scaffold.WithModifier(size.FillMax()),
+				// Snackbar host overlay
+				snackbar.SnackbarHost(snackbarHostState),
 			),
-			// Dialog overlay
-			c.When(showDialog.Get(),
-				dialog.AlertDialog(
-					func() {
-						fmt.Println("Dialog Dismiss requested")
-						showDialog.Set(false)
-					},
-					button.Text(func() {
-						fmt.Println("Dialog Confirm button clicked")
-						showDialog.Set(false)
-					}, "Confirm"),
-					dialog.TextContent("This is an example AlertDialog demonstrating the Feedback category."),
-					dialog.WithTitleText("Example Dialog"),
-					dialog.WithDismissButton(button.Text(
-						func() {
-							fmt.Println("Dialog Dismis button clicked")
-							showDialog.Set(false)
-						}, "Cancel")),
-				),
-			),
-			// Snackbar host overlay
-			snackbar.SnackbarHost(snackbarHostState),
 		)(c)
 
 		return c
