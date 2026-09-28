@@ -35,7 +35,6 @@ func UI() api.Composable {
 					return column.Column(
 						c.Sequence(
 							//ColorScheme Toggle
-							// Case 1: Switch in a row, text then switch
 							row.Row(
 								c.Sequence(
 									text.BodyMedium("Toggle ColorScheme"),
@@ -163,33 +162,33 @@ func UI() api.Composable {
 							),
 							spacer.Height(16),
 
-							// func(c api.Composer) api.Composer {
-							// 	theme := material3.Theme(c)
-							// 	// 7. Custom Colors - Primary Theme
-							// 	return appbar.TopAppBar(
-							// 		text.TextWithStyle("Custom Colors", text.TypestyleTitleLarge),
-							// 		appbar.WithNavigationIcon(
-							// 			iconbutton.Standard(
-							// 				func() {},
-							// 				icons.NavigationMenu,
-							// 				"Menu",
-							// 			),
-							// 		),
-							// 		appbar.WithActions(
-							// 			iconbutton.Standard(
-							// 				func() {},
-							// 				icons.ActionSearch,
-							// 				"Search",
-							// 			),
-							// 		),
-							// 		appbar.WithColors(appbar.TopAppBarColors{
-							// 			ContainerColor:             theme.ColorScheme().Primary.Color,   //theme.ColorHelper.ColorSelector().PrimaryRoles.Primary,
-							// 			NavigationIconContentColor: theme.ColorScheme().Primary.OnColor, //theme.ColorHelper.ColorSelector().PrimaryRoles.OnPrimary,
-							// 			TitleContentColor:          theme.ColorScheme().Primary.OnColor, //theme.ColorHelper.ColorSelector().PrimaryRoles.OnPrimary,
-							// 			ActionIconContentColor:     theme.ColorScheme().Primary.OnColor, //theme.ColorHelper.ColorSelector().PrimaryRoles.OnPrimary,
-							// 		}),
-							// 	)(c)
-							// },
+							func(c api.Composer) api.Composer {
+								theme := material3.Theme(c)
+								// 7. Custom Colors - Primary Theme
+								return appbar.TopAppBar(
+									text.HeadlineMedium("Custom Colors"),
+									appbar.WithNavigationIcon(
+										iconbutton.Standard(
+											func() {},
+											icons.NavigationMenu,
+											"Menu",
+										),
+									),
+									appbar.WithActions(
+										iconbutton.Standard(
+											func() {},
+											icons.ActionSearch,
+											"Search",
+										),
+									),
+									appbar.WithColors(appbar.TopAppBarColors{
+										ContainerColor:             theme.ColorScheme().Primary,   //theme.ColorHelper.ColorSelector().PrimaryRoles.Primary,
+										NavigationIconContentColor: theme.ColorScheme().OnPrimary, //theme.ColorHelper.ColorSelector().PrimaryRoles.OnPrimary,
+										TitleContentColor:          theme.ColorScheme().OnPrimary, //theme.ColorHelper.ColorSelector().PrimaryRoles.OnPrimary,
+										ActionIconContentColor:     theme.ColorScheme().OnPrimary, //theme.ColorHelper.ColorSelector().PrimaryRoles.OnPrimary,
+									}),
+								)(c)
+							},
 						),
 						column.WithModifier(size.FillMax().
 							Then(padding.All(16)), // Add some padding around the column
