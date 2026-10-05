@@ -27,7 +27,12 @@ func UI() api.Composable {
 				text.HeadlineMedium("Reactive Form Engine Demo"),
 				spacer.Height(16),
 				fform.Form(formState, formContent, fform.WithModifier(padding.All(16))),
-				button.Outlined(func() {}, "Submit"),
+				button.Outlined(func() {
+					// print form data
+					//type FormNode interface {
+					// formState
+
+				}, "Submit"),
 			),
 			column.WithSpacing(column.SpaceSides),
 			column.WithAlignment(column.Middle),
