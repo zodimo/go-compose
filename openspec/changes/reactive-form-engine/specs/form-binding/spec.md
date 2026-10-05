@@ -72,3 +72,49 @@ The fully-dead files `pkg/cforms/forms.go`, `pkg/cforms/errors.go`, and `cmd/dem
 #### Scenario: Demo has accurate title
 - **WHEN** the form demo launches
 - **THEN** the window title reflects the new form engine demo
+### Requirement: Bound field components
+
+`compose/foundation/form/components` SHALL provide bound Material 3 field components that take a `*FormFieldBinding[T]`, read value/errors/touched state from the control, write through `SetValue`, and honor the control's enabled state: `TextFieldComponent` (`string`), `NumberFieldComponent` (`int`), `CheckboxComponent` and `SwitchComponent` (`bool`), and `SelectComponent` (`string` with `[]SelectOption`). Errors SHALL be touched-gated and rendered as supporting text.
+
+#### Scenario: Disabled control renders a disabled widget
+
+- **WHEN** a bound field's control is effectively disabled (own or inherited)
+- **THEN** the field component renders with error/enabled styling reflecting the disabled state and its writes are ignored
+
+#### Scenario: Number field tolerates partial input
+
+- **WHEN** the user types a value that does not parse as an int into a `NumberFieldComponent`
+- **THEN** the raw text is retained for editing, the control keeps its last parsed value, and a touched-gated error is shown
+
+#### Scenario: Select writes the option value
+
+- **WHEN** the user picks an option in a `SelectComponent`
+- **THEN** the option's `Value` is written through the binding and the menu closes
+
+### Requirement: FormFieldBinding read surface
+
+`FormFieldBinding[T]` SHALL expose `Value()`, `SetValue(v)`, `Errors()`, `HasErrors()`, `IsTouched()`, `IsEnabled()`, `IsDirty()`, `Status()`, `ErrorMessage()`, and `Control()`.
+
+#### Scenario: Binding reflects control state
+
+- **WHEN** the control's value, errors, or enabled state change
+- **THEN** the binding's corresponding accessors reflect the new state
+
+### Requirement: Optional-capable number field
+
+`compose/foundation/form/components` SHALL provide `OptionalNumberFieldComponent(*FormFieldBinding[Optional[int]], ...)` alongside the int `NumberFieldComponent`. The raw text buffer SHALL be the authority for emptiness: an empty field writes `None`, a parseable entry writes `Some(n)`, and a non-empty unparsable entry is a touched-gated supporting error that leaves the control's last value in place. An external control change (Reset, programmatic Set) SHALL re-seed the displayed text rather than being shadowed by a stale buffer.
+
+#### Scenario: Clearing an optional number field yields None
+
+- **WHEN** the user clears an `OptionalNumberFieldComponent`
+- **THEN** the control's value becomes `None` and the field renders empty
+
+#### Scenario: Zero is preserved as Some(0)
+
+- **WHEN** the user types "0"
+- **THEN** the control's value becomes `Some(0)` and the field renders "0"
+
+#### Scenario: External reset re-seeds the field
+
+- **WHEN** the bound control is reset to `None` while the field previously showed a number
+- **THEN** the field renders empty again rather than the stale text

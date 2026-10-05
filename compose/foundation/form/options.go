@@ -31,21 +31,23 @@ func WithModifier(m ui.Modifier) FormOption {
 	}
 }
 
-// DEAD: superseded by the form engine (FormNode/Control/Group/Array)
+// WithTextStyle sets the text style provided to the form's field components via
+// CompositionLocalProvider.
 func WithTextStyle(style *text.TextStyle) FormOption {
 	return func(o *FormOptions) {
 		o.TextStyle = style
 	}
 }
 
-// DEAD: superseded by the form engine (FormNode/Control/Group/Array)
+// WithTextStyleOption merges a text style option into the form's provided style.
 func WithTextStyleOption(textStyleOption text.TextStyleOption) FormOption {
 	return func(o *FormOptions) {
 		o.TextStyle = text.CopyTextStyle(o.TextStyle, textStyleOption)
 	}
 }
 
-// DEAD: superseded by the form engine (FormNode/Control/Group/Array)
+// DEAD: superseded by the form engine (FormNode/Control/Group/Array); the form
+// renders a LazyColumn and nothing reads Orientation.
 func WithOrientation(orentation Orientation) FormOption {
 	return func(o *FormOptions) {
 		o.Orientation = orentation

@@ -9,7 +9,12 @@ import (
 )
 
 type TextFieldComponentOptions struct {
-	Modifier  ui.Modifier
+	Modifier ui.Modifier
+
+	// TextStyle is reserved: the Material 3 textfield option takes a different
+	// TextStyle type (foundation/next/text) than the form's ui/text style, so it
+	// is not forwarded to the field. The form-level style is provided through
+	// Form(WithTextStyle(...)) instead.
 	TextStyle *text.TextStyle
 
 	Label    string
@@ -29,21 +34,21 @@ func DefaultTextFieldComponentOptions() TextFieldComponentOptions {
 	}
 }
 
-// DEAD: superseded by the form engine (FormNode/Control/Group/Array)
+// TextFieldWithModifier appends a modifier to the field.
 func TextFieldWithModifier(m ui.Modifier) TextFieldComponentOption {
 	return func(o *TextFieldComponentOptions) {
 		o.Modifier = o.Modifier.Then(m)
 	}
 }
 
-// DEAD: superseded by the form engine (FormNode/Control/Group/Array)
+// TextFieldWithTextStyle sets the field's text style.
 func TextFieldWithTextStyle(style *text.TextStyle) TextFieldComponentOption {
 	return func(o *TextFieldComponentOptions) {
 		o.TextStyle = style
 	}
 }
 
-// DEAD: superseded by the form engine (FormNode/Control/Group/Array)
+// TextFieldWithTextStyleOption merges a text style option into the field's style.
 func TextFieldWithTextStyleOption(textStyleOption text.TextStyleOption) TextFieldComponentOption {
 	return func(o *TextFieldComponentOptions) {
 		o.TextStyle = text.CopyTextStyle(o.TextStyle, textStyleOption)
@@ -56,7 +61,8 @@ func TextFieldWithLabel(label string) TextFieldComponentOption {
 	}
 }
 
-// DEAD: superseded by the form engine (FormNode/Control/Group/Array)
+// TextFieldWithInline renders the field alongside surrounding content in a row
+// instead of as a full-width column entry.
 func TextFieldWithInline(inline bool) TextFieldComponentOption {
 	return func(o *TextFieldComponentOptions) {
 		o.Inline = inline

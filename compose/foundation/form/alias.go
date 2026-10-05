@@ -72,6 +72,18 @@ func ResolvePath(root FormNode, path string) (FormNode, bool) {
 	return formengine.ResolvePath(root, path)
 }
 
+// Walk visits root and every descendant depth-first in root-to-leaf
+// (pre-order) order.
+func Walk(root FormNode, visit func(node FormNode)) {
+	formengine.Walk(root, visit)
+}
+
+// WalkUp visits every descendant of node depth-first in leaf-to-root
+// (post-order) order.
+func WalkUp(node FormNode, visit func(node FormNode)) {
+	formengine.WalkUp(node, visit)
+}
+
 // Status constants are re-declared explicitly because constants cannot be
 // type-aliased.
 const (

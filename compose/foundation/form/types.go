@@ -2,7 +2,8 @@ package fform
 
 import "github.com/zodimo/go-compose/compose/ui/layout"
 
-// DEAD: superseded by the form engine (FormNode/Control/Group/Array)
+// DEAD: superseded by the form engine's FormNode interface, which validates via
+// Validate() bool and reports errors through Errors() map[string]string.
 // Validatable is an interface for specifying if a widget is validatable.
 type Validatable interface {
 	Validate() error
@@ -15,7 +16,8 @@ type Validatable interface {
 // StringValidator is a function signature for validating string inputs.
 type StringValidator func(string) error
 
-// DEAD: superseded by the form engine (FormNode/Control/Group/Array)
+// Orientation is a form layout axis. DEAD: its only consumer is the dead
+// WithOrientation option; the form renders a LazyColumn and ignores orientation.
 type Orientation layout.Axis
 
 const (

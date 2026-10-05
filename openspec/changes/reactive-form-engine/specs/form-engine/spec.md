@@ -117,3 +117,79 @@ Nodes SHALL expose change subscriptions (`OnValueChange`, `OnStatusChange`, `OnT
 #### Scenario: Reset restores initial state
 - **WHEN** `Reset()` is called on a group whose children were modified
 - **THEN** all values return to initial values, `IsDirty()` is false, and `IsTouched()` is false
+### Requirement: Form-level lifecycle surface
+
+`FormState` SHALL expose form-level operations over the tree root: `Validate() bool`, `Status()`, `Errors() map[string]string`, `Value() map[string]any`, `RawValue() any`, `IsTouched()`, `IsDirty()`, `IsPristine()`, `IsEnabled()`, `MarkAllTouched()`, `MarkAllUntouched()`, `MarkAllPristine()`, `Reset()`, `SetDisabled(bool)`, `Root()`, and `Submit(onValid func(map[string]any)) bool`.
+
+#### Scenario: Validate reports aggregate validity
+
+- **WHEN** `FormState.Validate()` is called on a tree containing an invalid control
+- **THEN** it returns false and `Errors()` returns an entry keyed by the control's dotted path
+
+#### Scenario: Value exports the whole tree
+
+- **WHEN** `FormState.Value()` is called
+- **THEN** it returns the root group's `RawValue()` as `map[string]any`, with nested groups as maps, arrays as ordered slices, and effectively-disabled nodes omitted
+
+#### Scenario: Submit validates, touches, and proceeds only when valid
+
+- **WHEN** `FormState.Submit(onValid)` is called on an invalid form
+- **THEN** it marks every control touched, does not invoke `onValid`, and returns false
+- **WHEN** the form is valid
+- **THEN** it invokes `onValid` with `Value()` and returns true
+
+#### Scenario: Reset restores the whole form
+
+- **WHEN** `FormState.Reset()` is called after mutation
+- **THEN** all values return to initial, errors clear, and the form is pristine and untouched
+
+### Requirement: Typed node resolution
+
+The public package SHALL expose generic resolution helpers so callers do not perform raw type assertions: `ControlOf[T](Resolver, key) (*Control[T], bool)`, `ControlFieldOf[T](FormScope, key, content)`, and `ControlViewOf[T](Resolver, key, content)`. A `Resolver` SHALL be satisfied by a `FormScope` and by any tree node wrapped with `NodeResolver(node)`.
+
+#### Scenario: ControlOf resolves a typed control
+
+- **WHEN** `ControlOf[string](resolver, "name")` is called and the node at `name` is a `Control[string]`
+- **THEN** the control and true are returned
+- **WHEN** the node is a different kind or does not resolve
+- **THEN** nil and false are returned without panicking
+
+#### Scenario: NodeResolver adapts a bare node
+
+- **WHEN** `ControlOf[string](NodeResolver(root), "a.b")` is called on a tree root
+- **THEN** resolution proceeds through the node's `Get`
+
+### Requirement: Array rendering and traversal helpers
+
+`FormScope` SHALL expose `FormArray(key, row)` to render one item per array child in order (passing the index and a row-relative scope), `ArrayLength(key)`, `Array(key)`, `Group(key)`, and `Resolve(key)`. Rows SHALL receive a scope whose base path is the array's path plus `[index]`, so nested keys resolve relative to the row.
+
+#### Scenario: FormArray iterates every child with relative resolution
+
+- **WHEN** `FormArray("phones", row)` is called on an array with two children
+- **THEN** `row` is invoked with indices 0 and 1, and each row scope resolves `"number"` to that row's control
+
+#### Scenario: ArrayLength reports child count
+
+- **WHEN** `ArrayLength(key)` is called for an array, a non-array node, and a missing key
+- **THEN** it returns the child count, 0, and 0 respectively
+
+### Requirement: Optional values for empty-vs-zero
+
+The engine SHALL support absent values through `Optional[T]`, an alias for `github.com/zodimo/go-maybe.Maybe`, so a typed control can distinguish "empty" from a legitimate zero value. The public package SHALL expose `Some`, `None`, `OptionalOf`, `RequiredOptional[T]()`, `NewOptionalControl[T]`, and `OptionalValue[T]`.
+
+#### Scenario: Optional distinguishes empty from zero
+
+- **WHEN** a `Control[Optional[int]]` holds `None[int]()`
+- **THEN** its exported value is `None`, distinct from `Some(0)`
+
+#### Scenario: RequiredOptional rejects only the empty state
+
+- **WHEN** `RequiredOptional[int]()` validates `None[int]()`
+- **THEN** it returns an error
+- **WHEN** it validates `Some(0)`
+- **THEN** it returns nil
+
+#### Scenario: Optional is comparable for Required
+
+- **WHEN** `Required(None[int]())` is used as a validator on a `Control[Optional[int]]`
+- **THEN** it behaves equivalently to `RequiredOptional`, failing on `None` and accepting `Some(T)`

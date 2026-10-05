@@ -59,3 +59,16 @@
 - [x] 8.2 `lsp_diagnostics` clean on all changed files
 - [x] 8.3 Confirm dead-code markers present and no dead code deleted
 - [x] 8.4 Manual smoke test of form demo (web + desktop if feasible)
+## 9. Follow-up: form lifecycle, typed binding, array UI, extra components
+
+- [x] 9.1 `FormState` lifecycle surface: `Validate`/`Status`/`Errors`/`Value`/`RawValue`/`IsTouched`/`IsDirty`/`IsPristine`/`IsEnabled`/`MarkAllTouched`/`MarkAllUntouched`/`MarkAllPristine`/`Reset`/`SetDisabled`/`Root`/`Submit`
+- [x] 9.2 `Resolver` interface + `NodeResolver` adapter; `ControlOf[T]`, `ControlFieldOf[T]`, `ControlViewOf[T]` generic helpers removing manual node type assertions
+- [x] 9.3 `FormScope` additions: `FormArray` (row iteration), `GroupScope`, `ArrayLength`, `Array`, `Group`, `Has`, `Resolve`; namespaced lazy item keys
+- [x] 9.4 `FormFieldBinding` read surface: `IsEnabled`/`IsDirty`/`Status`/`ErrorMessage`
+- [x] 9.5 Components: `NumberFieldComponent`, `CheckboxComponent`, `SwitchComponent`, `SelectComponent`; shared `field.go` touched-gating helpers; disabled-aware `TextFieldComponent`
+- [x] 9.6 Components option files for checkbox, switch, select, number; un-marked live `TextFieldWith*` options and wired `Inline`/`TextStyle`
+- [x] 9.7 Demo: real Submit/Reset, dynamic phone add/remove via `FormArray`, select and number fields, live status line, submission summary
+- [x] 9.8 Engine exports: `Walk`/`WalkUp` in `alias.go`
+- [x] 9.9 Tests: `FormState` lifecycle, scope/array resolution (fake lazy scope), demo path/type guards and cross-field disable
+- [x] 9.10 `compose/foundation/form/README.md` documenting the public API; openspec spec deltas for the new capabilities
+- [x] 9.11 `go build ./...`, `go vet ./...`, `go test ./...` all green

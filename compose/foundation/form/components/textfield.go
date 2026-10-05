@@ -8,9 +8,6 @@
 package components
 
 import (
-	"sort"
-	"strings"
-
 	fform "github.com/zodimo/go-compose/compose/foundation/form"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
@@ -21,6 +18,10 @@ import (
 
 // TextFieldComponent renders an Outlined text field bound to a form control.
 // Value, validation, and touched state are all driven through the control.
+//
+// The field is disabled when the bound control is not enabled, so a field inside
+// a disabled group (own or inherited) renders read-only rather than merely
+// ignoring writes.
 func TextFieldComponent(binding *fform.FormFieldBinding[string], options ...TextFieldComponentOption) api.Composable {
 	opts := DefaultTextFieldComponentOptions()
 	for _, opt := range options {
@@ -31,69 +32,30 @@ func TextFieldComponent(binding *fform.FormFieldBinding[string], options ...Text
 
 	return func(c api.Composer) api.Composer {
 		label := sentinel.TakeOrElseString(opts.Label, "")
-		supportingText := sentinel.TakeOrElseString(opts.HintText, "")
+		hint := sentinel.TakeOrElseString(opts.HintText, "")
 
-		hasError := binding.HasErrors() && binding.IsTouched()
-		if hasError {
-			if msg := errorMessage(binding.Errors()); msg != "" {
-				supportingText = msg
-			}
+		message, hasError := fieldError(binding)
+		support := supportingText(hint, message, hasError)
+
+		fieldOpts := []textfield.TextFieldOption{
+			textfield.WithLabel(label),
+			textfield.WithSupportingText(support),
+			textfield.WithError(hasError),
+			textfield.WithEnabled(binding.IsEnabled()),
+			textfield.WithModifier(opts.Modifier),
 		}
 
-		return c.IfLazy(
-			opts.Inline,
-			func() api.Composable {
-				return column.Column(
-					c.Sequence(
-						row.Row(
-							c.Sequence(
-								textfield.Outlined(
-									binding.Value(),
-									func(s string) {
-										binding.SetValue(s)
-									},
-									textfield.WithLabel(label),
-									textfield.WithSupportingText(supportingText),
-									textfield.WithError(hasError),
-									textfield.WithModifier(opts.Modifier),
-								),
-							),
-						),
-					),
-				)
+		field := textfield.Outlined(
+			binding.Value(),
+			func(s string) {
+				binding.SetValue(s)
 			},
-			func() api.Composable {
-				return column.Column(
-					c.Sequence(
-						textfield.Outlined(
-							binding.Value(),
-							func(s string) {
-								binding.SetValue(s)
-							},
-							textfield.WithLabel(label),
-							textfield.WithSupportingText(supportingText),
-							textfield.WithError(hasError),
-							textfield.WithModifier(opts.Modifier),
-						),
-					),
-				)
-			},
-		)(c)
-	}
-}
+			fieldOpts...,
+		)
 
-// errorMessage returns every error message in errs, sorted for determinism and
-// joined with newlines. A control exposes a single Errors() entry keyed by its
-// own path whose value is the errors.Join aggregation of all validator failures;
-// a group exposes one entry per descendant path. Nothing is dropped.
-func errorMessage(errs map[string]string) string {
-	if len(errs) == 0 {
-		return ""
+		if opts.Inline {
+			return row.Row(c.Sequence(field))(c)
+		}
+		return column.Column(c.Sequence(field))(c)
 	}
-	msgs := make([]string, 0, len(errs))
-	for _, msg := range errs {
-		msgs = append(msgs, msg)
-	}
-	sort.Strings(msgs)
-	return strings.Join(msgs, "\n")
 }
