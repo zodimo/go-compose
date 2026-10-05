@@ -83,3 +83,18 @@
 - [x] 10.6 Tests: rules catalog, code survival through join/wrap, WithCode preservation, FormState coded access
 - [x] 10.7 Demo: email + password/confirm (EqualTo) + phone rules + code-aware status line
 - [x] 10.8 README + spec deltas; provenance note (MPL-2.0 inspiration, original code)
+
+## 11. Take it home: cleanup of superseded residues
+
+Decision: the prototype (`rules` catalog + coded errors) is the design going forward; remove the residue it supersedes rather than keeping dead/marked code.
+
+- [x] 11.1 Delete `types.go` entirely: `Validatable`, `Orientation`/`Horizontal`/`Vertical`, `StringValidator` (all unreferenced)
+- [x] 11.2 Delete `FormOptions.Orientation` and `WithOrientation` (nothing read them)
+- [x] 11.3 Delete the reserved-but-unwired TextStyle plumbing: `FormOptions.TextStyle`/`WithTextStyle`/`WithTextStyleOption`, the `CompositionLocalProvider` in `form.go` (it provided `compose.LocalTextStyle`, which the material3 subtree does not read), and the components' `TextStyle` field/`TextFieldWithTextStyle`/`TextFieldWithTextStyleOption`
+- [x] 11.4 Delete engine-level `Required`/`MinLength` (`internal/validator.go` now only defines `ValidatorFunc`); engine tests use a test-only helper (`internal/helpers_test.go`)
+- [x] 11.5 Delete `NumberFieldComponentOptions.ErrorSpacing` (unused)
+- [x] 11.6 Promote standalone binding: remove the deprecated `RememberFormFieldState` alias; document `RememberFormFieldBinding` as the first-class tree-free path; add coverage
+- [x] 11.7 Delete the superseded design sketch `OiBqXP9A9jiK-2026-09-17-162915.md`
+- [x] 11.8 Fix `FirstInvalidPath` to be deterministic: groups are unordered maps, so "first" now means the lexically smallest failing path (documented), not map-walk order
+- [x] 11.9 README: drop stale style references; document the standalone binding and its FormState-visibility trade-off
+- [x] 11.10 `go build ./...`, `go vet ./...`, `gofmt`, `go test ./...` all green (43 packages)

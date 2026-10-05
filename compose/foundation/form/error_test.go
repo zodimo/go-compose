@@ -8,6 +8,7 @@ import (
 	"github.com/zodimo/go-compose/compose"
 	fform "github.com/zodimo/go-compose/compose/foundation/form"
 	"github.com/zodimo/go-compose/pkg/api"
+	"github.com/zodimo/go-compose/state"
 )
 
 func TestValidationError_ErrorAndCode(t *testing.T) {
@@ -135,9 +136,10 @@ func TestFormState_CodedErrorsAndFirstInvalidPath(t *testing.T) {
 		}
 	}
 
-	// Document order: identity.name is walked before email.
-	if path, ok := fs.FirstInvalidPath(); !ok || path != "identity.name" {
-		t.Fatalf("expected first invalid path identity.name, got %q ok=%t", path, ok)
+	// Deterministic: the lexically smallest failing path. With "email" and
+	// "identity.name" both invalid, "email" sorts first.
+	if path, ok := fs.FirstInvalidPath(); !ok || path != "email" {
+		t.Fatalf("expected first invalid path email, got %q ok=%t", path, ok)
 	}
 
 	// Codes are deduped and sorted across the tree.
@@ -184,5 +186,34 @@ func TestFormFieldBinding_Codes(t *testing.T) {
 		if code == "" {
 			t.Fatal("expected non-empty code")
 		}
+	}
+}
+
+// TestRememberFormFieldBinding_Standalone verifies the tree-free standalone path:
+// the binding owns a control whose value is driven by the remembered
+// MutableValueTyped, so writes flow through and validators run.
+func TestRememberFormFieldBinding_Standalone(t *testing.T) {
+	c := compose.NewComposer()
+	itemState := state.MustRemember[string](c, "standalone-name", func() string {
+		return ""
+	})
+
+	binding := fform.RememberFormFieldBinding(c, itemState)
+	if binding == nil {
+		t.Fatal("expected a binding")
+	}
+	if got := binding.Value(); got != "" {
+		t.Fatalf("expected empty initial value, got %q", got)
+	}
+
+	binding.SetValue("Ada")
+	if got := itemState.Get(); got != "Ada" {
+		t.Fatalf("expected SetValue to write through to itemState, got %q", got)
+	}
+	if !binding.IsTouched() {
+		t.Fatal("expected SetValue to mark the control touched")
+	}
+	if !binding.IsDirty() {
+		t.Fatal("expected SetValue to mark the control dirty")
 	}
 }

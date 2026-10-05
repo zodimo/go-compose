@@ -118,14 +118,19 @@ func errorMessage(errs map[string]string) string {
 	return strings.Join(msgs, "\n")
 }
 
-// Deprecated: use RememberFormFieldBinding.
-func RememberFormFieldState[T any](c api.Composer, itemState state.MutableValueTyped[T]) *FormFieldBinding[T] {
-	return RememberFormFieldBinding(c, itemState)
-}
-
 // RememberFormFieldBinding remembers a standalone FormFieldBinding backed by the
-// given itemState. This is the standalone (non-tree-integrated) path; the
-// tree-integrated path is FormScope.Field.
+// given itemState.
+//
+// This is the standalone, tree-free path: the control lives only in the
+// remembered binding and its value is driven by itemState (a
+// state.MutableValueTyped[T]), so a Set writes through to itemState and drives
+// recomposition. Use it for a one-off validated field that does not belong to a
+// Form tree.
+//
+// When the field is part of a Form, use FormScope.ControlFieldOf /
+// FormScope.ControlViewOf instead: those bind controls resident in the tree, so
+// form-level validation, reset, and value export see the field. Standalone fields
+// are invisible to FormState.
 func RememberFormFieldBinding[T any](c api.Composer, itemState state.MutableValueTyped[T]) *FormFieldBinding[T] {
 	fieldID := fmt.Sprintf("%d/%s/formField", c.GenerateID(), c.GetPath())
 

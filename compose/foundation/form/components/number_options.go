@@ -21,9 +21,6 @@ type NumberFieldComponentOptions struct {
 	// to "numberFieldText", which is only safe when a single number field is
 	// rendered under one path.
 	TextStateKey string
-
-	// ErrorSpacing is reserved for future supporting-text spacing.
-	ErrorSpacing int
 }
 
 // NumberFieldComponentOption configures a NumberFieldComponent.
@@ -36,7 +33,6 @@ func DefaultNumberFieldComponentOptions() NumberFieldComponentOptions {
 		Label:        sentinel.StringValueUnspecified,
 		HintText:     sentinel.StringValueUnspecified,
 		TextStateKey: "",
-		ErrorSpacing: 0,
 	}
 }
 

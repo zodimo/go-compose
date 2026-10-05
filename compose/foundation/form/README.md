@@ -170,6 +170,23 @@ list item keyed by the base path plus key. This means a field cannot be split
 across list items, and inline composition (for example a field plus a remove
 button in one row) uses `ControlViewOf` inside a `row.Row`.
 
+## Standalone fields (no form tree)
+
+A field does not have to live in a `Form`. `RememberFormFieldBinding` builds a
+tree-free binding whose control is driven directly by a remembered
+`state.MutableValueTyped[T]`:
+
+```go
+itemState := state.MustRemember(c, "age", func() int { return 0 })
+binding := fform.RememberFormFieldBinding(c, itemState)
+return components.NumberFieldComponent(binding, components.NumberFieldWithLabel("Age"))(c)
+```
+
+Validation, touched-gated errors, and recomposition work as usual. The trade-off:
+standalone fields are invisible to `FormState` — form-level `Validate`, `Reset`,
+`Value`, and `CodedErrors` only see controls in the tree. Prefer
+`ControlFieldOf`/`ControlViewOf` for anything that belongs to a form.
+
 ## Validation rules and error codes
 
 The base package ships `Required` and `MinLength`. A fuller rule catalog lives in

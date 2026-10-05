@@ -3,13 +3,12 @@ package fform
 import (
 	"fmt"
 
-	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/lazy"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/state"
 )
 
-// Form renders the form tree as a LazyColumn wrapped in a CompositionLocalProvider.
+// Form renders the form tree as a LazyColumn.
 //
 // It subscribes once to the tree root's change stream and bumps a remembered
 // version on every mutation, driving the store -> window.Invalidate()
@@ -46,18 +45,15 @@ func Form(
 			})
 		})
 
-		return compose.CompositionLocalProvider(
-			[]api.ProvidedValue{compose.LocalTextStyle.Provides(opts.TextStyle)},
-			lazy.LazyColumn(
-				func(scope lazy.LazyListScope) {
-					tScope := &formScopeImpl{
-						listScope: scope,
-						tree:      formState.root,
-					}
-					content(tScope)
-				},
-				lazyOpts...,
-			),
+		return lazy.LazyColumn(
+			func(scope lazy.LazyListScope) {
+				tScope := &formScopeImpl{
+					listScope: scope,
+					tree:      formState.root,
+				}
+				content(tScope)
+			},
+			lazyOpts...,
 		)(c)
 	}
 }

@@ -120,28 +120,22 @@ func (s *FormState) Codes() []ErrorCode {
 	return codes
 }
 
-// FirstInvalidPath returns the dotted path of the first failing control in
-// document order, or ("", false) when the form is valid. It is the usual hook for
-// "scroll to / focus the first error".
+// FirstInvalidPath returns the first failing control's dotted path, or ("",
+// false) when the form is valid. It is the usual hook for "focus the first
+// error".
+//
+// Group children are stored in a map, so there is no stable insertion order to
+// walk; "first" therefore means the lexically smallest dotted path among the
+// failing controls, which is deterministic. Arrays keep positional order within
+// a path (for example phones[0].number sorts before phones[1].number).
 func (s *FormState) FirstInvalidPath() (string, bool) {
-	var path string
-	found := false
-	Walk(s.root, func(node FormNode) {
-		if found {
-			return
-		}
-		control, ok := node.(interface {
-			ValidationErrors() []error
-		})
-		if !ok {
-			return
-		}
-		if len(control.ValidationErrors()) > 0 {
-			path = node.Path()
-			found = true
-		}
-	})
-	return path, found
+	coded := s.CodedErrors()
+	if len(coded) == 0 {
+		return "", false
+	}
+	// CodedErrors is sorted by path, so the first entry is the lexically
+	// smallest failing path.
+	return coded[0].Path, true
 }
 
 // Value returns the form serialized as plain Go values: a map[string]any keyed
