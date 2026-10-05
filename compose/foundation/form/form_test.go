@@ -36,6 +36,20 @@ func rememberTestForm(t *testing.T) *fform.FormState {
 	return fs
 }
 
+// composer is a short alias for api.Composer used by test builders.
+type composer = api.Composer
+
+// rememberTestFormWith builds and remembers a form tree with the given builder.
+func rememberTestFormWith(t *testing.T, build func(c api.Composer) *fform.Group) *fform.FormState {
+	t.Helper()
+	c := compose.NewComposer()
+	fs := fform.RememberFormState(c, build)
+	if fs == nil {
+		t.Fatal("RememberFormState returned nil")
+	}
+	return fs
+}
+
 func TestFormState_ValidateAndErrors(t *testing.T) {
 	fs := rememberTestForm(t)
 

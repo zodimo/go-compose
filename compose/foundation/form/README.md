@@ -218,6 +218,42 @@ url, uuid, ip/ipv4/ipv6, dns label/subdomain, base64, hex, semver), comparables
 slice contains, map key/value), and cross-field (equal-to, greater/less than
 field, required-when, forbidden-when, at-least-one-set, mutually-exclusive).
 
+Length rules come in two flavors: `MinLength` fails on empty input (0 < min);
+`MinLengthIfNotEmpty` and `Length` pass on empty and enforce a size only once the
+user has typed something — the right choice for an optional field with a minimum
+size when present.
+
+### Group-level validation
+
+Some cross-field rules are about the *group*, not any single child: "provide at
+least one of email/phone", "these are mutually exclusive", "end must be after
+start". Attach them to the group with `WithGroupValidator`; the failure is
+reported against the group's own path.
+
+```go
+fform.NewGroup(
+    map[string]fform.FormNode{
+        "email": email,
+        "phone": phone,
+    },
+    fform.WithGroupValidator(rules.GroupAtLeastOneSet[string]("email", "phone")),
+)
+```
+
+Group rules read named children (dotted paths allowed), ignore disabled and
+unresolvable children, and compose with the same coded-error machinery, so
+`formState.Errors()["contact"]` and `formState.CodedErrors()` both see the
+failure. Catalog: `GroupAtLeastOneSet`, `GroupMutuallyExclusive`,
+`GroupRequiredTogether`, `GroupOrdered`, and `GroupCustom`. Any
+`fform.GroupValidatorFunc` (`func(*fform.Group) error`) works, so hand-written
+group validators are first-class too.
+
+Group validators run on read (the engine never caches status), so they must be
+side-effect free and cheap, and they never run for an effectively disabled group.
+For a rule that concerns one field but compares it to a sibling, prefer the
+per-control cross-field rules (`EqualTo`, `GreaterThanField`); use a group
+validator when the subject is the group.
+
 ### Machine-readable failures
 
 Every rule raises a `*fform.ValidationError` carrying a stable `ErrorCode`, so you

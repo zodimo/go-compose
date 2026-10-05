@@ -33,8 +33,27 @@ func StringNotEmpty() fform.ValidatorFunc[string] {
 
 // MinLength fails when the rune count is below min. It raises CodeMinLength.
 // Counting runes (not bytes) keeps multibyte text correct.
+//
+// Empty input always fails (0 < min). For an optional field where empty is
+// allowed, use MinLengthIfNotEmpty.
 func MinLength(min int) fform.ValidatorFunc[string] {
 	return func(value string) error {
+		if n := len([]rune(value)); n < min {
+			return fail(CodeMinLength, "must be at least %d characters", min)
+		}
+		return nil
+	}
+}
+
+// MinLengthIfNotEmpty fails when the value is non-empty but shorter than min. It
+// raises CodeMinLength. Empty input passes, so it enforces a length only once the
+// user has entered something — the usual rule for an optional field that has a
+// minimum size when present.
+func MinLengthIfNotEmpty(min int) fform.ValidatorFunc[string] {
+	return func(value string) error {
+		if value == "" {
+			return nil
+		}
 		if n := len([]rune(value)); n < min {
 			return fail(CodeMinLength, "must be at least %d characters", min)
 		}
@@ -52,9 +71,14 @@ func MaxLength(max int) fform.ValidatorFunc[string] {
 	}
 }
 
-// Length fails when the rune count is outside [min, max]. It raises CodeLength.
+// Length fails when the value is non-empty and its rune count is outside
+// [min, max]. It raises CodeLength. Empty input passes; pair with StringNotEmpty
+// or Required when the field is mandatory.
 func Length(min, max int) fform.ValidatorFunc[string] {
 	return func(value string) error {
+		if value == "" {
+			return nil
+		}
 		n := len([]rune(value))
 		if n < min || n > max {
 			return fail(CodeLength, "must be between %d and %d characters", min, max)

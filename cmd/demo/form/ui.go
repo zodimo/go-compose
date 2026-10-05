@@ -81,10 +81,6 @@ func buildForm(c api.Composer) *fform.Group {
 				rules.MinLength(3),
 				rules.AlphaUnicode(),
 			),
-			"email": fform.NewControl(fform.NewPlainValueStore(""), "",
-				rules.StringNotEmpty(),
-				rules.Email(),
-			),
 			// Age is an optional number: an empty field is distinct from 0, and
 			// RequiredOptional rejects only the empty state.
 			"age": fform.NewControl[fform.Optional[int]](
@@ -97,6 +93,23 @@ func buildForm(c api.Composer) *fform.Group {
 				rules.EqualTo(func() string { return password.Value() }),
 			),
 		}),
+		// The contact group carries a group-level validator: at least one of
+		// email/phone is required. This is a rule about the group, not any single
+		// child, so it lives on the group and reports against the group's path.
+		"contact": fform.NewGroup(
+			map[string]fform.FormNode{
+				"email": fform.NewControl(fform.NewPlainValueStore(""), "",
+					rules.Email(),
+				),
+				"phone": fform.NewControl(fform.NewPlainValueStore(""), "",
+					rules.Numeric(),
+					// Phone is optional (only required if email is blank), so
+					// enforce the length only when something was entered.
+					rules.MinLengthIfNotEmpty(10),
+				),
+			},
+			fform.WithGroupValidator(rules.GroupAtLeastOneSet[string]("email", "phone")),
+		),
 		"tier": fform.NewControl(fform.NewPlainValueStore(""), "",
 			rules.OneOf("free", "pro", "enterprise"),
 		),
@@ -168,13 +181,6 @@ func formContent(fs fform.FormScope) {
 				components.TextFieldWithHintText("Minimum 3 letters"),
 			)
 		})
-		fform.ControlFieldOf[string](fs, "email", func(b *fform.FormFieldBinding[string]) api.Composable {
-			return components.TextFieldComponent(
-				b,
-				components.TextFieldWithLabel("Email"),
-				components.TextFieldWithHintText("name@example.com"),
-			)
-		})
 		fform.ControlFieldOf[fform.Optional[int]](fs, "age", func(b *fform.FormFieldBinding[fform.Optional[int]]) api.Composable {
 			return components.OptionalNumberFieldComponent(
 				b,
@@ -195,6 +201,26 @@ func formContent(fs fform.FormScope) {
 				b,
 				components.TextFieldWithLabel("Confirm password"),
 				components.TextFieldWithHintText("Must match the password"),
+			)
+		})
+	})
+
+	// The contact group renders its fields, and the group-level validator's
+	// failure ("at least one of email/phone") surfaces as an error under the
+	// "contact" path.
+	fs.Form("contact", text.TitleLarge("Contact"), func(fs fform.FormScope) {
+		fform.ControlFieldOf[string](fs, "email", func(b *fform.FormFieldBinding[string]) api.Composable {
+			return components.TextFieldComponent(
+				b,
+				components.TextFieldWithLabel("Email"),
+				components.TextFieldWithHintText("name@example.com"),
+			)
+		})
+		fform.ControlFieldOf[string](fs, "phone", func(b *fform.FormFieldBinding[string]) api.Composable {
+			return components.TextFieldComponent(
+				b,
+				components.TextFieldWithLabel("Phone"),
+				components.TextFieldWithHintText("At least 10 digits"),
 			)
 		})
 	})

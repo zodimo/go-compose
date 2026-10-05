@@ -16,7 +16,7 @@ func TestBuildFormPathsResolve(t *testing.T) {
 	root := buildForm(c)
 	resolver := fform.NodeResolver(root)
 
-	stringPaths := []string{"identity.name", "tier", "billing.street", "billing.city"}
+	stringPaths := []string{"identity.name", "tier", "billing.street", "billing.city", "contact.email", "contact.phone"}
 	for _, path := range stringPaths {
 		if _, ok := fform.ControlOf[string](resolver, path); !ok {
 			t.Errorf("expected %q to resolve to Control[string]", path)
@@ -91,7 +91,7 @@ func TestSubmitCollectsValidValue(t *testing.T) {
 		ctl.Set(value)
 	}
 	set("identity.name", "Ada")
-	set("identity.email", "ada@example.com")
+	set("contact.email", "ada@example.com")
 	set("identity.password", "s3cret-pass")
 	set("identity.confirm", "s3cret-pass")
 	set("tier", "pro")
@@ -115,5 +115,49 @@ func TestSubmitCollectsValidValue(t *testing.T) {
 	identity, _ := got["identity"].(map[string]any)
 	if identity["name"] != "Ada" {
 		t.Errorf("expected identity.name=Ada, got %v", identity["name"])
+	}
+}
+
+// TestContactGroupValidator exercises the demo's group-level validator: the
+// contact group is invalid until at least one of email/phone is provided, and
+// the failure is reported under the "contact" path.
+func TestContactGroupValidator(t *testing.T) {
+	c := compose.NewComposer()
+	formState := fform.RememberFormState(c, buildForm)
+
+	if !formState.Validate() {
+		// Expected: other fields are empty too, but confirm the group error.
+	}
+	if _, ok := formState.Errors()["contact"]; !ok {
+		t.Fatalf("expected a group error under 'contact', got %v", formState.Errors())
+	}
+
+	email, ok := fform.ControlOf[string](fform.NodeResolver(formState.Root()), "contact.email")
+	if !ok {
+		t.Fatal("expected contact.email to resolve")
+	}
+	email.Set("ada@example.com")
+
+	// The group-level failure clears once a member is set.
+	if _, ok := formState.Errors()["contact"]; ok {
+		t.Fatalf("expected the contact group error to clear, got %v", formState.Errors())
+	}
+}
+
+// TestContactGroupViaPhone shows the OR: setting phone instead of email also
+// satisfies the group rule.
+func TestContactGroupViaPhone(t *testing.T) {
+	c := compose.NewComposer()
+	formState := fform.RememberFormState(c, buildForm)
+
+	phone, ok := fform.ControlOf[string](fform.NodeResolver(formState.Root()), "contact.phone")
+	if !ok {
+		t.Fatal("expected contact.phone to resolve")
+	}
+	phone.Set("5550100123")
+	formState.Validate()
+
+	if _, ok := formState.Errors()["contact"]; ok {
+		t.Fatalf("expected the contact group error to clear via phone, got %v", formState.Errors())
 	}
 }

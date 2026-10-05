@@ -240,3 +240,27 @@ Validators SHALL be able to attach a machine-readable `ErrorCode` to failures vi
 
 - **WHEN** `EqualTo(func() string { return password.Value() })` validates the confirmation field
 - **THEN** it compares against the password control's current value and raises `compare_fields` on mismatch
+
+### Requirement: Group-level validation
+
+A `Group` SHALL accept group-level validators (`GroupValidatorFunc`, `func(*Group) error`) via `NewGroup(children, WithValidator(...))`. Group validators SHALL run on read — during `Validate()`, `Errors()`, and `Status()` — never cached, and SHALL NOT run for an effectively disabled group. Their failures SHALL be reported against the group's own path and SHALL be exposed via `Group.ValidationErrors()` so structured (coded) errors flow through `FormState.CodedErrors`.
+
+#### Scenario: Group validator failure invalidates the group
+
+- **WHEN** a group with a failing group validator is validated
+- **THEN** `Validate()` returns false, `Status()` returns INVALID, and `Errors()` contains an entry keyed by the group's own path
+
+#### Scenario: Group validators are skipped when disabled
+
+- **WHEN** a group (or an ancestor) is disabled
+- **THEN** its group validators do not run and the group reports DISABLED
+
+#### Scenario: Multiple group validators aggregate
+
+- **WHEN** a group has two failing validators
+- **THEN** both failures are joined under the group's path and both codes appear in `Codes()`
+
+#### Scenario: Group validators run on read
+
+- **WHEN** `Status()` or `Validate()` is called
+- **THEN** the group's validators execute, and no cached result is reused across calls

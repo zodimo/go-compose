@@ -118,3 +118,17 @@ The fully-dead files `pkg/cforms/forms.go`, `pkg/cforms/errors.go`, and `cmd/dem
 
 - **WHEN** the bound control is reset to `None` while the field previously showed a number
 - **THEN** the field renders empty again rather than the stale text
+
+### Requirement: Group-level rule catalog
+
+The `rules` package SHALL provide group-level rules that read named children and raise coded errors: `GroupAtLeastOneSet`, `GroupMutuallyExclusive`, `GroupRequiredTogether`, `GroupOrdered`, and `GroupCustom`. These SHALL be `fform.GroupValidatorFunc` values attachable with `fform.WithGroupValidator`. A length rule SHALL exist for optional string fields that passes on empty input (`MinLengthIfNotEmpty`), and `Length` SHALL pass on empty input.
+
+#### Scenario: At-least-one reads the group's children
+
+- **WHEN** `GroupAtLeastOneSet[string]("email", "phone")` is attached to a group and both children are empty
+- **THEN** the group is invalid with a `cross_field` code; setting either child clears it
+
+#### Scenario: Disabled children are ignored by group rules
+
+- **WHEN** a group rule names a child that is disabled
+- **THEN** that child does not count toward the rule's outcome

@@ -1,6 +1,7 @@
 package formengine
 
 import (
+	"errors"
 	"sync"
 
 	"github.com/zodimo/go-compose/state"
@@ -11,6 +12,7 @@ type Group struct {
 	mu                sync.RWMutex
 	parent            FormNode
 	children          map[string]FormNode
+	validators        []GroupValidatorFunc
 	ownDisabled       bool
 	inheritedDisabled bool
 
@@ -21,14 +23,45 @@ type Group struct {
 
 var _ FormNode = (*Group)(nil)
 
+// GroupValidatorFunc validates a group as a whole, typically by reading its
+// children's values. It returns a non-nil error when the group is invalid.
+//
+// Group validators are the home for cross-field rules whose subject is the
+// group rather than one child (at-least-one-of, mutually-exclusive, ordered
+// ranges across siblings). The failure is reported against the group's own path.
+//
+// Validators run on read (design D3: status is computed on read, never cached),
+// so they must be side-effect free and cheap. They never run for an effectively
+// disabled group. Like ValidatorFunc, they must not depend on a node's internal
+// lock, which is never held while they run.
+type GroupValidatorFunc func(g *Group) error
+
+// GroupOption configures a Group at construction.
+type GroupOption func(g *Group)
+
+// WithValidator attaches a group-level validator. It may be passed more than
+// once; validators run in the order they are added.
+func WithValidator(fn GroupValidatorFunc) GroupOption {
+	return func(g *Group) {
+		if fn != nil {
+			g.validators = append(g.validators, fn)
+		}
+	}
+}
+
 // NewGroup creates a group with the given named children and wires each child's
-// parent pointer to the group.
-func NewGroup(children map[string]FormNode) *Group {
+// parent pointer to the group. Options attach group-level validators.
+func NewGroup(children map[string]FormNode, options ...GroupOption) *Group {
 	g := &Group{
 		children:     children,
 		valueStream:  newTypedStream(map[string]any{}),
 		statusStream: newTypedStream(StatusValid),
 		touchStream:  newTypedStream(false),
+	}
+	for _, opt := range options {
+		if opt != nil {
+			opt(g)
+		}
 	}
 	for _, child := range children {
 		child.setParent(g)
@@ -36,13 +69,39 @@ func NewGroup(children map[string]FormNode) *Group {
 	return g
 }
 
-// Status aggregates child statuses: DISABLED if the group is itself effectively
-// disabled; else INVALID if any child is INVALID; else PENDING if any child is
-// PENDING; else DISABLED if all children are disabled; else VALID. An empty
-// group is VALID.
+// groupErrors runs the group's own validators and returns their failures. It
+// returns nil when the group is effectively disabled. Validators run without any
+// group lock held (they may read children, which take their own locks).
+func (g *Group) groupErrors() []error {
+	if g.effectiveDisabled() {
+		return nil
+	}
+	g.mu.RLock()
+	validators := append([]GroupValidatorFunc(nil), g.validators...)
+	g.mu.RUnlock()
+	if len(validators) == 0 {
+		return nil
+	}
+	var errs []error
+	for _, vf := range validators {
+		if err := vf(g); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errs
+}
+
+// Status aggregates child statuses and the group's own validators: DISABLED if
+// the group is itself effectively disabled; else INVALID if any child or group
+// validator is invalid; else PENDING if any child is PENDING; else DISABLED if
+// all children are disabled; else VALID. An empty group with no validators is
+// VALID.
 func (g *Group) Status() Status {
 	if g.effectiveDisabled() {
 		return StatusDisabled
+	}
+	if len(g.groupErrors()) > 0 {
+		return StatusInvalid
 	}
 	children := g.childrenList()
 	if len(children) == 0 {
@@ -71,7 +130,8 @@ func (g *Group) Status() Status {
 	return StatusValid
 }
 
-// Validate validates all children and reports whether the subtree is valid.
+// Validate validates all children and the group's own validators and reports
+// whether the subtree is valid.
 func (g *Group) Validate() bool {
 	if g.effectiveDisabled() {
 		return true
@@ -82,10 +142,14 @@ func (g *Group) Validate() bool {
 			valid = false
 		}
 	}
+	if len(g.groupErrors()) > 0 {
+		valid = false
+	}
 	return valid
 }
 
-// Errors merges all descendant control errors keyed by their dotted paths.
+// Errors merges all descendant control errors keyed by their dotted paths, plus
+// the group's own validator failures keyed by the group's path.
 func (g *Group) Errors() map[string]string {
 	if g.effectiveDisabled() {
 		return nil
@@ -96,10 +160,20 @@ func (g *Group) Errors() map[string]string {
 			result[k] = v
 		}
 	}
+	if errs := g.groupErrors(); len(errs) > 0 {
+		result[g.Path()] = errors.Join(errs...).Error()
+	}
 	if len(result) == 0 {
 		return nil
 	}
 	return result
+}
+
+// ValidationErrors returns the group's own validator failures (not descendants'),
+// or nil when valid or disabled. It is the group-level counterpart of
+// Control.ValidationErrors, used by the binding layer to read structured errors.
+func (g *Group) ValidationErrors() []error {
+	return g.groupErrors()
 }
 
 // IsTouched reports whether any descendant is touched.

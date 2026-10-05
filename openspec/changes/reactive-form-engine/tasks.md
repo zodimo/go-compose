@@ -98,3 +98,15 @@ Decision: the prototype (`rules` catalog + coded errors) is the design going for
 - [x] 11.8 Fix `FirstInvalidPath` to be deterministic: groups are unordered maps, so "first" now means the lexically smallest failing path (documented), not map-walk order
 - [x] 11.9 README: drop stale style references; document the standalone binding and its FormState-visibility trade-off
 - [x] 11.10 `go build ./...`, `go vet ./...`, `gofmt`, `go test ./...` all green (43 packages)
+
+## 12. Group-level cross-field validation
+
+- [x] 12.1 Engine: `GroupValidatorFunc` (`func(*Group) error`), `GroupOption`, `WithValidator`, variadic `NewGroup(children, options...)`
+- [x] 12.2 Run group validators on read in `Validate`/`Errors`/`Status`; skip when effectively disabled; join failures
+- [x] 12.3 `Group.ValidationErrors()` exposing own (not descendant) failures; picked up by `FormState.CodedErrors` with the group path
+- [x] 12.4 Public `fform`: `GroupValidatorFunc`, `GroupOption`, `WithGroupValidator`, updated `NewGroup`
+- [x] 12.5 `rules`: `GroupAtLeastOneSet`, `GroupMutuallyExclusive`, `GroupRequiredTogether`, `GroupOrdered`, `GroupCustom`; add `MinLengthIfNotEmpty`; make `Length` pass on empty
+- [x] 12.6 Tests: runs-on-read, group-path reporting, disabled skip, multiple aggregate, uncoded errors, all group rules
+- [x] 12.7 Demo: contact group with `GroupAtLeastOneSet("email","phone")`; phone uses `MinLengthIfNotEmpty`
+- [x] 12.8 README group-validator section + spec deltas
+- [x] 12.9 `go build ./...`, `go vet ./...`, `gofmt`, `go test ./...` green (43 packages)

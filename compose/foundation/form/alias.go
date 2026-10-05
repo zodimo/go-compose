@@ -30,9 +30,23 @@ type ValueStore[T any] = formengine.ValueStore[T]
 // ValidatorFunc validates a control value, returning a non-nil error when invalid.
 type ValidatorFunc[T any] = formengine.ValidatorFunc[T]
 
-// NewGroup creates a group with the given named children.
-func NewGroup(children map[string]FormNode) *Group {
-	return formengine.NewGroup(children)
+// GroupValidatorFunc validates a group as a whole, typically by reading its
+// children's values. Group validators are the home for cross-field rules whose
+// subject is the group (at-least-one-of, mutually-exclusive).
+type GroupValidatorFunc = formengine.GroupValidatorFunc
+
+// GroupOption configures a Group at construction.
+type GroupOption = formengine.GroupOption
+
+// WithGroupValidator attaches a group-level validator to a Group.
+func WithGroupValidator(fn GroupValidatorFunc) GroupOption {
+	return formengine.WithValidator(fn)
+}
+
+// NewGroup creates a group with the given named children, wiring each child's
+// parent pointer. Options attach group-level validators.
+func NewGroup(children map[string]FormNode, options ...GroupOption) *Group {
+	return formengine.NewGroup(children, options...)
 }
 
 // NewArray creates an array with the given indexed children.

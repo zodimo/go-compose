@@ -47,6 +47,11 @@ func TestLengthRunes(t *testing.T) {
 	expectPasses(t, "length ok", Length(2, 4)("abc"))
 	expectFails(t, "length low", Length(2, 4)("a"), CodeLength)
 	expectFails(t, "length high", Length(2, 4)("abcde"), CodeLength)
+	// Empty passes for Length and MinLengthIfNotEmpty: optional fields.
+	expectPasses(t, "length empty ok", Length(2, 4)(""))
+	expectPasses(t, "min-if-not-empty empty", MinLengthIfNotEmpty(3)(""))
+	expectFails(t, "min-if-not-empty short", MinLengthIfNotEmpty(3)("ab"), CodeMinLength)
+	expectPasses(t, "min-if-not-empty ok", MinLengthIfNotEmpty(3)("abc"))
 }
 
 func TestSliceLength(t *testing.T) {
@@ -218,4 +223,118 @@ func TestRulesComposeInControl(t *testing.T) {
 	if !control.Validate() {
 		t.Fatalf("expected valid for \"abc\", errors=%v", control.Errors())
 	}
+}
+
+func TestGroupRules(t *testing.T) {
+	// A group with two string controls and an int pair for ordering.
+	build := func() *fform.Group {
+		return fform.NewGroup(map[string]fform.FormNode{
+			"email": fform.NewControl(fform.NewPlainValueStore(""), ""),
+			"phone": fform.NewControl(fform.NewPlainValueStore(""), ""),
+			"sms":   fform.NewControl(fform.NewPlainValueStore(""), ""),
+			"start": fform.NewControl(fform.NewPlainValueStore(0), 0),
+			"end":   fform.NewControl(fform.NewPlainValueStore(0), 0),
+		})
+	}
+	set := func(g *fform.Group, key, value string) {
+		ctl, ok := fform.ControlOf[string](fform.NodeResolver(g), key)
+		if !ok {
+			t.Fatalf("could not resolve %q", key)
+		}
+		ctl.Set(value)
+	}
+	setInt := func(g *fform.Group, key string, value int) {
+		ctl, ok := fform.ControlOf[int](fform.NodeResolver(g), key)
+		if !ok {
+			t.Fatalf("could not resolve %q", key)
+		}
+		ctl.Set(value)
+	}
+
+	t.Run("AtLeastOneSet", func(t *testing.T) {
+		g := build()
+		v := GroupAtLeastOneSet[string]("email", "phone")
+		if err := v(g); err == nil {
+			t.Fatal("expected failure with both empty")
+		} else if code, _ := fform.CodeOf(err); code != CodeCrossField {
+			t.Fatalf("expected %q, got %q", CodeCrossField, code)
+		}
+		set(g, "phone", "555")
+		if err := v(g); err != nil {
+			t.Fatalf("expected pass once set, got %v", err)
+		}
+	})
+
+	t.Run("MutuallyExclusive", func(t *testing.T) {
+		g := build()
+		v := GroupMutuallyExclusive[string]("email", "phone", "sms")
+		if err := v(g); err != nil {
+			t.Fatalf("expected pass when none set, got %v", err)
+		}
+		set(g, "email", "a@b.c")
+		if err := v(g); err != nil {
+			t.Fatalf("expected pass with one set, got %v", err)
+		}
+		set(g, "sms", "555")
+		if err := v(g); err == nil {
+			t.Fatal("expected failure with two set")
+		}
+	})
+
+	t.Run("RequiredTogether", func(t *testing.T) {
+		g := build()
+		v := GroupRequiredTogether[string]("email", "phone")
+		if err := v(g); err != nil {
+			t.Fatalf("expected pass when neither set, got %v", err)
+		}
+		set(g, "email", "a@b.c")
+		if err := v(g); err == nil {
+			t.Fatal("expected failure with only one of the pair set")
+		}
+		set(g, "phone", "555")
+		if err := v(g); err != nil {
+			t.Fatalf("expected pass with both set, got %v", err)
+		}
+	})
+
+	t.Run("Ordered", func(t *testing.T) {
+		g := build()
+		v := GroupOrdered[int]("end", "start")
+		setInt(g, "start", 5)
+		setInt(g, "end", 3)
+		if err := v(g); err == nil {
+			t.Fatal("expected failure when end <= start")
+		}
+		setInt(g, "end", 6)
+		if err := v(g); err != nil {
+			t.Fatalf("expected pass when end > start, got %v", err)
+		}
+	})
+
+	t.Run("SkipsDisabledAndMissing", func(t *testing.T) {
+		g := build()
+		set(g, "email", "a@b.c")
+		email, _ := fform.ControlOf[string](fform.NodeResolver(g), "email")
+		email.SetDisabled(true)
+		// Disabled email is ignored; nothing else set -> AtLeastOneSet fails.
+		v := GroupAtLeastOneSet[string]("email", "phone", "missing")
+		if err := v(g); err == nil {
+			t.Fatal("expected failure when the only set control is disabled")
+		}
+	})
+
+	t.Run("GroupCustom", func(t *testing.T) {
+		g := build()
+		v := GroupCustom("custom", func(g *fform.Group) bool {
+			email, _ := fform.ControlOf[string](fform.NodeResolver(g), "email")
+			return email.Value() != ""
+		}, "email is required")
+		if err := v(g); err == nil {
+			t.Fatal("expected failure")
+		}
+		set(g, "email", "a@b.c")
+		if err := v(g); err != nil {
+			t.Fatalf("expected pass, got %v", err)
+		}
+	})
 }
