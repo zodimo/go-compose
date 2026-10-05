@@ -72,3 +72,14 @@
 - [x] 9.9 Tests: `FormState` lifecycle, scope/array resolution (fake lazy scope), demo path/type guards and cross-field disable
 - [x] 9.10 `compose/foundation/form/README.md` documenting the public API; openspec spec deltas for the new capabilities
 - [x] 9.11 `go build ./...`, `go vet ./...`, `go test ./...` all green
+
+## 10. Prototype: rules catalog + coded errors (inspired by nobl9/govy)
+
+- [x] 10.1 `error.go`: `ErrorCode`, `*ValidationError{Code,Message,Path}`, `NewValidationError`, `CodeOf`, `CodesOf`, `WithCode`; survives `errors.Join`/`%w`
+- [x] 10.2 `Control.ValidationErrors() []error` returning raw failures for structured inspection
+- [x] 10.3 `FormFieldBinding.ValidationErrors`/`Codes`; `FormState.CodedErrors`/`Codes`/`FirstInvalidPath`
+- [x] 10.4 Base `Required`/`MinLength` now emit `CodeRequired`/`CodeMinLength`
+- [x] 10.5 `rules` package: length, string shape, formats, comparables, collections, cross-field; all original implementations (no govy source)
+- [x] 10.6 Tests: rules catalog, code survival through join/wrap, WithCode preservation, FormState coded access
+- [x] 10.7 Demo: email + password/confirm (EqualTo) + phone rules + code-aware status line
+- [x] 10.8 README + spec deltas; provenance note (MPL-2.0 inspiration, original code)

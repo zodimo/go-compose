@@ -1,6 +1,7 @@
 package fform
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -69,6 +70,32 @@ func (b *FormFieldBinding[T]) Status() Status {
 // components gate on IsTouched before rendering it.
 func (b *FormFieldBinding[T]) ErrorMessage() string {
 	return errorMessage(b.control.Errors())
+}
+
+// ValidationErrors returns the control's raw validator failures as errors,
+// each stamped with the control's path when it is a *ValidationError. Callers
+// use it to read error codes (via CodeOf/CodesOf) without parsing messages.
+func (b *FormFieldBinding[T]) ValidationErrors() []error {
+	raw := b.control.ValidationErrors()
+	if len(raw) == 0 {
+		return nil
+	}
+	out := make([]error, 0, len(raw))
+	for _, err := range raw {
+		var ve *ValidationError
+		if errors.As(err, &ve) && ve.Path == "" {
+			out = append(out, ve.WithPath(b.control.Path()))
+			continue
+		}
+		out = append(out, err)
+	}
+	return out
+}
+
+// Codes returns every distinct ErrorCode raised by the control, sorted. It is a
+// convenience over ValidationErrors for the common "which rules failed?" query.
+func (b *FormFieldBinding[T]) Codes() []ErrorCode {
+	return CodesOf(errors.Join(b.control.ValidationErrors()...))
 }
 
 // Control returns the underlying control.

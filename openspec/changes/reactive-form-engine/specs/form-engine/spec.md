@@ -193,3 +193,50 @@ The engine SHALL support absent values through `Optional[T]`, an alias for `gith
 
 - **WHEN** `Required(None[int]())` is used as a validator on a `Control[Optional[int]]`
 - **THEN** it behaves equivalently to `RequiredOptional`, failing on `None` and accepting `Some(T)`
+
+### Requirement: Coded validation errors
+
+Validators SHALL be able to attach a machine-readable `ErrorCode` to failures via `*ValidationError`, which SHALL satisfy the `error` interface, carry `Code`, `Message`, and `Path`, and remain recoverable through `errors.Join` and `%w` wrapping. The package SHALL expose `NewValidationError`, `WithCode`, `CodeOf`, and `CodesOf`.
+
+#### Scenario: Code survives join and wrap
+
+- **WHEN** a `*ValidationError` with code `min_length` is joined with other errors or wrapped with `fmt.Errorf("%w")`
+- **THEN** `CodeOf` returns `min_length` and true
+
+#### Scenario: CodesOf dedups and sorts
+
+- **WHEN** `CodesOf` is given a joined error containing duplicate and distinct codes
+- **THEN** it returns each distinct code once, sorted
+
+#### Scenario: WithCode wraps an uncoded validator
+
+- **WHEN** `WithCode(code, v)` wraps a validator returning a bare error
+- **THEN** failures carry `code` with the original message preserved, and a validator that already carries a code keeps its own
+
+### Requirement: Structured form error access
+
+`FormState` SHALL expose `CodedErrors() []*ValidationError` (each stamped with the failing control's path), `Codes() []ErrorCode`, and `FirstInvalidPath() (string, bool)`. `FormFieldBinding[T]` SHALL expose `ValidationErrors() []error` and `Codes() []ErrorCode`. These reflect the last validation run, matching `Errors()`.
+
+#### Scenario: CodedErrors reports path and code per failure
+
+- **WHEN** the form is validated with invalid controls
+- **THEN** `CodedErrors()` returns one entry per validator failure, each with a non-empty Path and Code
+
+#### Scenario: FirstInvalidPath is document order
+
+- **WHEN** multiple controls fail
+- **THEN** `FirstInvalidPath()` returns the path of the first failing control in depth-first order, or ("", false) when valid
+
+### Requirement: Rule catalog
+
+`compose/foundation/form/rules` SHALL provide a catalog of ready-made validators, each a plain `fform.ValidatorFunc[T]` raising a documented `ErrorCode`: required/not-empty, length (runes and items), string shape (regex, contains/excludes, starts/ends-with, alpha/numeric/alphanumeric), formats (email, url, uuid, ip, dns, base64, hex, semver), comparables (one-of, eq/neq, gt/gte/lt/lte, in-range), collections (unique, unique-by, slice/map contains), and cross-field (equal-to, greater/less-than-field, required-when, forbidden-when, at-least-one-set, mutually-exclusive). The implementations SHALL be original to this repository and SHALL NOT copy third-party source.
+
+#### Scenario: Rules compose with the engine
+
+- **WHEN** multiple rules are passed to `NewControl`
+- **THEN** each failure carries its own code and all codes survive the engine's errors.Join aggregation
+
+#### Scenario: Cross-field rule reads a sibling at validation time
+
+- **WHEN** `EqualTo(func() string { return password.Value() })` validates the confirmation field
+- **THEN** it compares against the password control's current value and raises `compare_fields` on mismatch

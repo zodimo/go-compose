@@ -169,3 +169,70 @@ path strings across mutations.
 list item keyed by the base path plus key. This means a field cannot be split
 across list items, and inline composition (for example a field plus a remove
 button in one row) uses `ControlViewOf` inside a `row.Row`.
+
+## Validation rules and error codes
+
+The base package ships `Required` and `MinLength`. A fuller rule catalog lives in
+`compose/foundation/form/rules` — every rule is a plain `fform.ValidatorFunc[T]`,
+so it drops straight into `NewControl`:
+
+```go
+fform.NewControl(fform.NewPlainValueStore(""), "",
+    rules.StringNotEmpty(),
+    rules.MinLength(3),
+    rules.AlphaUnicode(),
+)
+
+fform.NewControl(fform.NewPlainValueStore(""), "",
+    rules.StringNotEmpty(),
+    rules.Email(),
+)
+
+// Cross-field: confirmation must equal the password control's current value.
+fform.NewControl(fform.NewPlainValueStore(""), "",
+    rules.EqualTo(func() string { return password.Value() }),
+)
+```
+
+Catalog: required/not-empty, length (runes and items), string shape (regex,
+contains/excludes, starts/ends-with, alpha/numeric/alphanumeric), formats (email,
+url, uuid, ip/ipv4/ipv6, dns label/subdomain, base64, hex, semver), comparables
+(one-of/none-of, eq/neq, gt/gte/lt/lte, in-range), collections (unique, unique-by,
+slice contains, map key/value), and cross-field (equal-to, greater/less than
+field, required-when, forbidden-when, at-least-one-set, mutually-exclusive).
+
+### Machine-readable failures
+
+Every rule raises a `*fform.ValidationError` carrying a stable `ErrorCode`, so you
+can branch on *why* something failed without parsing messages:
+
+```go
+formState.Validate()
+for _, ve := range formState.CodedErrors() { // []*ValidationError{Path, Code, Message}
+    switch ve.Code {
+    case rules.CodeEmail:
+        // localize / highlight
+    }
+}
+
+codes := formState.Codes()            // distinct codes across the tree, sorted
+path, ok := formState.FirstInvalidPath() // document-order first invalid field
+```
+
+`CodeOf(err)` / `CodesOf(err)` work on any error, unwrapping through `errors.Join`
+and `%w` chains. To attach a code to a hand-written validator, wrap it:
+
+```go
+fform.WithCode("phone_format", func(s string) error { ... })
+```
+
+Existing behavior is unchanged: `Errors() map[string]string` still works, and
+`Required`/`MinLength` in the base package now emit codes (`CodeRequired`,
+`CodeMinLength`).
+
+### Provenance
+
+The `rules` catalog is inspired by [govy](https://github.com/nobl9/govy) and other
+Go validation libraries, but every rule here is reimplemented from scratch in this
+repository. No third-party source is copied, so no external license obligations
+attach to the `rules` package.

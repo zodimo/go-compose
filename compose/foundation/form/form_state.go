@@ -1,7 +1,9 @@
 package fform
 
 import (
+	"errors"
 	"fmt"
+	"sort"
 
 	formengine "github.com/zodimo/go-compose/compose/foundation/form/internal"
 	"github.com/zodimo/go-compose/pkg/api"
@@ -54,6 +56,92 @@ func (s *FormState) Validate() bool {
 // when the form is valid or disabled.
 func (s *FormState) Errors() map[string]string {
 	return s.root.Errors()
+}
+
+// CodedErrors returns every coded validation failure in the tree as a slice of
+// *ValidationError, each stamped with the failing control's dotted path. Errors
+// without a code are still included with an empty Code. It returns nil when the
+// form is valid or disabled.
+//
+// Like Errors(), it reflects the last validation run: call Validate() first (or
+// Submit, which validates) so a fresh tree's validators have executed.
+//
+// This is the structured counterpart to Errors(): use it to branch on ErrorCode
+// (localization, focusing the first invalid field, mapping to an API error body)
+// instead of parsing message strings.
+func (s *FormState) CodedErrors() []*ValidationError {
+	var out []*ValidationError
+
+	Walk(s.root, func(node FormNode) {
+		control, ok := node.(interface{ ValidationErrors() []error })
+		if !ok {
+			return
+		}
+		for _, err := range control.ValidationErrors() {
+			var ve *ValidationError
+			if errors.As(err, &ve) {
+				out = append(out, ve.WithPath(node.Path()))
+				continue
+			}
+			// A non-coded validator failure: surface it with its message only.
+			out = append(out, &ValidationError{Message: err.Error(), Path: node.Path()})
+		}
+	})
+
+	// Deterministic order: by path, then code, then message.
+	sort.SliceStable(out, func(i, j int) bool {
+		if out[i].Path != out[j].Path {
+			return out[i].Path < out[j].Path
+		}
+		if out[i].Code != out[j].Code {
+			return out[i].Code < out[j].Code
+		}
+		return out[i].Message < out[j].Message
+	})
+
+	return out
+}
+
+// Codes returns the distinct ErrorCodes raised anywhere in the form, sorted.
+func (s *FormState) Codes() []ErrorCode {
+	coded := s.CodedErrors()
+	seen := make(map[ErrorCode]struct{}, len(coded))
+	for _, ve := range coded {
+		if ve.Code == "" {
+			continue
+		}
+		seen[ve.Code] = struct{}{}
+	}
+	codes := make([]ErrorCode, 0, len(seen))
+	for code := range seen {
+		codes = append(codes, code)
+	}
+	sort.Slice(codes, func(i, j int) bool { return codes[i] < codes[j] })
+	return codes
+}
+
+// FirstInvalidPath returns the dotted path of the first failing control in
+// document order, or ("", false) when the form is valid. It is the usual hook for
+// "scroll to / focus the first error".
+func (s *FormState) FirstInvalidPath() (string, bool) {
+	var path string
+	found := false
+	Walk(s.root, func(node FormNode) {
+		if found {
+			return
+		}
+		control, ok := node.(interface {
+			ValidationErrors() []error
+		})
+		if !ok {
+			return
+		}
+		if len(control.ValidationErrors()) > 0 {
+			path = node.Path()
+			found = true
+		}
+	})
+	return path, found
 }
 
 // Value returns the form serialized as plain Go values: a map[string]any keyed

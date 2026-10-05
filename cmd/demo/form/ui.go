@@ -1,11 +1,12 @@
 package main
 
 import (
-	"errors"
 	"fmt"
+	"strings"
 
 	fform "github.com/zodimo/go-compose/compose/foundation/form"
 	"github.com/zodimo/go-compose/compose/foundation/form/components"
+	"github.com/zodimo/go-compose/compose/foundation/form/rules"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
@@ -52,8 +53,8 @@ func buildForm(c api.Composer) *fform.Group {
 	sameAsShipping := fform.NewControl(fform.NewPlainValueStore(false), false)
 
 	billing := fform.NewGroup(map[string]fform.FormNode{
-		"street": fform.NewControl(fform.NewPlainValueStore(""), "", fform.Required("")),
-		"city":   fform.NewControl(fform.NewPlainValueStore(""), "", fform.Required("")),
+		"street": fform.NewControl(fform.NewPlainValueStore(""), "", rules.StringNotEmpty()),
+		"city":   fform.NewControl(fform.NewPlainValueStore(""), "", rules.StringNotEmpty()),
 	})
 
 	// Cross-field disable: checking "same as shipping" disables the billing
@@ -62,11 +63,28 @@ func buildForm(c api.Composer) *fform.Group {
 		billing.SetDisabled(same)
 	})
 
+	// Password and confirmation demonstrate a cross-field rule: EqualTo reads the
+	// sibling's current value at validation time.
+	password := fform.NewControl(
+		fform.NewPlainValueStore(""),
+		"",
+		rules.StringNotEmpty(),
+		rules.MinLength(8),
+	)
+
 	phones := fform.NewArray(phoneRow(""))
 
 	return fform.NewGroup(map[string]fform.FormNode{
 		"identity": fform.NewGroup(map[string]fform.FormNode{
-			"name": fform.NewControl(fform.NewPlainValueStore(""), "", fform.Required(""), fform.MinLength(3)),
+			"name": fform.NewControl(fform.NewPlainValueStore(""), "",
+				rules.StringNotEmpty(),
+				rules.MinLength(3),
+				rules.AlphaUnicode(),
+			),
+			"email": fform.NewControl(fform.NewPlainValueStore(""), "",
+				rules.StringNotEmpty(),
+				rules.Email(),
+			),
 			// Age is an optional number: an empty field is distinct from 0, and
 			// RequiredOptional rejects only the empty state.
 			"age": fform.NewControl[fform.Optional[int]](
@@ -74,32 +92,36 @@ func buildForm(c api.Composer) *fform.Group {
 				fform.None[int](),
 				fform.RequiredOptional[int](),
 			),
+			"password": password,
+			"confirm": fform.NewControl(fform.NewPlainValueStore(""), "",
+				rules.EqualTo(func() string { return password.Value() }),
+			),
 		}),
-		"tier":           fform.NewControl(fform.NewPlainValueStore(""), "", fform.Required("")),
+		"tier": fform.NewControl(fform.NewPlainValueStore(""), "",
+			rules.OneOf("free", "pro", "enterprise"),
+		),
 		"sameAsShipping": sameAsShipping,
 		"billing":        billing,
 		"phones":         phones,
 	})
 }
 
-// phoneRow builds one phone entry: a group with a required number control. Rows
-// are dynamic, so their stores are plain holders owned by the tree rather than
-// remembered composition state.
+// phoneRow builds one phone entry: a group with a required, ≥10-character
+// number control. Rows are dynamic, so their stores are plain holders owned by
+// the tree rather than remembered composition state.
 func phoneRow(initial string) *fform.Group {
 	return fform.NewGroup(map[string]fform.FormNode{
 		"number": fform.NewControl(fform.NewPlainValueStore(initial), initial,
-			fform.Required(""),
-			func(value string) error {
-				if len(value) < 10 {
-					return errors.New("phone number must be at leat 10 digits")
-				}
-				return nil
-			}),
+			rules.StringNotEmpty(),
+			rules.Numeric(),
+			rules.MinLength(10),
+		),
 	})
 }
 
-// formStatusLine renders the live aggregate status, error count, and lifecycle
-// flags.
+// formStatusLine renders the live aggregate status, error count, failing codes,
+// and lifecycle flags. The codes line demonstrates the structured error surface:
+// it lists the distinct ErrorCodes currently raised across the tree.
 func formStatusLine(formState *fform.FormState) api.Composable {
 	return func(c api.Composer) api.Composer {
 		label := "VALID"
@@ -116,7 +138,23 @@ func formStatusLine(formState *fform.FormState) api.Composable {
 			"status=%s  errors=%d  touched=%t  dirty=%t",
 			label, len(formState.Errors()), formState.IsTouched(), formState.IsDirty(),
 		)
-		return text.BodyMedium(summary)(c)
+
+		codes := formState.Codes()
+		codesLine := "codes=—"
+		if len(codes) > 0 {
+			parts := make([]string, 0, len(codes))
+			for _, code := range codes {
+				parts = append(parts, string(code))
+			}
+			codesLine = "codes=" + strings.Join(parts, ", ")
+		}
+
+		return column.Column(
+			c.Sequence(
+				text.BodyMedium(summary),
+				text.BodySmall(codesLine),
+			),
+		)(c)
 	}
 }
 
@@ -127,7 +165,14 @@ func formContent(fs fform.FormScope) {
 			return components.TextFieldComponent(
 				b,
 				components.TextFieldWithLabel("Name"),
-				components.TextFieldWithHintText("Minimum 3 characters"),
+				components.TextFieldWithHintText("Minimum 3 letters"),
+			)
+		})
+		fform.ControlFieldOf[string](fs, "email", func(b *fform.FormFieldBinding[string]) api.Composable {
+			return components.TextFieldComponent(
+				b,
+				components.TextFieldWithLabel("Email"),
+				components.TextFieldWithHintText("name@example.com"),
 			)
 		})
 		fform.ControlFieldOf[fform.Optional[int]](fs, "age", func(b *fform.FormFieldBinding[fform.Optional[int]]) api.Composable {
@@ -136,6 +181,20 @@ func formContent(fs fform.FormScope) {
 				components.NumberFieldWithLabel("Age"),
 				components.NumberFieldWithHintText("Leave blank if unknown"),
 				components.NumberFieldWithTextStateKey("identity-age-text"),
+			)
+		})
+		fform.ControlFieldOf[string](fs, "password", func(b *fform.FormFieldBinding[string]) api.Composable {
+			return components.TextFieldComponent(
+				b,
+				components.TextFieldWithLabel("Password"),
+				components.TextFieldWithHintText("Minimum 8 characters"),
+			)
+		})
+		fform.ControlFieldOf[string](fs, "confirm", func(b *fform.FormFieldBinding[string]) api.Composable {
+			return components.TextFieldComponent(
+				b,
+				components.TextFieldWithLabel("Confirm password"),
+				components.TextFieldWithHintText("Must match the password"),
 			)
 		})
 	})

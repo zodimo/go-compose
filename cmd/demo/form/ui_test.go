@@ -91,10 +91,13 @@ func TestSubmitCollectsValidValue(t *testing.T) {
 		ctl.Set(value)
 	}
 	set("identity.name", "Ada")
+	set("identity.email", "ada@example.com")
+	set("identity.password", "s3cret-pass")
+	set("identity.confirm", "s3cret-pass")
 	set("tier", "pro")
 	set("billing.street", "42 Wallaby Way")
 	set("billing.city", "Sydney")
-	set("phones[0].number", "555-0100")
+	set("phones[0].number", "5550100123")
 
 	age, ok := fform.ControlOf[fform.Optional[int]](fform.NodeResolver(formState.Root()), "identity.age")
 	if !ok {

@@ -56,14 +56,26 @@ func NewMutableValueValueStore[T any](mv state.MutableValueTyped[T]) ValueStore[
 	return formengine.NewMutableValueValueStore(mv)
 }
 
-// Required returns a validator that fails when value equals zero.
+// Required returns a validator that fails when value equals zero. Failures carry
+// CodeRequired.
 func Required[T comparable](zero T) ValidatorFunc[T] {
-	return formengine.Required(zero)
+	return func(value T) error {
+		if value == zero {
+			return NewValidationError(CodeRequired, "value is required")
+		}
+		return nil
+	}
 }
 
-// MinLength returns a validator for string values that fails below min characters.
+// MinLength returns a validator for string values that fails below min
+// characters. Failures carry CodeMinLength.
 func MinLength(min int) ValidatorFunc[string] {
-	return formengine.MinLength(min)
+	return func(value string) error {
+		if len(value) < min {
+			return NewValidationError(CodeMinLength, "minimum length is %d", min)
+		}
+		return nil
+	}
 }
 
 // ResolvePath resolves a dotted path such as "a.b.c" or "items[0].name" against

@@ -121,6 +121,18 @@ func (c *Control[T]) HasErrors() bool {
 	return !c.ownDisabled && !c.inheritedDisabled && len(c.errors) > 0
 }
 
+// ValidationErrors returns a copy of the control's raw validator failures, or
+// nil when valid or disabled. Unlike Errors it does not join or stringify, so
+// callers can inspect structured error values (for example codes via errors.As).
+func (c *Control[T]) ValidationErrors() []error {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if c.ownDisabled || c.inheritedDisabled || len(c.errors) == 0 {
+		return nil
+	}
+	return append([]error(nil), c.errors...)
+}
+
 // Status returns DISABLED when effectively disabled, INVALID when errors exist,
 // otherwise VALID.
 func (c *Control[T]) Status() Status {
