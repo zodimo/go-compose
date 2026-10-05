@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	fform "github.com/zodimo/go-compose/compose/foundation/form"
@@ -86,7 +87,14 @@ func buildForm(c api.Composer) *fform.Group {
 // remembered composition state.
 func phoneRow(initial string) *fform.Group {
 	return fform.NewGroup(map[string]fform.FormNode{
-		"number": fform.NewControl(fform.NewPlainValueStore(initial), initial, fform.Required("")),
+		"number": fform.NewControl(fform.NewPlainValueStore(initial), initial,
+			fform.Required(""),
+			func(value string) error {
+				if len(value) < 10 {
+					return errors.New("phone number must be at leat 10 digits")
+				}
+				return nil
+			}),
 	})
 }
 
