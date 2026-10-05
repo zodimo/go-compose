@@ -12,9 +12,9 @@ require (
 	github.com/zodimo/go-zero-hash v0.1.0
 	golang.org/x/exp/shiny v0.0.0-20260611194520-c48552f49976
 	golang.org/x/image v0.42.0
-	golang.org/x/sync v0.21.0
-	golang.org/x/text v0.38.0
-	golang.org/x/tools v0.46.0
+	golang.org/x/sync v0.23.0
+	golang.org/x/text v0.42.0
+	golang.org/x/tools v0.49.0
 )
 
 require (
@@ -22,9 +22,9 @@ require (
 	git.wow.st/gmp/jni v0.0.0-20260127013417-d142949d346a // indirect
 	github.com/godbus/dbus/v5 v5.2.2 // indirect
 	github.com/zodimo/go-lazy v0.1.1 // indirect
-	golang.org/x/mod v0.37.0 // indirect
-	golang.org/x/net v0.56.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
+	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/net v0.58.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
 )
 
 // required for android builds - contains the fix
