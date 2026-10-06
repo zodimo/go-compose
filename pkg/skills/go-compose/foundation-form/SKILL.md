@@ -20,6 +20,10 @@ Canonical, working example: `cmd/demo/form/ui.go` (+ `ui_test.go`). Read it
 before writing a new form; it exercises nested groups, a dynamic array,
 cross-field disable, group validation, and the submit/reset lifecycle.
 
+For copy-paste snippets of every component and pattern, see
+`references/cookbook.md`. Read it when you need the exact call shape; this file
+explains the model and the rules.
+
 ## The mental model
 
 The form is a **tree of nodes**:
@@ -41,6 +45,78 @@ Three rules govern everything:
 3. **Validation runs on read, never cached.** Status is recomputed whenever it
    is asked for. Validators (including group validators) must be side-effect
    free and cheap.
+
+## Rendering: the `FormScope` helpers
+
+`Form(formState, content, ...options)` renders a `LazyColumn` and hands
+`content` a `FormScope`. Call `fform.RememberFormState(c, buildForm)` to build
+and remember the tree, then pass the state to `Form`.
+
+Keys resolve by path relative to the scope (`a.b.c`, `items[0].name`). **An
+unresolvable key renders nothing rather than panicking** — the tree decides what
+exists.
+
+| Helper | Purpose |
+|--------|---------|
+| `fform.ControlFieldOf[T](fs, key, content)` | Field as its own full-width list item. **The default.** |
+| `fform.ControlViewOf[T](resolver, key, content)` | Field embedded inline (e.g. in an array row with a remove button). |
+| `fs.Field(key, content)` | Resolve any node, render content with the raw `FormNode`. |
+| `fs.Form(key, header, children)` | Header row + nested scope over the subtree named by `key`. |
+| `fs.GroupScope(key, children)` | Nested scope with no header. |
+| `fs.FormArray(key, row)` | One list item per array child; row gets `(index, rowScope)`. |
+| `fs.ArrayLength(key)` | Child count of an array (for add/remove affordances). |
+| `fs.Array(key)` / `fs.Group(key)` / `fs.Resolve(key)` | Typed/raw escape hatches. |
+| `fform.ControlOf[T](resolver, key)` | Type-safe `*Control[T]` resolution. |
+
+Two things about these signatures that are easy to get wrong:
+
+- `ControlOf`/`ControlViewOf` take a `Resolver` — a `FormScope`, or any node
+  wrapped with `fform.NodeResolver(node)`.
+- `ControlOf`/`ControlFieldOf` are **package-level generic functions, not scope
+  methods** (Go forbids type parameters on interface methods).
+- The `children`/`row` callbacks receive a **narrowed scope**, not the outer
+  `fs`. Inside `fs.Form("identity", ..., func(fs fform.FormScope) { ... })` you
+  shadow `fs` with a scope rooted at `identity`, so `"password"` resolves to
+  `identity.password`. Bind paths relative to the scope you were handed.
+
+**Layout constraint:** `Form` renders a `LazyColumn`, so each
+`Field`/`Form`/`FormArray` call appends a list item keyed by base path + key. A
+field cannot be split across list items. To place a field *beside* something
+(button, label) inside one row, use `ControlViewOf` inside a `row.Row`.
+
+## The binding: `FormFieldBinding[T]`
+
+Every component takes a `*FormFieldBinding[T]`, which wraps a `*Control[T]`:
+
+- Reads: `Value()`, `Errors()`, `HasErrors()`, `IsTouched()`, `IsDirty()`,
+  `IsEnabled()`, `Status()`, `ErrorMessage()`.
+- Writes: `SetValue(v)` — sets the value **and marks the control touched**.
+- `Control() *Control[T]` for direct access.
+
+Errors are **touched-gated** per Material 3: a component only shows an error
+message once the control is touched, so invalid-but-unvisited fields render
+cleanly. This rule lives in `components/field.go` and applies to every widget.
+
+## Components (`.../form/components`)
+
+Each reads value/errors/touched and honors the control's enabled state:
+
+- `TextFieldComponent(*FormFieldBinding[string], ...)`
+- `NumberFieldComponent(*FormFieldBinding[int], ...)` — keeps raw text so partial
+  input like `-` or `1.` is typable; writes only parsed ints and reports
+  unparsable text. **An int control cannot be empty**, so clearing falls back to
+  the current value.
+- `OptionalNumberFieldComponent(*FormFieldBinding[Optional[int]], ...)` — the
+  empty-capable number field.
+- `CheckboxComponent` / `SwitchComponent(*FormFieldBinding[bool], ...)`
+- `SelectComponent(*FormFieldBinding[string], []SelectOption, ...)` — note the
+  option slice is a required positional argument, before component options.
+
+Option constructors follow `WidgetWithX`, e.g. `TextFieldWithLabel`,
+`TextFieldWithHintText`, `TextFieldWithInline`, `NumberFieldWithLabel`,
+`NumberFieldWithHintText`, `NumberFieldWithTextStateKey`, `CheckboxWithLabel`,
+`CheckboxWithErrorIndent`, `SelectWithLabel`, `SelectWithPlaceholder`,
+`SelectWithHintText`. See the cookbook for a full call per widget.
 
 ## Minimal complete form
 
@@ -117,66 +193,6 @@ func submitButton(formState *fform.FormState) api.Composable {
     }
 }
 ```
-
-## Rendering: the `FormScope` helpers
-
-Inside `Form`'s content closure you receive a `FormScope`. Keys resolve by path
-relative to the scope (`a.b.c`, `items[0].name`). **An unresolvable key renders
-nothing rather than panicking** — the tree decides what exists.
-
-| Helper | Purpose |
-|--------|---------|
-| `fform.ControlFieldOf[T](fs, key, content)` | Field as its own full-width list item. **The default.** |
-| `fform.ControlViewOf[T](resolver, key, content)` | Field embedded inline (e.g. in an array row with a remove button). |
-| `fs.Field(key, content)` | Resolve any node, render content with the raw `FormNode`. |
-| `fs.Form(key, header, children)` | Header row + nested scope over the subtree named by `key`. |
-| `fs.GroupScope(key, children)` | Nested scope with no header. |
-| `fs.FormArray(key, row)` | One list item per array child; row gets `(index, rowScope)`. |
-| `fs.ArrayLength(key)` | Child count of an array (for add/remove affordances). |
-| `fs.Array(key)` / `fs.Group(key)` / `fs.Resolve(key)` | Typed/raw escape hatches. |
-| `fform.ControlOf[T](resolver, key)` | Type-safe `*Control[T]` resolution. |
-
-`ControlOf`/`ControlViewOf` take a `Resolver` — a `FormScope`, or any node
-wrapped with `fform.NodeResolver(node)`. `ControlOf`/`ControlFieldOf` are
-**package-level generic functions, not scope methods** (Go forbids type
-parameters on interface methods).
-
-**Layout constraint:** `Form` renders a `LazyColumn`, so each
-`Field`/`Form`/`FormArray` call appends a list item keyed by base path + key. A
-field cannot be split across list items. To place a field *beside* something
-(button, label) inside one row, use `ControlViewOf` inside a `row.Row`.
-
-## The binding: `FormFieldBinding[T]`
-
-Every component takes a `*FormFieldBinding[T]`, which wraps a `*Control[T]`:
-
-- Reads: `Value()`, `Errors()`, `HasErrors()`, `IsTouched()`, `IsDirty()`,
-  `IsEnabled()`, `Status()`, `ErrorMessage()`.
-- Writes: `SetValue(v)` — sets the value **and marks the control touched**.
-- `Control() *Control[T]` for direct access.
-
-Errors are **touched-gated** per Material 3: a component only shows an error
-message once the control is touched, so invalid-but-unvisited fields render
-cleanly. This rule lives in `components/field.go` and applies to every widget.
-
-## Components (`.../form/components`)
-
-Each reads value/errors/touched and honors the control's enabled state:
-
-- `TextFieldComponent(*FormFieldBinding[string], ...)`
-- `NumberFieldComponent(*FormFieldBinding[int], ...)` — keeps raw text so partial
-  input like `-` or `1.` is typable; writes only parsed ints and reports
-  unparsable text. **An int control cannot be empty**, so clearing falls back to
-  the current value.
-- `OptionalNumberFieldComponent(*FormFieldBinding[Optional[int]], ...)` — the
-  empty-capable number field.
-- `CheckboxComponent` / `SwitchComponent(*FormFieldBinding[bool], ...)`
-- `SelectComponent(*FormFieldBinding[string], []SelectOption, ...)`
-
-Option constructors follow `WidgetWithX`, e.g. `TextFieldWithLabel`,
-`TextFieldWithHintText`, `NumberFieldWithLabel`, `NumberFieldWithHintText`,
-`NumberFieldWithTextStateKey`, `CheckboxWithLabel`, `CheckboxWithErrorIndent`,
-`SelectWithLabel`, `SelectWithPlaceholder`.
 
 ## Empty vs. zero: `Optional[T]`
 
@@ -257,10 +273,19 @@ collections (`Unique`, `UniqueBy`, `SliceContainsAll`, map key/value); cross-fie
 (`EqualTo`, `NotEqualTo`, `GreaterThanField`, `LessThanField`, `RequiredWhen`,
 `ForbiddenWhen`, `AtLeastOneSet`, `MutuallyExclusive`); `Custom`.
 
-**Length gotcha:** `MinLength` fails on empty input (0 < min).
-`MinLengthIfNotEmpty` and `Length` pass on empty and enforce a size only once
-the user has typed — the right choice for an optional field with a minimum size
-when present.
+### Empty-input gotcha in the length rules
+
+`MinLength` fails on empty input because `0 < min` — so a `MinLength` control is
+also implicitly required. The rules that **let empty input pass** are
+`MinLengthIfNotEmpty`, `Length`, and `MaxLength`:
+
+- Use `MinLengthIfNotEmpty(n)` for an optional field that must meet a minimum
+  size *only once something is typed* (it guards with `value == ""`).
+- `Length(min, max)` likewise **accepts empty**, so it enforces a size band only
+  for non-empty input. To make a field both required and bounded, combine it
+  with `StringNotEmpty()` (or pair `MinLength` with an explicit optional story).
+- `MaxLength(n)` never rejects empty on its own (an empty string trivially
+  satisfies an upper bound); add `StringNotEmpty()` if presence matters.
 
 ### Group-level validation
 
@@ -355,6 +380,8 @@ standalone fields are invisible to `FormState` — form-level `Validate`, `Reset
   `RememberFormState(c, buildForm)`. Never rebuild nodes during composition.
 - **Keys that don't resolve render nothing** (no panic). If a field is missing
   from the UI, check the path and that the node exists in the tree.
+- **The scope callback is narrowed.** Inside a nested `fs.Form`/`fs.GroupScope`,
+  bind paths relative to the inner scope — don't repeat the parent prefix.
 - **Resolve-and-assert escape hatch:** `fform.ControlOf[T](resolver, key)` returns
   `(*Control[T], bool)`; `NodeResolver(node)` adapts a bare node (e.g. the group
   passed to a group validator) to a `Resolver`.
@@ -376,4 +403,5 @@ go run ./cmd/demo/form/          # run the reference demo
 
 `cmd/demo/form/ui_test.go` shows the intended test style: build the tree, wrap
 the root with `fform.NodeResolver`, then assert on `fform.ControlOf[T]` and array
-lengths.
+lengths. A test that every bound path resolves is cheap insurance against the
+silent "renders nothing" miss.
