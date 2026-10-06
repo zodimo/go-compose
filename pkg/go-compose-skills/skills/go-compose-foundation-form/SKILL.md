@@ -1,5 +1,5 @@
 ---
-name: foundation-form
+name: go-compose-foundation-form
 description: Use the go-compose reactive form engine (compose/foundation/form, imported as fform) — building a form tree of Control/Group/Array nodes, rendering it with Form + FormScope helpers, binding Material 3 field components, choosing validators from the rules catalog, and driving the validate/submit/reset lifecycle. Use when adding, editing, or debugging a form, form field, validation rule, or form-level action (submit/reset/status) in this repository.
 ---
 
