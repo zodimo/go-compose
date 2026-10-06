@@ -222,10 +222,10 @@ Validators SHALL be able to attach a machine-readable `ErrorCode` to failures vi
 - **WHEN** the form is validated with invalid controls
 - **THEN** `CodedErrors()` returns one entry per validator failure, each with a non-empty Path and Code
 
-#### Scenario: FirstInvalidPath is document order
+#### Scenario: FirstInvalidPath is deterministic
 
 - **WHEN** multiple controls fail
-- **THEN** `FirstInvalidPath()` returns the path of the first failing control in depth-first order, or ("", false) when valid
+- **THEN** `FirstInvalidPath()` returns the lexically smallest failing dotted path — group children are stored in a map, so there is no stable insertion order to walk and "first" means deterministic lexical order (positions within a path are preserved, e.g. `phones[0].number` sorts before `phones[1].number`) — or ("", false) when valid
 
 ### Requirement: Rule catalog
 

@@ -269,7 +269,7 @@ for _, ve := range formState.CodedErrors() { // []*ValidationError{Path, Code, M
 }
 
 codes := formState.Codes()            // distinct codes across the tree, sorted
-path, ok := formState.FirstInvalidPath() // document-order first invalid field
+path, ok := formState.FirstInvalidPath() // lexically first invalid field (deterministic)
 ```
 
 `CodeOf(err)` / `CodesOf(err)` work on any error, unwrapping through `errors.Join`

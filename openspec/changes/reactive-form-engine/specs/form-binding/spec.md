@@ -55,16 +55,16 @@ Field components SHALL display Material 3 errors only after the control is touch
 - **WHEN** `cmd/demo/form/ui.go` renders a field via `TextFieldComponent(binding, ...)`
 - **THEN** typing validates against the control's validators and touched-gated errors render per the M3 convention
 
-### Requirement: Dead code markers
-The fully-dead files `pkg/cforms/forms.go`, `pkg/cforms/errors.go`, and `cmd/demo/form/form.go` SHALL carry a header `// DEAD CODE` comment referencing the replacement. The dead declarations `Validatable`, `Orientation`, `WithTextStyle`, `WithTextStyleOption`, `WithOrientation`, and the dead `TextFieldWith*` options SHALL each carry a `// DEAD` marker. No dead code SHALL be deleted by this change.
+### Requirement: Superseded residues removed
+The prototype (coded errors + the `rules` catalog) superseded the engine's early scaffolding and the marked-but-kept dead code, so the residue SHALL be removed rather than marked: `pkg/cforms/` (`forms.go`, `errors.go`), `cmd/demo/form/form.go`, `compose/foundation/form/types.go` (`Validatable`, `Orientation`), the unwired `TextStyle`/`Orientation` option plumbing (`WithTextStyle`, `WithTextStyleOption`, `WithOrientation`), and the deprecated `RememberFormFieldState` alias SHALL NOT exist. Live options such as `WithModifier` SHALL remain.
 
-#### Scenario: Dead files are marked
-- **WHEN** a developer opens any fully-dead file listed above
-- **THEN** a header comment explains the file is dead and what replaces it
+#### Scenario: Superseded files and declarations are gone
+- **WHEN** a developer looks for `pkg/cforms/`, `cmd/demo/form/form.go`, or `compose/foundation/form/types.go`
+- **THEN** they do not exist, having been replaced by the form engine and its `rules` catalog
 
-#### Scenario: Live options remain unmarked
+#### Scenario: Live options remain
 - **WHEN** a developer opens `compose/foundation/form/options.go`
-- **THEN** `WithModifier` carries no dead marker while the dead options carry `// DEAD` markers
+- **THEN** `WithModifier` is present and no superseded `TextStyle`/`Orientation` options remain
 
 ### Requirement: Demo title fix
 `cmd/demo/form/main.go` SHALL use a window title matching the actual demo content instead of the stale "Package CForms Demo" title.
