@@ -5,9 +5,9 @@ help:
 	@echo "  version        - Show current version"
 	@echo "  generate-icons - Regenerate Material Symbol icon constants"
 	@echo "  test           - Run tests"
-	@echo "  tag-patch      - Increment patch version (v0.0.X -> v0.0.X+1)"
-	@echo "  tag-minor      - Increment minor version (v0.X.0 -> v0.X+1.0)"
-	@echo "  tag-major      - Increment major version (vX.0.0 -> vX+1.0.0)"
+	@echo "  tag-patch      - Increment patch version (vX.Y.Z -> vX.Y.Z+1)"
+	@echo "  tag-minor      - Increment minor version (vX.Y.Z -> vX.Y+1.0)"
+	@echo "  tag-major      - Increment major version (vX.Y.Z -> vX+1.0.0)"
 
 
 
