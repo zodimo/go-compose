@@ -5,6 +5,16 @@ description: Use the go-compose reactive form engine (compose/foundation/form, i
 
 # go-compose foundation form (`fform`)
 
+**Requires go-compose v0.1.125 or newer.** The API described here (the
+`fform.FormScope` helpers, `FormFieldBinding`, the `rules` catalog, and the
+coded-error surface) assumes that minimum; on older versions some symbols are
+missing or behave differently. Check the module version before relying on any
+signature in this skill:
+
+```bash
+go list -m github.com/zodimo/go-compose    # must be >= v0.1.125
+```
+
 A reactive, type-safe form engine. The engine is **pure Go and unit-testable**;
 a thin binding layer connects it to the framework's recomposition loop.
 

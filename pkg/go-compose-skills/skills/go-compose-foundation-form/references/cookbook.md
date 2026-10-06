@@ -1,5 +1,7 @@
 # foundation-form cookbook
 
+Requires **go-compose v0.1.125 or newer**.
+
 Copy-paste call shapes for every component and the common patterns. All snippets
 assume:
 
