@@ -3,16 +3,19 @@ package navigationrail
 import (
 	"fmt"
 
+	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
+	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/clip"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
+	"github.com/zodimo/go-compose/pkg/api"
 
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
 	"github.com/zodimo/go-compose/compose/material3/surface"
@@ -49,23 +52,30 @@ func NavigationRailItem(
 		// Define indicator styling (pill shape)
 		// Usually 56x32dp or similar for indicator.
 		// We'll wrap the icon in a Surface that acts as the indicator.
+		defaultIconsSizeProvider := compose.LocalTextStyle.Provides(
+			text.CopyTextStyle(text.TextStyleUnspecified, text.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
+		)
 
 		return column.Column(
 			func(c Composer) Composer {
 				// Icon Container (Indicator)
 				surface.Surface(
-					icon,
+					compose.CompositionLocalProvider(
+						[]api.ProvidedValue{
+							defaultIconsSizeProvider,
+						},
+						icon,
+					),
 					surface.WithColor(ternary.Ternary(
 						selected,
 						theme.ColorScheme().SecondaryContainer,
 						graphics.ColorTransparent,
 					)),
-					surface.WithShape(&shape.RoundedCornerShape{Radius: unit.Dp(12)}), // Pill shape (approx)
+					surface.WithShape(&shape.RoundedCornerShape{Radius: unit.Dp(16)}), // Pill shape (approx)
 					surface.WithModifier(
-						size.FillMaxWidth().
-							Then(size.Height(32)).
-							Then(clip.Clip(&shape.RoundedCornerShape{Radius: unit.Dp(12)})). // Clip to pill shape
-							Then(padding.Padding(4, 4, 4, 4)),                               // Padding inside indicator? Or just center icon.
+						size.Height(32).
+							Then(clip.Clip(&shape.RoundedCornerShape{Radius: unit.Dp(16)})). // Clip to pill shape
+							Then(padding.Padding(16, 4, 16, 4)),                             // Padding inside indicator? Or just center icon.
 					),
 					surface.WithAlignment(box.Center),
 				)(c)

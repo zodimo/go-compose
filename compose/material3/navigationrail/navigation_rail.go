@@ -14,7 +14,7 @@ import (
 // NavigationRail represents a side navigation component.
 //
 // Material 3 Specs:
-// - Width: 80dp
+// - Width: 96dp
 // - Container Layout: Centered horizontally, Top or Center vertically (usually).
 func NavigationRail(
 	modifier ui.Modifier,
@@ -53,7 +53,7 @@ func NavigationRail(
 			surface.WithContentColor(contentColor),
 			surface.WithModifier(
 				modifier.
-					Then(size.Width(80)).
+					Then(size.Width(96)).
 					Then(size.FillMaxHeight()),
 			),
 		)(c)

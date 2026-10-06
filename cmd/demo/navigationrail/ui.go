@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 
+	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
@@ -18,6 +19,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	uiText "github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
@@ -82,12 +84,10 @@ func UI() api.Composable {
 									icon.Icon(
 										icon.IconBytes(item.Icon),
 										icon.WithColor(theme.ColorScheme().OnSecondaryContainer),
-										icon.WithModifier(size.Size(24, 24)),
 									),
 									icon.Icon(
 										icon.IconBytes(item.Icon),
 										icon.WithColor(theme.ColorScheme().OnSurfaceVariant),
-										icon.WithModifier(size.Size(24, 24)),
 									),
 								),
 
@@ -126,10 +126,17 @@ func UI() api.Composable {
 								// Header (Menu Icon to toggle drawer)
 								return box.Box(
 									func(c api.Composer) api.Composer {
-										return icon.Icon(
-											icon.IconBytes(icons.NavigationMenu),
-											icon.WithColor(graphics.FromNRGBA(color.NRGBA{A: 255})),
-											icon.WithModifier(size.Size(24, 24)),
+										defaultIconsSizeProvider := compose.LocalTextStyle.Provides(
+											uiText.CopyTextStyle(uiText.TextStyleUnspecified, uiText.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
+										)
+										return compose.CompositionLocalProvider(
+											[]api.ProvidedValue{
+												defaultIconsSizeProvider,
+											},
+											icon.Icon(
+												icon.IconBytes(icons.NavigationMenu),
+												icon.WithColor(graphics.FromNRGBA(color.NRGBA{A: 255})),
+											),
 										)(c)
 									},
 									box.WithAlignment(box.Center),
@@ -166,12 +173,10 @@ func UI() api.Composable {
 											icon.Icon(
 												icon.IconBytes(item.Icon),
 												icon.WithColor(theme.ColorScheme().OnSecondaryContainer),
-												icon.WithModifier(size.Size(24, 24)),
 											),
 											icon.Icon(
 												icon.IconBytes(item.Icon),
 												icon.WithColor(theme.ColorScheme().OnSurfaceVariant),
-												icon.WithModifier(size.Size(24, 24)),
 											),
 										),
 										//label

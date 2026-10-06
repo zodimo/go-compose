@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 
+	"github.com/zodimo/go-compose/compose"
 	fform "github.com/zodimo/go-compose/compose/foundation/form"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
@@ -10,6 +11,7 @@ import (
 	"github.com/zodimo/go-compose/compose/material3/menu"
 	"github.com/zodimo/go-compose/compose/material3/textfield"
 	"github.com/zodimo/go-compose/compose/ui"
+	boxm "github.com/zodimo/go-compose/modifiers/box"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/pkg/sentinel"
@@ -91,11 +93,15 @@ func SelectComponent(binding *fform.FormFieldBinding[string], options []SelectOp
 		return column.Column(
 			c.Sequence(
 				box.Box(
-					func(c api.Composer) api.Composer {
-						return anchor(c)
-					},
-					box.WithModifier(clickMod),
-					box.WithAlignment(box.W),
+					c.Sequence(
+						anchor,
+						box.Box(
+							compose.Id(),
+							box.WithModifier(
+								boxm.MatchParentSize().Then(clickMod),
+							),
+						),
+					),
 				),
 				menu.DropdownMenu(
 					expanded.Get(),

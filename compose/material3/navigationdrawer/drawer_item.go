@@ -1,6 +1,7 @@
 package navigationdrawer
 
 import (
+	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
@@ -9,10 +10,12 @@ import (
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
+	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/clip"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/modifiers/size"
+	"github.com/zodimo/go-compose/pkg/api"
 
 	"gioui.org/widget"
 	"github.com/zodimo/go-compose/compose/ui/unit"
@@ -55,8 +58,18 @@ func NavigationDrawerItem(
 						// Drawer items usually have 24dp icons, 12dp padding start.
 						// We'll rely on the caller sizing the icon or simple wrapping.
 						// We just layout children.
+
+						defaultIconsSizeProvider := compose.LocalTextStyle.Provides(
+							text.CopyTextStyle(text.TextStyleUnspecified, text.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
+						)
+
 						if icon != nil {
-							icon(c)
+							compose.CompositionLocalProvider(
+								[]api.ProvidedValue{
+									defaultIconsSizeProvider,
+								},
+								icon,
+							)(c)
 							spacer.Width(12)(c)
 						}
 

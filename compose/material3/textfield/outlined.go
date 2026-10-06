@@ -7,9 +7,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
+	"github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
+	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 	"github.com/zodimo/go-compose/pkg/sentinel"
 
@@ -105,12 +109,32 @@ func Outlined(
 			return m.Then(opts.Modifier)
 		})
 
+		defaultIconsSizeProvider := compose.LocalTextStyle.Provides(
+			text.CopyTextStyle(text.TextStyleUnspecified, text.WithFontSize(unit.NewTextUnit(48, unit.TextUnitTypeSp))),
+		)
+
 		// Compose slots
 		if opts.LeadingIcon != nil {
-			c.WithComposable(opts.LeadingIcon)
+			// local size provider
+			c.WithComposable(
+				compose.CompositionLocalProvider(
+					[]api.ProvidedValue{
+						defaultIconsSizeProvider,
+					},
+					opts.LeadingIcon,
+				),
+			)
 		}
 		if opts.TrailingIcon != nil {
-			c.WithComposable(opts.TrailingIcon)
+			// local size provider
+			c.WithComposable(
+				compose.CompositionLocalProvider(
+					[]api.ProvidedValue{
+						defaultIconsSizeProvider,
+					},
+					opts.TrailingIcon,
+				),
+			)
 		}
 
 		// Constructor

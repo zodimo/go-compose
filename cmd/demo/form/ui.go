@@ -32,7 +32,13 @@ func UI() api.Composable {
 				spacer.Height(8),
 				formStatusLine(formState),
 				spacer.Height(8),
-				fform.Form(formState, formContent, fform.WithModifier(padding.All(8))),
+				fform.Form(
+					formState,
+					formContent,
+					fform.WithModifier(
+						padding.All(8).Then(weight.Weight(1)),
+					),
+				),
 				spacer.Height(16),
 				formActions(formState, submitted),
 				spacer.Height(16),
@@ -308,12 +314,10 @@ func phoneSection(fs fform.FormScope) {
 
 // flexWeight wraps content so it flexes within a row.
 func flexWeight(content api.Composable, w int) api.Composable {
-	return func(c api.Composer) api.Composer {
-		return column.Column(
-			c.Sequence(content),
-			column.WithModifier(weight.Weight(w)),
-		)(c)
-	}
+	return column.Column(
+		content,
+		column.WithModifier(weight.Weight(w)),
+	)
 }
 
 // formActions renders Submit and Reset buttons wired to the form lifecycle.

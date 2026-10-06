@@ -3,6 +3,7 @@ package navigationbar
 import (
 	"fmt"
 
+	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/box"
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/foundation/layout/spacer"
@@ -11,10 +12,12 @@ import (
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
+	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/clip"
 	"github.com/zodimo/go-compose/modifiers/size"
 	"github.com/zodimo/go-compose/modifiers/weight"
+	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-ternary"
 
 	"gioui.org/layout"
@@ -57,6 +60,10 @@ func NavigationBarItem(
 		// Defaults
 		colors := NavigationBarDefaults.Colors(c)
 
+		defaultIconsSizeProvider := compose.LocalTextStyle.Provides(
+			text.CopyTextStyle(text.TextStyleUnspecified, text.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
+		)
+
 		return box.Box(
 			column.Column(
 				c.Sequence(
@@ -66,7 +73,12 @@ func NavigationBarItem(
 					surface.Surface(
 						func(c Composer) Composer {
 							return box.Box(
-								icon,
+								compose.CompositionLocalProvider(
+									[]api.ProvidedValue{
+										defaultIconsSizeProvider,
+									},
+									icon,
+								),
 								box.WithAlignment(layout.Center),
 							)(c)
 						},

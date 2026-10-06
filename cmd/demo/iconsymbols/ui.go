@@ -12,13 +12,13 @@ func UI() api.Composable {
 		c = column.Column(
 			c.Sequence(
 				// Search icon
-				icon.Symbol(icon.SymbolSearch, icon.WithSymbolSize(unit.Sp(48))),
+				icon.Icon(icon.SymbolSearch, icon.WithSize(unit.Dp(48))),
 
 				// Home icon
-				icon.Symbol(icon.SymbolHome, icon.WithSymbolSize(unit.Sp(48))),
+				icon.Icon(icon.SymbolHome, icon.WithSize(unit.Dp(48))),
 
 				// Settings icon
-				icon.Symbol(icon.SymbolSettings, icon.WithSymbolSize(unit.Sp(100))),
+				icon.Icon(icon.SymbolSettings, icon.WithSize(unit.Dp(100))),
 			),
 			column.WithSpacing(column.SpaceEvenly),
 			column.WithAlignment(column.Middle),
