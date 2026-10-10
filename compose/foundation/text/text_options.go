@@ -53,7 +53,7 @@ func WithTextStyle(ts *text.TextStyle) TextOption {
 // merge TextStyle
 func WithAdditionalTextStyle(ts *text.TextStyle) TextOption {
 	return func(o *TextOptions) {
-		textStyle := text.MergeTextStyle(
+		textStyle := text.TextStyleCompanion.Merge(
 			o.TextStyle,
 			ts,
 		)
@@ -64,8 +64,8 @@ func WithAdditionalTextStyle(ts *text.TextStyle) TextOption {
 func WithTextStyleOptions(options ...text.TextStyleOption) TextOption {
 	return func(o *TextOptions) {
 		// Use CopyTextStyle to avoid mutating the shared TextStyleUnspecified singleton
-		textStyle := text.CopyTextStyle(
-			text.CoalesceTextStyle(o.TextStyle, text.TextStyleUnspecified),
+		textStyle := text.CopyTextStyleWithOptions(
+			text.TextStyleCompanion.Coalesce(o.TextStyle, text.TextStyleCompanion.Unspecified()),
 			options...,
 		)
 		o.TextStyle = textStyle

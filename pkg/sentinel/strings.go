@@ -70,3 +70,15 @@ func EqualString(a, b StringValue) bool {
 func CopyString(s StringValue) StringValue {
 	return s
 }
+
+var StringsCompanion = NewScalarCompanion[StringValue](
+	func() StringValue { return StringValueUnspecified },
+	StringString,
+	IsSpecifiedString,
+	TakeOrElseString,
+	MergeString,
+	SameString,
+	SemanticEqualString,
+	EqualString,
+	CopyString,
+)

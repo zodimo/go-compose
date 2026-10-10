@@ -9,46 +9,46 @@ import (
 )
 
 var TypographyUnspecified = &Typography{
-	BodyLarge:  text.TextStyleUnspecified,
-	BodyMedium: text.TextStyleUnspecified,
-	BodySmall:  text.TextStyleUnspecified,
+	BodyLarge:  text.TextStyleCompanion.Unspecified(),
+	BodyMedium: text.TextStyleCompanion.Unspecified(),
+	BodySmall:  text.TextStyleCompanion.Unspecified(),
 
-	DisplayLarge:  text.TextStyleUnspecified,
-	DisplayMedium: text.TextStyleUnspecified,
-	DisplaySmall:  text.TextStyleUnspecified,
+	DisplayLarge:  text.TextStyleCompanion.Unspecified(),
+	DisplayMedium: text.TextStyleCompanion.Unspecified(),
+	DisplaySmall:  text.TextStyleCompanion.Unspecified(),
 
-	HeadlineLarge:  text.TextStyleUnspecified,
-	HeadlineMedium: text.TextStyleUnspecified,
-	HeadlineSmall:  text.TextStyleUnspecified,
+	HeadlineLarge:  text.TextStyleCompanion.Unspecified(),
+	HeadlineMedium: text.TextStyleCompanion.Unspecified(),
+	HeadlineSmall:  text.TextStyleCompanion.Unspecified(),
 
-	LabelLarge:  text.TextStyleUnspecified,
-	LabelMedium: text.TextStyleUnspecified,
-	LabelSmall:  text.TextStyleUnspecified,
+	LabelLarge:  text.TextStyleCompanion.Unspecified(),
+	LabelMedium: text.TextStyleCompanion.Unspecified(),
+	LabelSmall:  text.TextStyleCompanion.Unspecified(),
 
-	TitleLarge:  text.TextStyleUnspecified,
-	TitleMedium: text.TextStyleUnspecified,
-	TitleSmall:  text.TextStyleUnspecified,
+	TitleLarge:  text.TextStyleCompanion.Unspecified(),
+	TitleMedium: text.TextStyleCompanion.Unspecified(),
+	TitleSmall:  text.TextStyleCompanion.Unspecified(),
 
 	// Emphasized
-	BodyLargeEmphasized:  text.TextStyleUnspecified,
-	BodyMediumEmphasized: text.TextStyleUnspecified,
-	BodySmallEmphasized:  text.TextStyleUnspecified,
+	BodyLargeEmphasized:  text.TextStyleCompanion.Unspecified(),
+	BodyMediumEmphasized: text.TextStyleCompanion.Unspecified(),
+	BodySmallEmphasized:  text.TextStyleCompanion.Unspecified(),
 
-	DisplayLargeEmphasized:  text.TextStyleUnspecified,
-	DisplayMediumEmphasized: text.TextStyleUnspecified,
-	DisplaySmallEmphasized:  text.TextStyleUnspecified,
+	DisplayLargeEmphasized:  text.TextStyleCompanion.Unspecified(),
+	DisplayMediumEmphasized: text.TextStyleCompanion.Unspecified(),
+	DisplaySmallEmphasized:  text.TextStyleCompanion.Unspecified(),
 
-	HeadlineLargeEmphasized:  text.TextStyleUnspecified,
-	HeadlineMediumEmphasized: text.TextStyleUnspecified,
-	HeadlineSmallEmphasized:  text.TextStyleUnspecified,
+	HeadlineLargeEmphasized:  text.TextStyleCompanion.Unspecified(),
+	HeadlineMediumEmphasized: text.TextStyleCompanion.Unspecified(),
+	HeadlineSmallEmphasized:  text.TextStyleCompanion.Unspecified(),
 
-	LabelLargeEmphasized:  text.TextStyleUnspecified,
-	LabelMediumEmphasized: text.TextStyleUnspecified,
-	LabelSmallEmphasized:  text.TextStyleUnspecified,
+	LabelLargeEmphasized:  text.TextStyleCompanion.Unspecified(),
+	LabelMediumEmphasized: text.TextStyleCompanion.Unspecified(),
+	LabelSmallEmphasized:  text.TextStyleCompanion.Unspecified(),
 
-	TitleLargeEmphasized:  text.TextStyleUnspecified,
-	TitleMediumEmphasized: text.TextStyleUnspecified,
-	TitleSmallEmphasized:  text.TextStyleUnspecified,
+	TitleLargeEmphasized:  text.TextStyleCompanion.Unspecified(),
+	TitleMediumEmphasized: text.TextStyleCompanion.Unspecified(),
+	TitleSmallEmphasized:  text.TextStyleCompanion.Unspecified(),
 }
 
 type Typography struct {
@@ -97,7 +97,7 @@ type Typography struct {
 func (t *Typography) FromToken(value tokens.TypographyTokenKey) *text.TextStyle {
 	switch value {
 	case tokens.TypographyTokenKeyUnspecified:
-		return text.TextStyleUnspecified
+		return text.TextStyleCompanion.Unspecified()
 	case tokens.TypographyTokenKeyBodyLarge:
 		return t.BodyLarge
 	case tokens.TypographyTokenKeyBodyMedium:

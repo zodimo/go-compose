@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "go-sentinel-helper": {
+      "source": "zodimo/go-sentinel-helper",
+      "sourceType": "github",
+      "skillPath": "skills/go-sentinel-helper/SKILL.md",
+      "computedHash": "60e0b7c3154aaa966a59e4b679709ffd54dbfe69185d10f8a9e180a8c5e17eb5"
+    }
+  }
+}

@@ -40,7 +40,7 @@ func Icon(iconByte []byte, options ...IconOption) Composable {
 
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 		// Resolve text style with defaults
-		defaultTextStyles := uitext.TextStyleResolveDefaults(localTextStyle, layoutDirection)
+		defaultTextStyles := uitext.ResolveTextStyleDefaults(localTextStyle, layoutDirection)
 
 		iconSizeInPx := localDensity.DpRoundToPx(opts.Size.TakeOrElse(localDensity.TextUnitToDp(defaultTextStyles.FontSize())))
 

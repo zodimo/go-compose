@@ -36,7 +36,7 @@ func Outlined(
 
 		textStyle := material3.LocalTextStyle.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
-		textStyle = text.TextStyleResolveDefaults(textStyle, layoutDirection)
+		textStyle = text.ResolveTextStyleDefaults(textStyle, layoutDirection)
 
 		key := c.GenerateID()
 		path := c.GetPath()

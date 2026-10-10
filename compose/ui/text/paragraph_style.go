@@ -6,9 +6,12 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/text/style"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
-var ParagraphStyleUnspecified *ParagraphStyle = &ParagraphStyle{
+// paragraphStyleUnspecified is the sentinel for ParagraphStyle. It is deliberately
+// package-private: the only public way to obtain it is ParagraphStyleCompanion.Unspecified().
+var paragraphStyleUnspecified *ParagraphStyle = &ParagraphStyle{
 	textAlign:     style.TextAlignUnspecified,
 	textDirection: style.TextDirectionUnspecified,
 	lineHeight:    unit.TextUnitUnspecified,
@@ -24,7 +27,57 @@ type ParagraphStyle struct {
 	lineBreak     style.LineBreak
 }
 
-type ParagraphStyleOption func(*ParagraphStyle)
+// ParagraphStyleOptions carries one field per ParagraphStyle property. A field left at
+// its sentinel (or nil) means "leave the source value alone"; a field set to any other
+// value overrides it. Options start from the sentinel set, so they defer by default.
+type ParagraphStyleOptions struct {
+	TextAlign     style.TextAlign
+	TextDirection style.TextDirection
+	LineHeight    unit.TextUnit
+	LineBreak     style.LineBreak
+}
+
+func newParagraphStyleOptions() ParagraphStyleOptions {
+	return ParagraphStyleOptions{
+		TextAlign:     style.TextAlignUnspecified,
+		TextDirection: style.TextDirectionUnspecified,
+		LineHeight:    unit.TextUnitUnspecified,
+		LineBreak:     style.LineBreakUnspecified,
+	}
+}
+
+type ParagraphStyleOption = func(*ParagraphStyleOptions)
+
+// asOption lets an already-populated ParagraphStyleOptions seed a
+// ParagraphStyleOptions target, so the whole struct can be passed as a single
+// ParagraphStyleOption.
+func (o ParagraphStyleOptions) asOption(opts *ParagraphStyleOptions) {
+	*opts = o
+}
+
+func ParagraphStyleWithTextAlign(textAlign style.TextAlign) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.TextAlign = textAlign
+	}
+}
+
+func ParagraphStyleWithTextDirection(textDirection style.TextDirection) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.TextDirection = textDirection
+	}
+}
+
+func ParagraphStyleWithLineHeight(lineHeight unit.TextUnit) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.LineHeight = lineHeight
+	}
+}
+
+func ParagraphStyleWithLineBreak(lineBreak style.LineBreak) ParagraphStyleOption {
+	return func(opts *ParagraphStyleOptions) {
+		opts.LineBreak = lineBreak
+	}
+}
 
 func (ps ParagraphStyle) TextAlign() style.TextAlign {
 	return ps.textAlign
@@ -39,16 +92,10 @@ func (ps ParagraphStyle) LineBreak() style.LineBreak {
 	return ps.lineBreak
 }
 
-func CopyParagraphStyle(s *ParagraphStyle, options ...ParagraphStyleOption) *ParagraphStyle {
-	copy := *s
-	for _, option := range options {
-		option(&copy)
+func stringParagraphStyle(s *ParagraphStyle) string {	s = coalesceParagraphStyle(s, paragraphStyleUnspecified)
+	if !isSpecifiedParagraphStyle(s) {
+		return "ParagraphStyle{Unspecified}"
 	}
-	return &copy
-}
-
-func StringParagraphStyle(s *ParagraphStyle) string {
-	s = CoalesceParagraphStyle(s, ParagraphStyleUnspecified)
 	return fmt.Sprintf("ParagraphStyle("+
 		"TextAlign=%s, "+
 		"TextDirection=%s, "+
@@ -60,36 +107,40 @@ func StringParagraphStyle(s *ParagraphStyle) string {
 		s.lineBreak.String())
 }
 
-func IsSpecifiedParagraphStyle(s *ParagraphStyle) bool {
-	return s != nil && s != ParagraphStyleUnspecified
+func isSpecifiedParagraphStyle(s *ParagraphStyle) bool {
+	return s != nil && s != paragraphStyleUnspecified
 }
 
-func TakeOrElseParagraphStyle(s, def *ParagraphStyle) *ParagraphStyle {
-	if !IsSpecifiedParagraphStyle(s) {
+func isUnspecifiedParagraphStyle(s *ParagraphStyle) bool {
+	return !isSpecifiedParagraphStyle(s)
+}
+
+func takeOrElseParagraphStyle(s, def *ParagraphStyle) *ParagraphStyle {
+	if !isSpecifiedParagraphStyle(s) {
 		return def
 	}
 	return s
 }
 
 // Identity (2 ns)
-func SameParagraphStyle(a, b *ParagraphStyle) bool {
+func sameParagraphStyle(a, b *ParagraphStyle) bool {
 	if a == nil && b == nil {
 		return true
 	}
 	if a == nil {
-		return b == ParagraphStyleUnspecified
+		return b == paragraphStyleUnspecified
 	}
 	if b == nil {
-		return a == ParagraphStyleUnspecified
+		return a == paragraphStyleUnspecified
 	}
 	return a == b
 }
 
 // Semantic equality (field-by-field, 20 ns)
-func SemanticEqualParagraphStyle(a, b *ParagraphStyle) bool {
+func semanticEqualParagraphStyle(a, b *ParagraphStyle) bool {
 
-	a = CoalesceParagraphStyle(a, ParagraphStyleUnspecified)
-	b = CoalesceParagraphStyle(b, ParagraphStyleUnspecified)
+	a = coalesceParagraphStyle(a, paragraphStyleUnspecified)
+	b = coalesceParagraphStyle(b, paragraphStyleUnspecified)
 
 	return a.textAlign == b.textAlign &&
 		a.textDirection == b.textDirection &&
@@ -97,23 +148,24 @@ func SemanticEqualParagraphStyle(a, b *ParagraphStyle) bool {
 		a.lineBreak == b.lineBreak
 }
 
-func EqualParagraphStyle(a, b *ParagraphStyle) bool {
-	if !SameParagraphStyle(a, b) {
-		return SemanticEqualParagraphStyle(a, b)
+func equalParagraphStyle(a, b *ParagraphStyle) bool {
+	if sameParagraphStyle(a, b) {
+		return true
 	}
-	return true
+	return semanticEqualParagraphStyle(a, b)
 }
 
-func MergeParagraphStyle(a, b *ParagraphStyle) *ParagraphStyle {
-	if b == nil {
-		return a
-	}
-	if a == nil {
+// mergeParagraphStyle layers b onto a: a value from b wins only where b actually set it.
+func mergeParagraphStyle(a, b *ParagraphStyle) *ParagraphStyle {
+	a = coalesceParagraphStyle(a, paragraphStyleUnspecified)
+	b = coalesceParagraphStyle(b, paragraphStyleUnspecified)
+
+	if a == paragraphStyleUnspecified {
 		return b
 	}
-
-	a = CoalesceParagraphStyle(a, ParagraphStyleUnspecified)
-	b = CoalesceParagraphStyle(b, ParagraphStyleUnspecified)
+	if b == paragraphStyleUnspecified {
+		return a
+	}
 
 	return &ParagraphStyle{
 		textAlign:     b.textAlign.TakeOrElse(a.textAlign),
@@ -123,16 +175,46 @@ func MergeParagraphStyle(a, b *ParagraphStyle) *ParagraphStyle {
 	}
 }
 
-func CoalesceParagraphStyle(ptr, def *ParagraphStyle) *ParagraphStyle {
+func coalesceParagraphStyle(ptr, def *ParagraphStyle) *ParagraphStyle {
 	if ptr == nil {
 		return def
 	}
 	return ptr
 }
 
-func LerpParagraphStyle(width, start, stop *ParagraphStyle, fraction float32) *ParagraphStyle {
-	start = CoalesceParagraphStyle(start, ParagraphStyleUnspecified)
-	stop = CoalesceParagraphStyle(stop, ParagraphStyleUnspecified)
+// copyParagraphStyle returns a copy of s with the given bare options applied on top.
+// By the time an option runs, the working copy of s has already been seeded from the
+// source, so an option that only touches one field leaves the rest intact.
+func copyParagraphStyle(s *ParagraphStyle, options ...func(*ParagraphStyle)) *ParagraphStyle {
+	s = coalesceParagraphStyle(s, paragraphStyleUnspecified)
+	work := *s
+	for _, option := range options {
+		option(&work)
+	}
+	return &work
+}
+
+// copyParagraphStyleWithOptions is the option-constructor form used by callers.
+// Options are applied to a fresh ParagraphStyleOptions seeded with sentinels, then
+// only the fields the caller actually set are overlaid onto s.
+func copyParagraphStyleWithOptions(s *ParagraphStyle, options ...ParagraphStyleOption) *ParagraphStyle {
+	s = coalesceParagraphStyle(s, paragraphStyleUnspecified)
+	opts := newParagraphStyleOptions()
+	for _, option := range options {
+		option(&opts)
+	}
+	return &ParagraphStyle{
+		textAlign:     opts.TextAlign.TakeOrElse(s.textAlign),
+		textDirection: opts.TextDirection.TakeOrElse(s.textDirection),
+		lineHeight:    opts.LineHeight.TakeOrElse(s.lineHeight),
+		lineBreak:     opts.LineBreak.TakeOrElse(s.lineBreak),
+	}
+}
+
+// lerpParagraphStyle interpolates between two ParagraphStyles.
+func lerpParagraphStyle(start, stop *ParagraphStyle, fraction float32) *ParagraphStyle {
+	start = coalesceParagraphStyle(start, paragraphStyleUnspecified)
+	stop = coalesceParagraphStyle(stop, paragraphStyleUnspecified)
 
 	return &ParagraphStyle{
 		textAlign:     lerp.LerpDiscrete(start.textAlign, stop.textAlign, fraction),
@@ -140,17 +222,30 @@ func LerpParagraphStyle(width, start, stop *ParagraphStyle, fraction float32) *P
 		lineHeight:    unit.LerpTextUnitInheritable(start.lineHeight, stop.lineHeight, fraction),
 		lineBreak:     lerp.LerpDiscrete(start.lineBreak, stop.lineBreak, fraction),
 	}
-
 }
 
-func ParagraphStyleResolveDefaults(s *ParagraphStyle, direction unit.LayoutDirection) *ParagraphStyle {
-	s = CoalesceParagraphStyle(s, ParagraphStyleUnspecified)
+func paragraphStyleResolveDefaults(s *ParagraphStyle, direction unit.LayoutDirection) *ParagraphStyle {
+	s = coalesceParagraphStyle(s, paragraphStyleUnspecified)
 
 	return &ParagraphStyle{
 		textAlign:     s.textAlign.TakeOrElse(DefaultTextAlign),
 		textDirection: style.ResolveTextDirection(direction, s.textDirection),
 		lineHeight:    s.lineHeight.TakeOrElse(DefaultLineHeight),
-		lineBreak:     s.lineBreak.TakeOrElse(style.LineBreakParagraph),
+		lineBreak:     s.lineBreak.TakeOrElse(DefaultLineBreak),
 	}
-
 }
+
+// ParagraphStyleCompanion is the only exported value of this file's sentinel family member.
+var ParagraphStyleCompanion = companions.NewStructCompanion(
+	func() *ParagraphStyle { return paragraphStyleUnspecified },
+	stringParagraphStyle,
+	isSpecifiedParagraphStyle,
+	isUnspecifiedParagraphStyle,
+	takeOrElseParagraphStyle,
+	mergeParagraphStyle,
+	sameParagraphStyle,
+	semanticEqualParagraphStyle,
+	equalParagraphStyle,
+	coalesceParagraphStyle,
+	copyParagraphStyle,
+)

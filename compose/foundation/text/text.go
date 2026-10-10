@@ -40,7 +40,7 @@ func Text(value string, options ...TextOption) Composable {
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 		localTextStyle := compose.LocalTextStyle.Current(c)
 		// Resolve text style with defaults
-		opts.TextStyle = text.MergeTextStyle(text.TextStyleResolveDefaults(localTextStyle, layoutDirection), opts.TextStyle)
+		opts.TextStyle = text.TextStyleCompanion.Merge(text.ResolveTextStyleDefaults(localTextStyle, layoutDirection), opts.TextStyle)
 
 		path := c.GetPath()
 		key := c.GenerateID()
@@ -138,7 +138,7 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 				}
 			}
 
-			// fmt.Printf("textStyle [%s]: %s\n", textValue, text.StringTextStyle(textStyle))
+			// fmt.Printf("textStyle [%s]: %s\n", textValue, text.TextStyleCompanion.String(textStyle))
 			dims = widget.Label{
 				Alignment:       style.TextAlignToGioTextAlignment(textStyle.TextAlign()),
 				MaxLines:        textOptions.MaxLines,

@@ -52,7 +52,7 @@ func DefaultTreeOptions() TreeOptions {
 	return TreeOptions{
 		Modifier:       modifier.EmptyModifier,
 		IndentSize:     24,
-		TextStyle:      text.TextStyleUnspecified,
+		TextStyle:      text.TextStyleCompanion.Unspecified(),
 		HideSeparators: false,
 		BranchIcons: newTreeBranchIcons(
 			icon.Icon(icon.SymbolIndeterminateCheckBox),
@@ -85,7 +85,7 @@ func WithTextStyle(style *text.TextStyle) TreeOption {
 
 func WithTextStyleOption(textStyleOption text.TextStyleOption) TreeOption {
 	return func(o *TreeOptions) {
-		o.TextStyle = text.CopyTextStyle(o.TextStyle, textStyleOption)
+		o.TextStyle = text.CopyTextStyleWithOptions(o.TextStyle, textStyleOption)
 	}
 }
 

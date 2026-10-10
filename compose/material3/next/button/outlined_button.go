@@ -154,8 +154,8 @@ func OutlinedButton(onClick func(), content Composable, options ...ButtonOption)
 						// textStyle.Copy doesn't exist? We use TextStyleFromOptions(WithColor)
 						// merging with existing style? Or just overriding color.
 						// TextStyle is immutable/pointer.
-						// We can use text.CopyTextStyle(textStyle, text.WithColor(contentColor))
-						textStyle = text.CopyTextStyle(textStyle, text.WithColor(contentColor))
+						// We can use text.CopyTextStyleWithOptions(textStyle, text.WithColor(contentColor))
+						textStyle = text.CopyTextStyleWithOptions(textStyle, text.WithColor(contentColor))
 
 						return c.StartProviders([]api.ProvidedValue{
 							material3.LocalTextStyle.Provides(textStyle),

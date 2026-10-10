@@ -6,7 +6,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/next/text/intl"
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
 	"github.com/zodimo/go-compose/compose/ui/unit"
-	"github.com/zodimo/go-compose/pkg/sentinel"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )
 
 var TextStyleUnspecified *TextStyle = &TextStyle{
@@ -257,7 +257,7 @@ func SpanStyleResolveDefaults(ss *SpanStyle) *SpanStyle {
 		FontStyle:              ss.FontStyle.TakeOrElse(font.FontStyleNormal),
 		FontSynthesis:          font.TakeOrElseFontSynthesis(ss.FontSynthesis, font.FontSynthesisAll),
 		FontFamily:             font.TakeOrElseFontFamily(ss.FontFamily, font.FontFamilyDefault),
-		FontFeatureSettings:    sentinel.TakeOrElseString(ss.FontFeatureSettings, ""),
+		FontFeatureSettings:    stringutils.StringsCompanion.TakeOrElse(ss.FontFeatureSettings, ""),
 		LetterSpacing:          ss.LetterSpacing.TakeOrElse(DefaultLetterSpacing),
 		BaselineShift:          style.TakeOrElseBaselineShift(ss.BaselineShift, style.BaselineShiftNone),
 		TextGeometricTransform: style.TakeOrElseTextGeometricTransform(ss.TextGeometricTransform, style.TextGeometricTransformNone),

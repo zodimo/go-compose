@@ -138,7 +138,7 @@ func textFieldWidgetConstructor(args BasicTextFieldConstructorArgs) layoutnode.L
 			controller := args.controller
 
 			// Resolve text style with defaults
-			textStyle := text.TextStyleResolveDefaults(args.textStyle, args.layoutDirection)
+			textStyle := text.ResolveTextStyleDefaults(args.textStyle, args.layoutDirection)
 
 			// Configure the controller from the text style
 			controller.SetTextStyle(textStyle)

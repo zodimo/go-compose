@@ -10,17 +10,17 @@ import (
 )
 
 func TestTextStyleUnspecified(t *testing.T) {
-	ts := TextStyleUnspecified
+	ts := textStyleUnspecified
 
 	if ts == nil {
-		t.Fatal("TextStyleUnspecified should not be nil")
+		t.Fatal("textStyleUnspecified should not be nil")
 	}
 	// Verify it uses unspecified span and paragraph styles
-	if ts.spanStyle != SpanStyleUnspecified {
-		t.Error("TextStyleUnspecified.spanStyle should be SpanStyleUnspecified")
+	if ts.spanStyle != spanStyleUnspecified {
+		t.Error("textStyleUnspecified.spanStyle should be spanStyleUnspecified")
 	}
-	if ts.paragraphStyle != ParagraphStyleUnspecified {
-		t.Error("TextStyleUnspecified.paragraphStyle should be ParagraphStyleUnspecified")
+	if ts.paragraphStyle != paragraphStyleUnspecified {
+		t.Error("textStyleUnspecified.paragraphStyle should be paragraphStyleUnspecified")
 	}
 }
 
@@ -37,7 +37,7 @@ func TestTextStyle_Getters(t *testing.T) {
 	testLineHeight := unit.Sp(32)
 	testLineBreak := style.LineBreakSimple
 
-	ts := TextStyleFromOptions(
+	ts := textStyleFromOptions(
 		WithColor(testColor),
 		WithBackground(testBg),
 		WithFontSize(testFontSize),
@@ -92,23 +92,23 @@ func TestIsSpecifiedTextStyle(t *testing.T) {
 		expected bool
 	}{
 		{"nil", nil, false},
-		{"Unspecified", TextStyleUnspecified, false},
-		{"CustomStyle", TextStyleFromOptions(WithColor(graphics.ColorRed)), true},
+		{"Unspecified", textStyleUnspecified, false},
+		{"CustomStyle", textStyleFromOptions(WithColor(graphics.ColorRed)), true},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			result := IsSpecifiedTextStyle(tc.style)
+			result := isSpecifiedTextStyle(tc.style)
 			if result != tc.expected {
-				t.Errorf("IsSpecifiedTextStyle(%v) = %v, want %v", tc.name, result, tc.expected)
+				t.Errorf("isSpecifiedTextStyle(%v) = %v, want %v", tc.name, result, tc.expected)
 			}
 		})
 	}
 }
 
 func TestTakeOrElseTextStyle(t *testing.T) {
-	defaultStyle := TextStyleFromOptions(WithColor(graphics.ColorBlue))
-	customStyle := TextStyleFromOptions(WithColor(graphics.ColorRed))
+	defaultStyle := textStyleFromOptions(WithColor(graphics.ColorBlue))
+	customStyle := textStyleFromOptions(WithColor(graphics.ColorRed))
 
 	tests := []struct {
 		name     string
@@ -117,28 +117,28 @@ func TestTakeOrElseTextStyle(t *testing.T) {
 		expected *TextStyle
 	}{
 		{"nil_returns_default", nil, defaultStyle, defaultStyle},
-		{"unspecified_returns_default", TextStyleUnspecified, defaultStyle, defaultStyle},
+		{"unspecified_returns_default", textStyleUnspecified, defaultStyle, defaultStyle},
 		{"custom_returns_custom", customStyle, defaultStyle, customStyle},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			result := TakeOrElseTextStyle(tc.style, tc.def)
+			result := takeOrElseTextStyle(tc.style, tc.def)
 			if result != tc.expected {
-				t.Errorf("TakeOrElseTextStyle() = %v, want %v", result, tc.expected)
+				t.Errorf("takeOrElseTextStyle() = %v, want %v", result, tc.expected)
 			}
 		})
 	}
 }
 
 func TestCopyTextStyle(t *testing.T) {
-	original := TextStyleFromOptions(
+	original := textStyleFromOptions(
 		WithColor(graphics.ColorRed),
 		WithFontSize(unit.Sp(20)),
 	)
 
 	// Copy with modifications
-	copied := CopyTextStyle(original, WithColor(graphics.ColorBlue))
+	copied := copyTextStyleWithOptions(original, WithColor(graphics.ColorBlue))
 
 	// Original should be unchanged
 	if original.Color() != graphics.ColorRed {
@@ -158,40 +158,40 @@ func TestCopyTextStyle(t *testing.T) {
 
 func TestMergeTextStyle(t *testing.T) {
 	t.Run("both_nil", func(t *testing.T) {
-		result := MergeTextStyle(nil, nil)
+		result := mergeTextStyle(nil, nil)
 		// Both nil coalesced to Unspecified, returns Unspecified
-		if result != TextStyleUnspecified {
-			t.Error("MergeTextStyle(nil, nil) should return TextStyleUnspecified")
+		if result != textStyleUnspecified {
+			t.Error("mergeTextStyle(nil, nil) should return textStyleUnspecified")
 		}
 	})
 
 	t.Run("a_unspecified", func(t *testing.T) {
-		b := TextStyleFromOptions(WithColor(graphics.ColorRed))
-		result := MergeTextStyle(TextStyleUnspecified, b)
+		b := textStyleFromOptions(WithColor(graphics.ColorRed))
+		result := mergeTextStyle(textStyleUnspecified, b)
 		if result != b {
-			t.Error("MergeTextStyle with a=Unspecified should return b")
+			t.Error("mergeTextStyle with a=Unspecified should return b")
 		}
 	})
 
 	t.Run("b_unspecified", func(t *testing.T) {
-		a := TextStyleFromOptions(WithColor(graphics.ColorRed))
-		result := MergeTextStyle(a, TextStyleUnspecified)
+		a := textStyleFromOptions(WithColor(graphics.ColorRed))
+		result := mergeTextStyle(a, textStyleUnspecified)
 		if result != a {
-			t.Error("MergeTextStyle with b=Unspecified should return a")
+			t.Error("mergeTextStyle with b=Unspecified should return a")
 		}
 	})
 
 	t.Run("both_specified", func(t *testing.T) {
-		a := TextStyleFromOptions(
+		a := textStyleFromOptions(
 			WithColor(graphics.ColorRed),
 			WithFontSize(unit.Sp(16)),
 		)
-		b := TextStyleFromOptions(
+		b := textStyleFromOptions(
 			WithColor(graphics.ColorBlue),
 			WithFontWeight(font.FontWeightBold),
 		)
 
-		result := MergeTextStyle(a, b)
+		result := mergeTextStyle(a, b)
 
 		// b's color should override a's
 		if result.Color() != graphics.ColorBlue {
@@ -209,8 +209,8 @@ func TestMergeTextStyle(t *testing.T) {
 }
 
 func TestCoalesceTextStyle(t *testing.T) {
-	defaultStyle := TextStyleFromOptions(WithColor(graphics.ColorBlue))
-	customStyle := TextStyleFromOptions(WithColor(graphics.ColorRed))
+	defaultStyle := textStyleFromOptions(WithColor(graphics.ColorBlue))
+	customStyle := textStyleFromOptions(WithColor(graphics.ColorRed))
 
 	tests := []struct {
 		name     string
@@ -224,9 +224,9 @@ func TestCoalesceTextStyle(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			result := CoalesceTextStyle(tc.ptr, tc.def)
+			result := coalesceTextStyle(tc.ptr, tc.def)
 			if result != tc.expected {
-				t.Errorf("CoalesceTextStyle() = %v, want %v", result, tc.expected)
+				t.Errorf("coalesceTextStyle() = %v, want %v", result, tc.expected)
 			}
 		})
 	}
@@ -234,15 +234,15 @@ func TestCoalesceTextStyle(t *testing.T) {
 
 func TestTextStyleFromOptions(t *testing.T) {
 	t.Run("no_options", func(t *testing.T) {
-		ts := TextStyleFromOptions()
+		ts := textStyleFromOptions()
 		// Should have unspecified values
 		if ts.Color() != graphics.ColorUnspecified {
-			t.Errorf("TextStyleFromOptions() with no options Color() = %v, want Unspecified", ts.Color())
+			t.Errorf("textStyleFromOptions() with no options Color() = %v, want Unspecified", ts.Color())
 		}
 	})
 
 	t.Run("with_options", func(t *testing.T) {
-		ts := TextStyleFromOptions(
+		ts := textStyleFromOptions(
 			WithColor(graphics.ColorRed),
 			WithFontSize(unit.Sp(18)),
 			WithTextAlign(style.TextAlignMiddle),
@@ -261,8 +261,8 @@ func TestTextStyleFromOptions(t *testing.T) {
 }
 
 func TestTextStyleResolveDefaults(t *testing.T) {
-	unspecified := TextStyleUnspecified
-	resolved := TextStyleResolveDefaults(unspecified, unit.LayoutDirectionLtr)
+	unspecified := textStyleUnspecified
+	resolved := textStyleResolveDefaults(unspecified, unit.LayoutDirectionLtr)
 
 	// Should resolve to default values
 	if resolved.FontSize() != DefaultFontSize {
@@ -280,16 +280,16 @@ func TestTextStyleResolveDefaults(t *testing.T) {
 }
 
 func TestStringTextStyle(t *testing.T) {
-	ts := TextStyleFromOptions(WithColor(graphics.ColorRed))
-	str := StringTextStyle(ts)
+	ts := textStyleFromOptions(WithColor(graphics.ColorRed))
+	str := stringTextStyle(ts)
 
 	// Should contain TextStyle prefix
 	if len(str) == 0 {
-		t.Error("StringTextStyle() should return non-empty string")
+		t.Error("stringTextStyle() should return non-empty string")
 	}
 	// Basic structure check
 	if str[:10] != "TextStyle{" {
-		t.Errorf("StringTextStyle() should start with 'TextStyle{', got: %s", str[:10])
+		t.Errorf("stringTextStyle() should start with 'TextStyle{', got: %s", str[:10])
 	}
 }
 

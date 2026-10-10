@@ -5,7 +5,7 @@ import "github.com/zodimo/go-compose/compose/ui/text"
 type TypographyOption func(*Typography)
 
 func WithDisplaySmall(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("DisplaySmall style must be specified")
 	}
 	return func(t *Typography) {
@@ -14,7 +14,7 @@ func WithDisplaySmall(style *text.TextStyle) TypographyOption {
 }
 
 func WithDisplayMedium(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("DisplayMedium style must be specified")
 	}
 	return func(t *Typography) {
@@ -23,7 +23,7 @@ func WithDisplayMedium(style *text.TextStyle) TypographyOption {
 }
 
 func WithDisplayLarge(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("DisplayLarge style must be specified")
 	}
 	return func(t *Typography) {
@@ -32,7 +32,7 @@ func WithDisplayLarge(style *text.TextStyle) TypographyOption {
 }
 
 func WithHeadlineSmall(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("HeadlineSmall style must be specified")
 	}
 	return func(t *Typography) {
@@ -41,7 +41,7 @@ func WithHeadlineSmall(style *text.TextStyle) TypographyOption {
 }
 
 func WithHeadlineMedium(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("HeadlineMedium style must be specified")
 	}
 	return func(t *Typography) {
@@ -50,7 +50,7 @@ func WithHeadlineMedium(style *text.TextStyle) TypographyOption {
 }
 
 func WithHeadlineLarge(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("HeadlineLarge style must be specified")
 	}
 	return func(t *Typography) {
@@ -59,7 +59,7 @@ func WithHeadlineLarge(style *text.TextStyle) TypographyOption {
 }
 
 func WithTitleSmall(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("TitleSmall style must be specified")
 	}
 	return func(t *Typography) {
@@ -68,7 +68,7 @@ func WithTitleSmall(style *text.TextStyle) TypographyOption {
 }
 
 func WithTitleMedium(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("TitleMedium style must be specified")
 	}
 	return func(t *Typography) {
@@ -77,7 +77,7 @@ func WithTitleMedium(style *text.TextStyle) TypographyOption {
 }
 
 func WithTitleLarge(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("TitleLarge style must be specified")
 	}
 	return func(t *Typography) {
@@ -86,7 +86,7 @@ func WithTitleLarge(style *text.TextStyle) TypographyOption {
 }
 
 func WithBodySmall(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("BodySmall style must be specified")
 	}
 	return func(t *Typography) {
@@ -95,7 +95,7 @@ func WithBodySmall(style *text.TextStyle) TypographyOption {
 }
 
 func WithBodyMedium(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("BodyMedium style must be specified")
 	}
 	return func(t *Typography) {
@@ -104,7 +104,7 @@ func WithBodyMedium(style *text.TextStyle) TypographyOption {
 }
 
 func WithBodyLarge(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("BodyLarge style must be specified")
 	}
 	return func(t *Typography) {
@@ -113,7 +113,7 @@ func WithBodyLarge(style *text.TextStyle) TypographyOption {
 }
 
 func WithLabelSmall(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("LabelSmall style must be specified")
 	}
 	return func(t *Typography) {
@@ -122,7 +122,7 @@ func WithLabelSmall(style *text.TextStyle) TypographyOption {
 }
 
 func WithLabelMedium(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("LabelMedium style must be specified")
 	}
 	return func(t *Typography) {
@@ -131,7 +131,7 @@ func WithLabelMedium(style *text.TextStyle) TypographyOption {
 }
 
 func WithLabelLarge(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("LabelLarge style must be specified")
 	}
 	return func(t *Typography) {
@@ -140,7 +140,7 @@ func WithLabelLarge(style *text.TextStyle) TypographyOption {
 }
 
 func WithDisplaySmallEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("DisplaySmallEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -149,7 +149,7 @@ func WithDisplaySmallEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithDisplayMediumEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("DisplayMediumEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -158,7 +158,7 @@ func WithDisplayMediumEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithDisplayLargeEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("DisplayLargeEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -167,7 +167,7 @@ func WithDisplayLargeEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithHeadlineSmallEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("HeadlineSmallEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -176,7 +176,7 @@ func WithHeadlineSmallEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithHeadlineMediumEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("HeadlineMediumEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -185,7 +185,7 @@ func WithHeadlineMediumEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithHeadlineLargeEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("HeadlineLargeEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -194,7 +194,7 @@ func WithHeadlineLargeEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithTitleSmallEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("TitleSmallEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -203,7 +203,7 @@ func WithTitleSmallEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithTitleMediumEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("TitleMediumEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -212,7 +212,7 @@ func WithTitleMediumEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithTitleLargeEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("TitleLargeEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -221,7 +221,7 @@ func WithTitleLargeEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithBodySmallEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("BodySmallEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -230,7 +230,7 @@ func WithBodySmallEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithBodyMediumEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("BodyMediumEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -239,7 +239,7 @@ func WithBodyMediumEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithBodyLargeEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("BodyLargeEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -248,7 +248,7 @@ func WithBodyLargeEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithLabelSmallEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("LabelSmallEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -257,7 +257,7 @@ func WithLabelSmallEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithLabelMediumEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("LabelMediumEmphasized style must be specified")
 	}
 	return func(t *Typography) {
@@ -266,7 +266,7 @@ func WithLabelMediumEmphasized(style *text.TextStyle) TypographyOption {
 }
 
 func WithLabelLargeEmphasized(style *text.TextStyle) TypographyOption {
-	if !text.IsSpecifiedTextStyle(style) {
+	if !text.TextStyleCompanion.IsSpecified(style) {
 		panic("LabelLargeEmphasized style must be specified")
 	}
 	return func(t *Typography) {

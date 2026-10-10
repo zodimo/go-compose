@@ -13,7 +13,7 @@ func DefaultTextOptions() TextOptions {
 
 	return TextOptions{
 		Modifier:  ui.EmptyModifier,
-		TextStyle: text.TextStyleUnspecified,
+		TextStyle: text.TextStyleCompanion.Unspecified(),
 		MaxLines:  math.MaxInt32,
 
 		// BACKWARDS COMPATIBILITY

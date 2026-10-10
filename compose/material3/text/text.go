@@ -37,7 +37,7 @@ func textWithStyle(value string, tokenStyle tokens.TypographyTokenKey, options .
 		baseStyle := typography.FromToken(tokenStyle)
 
 		if contentColor.IsSpecified() {
-			baseStyle = uiText.CopyTextStyle(baseStyle, uiText.WithColor(contentColor))
+			baseStyle = uiText.CopyTextStyleWithOptions(baseStyle, uiText.WithColor(contentColor))
 		}
 
 		finalOptions := append([]text.TextOption{text.WithTextStyle(baseStyle)}, options...)

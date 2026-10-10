@@ -9,7 +9,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
-	"github.com/zodimo/go-compose/pkg/sentinel"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )
 
 var SpanStyleUnspecified *SpanStyle = &SpanStyle{
@@ -191,7 +191,7 @@ func (s SpanStyle) Copy(options ...SpanStyleOption) *SpanStyle {
 		FontStyle:              opts.FontStyle.TakeOrElse(s.FontStyle),
 		FontSynthesis:          font.TakeOrElseFontSynthesis(opts.FontSynthesis, s.FontSynthesis),
 		FontFamily:             font.TakeOrElseFontFamily(opts.FontFamily, s.FontFamily),
-		FontFeatureSettings:    sentinel.TakeOrElseString(opts.FontFeatureSettings, s.FontFeatureSettings),
+		FontFeatureSettings:    stringutils.StringsCompanion.TakeOrElse(opts.FontFeatureSettings, s.FontFeatureSettings),
 		LetterSpacing:          opts.LetterSpacing.TakeOrElse(s.LetterSpacing),
 		BaselineShift:          style.TakeOrElseBaselineShift(opts.BaselineShift, s.BaselineShift),
 		TextGeometricTransform: style.TakeOrElseTextGeometricTransform(opts.TextGeometricTransform, s.TextGeometricTransform),
@@ -309,7 +309,7 @@ func MergeSpanStyle(a, b *SpanStyle) *SpanStyle {
 		FontStyle:              b.FontStyle.TakeOrElse(a.FontStyle),
 		FontSynthesis:          font.TakeOrElseFontSynthesis(b.FontSynthesis, a.FontSynthesis),
 		FontFamily:             font.TakeOrElseFontFamily(b.FontFamily, a.FontFamily),
-		FontFeatureSettings:    sentinel.TakeOrElseString(b.FontFeatureSettings, a.FontFeatureSettings),
+		FontFeatureSettings:    stringutils.StringsCompanion.TakeOrElse(b.FontFeatureSettings, a.FontFeatureSettings),
 		LetterSpacing:          b.LetterSpacing.TakeOrElse(a.LetterSpacing),
 		BaselineShift:          style.TakeOrElseBaselineShift(b.BaselineShift, a.BaselineShift),
 		TextGeometricTransform: style.TakeOrElseTextGeometricTransform(b.TextGeometricTransform, a.TextGeometricTransform),
@@ -376,7 +376,7 @@ func ResolveSpanStyleDefaults(s *SpanStyle) *SpanStyle {
 		FontStyle:              s.FontStyle.TakeOrElse(font.FontStyleNormal),
 		FontSynthesis:          font.TakeOrElseFontSynthesis(s.FontSynthesis, font.FontSynthesisAll),
 		FontFamily:             font.TakeOrElseFontFamily(s.FontFamily, font.FontFamilyDefault),
-		FontFeatureSettings:    sentinel.TakeOrElseString(s.FontFeatureSettings, ""),
+		FontFeatureSettings:    stringutils.StringsCompanion.TakeOrElse(s.FontFeatureSettings, ""),
 		LetterSpacing:          s.LetterSpacing.TakeOrElse(DefaultLetterSpacing),
 		BaselineShift:          style.TakeOrElseBaselineShift(s.BaselineShift, style.BaselineShiftNone),
 		TextGeometricTransform: style.TakeOrElseTextGeometricTransform(s.TextGeometricTransform, style.TextGeometricTransformNone), // TODO: check sentinel for nil

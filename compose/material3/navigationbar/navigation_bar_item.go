@@ -61,7 +61,7 @@ func NavigationBarItem(
 		colors := NavigationBarDefaults.Colors(c)
 
 		defaultIconsSizeProvider := compose.LocalTextStyle.Provides(
-			text.CopyTextStyle(text.TextStyleUnspecified, text.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
+			text.CopyTextStyleWithOptions(text.TextStyleCompanion.Unspecified(), text.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
 		)
 
 		return box.Box(

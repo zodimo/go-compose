@@ -110,7 +110,7 @@ func Outlined(
 		})
 
 		defaultIconsSizeProvider := compose.LocalTextStyle.Provides(
-			text.CopyTextStyle(text.TextStyleUnspecified, text.WithFontSize(unit.NewTextUnit(48, unit.TextUnitTypeSp))),
+			text.CopyTextStyleWithOptions(text.TextStyleCompanion.Unspecified(), text.WithFontSize(unit.NewTextUnit(48, unit.TextUnitTypeSp))),
 		)
 
 		// Compose slots

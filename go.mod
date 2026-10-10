@@ -22,6 +22,7 @@ require (
 	git.wow.st/gmp/jni v0.0.0-20260127013417-d142949d346a // indirect
 	github.com/godbus/dbus/v5 v5.2.2 // indirect
 	github.com/zodimo/go-lazy v0.1.1 // indirect
+	github.com/zodimo/go-sentinel-helper v0.2.0 // indirect
 	golang.org/x/mod v0.41.0 // indirect
 	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
