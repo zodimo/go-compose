@@ -45,7 +45,7 @@ func TestTextUnitPacking(t *testing.T) {
 	})
 
 	t.Run("Unspecified packing", func(t *testing.T) {
-		u := TextUnitUnspecified
+		u := TextUnitCompanion.Unspecified()
 		if !u.IsUnspecified() {
 			t.Errorf("Expected IsUnspecified() to be true")
 		}
@@ -96,7 +96,7 @@ func TestTextUnitArithmetic(t *testing.T) {
 				t.Errorf("The code did not panic")
 			}
 		}()
-		TextUnitUnspecified.Times(2)
+		TextUnitCompanion.Unspecified().Times(2)
 	})
 }
 
@@ -158,7 +158,7 @@ func TestTextUnitString(t *testing.T) {
 	if Em(2).String() != "TextUnit{2 Em}" {
 		t.Errorf("Expected TextUnit{2 Em}, got %v", Em(2).String())
 	}
-	if TextUnitUnspecified.String() != "TextUnit{Unspecified}" {
-		t.Errorf("Expected TextUnit{Unspecified}, got %v", TextUnitUnspecified.String())
+	if TextUnitCompanion.Unspecified().String() != "TextUnit{Unspecified}" {
+		t.Errorf("Expected TextUnit{Unspecified}, got %v", TextUnitCompanion.Unspecified().String())
 	}
 }

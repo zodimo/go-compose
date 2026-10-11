@@ -10,8 +10,8 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
-var CutCornerShapeUnspecified = &CutCornerShape{
-	Radius: unit.DpUnspecified,
+var cutCornerShapeUnspecified = &CutCornerShape{
+	Radius: unit.DpCompanion.Unspecified(),
 }
 var _ Shape = (*CutCornerShape)(nil)
 
@@ -36,7 +36,7 @@ func (c *CutCornerShape) CreateOutline(size image.Point, metric gioUnit.Metric) 
 func (c *CutCornerShape) mergeShape(other Shape) Shape {
 	if otherCutCorner, ok := other.(*CutCornerShape); ok {
 		return &CutCornerShape{
-			Radius: otherCutCorner.Radius.TakeOrElse(c.Radius),
+			Radius: unit.DpCompanion.TakeOrElse(otherCutCorner.Radius, c.Radius),
 		}
 
 	}

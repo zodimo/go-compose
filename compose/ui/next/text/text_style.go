@@ -6,12 +6,15 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/next/text/intl"
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
 	"github.com/zodimo/go-compose/compose/ui/next/text/unit"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )
 
-var TextStyleUnspecified *TextStyle = &TextStyle{
-	spanStyle:      SpanStyleUnspecified,
-	paragraphStyle: ParagraphStyleUnspecified,
+// textStyleUnspecified is the sentinel for TextStyle. It is deliberately
+// package-private: the only public way to obtain it is TextStyleCompanion.Unspecified().
+var textStyleUnspecified *TextStyle = &TextStyle{
+	spanStyle:      spanStyleUnspecified,
+	paragraphStyle: paragraphStyleUnspecified,
 	platformStyle:  nil,
 }
 
@@ -172,74 +175,149 @@ func (s TextStyle) ToString() string {
 }
 
 func IsSpecifiedTextStyle(style *TextStyle) bool {
-	return style != nil && style != TextStyleUnspecified
+	return isSpecifiedTextStyle(style)
 }
 
 func TakeOrElseTextStyle(style, defaultStyle *TextStyle) *TextStyle {
-	if style == nil || style == TextStyleUnspecified {
+	return takeOrElseTextStyle(style, defaultStyle)
+}
+
+// Identity (2 ns)
+func SameTextStyle(a, b *TextStyle) bool {
+	return sameTextStyle(a, b)
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualTextStyle(a, b *TextStyle) bool {
+	return semanticEqualTextStyle(a, b)
+}
+
+func EqualTextStyle(a, b *TextStyle) bool {
+	return equalTextStyle(a, b)
+}
+
+func MergeTextStyle(a, b *TextStyle) *TextStyle {
+	return mergeTextStyle(a, b)
+}
+
+func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle {
+	return coalesceTextStyle(ptr, def)
+}
+
+// === Sentinel operations ===
+
+func isSpecifiedTextStyle(style *TextStyle) bool {
+	return style != nil && style != textStyleUnspecified
+}
+
+func isUnspecifiedTextStyle(style *TextStyle) bool {
+	return !isSpecifiedTextStyle(style)
+}
+
+func takeOrElseTextStyle(style, defaultStyle *TextStyle) *TextStyle {
+	if style == nil || style == textStyleUnspecified {
 		return defaultStyle
 	}
 	return style
 }
 
-// Identity (2 ns)
-func SameTextStyle(a, b *TextStyle) bool {
-	if a == nil && b == nil {
-		return true
-	}
-	if a == nil {
-		return b == TextStyleUnspecified
-	}
-	if b == nil {
-		return a == TextStyleUnspecified
-	}
-	return a == b
-}
-
-// Semantic equality (field-by-field, 20 ns)
-func SemanticEqualTextStyle(a, b *TextStyle) bool {
-
-	a = CoalesceTextStyle(a, TextStyleUnspecified)
-	b = CoalesceTextStyle(b, TextStyleUnspecified)
-
-	return SemanticEqualSpanStyle(a.spanStyle, b.spanStyle) &&
-		SemanticEqualParagraphStyle(a.paragraphStyle, b.paragraphStyle)
-}
-
-func EqualTextStyle(a, b *TextStyle) bool {
-	if !SameTextStyle(a, b) {
-		return SemanticEqualTextStyle(a, b)
-	}
-	return true
-}
-
-func MergeTextStyle(a, b *TextStyle) *TextStyle {
-	a = CoalesceTextStyle(a, TextStyleUnspecified)
-	b = CoalesceTextStyle(b, TextStyleUnspecified)
-
-	if a == TextStyleUnspecified {
-		return b
-	}
-	if b == TextStyleUnspecified {
-		return a
-	}
-
-	// Both are custom: allocate new merged style
-	return &TextStyle{
-		spanStyle:      MergeSpanStyle(a.spanStyle, b.spanStyle),
-		paragraphStyle: MergeParagraphStyle(a.paragraphStyle, b.paragraphStyle),
-	}
-}
-
-func CoalesceTextStyle(ptr, def *TextStyle) *TextStyle {
+func coalesceTextStyle(ptr, def *TextStyle) *TextStyle {
 	if ptr == nil {
 		return def
 	}
 	return ptr
 }
 
+func mergeTextStyle(a, b *TextStyle) *TextStyle {
+	a = coalesceTextStyle(a, textStyleUnspecified)
+	b = coalesceTextStyle(b, textStyleUnspecified)
+
+	if a == textStyleUnspecified {
+		return b
+	}
+	if b == textStyleUnspecified {
+		return a
+	}
+
+	// Both are custom: allocate new merged style. b wins where specified.
+	return &TextStyle{
+		spanStyle:      mergeSpanStyle(a.spanStyle, b.spanStyle),
+		paragraphStyle: mergeParagraphStyle(a.paragraphStyle, b.paragraphStyle),
+	}
+}
+
+func stringTextStyle(ts *TextStyle) string {
+	if !isSpecifiedTextStyle(ts) {
+		return "TextStyle{Unspecified}"
+	}
+	return "TextStyle{spanStyle=" + stringSpanStyle(ts.spanStyle) +
+		", paragraphStyle=" + stringParagraphStyle(ts.paragraphStyle) + "}"
+}
+
+func sameTextStyle(a, b *TextStyle) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil {
+		return b == textStyleUnspecified
+	}
+	if b == nil {
+		return a == textStyleUnspecified
+	}
+	return a == b
+}
+
+func semanticEqualTextStyle(a, b *TextStyle) bool {
+
+	a = coalesceTextStyle(a, textStyleUnspecified)
+	b = coalesceTextStyle(b, textStyleUnspecified)
+
+	if a == textStyleUnspecified && b == textStyleUnspecified {
+		return true
+	}
+
+	return semanticEqualSpanStyle(a.spanStyle, b.spanStyle) &&
+		semanticEqualParagraphStyle(a.paragraphStyle, b.paragraphStyle)
+}
+
+func equalTextStyle(a, b *TextStyle) bool {
+	if !sameTextStyle(a, b) {
+		return semanticEqualTextStyle(a, b)
+	}
+	return true
+}
+
+// copyTextStyle returns a copy of ts; the source is never mutated.
+func copyTextStyle(ts *TextStyle, options ...func(*TextStyle)) *TextStyle {
+	cp := &TextStyle{}
+	if isSpecifiedTextStyle(ts) {
+		cp.spanStyle = ts.spanStyle
+		cp.paragraphStyle = ts.paragraphStyle
+		cp.platformStyle = ts.platformStyle
+	}
+	for _, option := range options {
+		option(cp)
+	}
+	return cp
+}
+
+// TextStyleCompanion is the single exported sentinel-family symbol for TextStyle.
+var TextStyleCompanion = companions.NewStructCompanion(
+	func() *TextStyle { return textStyleUnspecified },
+	stringTextStyle,
+	isSpecifiedTextStyle,
+	isUnspecifiedTextStyle,
+	takeOrElseTextStyle,
+	mergeTextStyle,
+	sameTextStyle,
+	semanticEqualTextStyle,
+	equalTextStyle,
+	coalesceTextStyle,
+	copyTextStyle,
+)
+
 func TextStyleResolveDefaults(ts *TextStyle, direction unit.LayoutDirection) *TextStyle {
-	ts = CoalesceTextStyle(ts, TextStyleUnspecified)
+	ts = coalesceTextStyle(ts, textStyleUnspecified)
 
 	return &TextStyle{
 		spanStyle:      SpanStyleResolveDefaults(ts.spanStyle),
@@ -249,38 +327,38 @@ func TextStyleResolveDefaults(ts *TextStyle, direction unit.LayoutDirection) *Te
 }
 
 func SpanStyleResolveDefaults(ss *SpanStyle) *SpanStyle {
-	ss = CoalesceSpanStyle(ss, SpanStyleUnspecified)
+	ss = coalesceSpanStyle(ss, spanStyleUnspecified)
 	return &SpanStyle{
 		textForegroundStyle:    style.TakeOrElseTextForegroundStyle(ss.textForegroundStyle, DefaultColorForegroundStyle),
-		FontSize:               ss.FontSize.TakeOrElse(DefaultFontSize),
-		FontWeight:             ss.FontWeight.TakeOrElse(font.FontWeightNormal),
-		FontStyle:              ss.FontStyle.TakeOrElse(font.FontStyleNormal),
+		FontSize:               unit.TextUnitCompanion.TakeOrElse(ss.FontSize, DefaultFontSize),
+		FontWeight:             font.FontWeightCompanion.TakeOrElse(ss.FontWeight, font.FontWeightNormal),
+		FontStyle:              font.FontStyleCompanion.TakeOrElse(ss.FontStyle, font.FontStyleNormal),
 		FontSynthesis:          font.TakeOrElseFontSynthesis(ss.FontSynthesis, font.FontSynthesisAll),
 		FontFamily:             font.TakeOrElseFontFamily(ss.FontFamily, font.FontFamilyDefault),
 		FontFeatureSettings:    stringutils.StringsCompanion.TakeOrElse(ss.FontFeatureSettings, ""),
-		LetterSpacing:          ss.LetterSpacing.TakeOrElse(DefaultLetterSpacing),
+		LetterSpacing:          unit.TextUnitCompanion.TakeOrElse(ss.LetterSpacing, DefaultLetterSpacing),
 		BaselineShift:          style.TakeOrElseBaselineShift(ss.BaselineShift, style.BaselineShiftNone),
 		TextGeometricTransform: style.TakeOrElseTextGeometricTransform(ss.TextGeometricTransform, style.TextGeometricTransformNone),
-		LocaleList:             intl.TakeOrElseLocaleList(ss.LocaleList, nil), //LocaleList.Current - local provider
-		Background:             ss.Background.TakeOrElse(DefaultBackgroundColor),
+		LocaleList:             intl.LocaleListCompanion.TakeOrElse(ss.LocaleList, nil), //LocaleList.Current - local provider
+		Background:             graphics.ColorCompanion.TakeOrElse(ss.Background, DefaultBackgroundColor),
 		TextDecoration:         style.TakeOrElseTextDecoration(ss.TextDecoration, style.TextDecorationNone),
-		Shadow:                 graphics.TakeOrElseShadow(ss.Shadow, graphics.ShadowNone),
+		Shadow:                 graphics.ShadowCompanion.TakeOrElse(ss.Shadow, graphics.ShadowNone),
 		PlatformStyle:          ss.PlatformStyle,
 		DrawStyle:              graphics.TakeOrElseDrawStyle(ss.DrawStyle, graphics.DrawStyleFill),
 	}
 }
 
 func ParagraphStyleResolveDefaults(ps *ParagraphStyle, direction unit.LayoutDirection) *ParagraphStyle {
-	ps = CoalesceParagraphStyle(ps, ParagraphStyleUnspecified)
+	ps = coalesceParagraphStyle(ps, paragraphStyleUnspecified)
 	return &ParagraphStyle{
-		TextAlign:       ps.TextAlign.TakeOrElse(style.TextAlignStart),
+		TextAlign:       style.TextAlignCompanion.TakeOrElse(ps.TextAlign, style.TextAlignStart),
 		TextDirection:   style.ResolveTextDirection(direction, ps.TextDirection),
-		LineHeight:      ps.LineHeight.TakeOrElse(unit.TextUnitUnspecified),
+		LineHeight:      unit.TextUnitCompanion.TakeOrElse(ps.LineHeight, unit.TextUnitCompanion.Unspecified()),
 		TextIndent:      style.TakeOrElseTextIndent(ps.TextIndent, style.TextIndentNone),
 		PlatformStyle:   ps.PlatformStyle,
 		LineHeightStyle: ps.LineHeightStyle,
-		LineBreak:       ps.LineBreak.TakeOrElse(style.LineBreakSimple),
-		Hyphens:         ps.Hyphens.TakeOrElse(style.HyphensNone),
+		LineBreak:       style.LineBreakCompanion.TakeOrElse(ps.LineBreak, style.LineBreakSimple),
+		Hyphens:         style.HyphensCompanion.TakeOrElse(ps.Hyphens, style.HyphensNone),
 		TextMotion:      style.TakeOrElseTextMotion(ps.TextMotion, style.TextMotionStatic),
 	}
 }

@@ -3,6 +3,7 @@ package divider
 import (
 	fDivider "github.com/zodimo/go-compose/compose/foundation/divider"
 	"github.com/zodimo/go-compose/compose/material3"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/layout"
 	"github.com/zodimo/go-compose/pkg/api"
 )
@@ -19,7 +20,7 @@ func Divider(options ...DividerOption) api.Composable {
 		}
 
 		theme := material3.Theme(c)
-		opts.Color = opts.Color.TakeOrElse(theme.ColorScheme().OutlineVariant)
+		opts.Color = graphics.ColorCompanion.TakeOrElse(opts.Color, theme.ColorScheme().OutlineVariant)
 		options = append(options, WithColor(opts.Color))
 		if opts.Axis == layout.AxisUnspecified {
 			opts.Axis = layout.AxisHorizontal

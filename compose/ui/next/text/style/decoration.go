@@ -3,6 +3,8 @@ package style
 import (
 	"fmt"
 	"strings"
+
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
 type TextDecorationMask int
@@ -29,14 +31,17 @@ var (
 	// TextDecorationLineThrough Draws a horizontal line over the text.
 	TextDecorationLineThrough = &TextDecoration{mask: TextDecorationMaskLineThrough}
 
-	TextDecorationUnspecified = &TextDecoration{mask: TextDecorationMaskUnspecified}
+	// textDecorationUnspecified is the sentinel for TextDecoration. It is
+	// deliberately package-private: the only public way to obtain it is
+	// TextDecorationCompanion.Unspecified().
+	textDecorationUnspecified = &TextDecoration{mask: TextDecorationMaskUnspecified}
 )
 
 // Combine creates a decoration that includes all the given decorations.
 func Combine(decorations []*TextDecoration) *TextDecoration {
 	mask := TextDecorationMaskNone
 	for _, decoration := range decorations {
-		decoration = CoalesceTextDecoration(decoration, TextDecorationUnspecified)
+		decoration = coalesceTextDecoration(decoration, textDecorationUnspecified)
 		if IsSpecifiedTextDecoration(decoration) {
 			mask |= decoration.mask
 		}
@@ -46,14 +51,14 @@ func Combine(decorations []*TextDecoration) *TextDecoration {
 
 // Plus creates a decoration that includes both of the TextDecorations.
 func (t TextDecoration) Plus(decoration *TextDecoration) *TextDecoration {
-	decoration = CoalesceTextDecoration(decoration, TextDecorationUnspecified)
+	decoration = coalesceTextDecoration(decoration, textDecorationUnspecified)
 
 	return &TextDecoration{mask: t.mask | decoration.mask}
 }
 
 // Contains checks whether this TextDecoration contains the given decoration.
 func (t TextDecoration) Contains(other *TextDecoration) bool {
-	other = CoalesceTextDecoration(other, TextDecorationUnspecified)
+	other = coalesceTextDecoration(other, textDecorationUnspecified)
 
 	return (t.mask | other.mask) == t.mask
 }
@@ -77,14 +82,117 @@ func NewTextDecoration(mask TextDecorationMask) TextDecoration {
 }
 
 func IsSpecifiedTextDecoration(t *TextDecoration) bool {
-	return t != nil && t != TextDecorationUnspecified
+	return isSpecifiedTextDecoration(t)
 }
 
+// === Sentinel operations ===
+
+func isSpecifiedTextDecoration(t *TextDecoration) bool {
+	return t != nil && t != textDecorationUnspecified
+}
+
+func isUnspecifiedTextDecoration(t *TextDecoration) bool {
+	return !isSpecifiedTextDecoration(t)
+}
+
+func takeOrElseTextDecoration(s, def *TextDecoration) *TextDecoration {
+	if !isSpecifiedTextDecoration(s) {
+		return def
+	}
+	return s
+}
+
+func coalesceTextDecoration(ptr, def *TextDecoration) *TextDecoration {
+	if ptr == nil {
+		return def
+	}
+	return ptr
+}
+
+func mergeTextDecoration(a, b *TextDecoration) *TextDecoration {
+	a = coalesceTextDecoration(a, textDecorationUnspecified)
+	b = coalesceTextDecoration(b, textDecorationUnspecified)
+
+	if a == textDecorationUnspecified {
+		return b
+	}
+	if b == textDecorationUnspecified {
+		return a
+	}
+
+	// Both are custom: allocate new merged style. b wins where specified.
+	return &TextDecoration{
+		mask: a.mask | b.mask,
+	}
+}
+
+func stringTextDecoration(t *TextDecoration) string {
+	return StringTextDecoration(t)
+}
+
+func sameTextDecoration(a, b *TextDecoration) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil {
+		return b == textDecorationUnspecified
+	}
+	if b == nil {
+		return a == textDecorationUnspecified
+	}
+	return a == b
+}
+
+func semanticEqualTextDecoration(a, b *TextDecoration) bool {
+
+	a = coalesceTextDecoration(a, textDecorationUnspecified)
+	b = coalesceTextDecoration(b, textDecorationUnspecified)
+
+	if a == textDecorationUnspecified && b == textDecorationUnspecified {
+		return true
+	}
+
+	return a.mask == b.mask
+}
+
+func equalTextDecoration(a, b *TextDecoration) bool {
+	if !sameTextDecoration(a, b) {
+		return semanticEqualTextDecoration(a, b)
+	}
+	return true
+}
+
+func copyTextDecoration(t *TextDecoration, options ...func(*TextDecoration)) *TextDecoration {
+	cp := &TextDecoration{}
+	if isSpecifiedTextDecoration(t) {
+		cp.mask = t.mask
+	}
+	for _, option := range options {
+		option(cp)
+	}
+	return cp
+}
+
+// TextDecorationCompanion is the single exported sentinel-family symbol for TextDecoration.
+var TextDecorationCompanion = companions.NewStructCompanion(
+	func() *TextDecoration { return textDecorationUnspecified },
+	stringTextDecoration,
+	isSpecifiedTextDecoration,
+	isUnspecifiedTextDecoration,
+	takeOrElseTextDecoration,
+	mergeTextDecoration,
+	sameTextDecoration,
+	semanticEqualTextDecoration,
+	equalTextDecoration,
+	coalesceTextDecoration,
+	copyTextDecoration,
+)
+
 func StringTextDecoration(t *TextDecoration) string {
-	t = CoalesceTextDecoration(t, TextDecorationUnspecified)
+	t = coalesceTextDecoration(t, textDecorationUnspecified)
 
 	if !IsSpecifiedTextDecoration(t) {
-		return "TextDecorationUnspecified"
+		return "textDecorationUnspecified"
 	}
 	if t.mask == 0 {
 		return "TextDecoration.None"
@@ -105,10 +213,7 @@ func StringTextDecoration(t *TextDecoration) string {
 }
 
 func TakeOrElseTextDecoration(s, def *TextDecoration) *TextDecoration {
-	if !IsSpecifiedTextDecoration(s) {
-		return def
-	}
-	return s
+	return takeOrElseTextDecoration(s, def)
 }
 
 // Identity (2 ns)
@@ -117,10 +222,10 @@ func SameTextDecoration(a, b *TextDecoration) bool {
 		return true
 	}
 	if a == nil {
-		return b == TextDecorationUnspecified
+		return b == textDecorationUnspecified
 	}
 	if b == nil {
-		return a == TextDecorationUnspecified
+		return a == textDecorationUnspecified
 	}
 	return a == b
 }
@@ -128,8 +233,8 @@ func SameTextDecoration(a, b *TextDecoration) bool {
 // Semantic equality (field-by-field, 20 ns)
 func SemanticEqualTextDecoration(a, b *TextDecoration) bool {
 
-	a = CoalesceTextDecoration(a, TextDecorationUnspecified)
-	b = CoalesceTextDecoration(b, TextDecorationUnspecified)
+	a = coalesceTextDecoration(a, textDecorationUnspecified)
+	b = coalesceTextDecoration(b, textDecorationUnspecified)
 
 	return a.mask == b.mask
 }
@@ -142,13 +247,13 @@ func EqualTextDecoration(a, b *TextDecoration) bool {
 }
 
 func MergeTextDecoration(a, b *TextDecoration) *TextDecoration {
-	a = CoalesceTextDecoration(a, TextDecorationUnspecified)
-	b = CoalesceTextDecoration(b, TextDecorationUnspecified)
+	a = coalesceTextDecoration(a, textDecorationUnspecified)
+	b = coalesceTextDecoration(b, textDecorationUnspecified)
 
-	if a == TextDecorationUnspecified {
+	if a == textDecorationUnspecified {
 		return b
 	}
-	if b == TextDecorationUnspecified {
+	if b == textDecorationUnspecified {
 		return a
 	}
 

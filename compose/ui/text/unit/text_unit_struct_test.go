@@ -70,15 +70,15 @@ func BenchmarkTextUnitStruct_Create(b *testing.B) {
 // BenchmarkTextUnitInt64_TakeOrElse tests TakeOrElse with int64-based TextUnit
 func BenchmarkTextUnitInt64_TakeOrElse(b *testing.B) {
 	specified := Sp(24)
-	unspecified := TextUnitUnspecified
+	unspecified := TextUnitCompanion.Unspecified()
 	defaultVal := Sp(14)
 	var result TextUnit
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		if i%2 == 0 {
-			result = specified.TakeOrElse(defaultVal)
+			result = TextUnitCompanion.TakeOrElse(specified, defaultVal)
 		} else {
-			result = unspecified.TakeOrElse(defaultVal)
+			result = TextUnitCompanion.TakeOrElse(unspecified, defaultVal)
 		}
 	}
 	_ = result
@@ -138,7 +138,7 @@ func TestTextUnitStruct_Equivalence(t *testing.T) {
 	}
 
 	// Test unspecified
-	if TextUnitUnspecified.IsUnspecified() != TextUnitStructUnspecified.IsUnspecified() {
+	if TextUnitCompanion.IsUnspecified(TextUnitCompanion.Unspecified()) != TextUnitStructUnspecified.IsUnspecified() {
 		t.Errorf("IsUnspecified mismatch")
 	}
 
@@ -146,7 +146,7 @@ func TestTextUnitStruct_Equivalence(t *testing.T) {
 	defaultInt64 := Sp(14)
 	defaultStruct := SpStruct(14)
 
-	resultInt64 := TextUnitUnspecified.TakeOrElse(defaultInt64)
+	resultInt64 := TextUnitCompanion.TakeOrElse(TextUnitCompanion.Unspecified(), defaultInt64)
 	resultStruct := TextUnitStructUnspecified.TakeOrElse(defaultStruct)
 
 	if resultInt64.Value() != resultStruct.Value() {

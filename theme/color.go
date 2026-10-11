@@ -7,7 +7,7 @@ import (
 )
 
 var ColorUnspecified ColorDescriptor = &colorDescriptor{
-	color:   graphics.ColorUnspecified,
+	color:   graphics.ColorCompanion.Unspecified(),
 	isColor: true,
 }
 

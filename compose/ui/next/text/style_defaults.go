@@ -14,7 +14,7 @@ var DefaultLetterSpacing = unit.Sp(0)
 var DefaultBackgroundColor = graphics.ColorTransparent
 
 var DefaultTextAlign = style.TextAlignStart
-var DefaultLineHeight = unit.TextUnitUnspecified // TODO: Should this stay unspecified ?
+var DefaultLineHeight = unit.TextUnitCompanion.Unspecified() // TODO: Should this stay unspecified ?
 var DefaultLineBreak = style.LineBreakParagraph
 var DefaultTextIndent = style.TextIndentNone
 var DefaultHyphens = style.HyphensNone

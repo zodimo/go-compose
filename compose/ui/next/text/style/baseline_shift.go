@@ -5,6 +5,7 @@ import (
 
 	"github.com/zodimo/go-compose/pkg/floatutils"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
 // BaselineShift represents the amount by which text is shifted up or down from the current baseline.
@@ -22,21 +23,20 @@ const (
 	BaselineShiftNone BaselineShift = 0.0
 )
 
-// BaselineShiftUnspecified represents an unset baseline shift (NaN value)
-var BaselineShiftUnspecified = BaselineShift(floatutils.Float32Unspecified)
+// baselineShiftUnspecified represents an unset baseline shift (NaN value). It is
+// deliberately package-private: the only public way to obtain it is
+// BaselineShiftCompanion.Unspecified().
+var baselineShiftUnspecified = BaselineShift(floatutils.Float32Unspecified)
 
 // IsBaselineShift returns true if this baseline shift is not Unspecified (i.e., not NaN)
 func IsBaselineShift(bs BaselineShift) bool {
-	return floatutils.IsSpecified(bs)
+	return isSpecifiedBaselineShift(bs)
 }
 
 // TakeOrElseBaselineShift returns this BaselineShift if it's specified, otherwise returns the result of block.
 // This is equivalent to Kotlin's inline function with lambda.
 func TakeOrElseBaselineShift(bs, block BaselineShift) BaselineShift {
-	if IsBaselineShift(bs) {
-		return bs
-	}
-	return block
+	return takeOrElseBaselineShift(bs, block)
 }
 
 // Multiplier returns the underlying multiplier value for use in calculations
@@ -85,3 +85,68 @@ func LerpBaselineShift(start, stop BaselineShift, fraction float32) BaselineShif
 	// If one is NaN, the arithmetic naturally produces NaN.
 	return lerp.Between32(start, stop, fraction)
 }
+
+// === Sentinel operations ===
+
+func isSpecifiedBaselineShift(bs BaselineShift) bool {
+	return floatutils.IsSpecified(bs)
+}
+
+func isUnspecifiedBaselineShift(bs BaselineShift) bool {
+	return !isSpecifiedBaselineShift(bs)
+}
+
+func takeOrElseBaselineShift(bs, def BaselineShift) BaselineShift {
+	if isSpecifiedBaselineShift(bs) {
+		return bs
+	}
+	return def
+}
+
+// mergeBaselineShift layers b onto a: a value from b wins only where b is specified.
+func mergeBaselineShift(a, b BaselineShift) BaselineShift {
+	if isUnspecifiedBaselineShift(b) {
+		return a
+	}
+	return b
+}
+
+func stringBaselineShift(bs BaselineShift) string {
+	return StringBaselineShift(bs)
+}
+
+func sameBaselineShift(a, b BaselineShift) bool {
+	if isUnspecifiedBaselineShift(a) && isUnspecifiedBaselineShift(b) {
+		return true
+	}
+	return a == b
+}
+
+func semanticEqualBaselineShift(a, b BaselineShift) bool {
+	if isUnspecifiedBaselineShift(a) && isUnspecifiedBaselineShift(b) {
+		return true
+	}
+	return floatutils.Float32Equals(float32(a), float32(b), floatutils.Float32EqualityThreshold)
+}
+
+func equalBaselineShift(a, b BaselineShift) bool {
+	return semanticEqualBaselineShift(a, b)
+}
+
+func copyBaselineShift(bs BaselineShift) BaselineShift {
+	return bs
+}
+
+// BaselineShiftCompanion is the single exported sentinel-family symbol for BaselineShift.
+var BaselineShiftCompanion = companions.NewScalarCompanion(
+	func() BaselineShift { return baselineShiftUnspecified },
+	stringBaselineShift,
+	isSpecifiedBaselineShift,
+	isUnspecifiedBaselineShift,
+	takeOrElseBaselineShift,
+	mergeBaselineShift,
+	sameBaselineShift,
+	semanticEqualBaselineShift,
+	equalBaselineShift,
+	copyBaselineShift,
+)

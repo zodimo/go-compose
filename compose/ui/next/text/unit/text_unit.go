@@ -7,6 +7,7 @@ import (
 	gioUnit "gioui.org/unit"
 	"github.com/zodimo/go-compose/pkg/floatutils"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
 // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-unit/src/commonMain/kotlin/androidx/compose/ui/unit/TextUnit.kt;drc=4970f6e96cdb06089723da0ab8ec93ae3f067c7a
@@ -44,10 +45,12 @@ type TextUnit struct {
 }
 
 // 1. `TUnspecified` – sentinel (value, not pointer)
-// TextUnitUnspecified is the sentinel value for an unspecified TextUnit.
+// textUnitUnspecified is the sentinel value for an unspecified TextUnit. It is
+// deliberately package-private: the only public way to obtain it is
+// TextUnitCompanion.Unspecified().
 // Kotlin uses a packed value with NaN for Unspecified.
 // val Unspecified = pack(UNIT_TYPE_UNSPECIFIED, Float.NaN)
-var TextUnitUnspecified = TextUnit{packed: packRaw(int64(TextUnitTypeUnspecified), float32(math.NaN()))}
+var textUnitUnspecified = TextUnit{packed: packRaw(int64(TextUnitTypeUnspecified), float32(math.NaN()))}
 
 // Internal packing function
 func packRaw(unitType int64, v float32) int64 {
@@ -98,45 +101,87 @@ func (tu TextUnit) IsEm() bool {
 
 // IsUnspecified returns true if this is an unspecified unit type.
 func (tu TextUnit) IsUnspecified() bool {
-	return tu.rawType() == int64(TextUnitTypeUnspecified)
+	return isUnspecifiedTextUnit(tu)
 }
 
 // 2. `IsSpecified` – predicate (method on value receiver)
 // IsSpecified returns true if this is a specified unit type.
 func (tu TextUnit) IsSpecified() bool {
-	return tu.rawType() != int64(TextUnitTypeUnspecified)
+	return isSpecifiedTextUnit(tu)
 }
 
-// 3. `TakeOrElse` – 2-param fallback (method on value receiver)
-// TakeOrElse returns this TextUnit if specified, otherwise returns the default.
-func (tu TextUnit) TakeOrElse(def TextUnit) TextUnit {
-	if tu.IsSpecified() {
-		return tu
-	}
-	return def
-}
-
-// 4. `Merge` – whole-value replacement for atomic packed types (method on value receiver)
-// Merge returns other if specified, otherwise returns tu.
-func (tu TextUnit) Merge(other TextUnit) TextUnit {
-	if other.IsSpecified() {
-		return other
-	}
-	return tu
-}
-
-// 5. `String` – stringification (method on value receiver)
 // String returns the string representation of the TextUnit.
 func (tu TextUnit) String() string {
-	if !tu.IsSpecified() {
+	if !isSpecifiedTextUnit(tu) {
 		return "TextUnit{Unspecified}"
 	}
 	return fmt.Sprintf("TextUnit{%v %s}", tu.Value(), tu.Type())
 }
 
-// 6. `Coalesce` – N/A for value types (no nil possible)
+// === TextUnit sentinel operations ===
 
-// 7-9. Equality – Equals method
+func isSpecifiedTextUnit(tu TextUnit) bool {
+	return tu.rawType() != int64(TextUnitTypeUnspecified)
+}
+
+func isUnspecifiedTextUnit(tu TextUnit) bool {
+	return tu.rawType() == int64(TextUnitTypeUnspecified)
+}
+
+func takeOrElseTextUnit(tu, def TextUnit) TextUnit {
+	if isSpecifiedTextUnit(tu) {
+		return tu
+	}
+	return def
+}
+
+func mergeTextUnit(tu, other TextUnit) TextUnit {
+	if isSpecifiedTextUnit(other) {
+		return other
+	}
+	return tu
+}
+
+func stringTextUnit(tu TextUnit) string {
+	if !isSpecifiedTextUnit(tu) {
+		return "TextUnit{Unspecified}"
+	}
+	return fmt.Sprintf("TextUnit{%v %s}", tu.Value(), tu.Type())
+}
+
+func sameTextUnit(a, b TextUnit) bool {
+	return a.packed == b.packed
+}
+
+func semanticEqualTextUnit(a, b TextUnit) bool {
+	if isUnspecifiedTextUnit(a) && isUnspecifiedTextUnit(b) {
+		return true
+	}
+	return a.packed == b.packed
+}
+
+func equalTextUnit(a, b TextUnit) bool {
+	return a.Equals(b)
+}
+
+func copyTextUnit(tu TextUnit) TextUnit {
+	return tu
+}
+
+// TextUnitCompanion is the single exported sentinel-family symbol for TextUnit.
+var TextUnitCompanion = companions.NewScalarCompanion(
+	func() TextUnit { return textUnitUnspecified },
+	stringTextUnit,
+	isSpecifiedTextUnit,
+	isUnspecifiedTextUnit,
+	takeOrElseTextUnit,
+	mergeTextUnit,
+	sameTextUnit,
+	semanticEqualTextUnit,
+	equalTextUnit,
+	copyTextUnit,
+)
+
 // Equals checks if two TextUnits are equal.
 func (tu TextUnit) Equals(other TextUnit) bool {
 	if tu.Type() != other.Type() {

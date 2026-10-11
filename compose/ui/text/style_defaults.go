@@ -19,5 +19,5 @@ var DefaultFontStyle = font.FontStyleNormal
 var DefaultFontFamily = font.FontFamilyDefault
 
 var DefaultTextAlign = style.TextAlignStart
-var DefaultLineHeight = unit.TextUnitUnspecified // TODO: Should this stay unspecified ?
+var DefaultLineHeight = unit.TextUnitCompanion.Unspecified() // TODO: Should this stay unspecified ?
 var DefaultLineBreak = style.LineBreakParagraph

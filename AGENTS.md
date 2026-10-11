@@ -113,13 +113,34 @@ Standard Go table-driven tests with t.Run() subtests
 
 ## ANTI-PATTERNS (THIS PROJECT)
 
-### DO NOT Pass Nil to TakeOrElseValue
+### Sentinel Pattern — One Export = Companion
+
+The compose core surface (`compose/ui/**`) uses `github.com/zodimo/go-sentinel-helper`.
+A sentinel-carrying type exposes **exactly one** public sentinel-family value — its
+`XCompanion`. The unspecified value and every operation are package-private and reachable
+only through the companion:
 
 ```go
-// pkg/sentinel/helper.go:12
-// DO NOT PASS NIL as arguments
-value := sentinel.TakeOrElseValue(maybe, defaultValue)  // defaultValue must not be nil
+// Correct
+if geometry.OffsetCompanion.IsSpecified(o) { ... }
+o = geometry.OffsetCompanion.TakeOrElse(o, def)
+u := graphics.ColorCompanion.Unspecified()
+
+// Wrong — there is no exported OffsetUnspecified to compare against
+if o != geometry.OffsetUnspecified { ... }   // does not compile
 ```
+
+DO NOT add a receiver method (`IsUnspecified()`, `IsSpecified()`, `TakeOrElse()`, `Merge()`)
+that re-implements sentinel logic — that duplicates the companion, which the contract forbids
+as a second public source of truth. Genuine domain methods stay (e.g. `Offset.X()`,
+`IsValid()`, `String()`).
+
+DO NOT import a `pkg/sentinel`-style fork. `pkg/sentinel` was deleted; use
+`github.com/zodimo/go-sentinel-helper` directly (`stringutils.StringsCompanion`,
+`floatutils.Float32Companion`, `companions.NewScalarCompanion` / `NewStructCompanion`).
+
+**Out of scope (still export their own sentinels):** `compose/foundation/**`,
+`compose/material3/**`, `theme/`, `pkg/adapters/**`.
 
 ### Known Bugs (Documented in Code)
 

@@ -7,7 +7,10 @@ import (
 )
 
 var _ Shape = (*ShapeUnspecifiedImpl)(nil)
-var ShapeUnspecified Shape = &ShapeUnspecifiedImpl{}
+
+// shapeUnspecified is the sentinel for Shape. It is deliberately package-private:
+// the only public way to obtain it is ShapeCompanion.Unspecified().
+var shapeUnspecified Shape = &ShapeUnspecifiedImpl{}
 
 type ShapeUnspecifiedImpl struct {
 }
@@ -20,7 +23,7 @@ func (s *ShapeUnspecifiedImpl) mergeShape(other Shape) Shape {
 	return other
 }
 func (s *ShapeUnspecifiedImpl) sameShape(other Shape) bool {
-	return other == ShapeUnspecified
+	return other == shapeUnspecified
 }
 func (s *ShapeUnspecifiedImpl) semanticEqualShape(other Shape) bool {
 	if _, ok := other.(*ShapeUnspecifiedImpl); ok {

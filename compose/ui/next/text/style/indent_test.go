@@ -146,7 +146,7 @@ func TestLerpTextUnitInheritable_BothSpecified(t *testing.T) {
 }
 
 func TestLerpTextUnitInheritable_StartUnspecified(t *testing.T) {
-	a := unit.TextUnitUnspecified
+	a := unit.TextUnitCompanion.Unspecified()
 	b := unit.Sp(16)
 
 	// Discrete interpolation: before 0.5 returns Unspecified
@@ -164,7 +164,7 @@ func TestLerpTextUnitInheritable_StartUnspecified(t *testing.T) {
 
 func TestLerpTextUnitInheritable_StopUnspecified(t *testing.T) {
 	a := unit.Sp(16)
-	b := unit.TextUnitUnspecified
+	b := unit.TextUnitCompanion.Unspecified()
 
 	// Discrete interpolation: before 0.5 returns the specified value
 	resultBefore := LerpTextUnitInheritable(a, b, 0.25)
@@ -180,8 +180,8 @@ func TestLerpTextUnitInheritable_StopUnspecified(t *testing.T) {
 }
 
 func TestLerpTextUnitInheritable_BothUnspecified(t *testing.T) {
-	a := unit.TextUnitUnspecified
-	b := unit.TextUnitUnspecified
+	a := unit.TextUnitCompanion.Unspecified()
+	b := unit.TextUnitCompanion.Unspecified()
 
 	// Both unspecified: always returns Unspecified
 	result := LerpTextUnitInheritable(a, b, 0.5)
@@ -205,7 +205,7 @@ func TestLerpTextIndent_BothSpecified(t *testing.T) {
 }
 
 func TestLerpTextIndent_WithUnspecified(t *testing.T) {
-	start := NewTextIndent(unit.TextUnitUnspecified, unit.Sp(0))
+	start := NewTextIndent(unit.TextUnitCompanion.Unspecified(), unit.Sp(0))
 	stop := NewTextIndent(unit.Sp(20), unit.Sp(10))
 
 	// Before 0.5: FirstLine is Unspecified (from start)

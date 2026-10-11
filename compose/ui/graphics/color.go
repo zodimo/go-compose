@@ -7,6 +7,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics/colorspace"
 	"github.com/zodimo/go-compose/compose/ui/util"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
 // Color is a 64-bit value representing a color.
@@ -25,8 +26,10 @@ import (
 type Color uint64
 
 const (
-	// ColorUnspecified represents an uninitialized or unspecified color.
-	ColorUnspecified Color = 0x10
+	// colorUnspecified represents an uninitialized or unspecified color. It is
+	// deliberately package-private: the only public way to obtain it is
+	// ColorCompanion.Unspecified().
+	colorUnspecified Color = 0x10
 
 	// Internal constants for packing
 	colorSpaceMask  = 0x3F
@@ -99,7 +102,7 @@ func NewColor(r, g, b, a float32, space colorspace.ColorSpace) Color {
 
 	sid := space.Id()
 	if sid == colorspace.MinId { // Unspecified?
-		return ColorUnspecified // Or handle as error?
+		return colorUnspecified // Or handle as error?
 	}
 	id := uint64(sid)
 
@@ -169,21 +172,78 @@ func (c Color) ColorSpaceId() int {
 }
 
 func (c Color) IsSpecified() bool {
-	return c != ColorUnspecified
+	return isSpecifiedColor(c)
 }
 
 func (c Color) IsUnspecified() bool {
-	return c == ColorUnspecified
+	return isUnspecifiedColor(c)
 }
 
-// TakeOrElse returns this color if specified, otherwise returns the block result.
-// Direct value version for Go zero-allocation.
-func (c Color) TakeOrElse(block Color) Color {
-	if c.IsSpecified() {
+// === Sentinel operations ===
+
+func isSpecifiedColor(c Color) bool {
+	return c != colorUnspecified
+}
+
+func isUnspecifiedColor(c Color) bool {
+	return c == colorUnspecified
+}
+
+func takeOrElseColor(c, def Color) Color {
+	if isSpecifiedColor(c) {
 		return c
 	}
-	return block
+	return def
 }
+
+// mergeColor layers b onto a: a value from b wins only where b is specified.
+func mergeColor(a, b Color) Color {
+	if isUnspecifiedColor(b) {
+		return a
+	}
+	return b
+}
+
+func stringColor(c Color) string {
+	if isUnspecifiedColor(c) {
+		return "Color.Unspecified"
+	}
+	cs := c.ColorSpace()
+	return fmt.Sprintf("Color(%f, %f, %f, %f, %s)", c.Red(), c.Green(), c.Blue(), c.Alpha(), cs.Name())
+}
+
+func sameColor(a, b Color) bool {
+	return a == b
+}
+
+func semanticEqualColor(a, b Color) bool {
+	if isUnspecifiedColor(a) && isUnspecifiedColor(b) {
+		return true
+	}
+	return a == b
+}
+
+func equalColor(a, b Color) bool {
+	return a == b
+}
+
+func copyColor(c Color) Color {
+	return c
+}
+
+// ColorCompanion is the single exported sentinel-family symbol for Color.
+var ColorCompanion = companions.NewScalarCompanion(
+	func() Color { return colorUnspecified },
+	stringColor,
+	isSpecifiedColor,
+	isUnspecifiedColor,
+	takeOrElseColor,
+	mergeColor,
+	sameColor,
+	semanticEqualColor,
+	equalColor,
+	copyColor,
+)
 
 // ColorSpace returns the ColorSpace object for this color.
 func (c Color) ColorSpace() colorspace.ColorSpace {

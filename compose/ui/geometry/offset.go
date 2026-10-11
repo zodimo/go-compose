@@ -6,12 +6,13 @@ import (
 
 	"github.com/zodimo/go-compose/pkg/floatutils"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
-// Sentinel Values
-// OffsetUnspecified Represents an unspecified [Offset] value, usually a replacement for `null` when a
-// primitive value is desired.
-var OffsetUnspecified = NewOffset(floatutils.Float32Unspecified, floatutils.Float32Unspecified)
+// offsetUnspecified Represents an unspecified [Offset] value, usually a replacement for `null` when a
+// primitive value is desired. It is deliberately package-private: the only public
+// way to obtain it is OffsetCompanion.Unspecified().
+var offsetUnspecified = NewOffset(floatutils.Float32Unspecified, floatutils.Float32Unspecified)
 
 // Offset is an immutable 2D floating-point offset.
 // It is a packed value where the x coordinate is in the high 32 bits and the y coordinate is in the low 32 bits.
@@ -96,7 +97,7 @@ func (o Offset) Rem(operand float32) Offset {
 
 // String returns a string representation of the object.
 func (o Offset) String() string {
-	if o.IsOffset() {
+	if isSpecifiedOffset(o) {
 		return fmt.Sprintf("Offset(%.1f, %.1f)", o.X(), o.Y())
 	}
 	return "Offset.Unspecified"
@@ -115,7 +116,7 @@ func (o Offset) Equal(other Offset) bool {
 	if o == other {
 		return true
 	}
-	if o == OffsetUnspecified && other == OffsetUnspecified {
+	if o == offsetUnspecified && other == offsetUnspecified {
 		return true
 	}
 	return floatutils.Float32Equals(o.X(), other.X(), floatutils.Float32EqualityThreshold) &&
@@ -136,20 +137,73 @@ func (o Offset) IsInfinite() bool {
 	return math.IsInf(float64(x), 0) || math.IsInf(float64(y), 0)
 }
 
-// IsOffset returns true if this is not Offset.Unspecified.
-func (o Offset) IsOffset() bool {
-	return o != OffsetUnspecified
+// === Sentinel operations ===
+//
+// These follow the go-sentinel-helper contract: sentinel logic lives in the
+// package-private ops below and is surfaced only through OffsetCompanion, so
+// there is a single public source of truth for "unspecified".
+
+func isSpecifiedOffset(o Offset) bool {
+	return o != offsetUnspecified
 }
 
-// IsUnspecified returns true if this is Offset.Unspecified.
-func (o Offset) IsUnspecified() bool {
-	return o == OffsetUnspecified
+func isUnspecifiedOffset(o Offset) bool {
+	return o == offsetUnspecified
 }
 
-// TakeOrElse returns this offset if Specified, otherwise executes the block and returns its result.
-func (o Offset) TakeOrElse(block Offset) Offset {
-	if o == OffsetUnspecified {
-		return block
+func takeOrElseOffset(o, def Offset) Offset {
+	if isUnspecifiedOffset(o) {
+		return def
 	}
 	return o
 }
+
+// mergeOffset layers b onto a: a value from b wins only where b is specified.
+func mergeOffset(a, b Offset) Offset {
+	if isUnspecifiedOffset(b) {
+		return a
+	}
+	return b
+}
+
+func stringOffset(o Offset) string {
+	if isUnspecifiedOffset(o) {
+		return "Offset.Unspecified"
+	}
+	return fmt.Sprintf("Offset(%.1f, %.1f)", o.X(), o.Y())
+}
+
+func sameOffset(a, b Offset) bool {
+	return a == b
+}
+
+// semanticEqualOffset treats two unspecified offsets as equal; comparing the
+// packed NaN representation with == would otherwise report them as different.
+func semanticEqualOffset(a, b Offset) bool {
+	if isUnspecifiedOffset(a) && isUnspecifiedOffset(b) {
+		return true
+	}
+	return a == b
+}
+
+func equalOffset(a, b Offset) bool {
+	return a.Equal(b)
+}
+
+func copyOffset(o Offset) Offset {
+	return o
+}
+
+// OffsetCompanion is the single exported sentinel-family symbol for Offset.
+var OffsetCompanion = companions.NewScalarCompanion(
+	func() Offset { return offsetUnspecified },
+	stringOffset,
+	isSpecifiedOffset,
+	isUnspecifiedOffset,
+	takeOrElseOffset,
+	mergeOffset,
+	sameOffset,
+	semanticEqualOffset,
+	equalOffset,
+	copyOffset,
+)

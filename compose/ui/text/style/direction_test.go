@@ -10,7 +10,7 @@ func TestTextDirectionConstants(t *testing.T) {
 		direction TextDirection
 		expected  int
 	}{
-		{"Unspecified", TextDirectionUnspecified, 0},
+		{"Unspecified", TextDirectionCompanion.Unspecified(), 0},
 		{"Ltr", TextDirectionLtr, 1},
 		{"Rtl", TextDirectionRtl, 2},
 		{"Content", TextDirectionContent, 3},
@@ -32,7 +32,7 @@ func TestTextDirection_String(t *testing.T) {
 		direction TextDirection
 		expected  string
 	}{
-		{TextDirectionUnspecified, "Unspecified"},
+		{TextDirectionCompanion.Unspecified(), "Unspecified"},
 		{TextDirectionLtr, "Ltr"},
 		{TextDirectionRtl, "Rtl"},
 		{TextDirectionContent, "Content"},
@@ -56,7 +56,7 @@ func TestTextDirection_IsSpecified(t *testing.T) {
 		direction TextDirection
 		expected  bool
 	}{
-		{"Unspecified", TextDirectionUnspecified, false},
+		{"Unspecified", TextDirectionCompanion.Unspecified(), false},
 		{"Ltr", TextDirectionLtr, true},
 		{"Rtl", TextDirectionRtl, true},
 		{"Content", TextDirectionContent, true},
@@ -96,7 +96,7 @@ func TestTextDirectionValues(t *testing.T) {
 
 	// Verify Unspecified is not in the list
 	for _, v := range values {
-		if v == TextDirectionUnspecified {
+		if v == TextDirectionCompanion.Unspecified() {
 			t.Error("TextDirectionValues() should not contain Unspecified")
 		}
 	}
@@ -108,15 +108,15 @@ func TestTextDirectionValueOf(t *testing.T) {
 		expected    TextDirection
 		expectError bool
 	}{
-		{0, TextDirectionUnspecified, false},
+		{0, TextDirectionCompanion.Unspecified(), false},
 		{1, TextDirectionLtr, false},
 		{2, TextDirectionRtl, false},
 		{3, TextDirectionContent, false},
 		{4, TextDirectionContentOrLtr, false},
 		{5, TextDirectionContentOrRtl, false},
-		{-1, TextDirectionUnspecified, true},
-		{6, TextDirectionUnspecified, true},
-		{100, TextDirectionUnspecified, true},
+		{-1, TextDirectionCompanion.Unspecified(), true},
+		{6, TextDirectionCompanion.Unspecified(), true},
+		{100, TextDirectionCompanion.Unspecified(), true},
 	}
 
 	for _, tt := range tests {
@@ -144,15 +144,15 @@ func TestTextDirection_TakeOrElse(t *testing.T) {
 
 	t.Run("specified value returns itself", func(t *testing.T) {
 		dir := TextDirectionRtl
-		result := dir.TakeOrElse(defaultDir)
+		result := TextDirectionCompanion.TakeOrElse(dir, defaultDir)
 		if result != TextDirectionRtl {
 			t.Errorf("TakeOrElse() = %v, want %v", result, TextDirectionRtl)
 		}
 	})
 
 	t.Run("unspecified value returns block result", func(t *testing.T) {
-		dir := TextDirectionUnspecified
-		result := dir.TakeOrElse(defaultDir)
+		dir := TextDirectionCompanion.Unspecified()
+		result := TextDirectionCompanion.TakeOrElse(dir, defaultDir)
 		if result != defaultDir {
 			t.Errorf("TakeOrElse() = %v, want %v", result, defaultDir)
 		}
@@ -160,15 +160,15 @@ func TestTextDirection_TakeOrElse(t *testing.T) {
 
 	t.Run("block is not called when specified", func(t *testing.T) {
 		dir := TextDirectionContent
-		takeDir := dir.TakeOrElse(defaultDir)
+		takeDir := TextDirectionCompanion.TakeOrElse(dir, defaultDir)
 		if takeDir != TextDirectionContent {
 			t.Errorf("TakeOrElse() = %v, want %v", takeDir, TextDirectionContent)
 		}
 	})
 
 	t.Run("block is called when unspecified", func(t *testing.T) {
-		dir := TextDirectionUnspecified
-		takeDir := dir.TakeOrElse(defaultDir)
+		dir := TextDirectionCompanion.Unspecified()
+		takeDir := TextDirectionCompanion.TakeOrElse(dir, defaultDir)
 		if takeDir != defaultDir {
 			t.Errorf("TakeOrElse() = %v, want %v", takeDir, defaultDir)
 		}

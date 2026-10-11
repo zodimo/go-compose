@@ -7,8 +7,8 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/material3/textfield"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/pkg/sentinel"
 	"github.com/zodimo/go-compose/state"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )
 
 // NumberFieldComponent renders an Outlined text field bound to an int control.
@@ -36,8 +36,8 @@ func NumberFieldComponent(binding *fform.FormFieldBinding[int], options ...Numbe
 	}
 
 	return func(c api.Composer) api.Composer {
-		label := sentinel.TakeOrElseString(opts.Label, "")
-		hint := sentinel.TakeOrElseString(opts.HintText, "")
+		label := stringutils.StringsCompanion.TakeOrElse(opts.Label, "")
+		hint := stringutils.StringsCompanion.TakeOrElse(opts.HintText, "")
 
 		textKey := opts.TextStateKey
 		if textKey == "" {

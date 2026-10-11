@@ -24,7 +24,7 @@ func (s SolidColor) ApplyTo(size geometry.Size, p *Paint, alpha float32) {
 }
 
 func (s SolidColor) IntrinsicSize() geometry.Size {
-	return geometry.SizeUnspecified
+	return geometry.SizeCompanion.Unspecified()
 }
 
 // NewSolidColor creates a new SolidColor brush from a Color.
@@ -33,8 +33,8 @@ func NewSolidColor(color Color) *SolidColor {
 }
 
 func SemanticEqualSolidColor(a, b *SolidColor) bool {
-	a = CoalesceBrush(a, BrushUnspecified).(*SolidColor)
-	b = CoalesceBrush(b, BrushUnspecified).(*SolidColor)
+	a = CoalesceBrush(a, brushUnspecified).(*SolidColor)
+	b = CoalesceBrush(b, brushUnspecified).(*SolidColor)
 
 	return a.Value == b.Value
 }

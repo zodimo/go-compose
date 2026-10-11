@@ -30,7 +30,7 @@ func TestParagraphStyle_Merge(t *testing.T) {
 	}
 	s2 := &ParagraphStyle{
 		TextAlign:  style.TextAlignRight,
-		LineHeight: unit.TextUnitUnspecified,
+		LineHeight: unit.TextUnitCompanion.Unspecified(),
 	}
 
 	merged := MergeParagraphStyle(s1, s2)

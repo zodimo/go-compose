@@ -19,6 +19,6 @@ func DefaultTextOptions() TextOptions {
 		// BACKWARDS COMPATIBILITY
 		LineHeightScale: maybe.None[float32](),
 		Selectable:      maybe.None[bool](),
-		SelectionColor:  graphics.ColorUnspecified,
+		SelectionColor:  graphics.ColorCompanion.Unspecified(),
 	}
 }

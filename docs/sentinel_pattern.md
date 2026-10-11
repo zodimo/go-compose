@@ -3,19 +3,53 @@
 
 ---
 
-> **AGENT CONTRACT**: This is a single-file, copy-paste-ready reference. Every exported type `T` must provide exactly **4 symbols**:  
-> 1. `TUnspecified` – sentinel (constant for values, singleton for structs)  
-> 2. `IsSpecifiedT` – predicate, package-level function  
-> 3. `TakeOrElseT` – 2-param fallback, package-level function  
-> 4. `MergeT` – composition merge, package-level function
-> 5. `StringT` – stringification, package-level function  
-> 6. `CoalesceT` – nil coalescing, package-level function
-> 7. `SameT` – identity, package-level function
-> 8. `SemanticEqualT` – semantic equality, package-level function
-> 9. `EqualT` – semantic equality, package-level function
-> 10. `CopyT` – copy, package-level function
+> **AGENT CONTRACT (revised for `go-sentinel-helper`)**: Every exported type `T` that carries a
+> sentinel must expose **exactly one public value — its Companion**:
+>
+> 1. `var TCompanion = companions.NewScalarCompanion(...)` (value types) or
+>    `companions.NewStructCompanion(...)` (pointer/interface types) — the only exported
+>    sentinel-family symbol.
+>
+> Everything else is **package-private**: the reserved "unspecified" value is
+> `tUnspecified` (lower-case) and the ten canonical operations are lower-case functions
+> (`isSpecifiedT`, `isUnspecifiedT`, `takeOrElseT`, `mergeT`, `stringT`, `sameT`,
+> `semanticEqualT`, `equalT`, `copyT`, plus `coalesceT` for struct types). Callers reach them
+> only through `TCompanion.Unspecified()`, `TCompanion.IsSpecified(v)`,
+> `TCompanion.TakeOrElse(src, def)`, etc.
+>
+> There is **no exported `TUnspecified`** in the compose core surface. Two public sources of
+> truth for "unspecified" are exactly what the contract forbids.
 
-> No other public symbols are required. All verification commands are in Section 9.
+> The library argument order (verified against `go-sentinel-helper` v0.2.0) is fixed:
+>
+> ```go
+> companions.NewScalarCompanion(unspecified, stringer, isSpecified, isUnspecified,
+>     takeOrElse, merge, same, semanticEqual, equal, copy)                       // 10 args
+> companions.NewStructCompanion(unspecified, stringer, isSpecified, isUnspecified,
+>     takeOrElse, merge, same, semanticEqual, equal, coalesce, copy)             // 11 args
+> ```
+>
+> `isUnspecified` is the **fourth** argument. Transposing `isSpecified`/`isUnspecified`
+> compiles cleanly and inverts the semantics silently — every companion has a conformance test
+> asserting `IsSpecified(Unspecified()) == false` and `IsUnspecified(Unspecified()) == true`.
+
+### Scope of the contract
+
+**In scope (this change, conforming):** `compose/ui/geometry`, `compose/ui/unit`,
+`compose/ui/text/unit`, `compose/ui/text/font`, `compose/ui/text/intl`,
+`compose/ui/text/style`, `compose/ui/text`, `compose/ui/graphics`,
+`compose/ui/graphics/shape`, and the whole `compose/ui/next/**` mirror.
+
+**Out of scope (follow-up change; still export raw sentinels):** `compose/foundation/**`,
+`compose/material3/**`, `theme/`, `pkg/adapters/**`. These own *their own* sentinels and are
+untouched here — but they no longer import the deleted `pkg/sentinel` fork.
+
+> **`pkg/sentinel` is deleted.** It was a parallel fork of `go-sentinel-helper` (its own
+> `Companion` interfaces, a 9-argument `NewScalarCompanion` missing `isUnspecified`, a
+> `StructCompoanion` typo). All importers now use `github.com/zodimo/go-sentinel-helper`
+> directly: `sentinel.TakeOrElseString(a, "")` → `stringutils.StringsCompanion.TakeOrElse(a, "")`,
+> and `sentinel.StringValueUnspecified` / `sentinel.StringUnspecified` →
+> `stringutils.StringsCompanion.Unspecified()`.
 
 ---
 

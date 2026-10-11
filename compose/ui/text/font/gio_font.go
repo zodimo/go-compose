@@ -22,7 +22,7 @@ func ToGioFont(f FontFamily, w FontWeight, s FontStyle) giofont.Font {
 // 700 -> 300 (Bold)
 func ToGioWeight(w FontWeight) giofont.Weight {
 
-	w = w.TakeOrElse(FontWeightNormal)
+	w = FontWeightCompanion.TakeOrElse(w, FontWeightNormal)
 
 	// Gio weight is (CSS weight - 400).
 	// We first ensure it's clamped to valid CSS range [1, 1000] (which FontWeight already should be),
@@ -38,7 +38,7 @@ func ToGioWeight(w FontWeight) giofont.Weight {
 // ToGioStyle converts a go-compose FontStyle to a gio font.Style.
 func ToGioStyle(s FontStyle) giofont.Style {
 
-	s = s.TakeOrElse(FontStyleNormal)
+	s = FontStyleCompanion.TakeOrElse(s, FontStyleNormal)
 
 	switch s {
 	case FontStyleNormal:

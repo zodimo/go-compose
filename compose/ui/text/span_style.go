@@ -14,13 +14,13 @@ import (
 // spanStyleUnspecified is the sentinel for SpanStyle. It is deliberately
 // package-private: the only public way to obtain it is SpanStyleCompanion.Unspecified().
 var spanStyleUnspecified *SpanStyle = &SpanStyle{
-	color:          graphics.ColorUnspecified,
-	fontSize:       unit.TextUnitUnspecified,
-	fontWeight:     font.FontWeightUnspecified,
-	fontStyle:      font.FontStyleUnspecified,
+	color:          graphics.ColorCompanion.Unspecified(),
+	fontSize:       unit.TextUnitCompanion.Unspecified(),
+	fontWeight:     font.FontWeightCompanion.Unspecified(),
+	fontStyle:      font.FontStyleCompanion.Unspecified(),
 	fontFamily:     nil,
-	letterSpacing:  unit.TextUnitUnspecified,
-	background:     graphics.ColorUnspecified,
+	letterSpacing:  unit.TextUnitCompanion.Unspecified(),
+	background:     graphics.ColorCompanion.Unspecified(),
 	textDecoration: nil,
 	shadow:         nil,
 }
@@ -149,13 +149,13 @@ func copySpanStyle(s *SpanStyle, options ...func(*SpanStyle)) *SpanStyle {
 		option(&changed)
 	}
 	return &SpanStyle{
-		color:          changed.color.TakeOrElse(localSs.color),
-		fontSize:       changed.fontSize.TakeOrElse(localSs.fontSize),
-		fontWeight:     changed.fontWeight.TakeOrElse(localSs.fontWeight),
-		fontStyle:      changed.fontStyle.TakeOrElse(localSs.fontStyle),
+		color:          graphics.ColorCompanion.TakeOrElse(changed.color, localSs.color),
+		fontSize:       unit.TextUnitCompanion.TakeOrElse(changed.fontSize, localSs.fontSize),
+		fontWeight:     font.FontWeightCompanion.TakeOrElse(changed.fontWeight, localSs.fontWeight),
+		fontStyle:      font.FontStyleCompanion.TakeOrElse(changed.fontStyle, localSs.fontStyle),
 		fontFamily:     font.TakeOrElseFontFamily(changed.fontFamily, localSs.fontFamily),
-		letterSpacing:  changed.letterSpacing.TakeOrElse(localSs.letterSpacing),
-		background:     changed.background.TakeOrElse(localSs.background),
+		letterSpacing:  unit.TextUnitCompanion.TakeOrElse(changed.letterSpacing, localSs.letterSpacing),
+		background:     graphics.ColorCompanion.TakeOrElse(changed.background, localSs.background),
 		textDecoration: style.TakeOrElseTextDecoration(changed.textDecoration, localSs.textDecoration),
 		shadow:         graphics.TakeOrElseShadow(changed.shadow, localSs.shadow),
 	}
@@ -254,13 +254,13 @@ func mergeSpanStyle(a, b *SpanStyle) *SpanStyle {
 	}
 
 	return &SpanStyle{
-		color:          localB.color.TakeOrElse(localA.color),
-		fontSize:       localB.fontSize.TakeOrElse(localA.fontSize),
-		fontWeight:     localB.fontWeight.TakeOrElse(localA.fontWeight),
-		fontStyle:      localB.fontStyle.TakeOrElse(localA.fontStyle),
+		color:          graphics.ColorCompanion.TakeOrElse(localB.color, localA.color),
+		fontSize:       unit.TextUnitCompanion.TakeOrElse(localB.fontSize, localA.fontSize),
+		fontWeight:     font.FontWeightCompanion.TakeOrElse(localB.fontWeight, localA.fontWeight),
+		fontStyle:      font.FontStyleCompanion.TakeOrElse(localB.fontStyle, localA.fontStyle),
 		fontFamily:     font.TakeOrElseFontFamily(localB.fontFamily, localA.fontFamily),
-		letterSpacing:  localB.letterSpacing.TakeOrElse(localA.letterSpacing),
-		background:     localB.background.TakeOrElse(localA.background),
+		letterSpacing:  unit.TextUnitCompanion.TakeOrElse(localB.letterSpacing, localA.letterSpacing),
+		background:     graphics.ColorCompanion.TakeOrElse(localB.background, localA.background),
 		textDecoration: style.TakeOrElseTextDecoration(localB.textDecoration, localA.textDecoration),
 		shadow:         graphics.TakeOrElseShadow(localB.shadow, localA.shadow),
 	}
@@ -295,13 +295,13 @@ func lerpSpanStyle(start, stop *SpanStyle, fraction float32) *SpanStyle {
 func spanStyleResolveDefaults(s *SpanStyle) *SpanStyle {
 	localSs := coalesceSpanStyle(s, spanStyleUnspecified)
 	return &SpanStyle{
-		color:          localSs.color.TakeOrElse(DefaultColor),
-		fontSize:       localSs.fontSize.TakeOrElse(DefaultFontSize),
-		fontWeight:     localSs.fontWeight.TakeOrElse(DefaultFontWeight),
-		fontStyle:      localSs.fontStyle.TakeOrElse(DefaultFontStyle),
+		color:          graphics.ColorCompanion.TakeOrElse(localSs.color, DefaultColor),
+		fontSize:       unit.TextUnitCompanion.TakeOrElse(localSs.fontSize, DefaultFontSize),
+		fontWeight:     font.FontWeightCompanion.TakeOrElse(localSs.fontWeight, DefaultFontWeight),
+		fontStyle:      font.FontStyleCompanion.TakeOrElse(localSs.fontStyle, DefaultFontStyle),
 		fontFamily:     font.TakeOrElseFontFamily(localSs.fontFamily, DefaultFontFamily),
-		letterSpacing:  localSs.letterSpacing.TakeOrElse(DefaultLetterSpacing),
-		background:     localSs.background.TakeOrElse(DefaultBackgroundColor),
+		letterSpacing:  unit.TextUnitCompanion.TakeOrElse(localSs.letterSpacing, DefaultLetterSpacing),
+		background:     graphics.ColorCompanion.TakeOrElse(localSs.background, DefaultBackgroundColor),
 		textDecoration: style.TakeOrElseTextDecoration(localSs.textDecoration, DefaultTextDecoration),
 		shadow:         graphics.TakeOrElseShadow(localSs.shadow, DefaultShadow),
 	}

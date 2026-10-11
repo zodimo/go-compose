@@ -15,7 +15,7 @@ func TestSpanStyle_Merge(t *testing.T) {
 	}
 	s2 := &SpanStyle{
 		FontSize:   unit.Sp(20),
-		FontWeight: font.FontWeightUnspecified,
+		FontWeight: font.FontWeightCompanion.Unspecified(),
 		FontStyle:  font.FontStyleItalic,
 	}
 
@@ -37,7 +37,7 @@ func TestSpanStyle_Merge(t *testing.T) {
 	}
 
 	// Test unspecified
-	if MergeSpanStyle(s1, SpanStyleUnspecified).FontSize != s1.FontSize {
+	if MergeSpanStyle(s1, SpanStyleCompanion.Unspecified()).FontSize != s1.FontSize {
 		t.Error("Merging with Unspecified should preserve original fields where unspecified")
 	}
 }

@@ -16,7 +16,7 @@ func DefaultButtonOptions() ButtonOptions {
 		Modifier:  ui.EmptyModifier,
 		Colors:    ButtonColorsUnspecified,
 		Enabled:   true,
-		Shape:     shape.ShapeUnspecified,
+		Shape:     shape.ShapeCompanion.Unspecified(),
 		Elevation: ButtonElevationUnspecified,
 		// Border:    foundation.BorderStrokeUnspecified,
 

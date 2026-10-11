@@ -15,7 +15,7 @@ import (
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
-	"github.com/zodimo/go-compose/pkg/sentinel"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 
 	"gioui.org/f32"
 	"gioui.org/gesture"
@@ -51,8 +51,8 @@ func Outlined(
 		theme := material.Theme(c)
 
 		opts.Colors = ResolveTextFieldColors(c, opts.Colors)
-		opts.SupportingText = sentinel.TakeOrElseString(opts.SupportingText, "")
-		opts.Label = sentinel.TakeOrElseString(opts.Label, "")
+		opts.SupportingText = stringutils.StringsCompanion.TakeOrElse(opts.SupportingText, "")
+		opts.Label = stringutils.StringsCompanion.TakeOrElse(opts.Label, "")
 
 		key := c.GenerateID()
 		path := c.GetPath()

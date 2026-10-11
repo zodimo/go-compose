@@ -31,7 +31,7 @@ var LocalTextShaper = compose.CompositionLocalOf(func() *text.TextShaper {
 })
 
 var LocalTextStyle = compose.CompositionLocalOf(func() *text.TextStyle {
-	return text.TextStyleUnspecified
+	return text.TextStyleCompanion.Unspecified()
 })
 
 // LocalDensity.current

@@ -41,25 +41,25 @@ func (m *FontMatcher) MatchFont(fonts []Font, weight FontWeight, style FontStyle
 		// If the desired weight is less than 400:
 		// - weights less than or equal to the desired weight are checked in descending order
 		// - followed by weights above the desired weight in ascending order
-		result = m.filterByClosestWeight(fontsToSearch, weight, true, FontWeightUnspecified, FontWeightUnspecified)
+		result = m.filterByClosestWeight(fontsToSearch, weight, true, FontWeightCompanion.Unspecified(), FontWeightCompanion.Unspecified())
 
 	case weight.Compare(FontWeightW500) > 0:
 		// If the desired weight is greater than 500:
 		// - weights greater than or equal to the desired weight are checked in ascending order
 		// - followed by weights below the desired weight in descending order
-		result = m.filterByClosestWeight(fontsToSearch, weight, false, FontWeightUnspecified, FontWeightUnspecified)
+		result = m.filterByClosestWeight(fontsToSearch, weight, false, FontWeightCompanion.Unspecified(), FontWeightCompanion.Unspecified())
 
 	default:
 		// If the desired weight is inclusively between 400 and 500:
 		// - weights greater than or equal to the target weight are checked in ascending order until 500
 		// - followed by weights less than the target weight in descending order
 		// - followed by weights greater than 500
-		result = m.filterByClosestWeight(fontsToSearch, weight, false, FontWeightUnspecified, FontWeightW500)
+		result = m.filterByClosestWeight(fontsToSearch, weight, false, FontWeightCompanion.Unspecified(), FontWeightW500)
 		if len(result) == 0 {
-			result = m.filterByClosestWeight(fontsToSearch, weight, true, FontWeightUnspecified, FontWeightUnspecified)
+			result = m.filterByClosestWeight(fontsToSearch, weight, true, FontWeightCompanion.Unspecified(), FontWeightCompanion.Unspecified())
 		}
 		if len(result) == 0 {
-			result = m.filterByClosestWeight(fontsToSearch, weight, false, FontWeightW500, FontWeightUnspecified)
+			result = m.filterByClosestWeight(fontsToSearch, weight, false, FontWeightW500, FontWeightCompanion.Unspecified())
 		}
 	}
 
@@ -82,8 +82,8 @@ func (m *FontMatcher) filterByClosestWeight(
 	minSearchRange FontWeight,
 	maxSearchRange FontWeight,
 ) []Font {
-	var bestWeightAbove FontWeight = FontWeightUnspecified
-	var bestWeightBelow FontWeight = FontWeightUnspecified
+	var bestWeightAbove FontWeight = FontWeightCompanion.Unspecified()
+	var bestWeightBelow FontWeight = FontWeightCompanion.Unspecified()
 
 	for _, font := range fonts {
 		possibleWeight := font.Weight()

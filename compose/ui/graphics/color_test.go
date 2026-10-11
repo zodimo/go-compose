@@ -102,10 +102,10 @@ func TestIsSpecified(t *testing.T) {
 	if !graphics.ColorRed.IsSpecified() {
 		t.Error("ColorRed should be specified")
 	}
-	if graphics.ColorUnspecified.IsSpecified() {
+	if graphics.ColorCompanion.Unspecified().IsSpecified() {
 		t.Error("ColorUnspecified should not be specified")
 	}
-	if !graphics.ColorUnspecified.IsUnspecified() {
+	if !graphics.ColorCompanion.Unspecified().IsUnspecified() {
 		t.Error("ColorUnspecified should be unspecified")
 	}
 }
@@ -115,13 +115,13 @@ func TestTakeOrElse(t *testing.T) {
 	blue := graphics.ColorBlue
 
 	// Specified color should return itself
-	result := red.TakeOrElse(blue)
+	result := graphics.ColorCompanion.TakeOrElse(red, blue)
 	if result != red {
 		t.Error("TakeOrElse should return self for specified color")
 	}
 
 	// Unspecified color should return the alternative
-	result = graphics.ColorUnspecified.TakeOrElse(blue)
+	result = graphics.ColorCompanion.TakeOrElse(graphics.ColorCompanion.Unspecified(), blue)
 	if result != blue {
 		t.Error("TakeOrElse should return alternative for unspecified color")
 	}

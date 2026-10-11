@@ -36,7 +36,7 @@ func (s *treeScopeImpl) Node(key any, content api.Composable) {
 	state := s.state
 
 	isSelected := state.IsSelected(key)
-	rowBackground := graphics.ColorUnspecified
+	rowBackground := graphics.ColorCompanion.Unspecified()
 	if isSelected {
 		rowBackground = graphics.Selected(s.options.SelectedNodeOnColor)
 	}
@@ -77,7 +77,7 @@ func (s *treeScopeImpl) Branch(key any, header api.Composable, children func(Tre
 	opts := s.options
 
 	isSelected := state.IsSelected(key)
-	rowBackground := graphics.ColorUnspecified
+	rowBackground := graphics.ColorCompanion.Unspecified()
 	if isSelected {
 		rowBackground = graphics.Selected(s.options.SelectedBranchOnColor)
 	}

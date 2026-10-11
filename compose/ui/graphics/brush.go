@@ -5,9 +5,12 @@ import (
 
 	"github.com/zodimo/go-compose/compose/ui/geometry"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
-var BrushUnspecified Brush = &SolidColor{Value: ColorUnspecified}
+// brushUnspecified is the sentinel for Brush. It is deliberately package-private:
+// the only public way to obtain it is BrushCompanion.Unspecified().
+var brushUnspecified Brush = &SolidColor{Value: colorUnspecified}
 
 // Brush is the interface for all brush types used for drawing.
 // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-graphics/src/commonMain/kotlin/androidx/compose/ui/graphics/Brush.kt
@@ -33,7 +36,7 @@ type ShaderBrush interface {
 func applyToShaderBrush(s ShaderBrush, size geometry.Size, p *Paint, alpha float32) {
 	p.Shader = s.CreateShader(size)
 	p.Alpha = alpha
-	p.Color = ColorUnspecified
+	p.Color = colorUnspecified
 }
 
 // Constructors (Top level functions instead of companion object)
@@ -89,7 +92,9 @@ func NewShaderBrushForTest() ShaderBrushForTest {
 func (s ShaderBrushForTest) isBrush()                                            {}
 func (s ShaderBrushForTest) CreateShader(size geometry.Size) Shader              { return nil }
 func (s ShaderBrushForTest) ApplyTo(size geometry.Size, p *Paint, alpha float32) {}
-func (s ShaderBrushForTest) IntrinsicSize() geometry.Size                        { return geometry.SizeUnspecified }
+func (s ShaderBrushForTest) IntrinsicSize() geometry.Size {
+	return geometry.SizeCompanion.Unspecified()
+}
 func (s ShaderBrushForTest) Equal(other Brush) bool {
 	_, ok := other.(ShaderBrushForTest)
 	return ok
@@ -109,10 +114,10 @@ func LerpBrush(start, stop Brush, fraction float32) Brush {
 		return nil
 	}
 	if start == nil {
-		start = SolidColor{Value: ColorUnspecified} // Or Transparent? Kotlin uses Transparent
+		start = SolidColor{Value: colorUnspecified} // Or Transparent? Kotlin uses Transparent
 	}
 	if stop == nil {
-		stop = SolidColor{Value: ColorUnspecified}
+		stop = SolidColor{Value: colorUnspecified}
 	}
 
 	// Case 1: Both SolidColor
@@ -169,44 +174,50 @@ func min(a, b int) int {
 	return b
 }
 
-// Short for IsSpecifiedShadow
-func IsSpecifiedBrush(s Brush) bool {
-	return s != nil && s != BrushUnspecified
+// === Sentinel operations ===
+
+func isSpecifiedBrush(s Brush) bool {
+	return s != nil && s != brushUnspecified
 }
-func TakeOrElseBrush(s, def Brush) Brush {
-	if !IsSpecifiedBrush(s) {
+
+func isUnspecifiedBrush(s Brush) bool {
+	return !isSpecifiedBrush(s)
+}
+
+func takeOrElseBrush(s, def Brush) Brush {
+	if !isSpecifiedBrush(s) {
 		return def
 	}
 	return s
 }
 
-func CoalesceBrush(ptr, def Brush) Brush {
+func coalesceBrush(ptr, def Brush) Brush {
 	if ptr == nil {
 		return def
 	}
 	return ptr
 }
 
-// Identity (2 ns)
-func SameBrush(a, b Brush) bool {
+// sameBrush is identity (2 ns).
+func sameBrush(a, b Brush) bool {
 	if a == nil && b == nil {
 		return true
 	}
 	if a == nil {
-		return b == BrushUnspecified
+		return b == brushUnspecified
 	}
 	if b == nil {
-		return a == BrushUnspecified
+		return a == brushUnspecified
 	}
 	// must be pointers
 	return a == b
 }
 
-// Semantic equality (field-by-field, 20 ns)
-func SemanticEqualBrush(a, b Brush) bool {
+// semanticEqualBrush is field-by-field equality (20 ns).
+func semanticEqualBrush(a, b Brush) bool {
 
-	a = CoalesceBrush(a, BrushUnspecified)
-	b = CoalesceBrush(b, BrushUnspecified)
+	a = coalesceBrush(a, brushUnspecified)
+	b = coalesceBrush(b, brushUnspecified)
 
 	switch brush := a.(type) {
 	case *SolidColor:
@@ -232,9 +243,73 @@ func SemanticEqualBrush(a, b Brush) bool {
 	return false
 }
 
-func EqualBrush(a, b Brush) bool {
-	if !SameBrush(a, b) {
-		return SemanticEqualBrush(a, b)
+func equalBrush(a, b Brush) bool {
+	if !sameBrush(a, b) {
+		return semanticEqualBrush(a, b)
 	}
 	return true
+}
+
+func mergeBrush(a, b Brush) Brush {
+	a = coalesceBrush(a, brushUnspecified)
+	b = coalesceBrush(b, brushUnspecified)
+	if a == brushUnspecified {
+		return b
+	}
+	if b == brushUnspecified {
+		return a
+	}
+	return b
+}
+
+func stringBrush(b Brush) string {
+	if !isSpecifiedBrush(b) {
+		return "Brush{Unspecified}"
+	}
+	return fmt.Sprintf("Brush{%T}", b)
+}
+
+func copyBrush(b Brush, options ...func(Brush)) Brush {
+	return b
+}
+
+// BrushCompanion is the single exported sentinel-family symbol for Brush.
+var BrushCompanion = companions.NewStructCompanion(
+	func() Brush { return brushUnspecified },
+	stringBrush,
+	isSpecifiedBrush,
+	isUnspecifiedBrush,
+	takeOrElseBrush,
+	mergeBrush,
+	sameBrush,
+	semanticEqualBrush,
+	equalBrush,
+	coalesceBrush,
+	copyBrush,
+)
+
+// Short for IsSpecifiedShadow
+func IsSpecifiedBrush(s Brush) bool {
+	return isSpecifiedBrush(s)
+}
+func TakeOrElseBrush(s, def Brush) Brush {
+	return takeOrElseBrush(s, def)
+}
+
+func CoalesceBrush(ptr, def Brush) Brush {
+	return coalesceBrush(ptr, def)
+}
+
+// Identity (2 ns)
+func SameBrush(a, b Brush) bool {
+	return sameBrush(a, b)
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualBrush(a, b Brush) bool {
+	return semanticEqualBrush(a, b)
+}
+
+func EqualBrush(a, b Brush) bool {
+	return equalBrush(a, b)
 }

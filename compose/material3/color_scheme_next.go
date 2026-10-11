@@ -119,7 +119,7 @@ func (c ColorSchemeNext) ContentFor(backgroundColor graphics.Color) graphics.Col
 		return c.OnTertiaryFixed
 
 	default:
-		return graphics.ColorUnspecified
+		return graphics.ColorCompanion.Unspecified()
 
 	}
 }
@@ -140,7 +140,7 @@ func (c ColorSchemeNext) SurfaceColorAtElevation(elevation unit.Dp) graphics.Col
 func (c ColorSchemeNext) FromToken(value tokens.ColorSchemeTokenKey) graphics.Color {
 	switch value {
 	case tokens.ColorSchemeTokenKeyUnspecified:
-		return graphics.ColorUnspecified
+		return graphics.ColorCompanion.Unspecified()
 	case tokens.ColorSchemeTokenKeyBackground:
 		return c.Background
 	case tokens.ColorSchemeTokenKeyError:

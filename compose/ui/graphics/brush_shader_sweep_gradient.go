@@ -20,13 +20,13 @@ func (s SweepGradient) ApplyTo(size geometry.Size, p *Paint, alpha float32) {
 }
 
 func (s SweepGradient) IntrinsicSize() geometry.Size {
-	return geometry.SizeUnspecified
+	return geometry.SizeCompanion.Unspecified()
 }
 
 func (s SweepGradient) CreateShader(size geometry.Size) Shader {
 	centerX := s.Center.X()
 	centerY := s.Center.Y()
-	if s.Center.IsUnspecified() {
+	if geometry.OffsetCompanion.IsUnspecified(s.Center) {
 		center := size.Center()
 		centerX = center.X()
 		centerY = center.Y()
@@ -53,8 +53,8 @@ func SweepGradientBrush(colors []Color, center geometry.Offset) *SweepGradient {
 }
 
 func SemanticEqualSweepGradient(a, b *SweepGradient) bool {
-	a = CoalesceBrush(a, BrushUnspecified).(*SweepGradient)
-	b = CoalesceBrush(b, BrushUnspecified).(*SweepGradient)
+	a = CoalesceBrush(a, brushUnspecified).(*SweepGradient)
+	b = CoalesceBrush(b, brushUnspecified).(*SweepGradient)
 
 	//center
 	if !a.Center.Equal(b.Center) {

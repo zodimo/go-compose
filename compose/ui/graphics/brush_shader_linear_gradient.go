@@ -106,8 +106,8 @@ func VerticalGradient(colors []Color, startY, endY float32, tileMode TileMode) *
 }
 
 func SemanticEqualLinearGradient(a, b *LinearGradient) bool {
-	a = CoalesceBrush(a, BrushUnspecified).(*LinearGradient)
-	b = CoalesceBrush(b, BrushUnspecified).(*LinearGradient)
+	a = CoalesceBrush(a, brushUnspecified).(*LinearGradient)
+	b = CoalesceBrush(b, brushUnspecified).(*LinearGradient)
 
 	// colors
 	if len(a.Colors) != len(b.Colors) {

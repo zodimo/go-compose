@@ -8,11 +8,11 @@ import (
 
 // ButtonElevationUnspecified is the sentinel value for unspecified ButtonElevation
 var ButtonElevationUnspecified = &ButtonElevation{
-	DefaultElevation:  unit.DpUnspecified,
-	PressedElevation:  unit.DpUnspecified,
-	FocusedElevation:  unit.DpUnspecified,
-	HoveredElevation:  unit.DpUnspecified,
-	DisabledElevation: unit.DpUnspecified,
+	DefaultElevation:  unit.DpCompanion.Unspecified(),
+	PressedElevation:  unit.DpCompanion.Unspecified(),
+	FocusedElevation:  unit.DpCompanion.Unspecified(),
+	HoveredElevation:  unit.DpCompanion.Unspecified(),
+	DisabledElevation: unit.DpCompanion.Unspecified(),
 }
 
 // ButtonElevation holds elevation configuration for button states
@@ -51,11 +51,11 @@ func MergeButtonElevation(a, b *ButtonElevation) *ButtonElevation {
 
 	// Both are custom: allocate new merged style
 	return &ButtonElevation{
-		DefaultElevation:  b.DefaultElevation.TakeOrElse(a.DefaultElevation),
-		PressedElevation:  b.PressedElevation.TakeOrElse(a.PressedElevation),
-		FocusedElevation:  b.FocusedElevation.TakeOrElse(a.FocusedElevation),
-		HoveredElevation:  b.HoveredElevation.TakeOrElse(a.HoveredElevation),
-		DisabledElevation: b.DisabledElevation.TakeOrElse(a.DisabledElevation),
+		DefaultElevation:  unit.DpCompanion.TakeOrElse(b.DefaultElevation, a.DefaultElevation),
+		PressedElevation:  unit.DpCompanion.TakeOrElse(b.PressedElevation, a.PressedElevation),
+		FocusedElevation:  unit.DpCompanion.TakeOrElse(b.FocusedElevation, a.FocusedElevation),
+		HoveredElevation:  unit.DpCompanion.TakeOrElse(b.HoveredElevation, a.HoveredElevation),
+		DisabledElevation: unit.DpCompanion.TakeOrElse(b.DisabledElevation, a.DisabledElevation),
 	}
 }
 
@@ -166,10 +166,10 @@ func CopyButtonElevation(e *ButtonElevation, options ...ButtonElevationOption) *
 	e = CoalesceButtonElevation(e, ButtonElevationUnspecified)
 
 	return &ButtonElevation{
-		DefaultElevation:  opt.DefaultElevation.TakeOrElse(e.DefaultElevation),
-		PressedElevation:  opt.PressedElevation.TakeOrElse(e.PressedElevation),
-		FocusedElevation:  opt.FocusedElevation.TakeOrElse(e.FocusedElevation),
-		HoveredElevation:  opt.HoveredElevation.TakeOrElse(e.HoveredElevation),
-		DisabledElevation: opt.DisabledElevation.TakeOrElse(e.DisabledElevation),
+		DefaultElevation:  unit.DpCompanion.TakeOrElse(opt.DefaultElevation, e.DefaultElevation),
+		PressedElevation:  unit.DpCompanion.TakeOrElse(opt.PressedElevation, e.PressedElevation),
+		FocusedElevation:  unit.DpCompanion.TakeOrElse(opt.FocusedElevation, e.FocusedElevation),
+		HoveredElevation:  unit.DpCompanion.TakeOrElse(opt.HoveredElevation, e.HoveredElevation),
+		DisabledElevation: unit.DpCompanion.TakeOrElse(opt.DisabledElevation, e.DisabledElevation),
 	}
 }

@@ -67,7 +67,7 @@ func iconFromBytes(iconByte []byte, opts IconOptions) Composable {
 	return func(c Composer) Composer {
 		// Resolve color
 		contentColor := material3.LocalContentColor.Current(c)
-		opts.Color = opts.Color.TakeOrElse(contentColor)
+		opts.Color = graphics.ColorCompanion.TakeOrElse(opts.Color, contentColor)
 
 		localTextStyle := compose.LocalTextStyle.Current(c)
 		localDensity := compose.LocalDensity.Current(c)
@@ -76,7 +76,7 @@ func iconFromBytes(iconByte []byte, opts IconOptions) Composable {
 		// Resolve text style with defaults
 		defaultTextStyles := uitext.ResolveTextStyleDefaults(localTextStyle, layoutDirection)
 
-		iconSizeInPx := localDensity.DpRoundToPx(opts.Size.TakeOrElse(localDensity.TextUnitToDp(defaultTextStyles.FontSize())))
+		iconSizeInPx := localDensity.DpRoundToPx(unit.DpCompanion.TakeOrElse(opts.Size, localDensity.TextUnitToDp(defaultTextStyles.FontSize())))
 
 		c.StartBlock(Material3IconNodeID)
 		c.Modifier(func(modifier ui.Modifier) ui.Modifier {
@@ -99,7 +99,7 @@ func iconFromSymbol(name SymbolName, opts IconOptions) Composable {
 	return func(c Composer) Composer {
 		// Resolve color
 		contentColor := material3.LocalContentColor.Current(c)
-		iconColor := opts.Color.TakeOrElse(contentColor)
+		iconColor := graphics.ColorCompanion.TakeOrElse(opts.Color, contentColor)
 
 		localTextStyle := compose.LocalTextStyle.Current(c)
 		localDensity := compose.LocalDensity.Current(c)
@@ -114,7 +114,7 @@ func iconFromSymbol(name SymbolName, opts IconOptions) Composable {
 			// Convert Dp to Sp (treat them as equivalent for font sizing)
 			fontSize = localDensity.DpToTextUnit(opts.Size)
 		} else {
-			fontSize = opts.FontSize.TakeOrElse(defaultTextStyles.FontSize())
+			fontSize = unit.TextUnitCompanion.TakeOrElse(opts.FontSize, defaultTextStyles.FontSize())
 		}
 
 		return box.Box(text.Text(

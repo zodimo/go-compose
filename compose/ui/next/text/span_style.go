@@ -9,22 +9,25 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
 	"github.com/zodimo/go-compose/compose/ui/next/text/unit"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )
 
-var SpanStyleUnspecified *SpanStyle = &SpanStyle{
+// spanStyleUnspecified is the sentinel for SpanStyle. It is deliberately
+// package-private: the only public way to obtain it is SpanStyleCompanion.Unspecified().
+var spanStyleUnspecified *SpanStyle = &SpanStyle{
 	textForegroundStyle:    nil,
-	FontSize:               unit.TextUnitUnspecified,
-	FontWeight:             font.FontWeightUnspecified,
-	FontStyle:              font.FontStyleUnspecified,
+	FontSize:               unit.TextUnitCompanion.Unspecified(),
+	FontWeight:             font.FontWeightCompanion.Unspecified(),
+	FontStyle:              font.FontStyleCompanion.Unspecified(),
 	FontSynthesis:          nil,
 	FontFamily:             nil,
 	FontFeatureSettings:    "",
-	LetterSpacing:          unit.TextUnitUnspecified,
-	BaselineShift:          style.BaselineShiftUnspecified,
+	LetterSpacing:          unit.TextUnitCompanion.Unspecified(),
+	BaselineShift:          style.BaselineShiftCompanion.Unspecified(),
 	TextGeometricTransform: nil,
 	LocaleList:             nil,
-	Background:             graphics.ColorUnspecified,
+	Background:             graphics.ColorCompanion.Unspecified(),
 	TextDecoration:         nil,
 	Shadow:                 nil,
 	PlatformStyle:          nil,
@@ -57,13 +60,13 @@ func (s SpanStyle) isAnnotation() {
 
 // Props
 func (s SpanStyle) Color() graphics.Color {
-	return style.CoalesceTextForegroundStyle(s.textForegroundStyle, style.TextForegroundStyleUnspecified).Color
+	return style.CoalesceTextForegroundStyle(s.textForegroundStyle, style.TextForegroundStyleCompanion.Unspecified()).Color
 }
 func (s SpanStyle) Brush() graphics.Brush {
-	return style.CoalesceTextForegroundStyle(s.textForegroundStyle, style.TextForegroundStyleUnspecified).Brush
+	return style.CoalesceTextForegroundStyle(s.textForegroundStyle, style.TextForegroundStyleCompanion.Unspecified()).Brush
 }
 func (s SpanStyle) Alpha() float32 {
-	return style.CoalesceTextForegroundStyle(s.textForegroundStyle, style.TextForegroundStyleUnspecified).Alpha
+	return style.CoalesceTextForegroundStyle(s.textForegroundStyle, style.TextForegroundStyleCompanion.Unspecified()).Alpha
 }
 
 type SpanStyleOptions struct {
@@ -186,20 +189,20 @@ func (s SpanStyle) Copy(options ...SpanStyleOption) *SpanStyle {
 	}
 	return &SpanStyle{
 		textForegroundStyle:    style.TakeOrElseTextForegroundStyle(opts.textForegroundStyle, s.textForegroundStyle),
-		FontSize:               opts.FontSize.TakeOrElse(s.FontSize),
-		FontWeight:             opts.FontWeight.TakeOrElse(s.FontWeight),
-		FontStyle:              opts.FontStyle.TakeOrElse(s.FontStyle),
+		FontSize:               unit.TextUnitCompanion.TakeOrElse(opts.FontSize, s.FontSize),
+		FontWeight:             font.FontWeightCompanion.TakeOrElse(opts.FontWeight, s.FontWeight),
+		FontStyle:              font.FontStyleCompanion.TakeOrElse(opts.FontStyle, s.FontStyle),
 		FontSynthesis:          font.TakeOrElseFontSynthesis(opts.FontSynthesis, s.FontSynthesis),
 		FontFamily:             font.TakeOrElseFontFamily(opts.FontFamily, s.FontFamily),
 		FontFeatureSettings:    stringutils.StringsCompanion.TakeOrElse(opts.FontFeatureSettings, s.FontFeatureSettings),
-		LetterSpacing:          opts.LetterSpacing.TakeOrElse(s.LetterSpacing),
+		LetterSpacing:          unit.TextUnitCompanion.TakeOrElse(opts.LetterSpacing, s.LetterSpacing),
 		BaselineShift:          style.TakeOrElseBaselineShift(opts.BaselineShift, s.BaselineShift),
 		TextGeometricTransform: style.TakeOrElseTextGeometricTransform(opts.TextGeometricTransform, s.TextGeometricTransform),
-		LocaleList:             intl.TakeOrElseLocaleList(opts.LocaleList, s.LocaleList),
-		Background:             opts.Background.TakeOrElse(s.Background),
-		TextDecoration:         style.TakeOrElseTextDecoration(opts.TextDecoration, s.TextDecoration),
-		Shadow:                 graphics.TakeOrElseShadow(opts.Shadow, s.Shadow),
-		PlatformStyle:          TakeOrElsePlatformSpanStyle(opts.PlatformStyle, s.PlatformStyle),
+		LocaleList:             intl.LocaleListCompanion.TakeOrElse(opts.LocaleList, s.LocaleList),
+		Background:             graphics.ColorCompanion.TakeOrElse(opts.Background, s.Background),
+		TextDecoration:         style.TextDecorationCompanion.TakeOrElse(opts.TextDecoration, s.TextDecoration),
+		Shadow:                 graphics.ShadowCompanion.TakeOrElse(opts.Shadow, s.Shadow),
+		PlatformStyle:          takeOrElsePlatformSpanStyle(opts.PlatformStyle, s.PlatformStyle),
 		DrawStyle:              graphics.TakeOrElseDrawStyle(opts.DrawStyle, s.DrawStyle),
 	}
 }
@@ -210,7 +213,7 @@ func StringSpanStyle(s *SpanStyle) string {
 		return "SpanStyle(nil)"
 	}
 
-	s = CoalesceSpanStyle(s, SpanStyleUnspecified)
+	s = coalesceSpanStyle(s, spanStyleUnspecified)
 
 	return "SpanStyle(" +
 		"color=" + s.Color().String() + ", " +
@@ -235,35 +238,116 @@ func StringSpanStyle(s *SpanStyle) string {
 }
 
 func IsSpecifiedSpanStyle(s *SpanStyle) bool {
-	return s != nil && s != SpanStyleUnspecified
+	return isSpecifiedSpanStyle(s)
 }
 
 func TakeOrElseSpanStyle(s, def *SpanStyle) *SpanStyle {
-	if !IsSpecifiedSpanStyle(s) {
+	return takeOrElseSpanStyle(s, def)
+}
+
+// Identity (2 ns)
+func SameSpanStyle(a, b *SpanStyle) bool {
+	return sameSpanStyle(a, b)
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualSpanStyle(a, b *SpanStyle) bool {
+	return semanticEqualSpanStyle(a, b)
+}
+
+func EqualSpanStyle(a, b *SpanStyle) bool {
+	return equalSpanStyle(a, b)
+}
+
+func MergeSpanStyle(a, b *SpanStyle) *SpanStyle {
+	return mergeSpanStyle(a, b)
+}
+
+func CoalesceSpanStyle(ptr, def *SpanStyle) *SpanStyle {
+	return coalesceSpanStyle(ptr, def)
+}
+
+// === Sentinel operations ===
+
+func isSpecifiedSpanStyle(s *SpanStyle) bool {
+	return s != nil && s != spanStyleUnspecified
+}
+
+func isUnspecifiedSpanStyle(s *SpanStyle) bool {
+	return !isSpecifiedSpanStyle(s)
+}
+
+func takeOrElseSpanStyle(s, def *SpanStyle) *SpanStyle {
+	if !isSpecifiedSpanStyle(s) {
 		return def
 	}
 	return s
 }
 
-// Identity (2 ns)
-func SameSpanStyle(a, b *SpanStyle) bool {
+func coalesceSpanStyle(ptr, def *SpanStyle) *SpanStyle {
+	if ptr == nil {
+		return def
+	}
+	return ptr
+}
+
+func mergeSpanStyle(a, b *SpanStyle) *SpanStyle {
+	if b == nil {
+		return a
+	}
+	if a == nil {
+		return b
+	}
+
+	a = coalesceSpanStyle(a, spanStyleUnspecified)
+	b = coalesceSpanStyle(b, spanStyleUnspecified)
+	// b is kept as is because we merge INTO it
+
+	return &SpanStyle{
+		textForegroundStyle:    style.MergeTextForegroundStyle(a.textForegroundStyle, b.textForegroundStyle),
+		FontSize:               unit.TextUnitCompanion.TakeOrElse(b.FontSize, a.FontSize),
+		FontWeight:             font.FontWeightCompanion.TakeOrElse(b.FontWeight, a.FontWeight),
+		FontStyle:              font.FontStyleCompanion.TakeOrElse(b.FontStyle, a.FontStyle),
+		FontSynthesis:          font.TakeOrElseFontSynthesis(b.FontSynthesis, a.FontSynthesis),
+		FontFamily:             font.TakeOrElseFontFamily(b.FontFamily, a.FontFamily),
+		FontFeatureSettings:    stringutils.StringsCompanion.TakeOrElse(b.FontFeatureSettings, a.FontFeatureSettings),
+		LetterSpacing:          unit.TextUnitCompanion.TakeOrElse(b.LetterSpacing, a.LetterSpacing),
+		BaselineShift:          style.BaselineShiftCompanion.TakeOrElse(b.BaselineShift, a.BaselineShift),
+		TextGeometricTransform: style.TextGeometricTransformCompanion.TakeOrElse(b.TextGeometricTransform, a.TextGeometricTransform),
+		LocaleList:             intl.LocaleListCompanion.TakeOrElse(b.LocaleList, a.LocaleList),
+		Background:             graphics.ColorCompanion.TakeOrElse(b.Background, a.Background),
+		TextDecoration:         style.TakeOrElseTextDecoration(b.TextDecoration, a.TextDecoration),
+		Shadow:                 graphics.ShadowCompanion.TakeOrElse(b.Shadow, a.Shadow),
+		PlatformStyle:          takeOrElsePlatformSpanStyle(b.PlatformStyle, a.PlatformStyle),
+		DrawStyle:              graphics.TakeOrElseDrawStyle(b.DrawStyle, a.DrawStyle),
+	}
+}
+
+func stringSpanStyle(s *SpanStyle) string {
+	return StringSpanStyle(s)
+}
+
+func sameSpanStyle(a, b *SpanStyle) bool {
 	if a == nil && b == nil {
 		return true
 	}
 	if a == nil {
-		return b == SpanStyleUnspecified
+		return b == spanStyleUnspecified
 	}
 	if b == nil {
-		return a == SpanStyleUnspecified
+		return a == spanStyleUnspecified
 	}
 	return a == b
 }
 
-// Semantic equality (field-by-field, 20 ns)
-func SemanticEqualSpanStyle(a, b *SpanStyle) bool {
+func semanticEqualSpanStyle(a, b *SpanStyle) bool {
 
-	a = CoalesceSpanStyle(a, SpanStyleUnspecified)
-	b = CoalesceSpanStyle(b, SpanStyleUnspecified)
+	a = coalesceSpanStyle(a, spanStyleUnspecified)
+	b = coalesceSpanStyle(b, spanStyleUnspecified)
+
+	if a == spanStyleUnspecified && b == spanStyleUnspecified {
+		return true
+	}
 
 	return style.EqualTextForegroundStyle(a.textForegroundStyle, b.textForegroundStyle) &&
 		a.FontSize == b.FontSize &&
@@ -279,59 +363,47 @@ func SemanticEqualSpanStyle(a, b *SpanStyle) bool {
 		a.Background == b.Background &&
 		style.EqualTextDecoration(a.TextDecoration, b.TextDecoration) &&
 		graphics.EqualShadow(a.Shadow, b.Shadow) &&
-		EqualPlatformSpanStyle(a.PlatformStyle, b.PlatformStyle) &&
+		equalPlatformSpanStyle(a.PlatformStyle, b.PlatformStyle) &&
 		graphics.EqualDrawStyle(a.DrawStyle, b.DrawStyle)
 }
 
-func EqualSpanStyle(a, b *SpanStyle) bool {
-	if !SameSpanStyle(a, b) {
-		return SemanticEqualSpanStyle(a, b)
+func equalSpanStyle(a, b *SpanStyle) bool {
+	if !sameSpanStyle(a, b) {
+		return semanticEqualSpanStyle(a, b)
 	}
 	return true
 }
 
-func MergeSpanStyle(a, b *SpanStyle) *SpanStyle {
-	if b == nil {
-		return a
+// copySpanStyle returns a copy of s; the source is never mutated.
+func copySpanStyle(s *SpanStyle, options ...func(*SpanStyle)) *SpanStyle {
+	cp := &SpanStyle{}
+	if isSpecifiedSpanStyle(s) {
+		*cp = *s
 	}
-	if a == nil {
-		return b
+	for _, option := range options {
+		option(cp)
 	}
-
-	a = CoalesceSpanStyle(a, SpanStyleUnspecified)
-	b = CoalesceSpanStyle(b, SpanStyleUnspecified)
-	// b is kept as is because we merge INTO it
-
-	return &SpanStyle{
-		textForegroundStyle:    style.MergeTextForegroundStyle(a.textForegroundStyle, b.textForegroundStyle),
-		FontSize:               b.FontSize.TakeOrElse(a.FontSize),
-		FontWeight:             b.FontWeight.TakeOrElse(a.FontWeight),
-		FontStyle:              b.FontStyle.TakeOrElse(a.FontStyle),
-		FontSynthesis:          font.TakeOrElseFontSynthesis(b.FontSynthesis, a.FontSynthesis),
-		FontFamily:             font.TakeOrElseFontFamily(b.FontFamily, a.FontFamily),
-		FontFeatureSettings:    stringutils.StringsCompanion.TakeOrElse(b.FontFeatureSettings, a.FontFeatureSettings),
-		LetterSpacing:          b.LetterSpacing.TakeOrElse(a.LetterSpacing),
-		BaselineShift:          style.TakeOrElseBaselineShift(b.BaselineShift, a.BaselineShift),
-		TextGeometricTransform: style.TakeOrElseTextGeometricTransform(b.TextGeometricTransform, a.TextGeometricTransform),
-		LocaleList:             intl.TakeOrElseLocaleList(b.LocaleList, a.LocaleList),
-		Background:             b.Background.TakeOrElse(a.Background),
-		TextDecoration:         style.TakeOrElseTextDecoration(b.TextDecoration, a.TextDecoration),
-		Shadow:                 graphics.TakeOrElseShadow(b.Shadow, a.Shadow),
-		PlatformStyle:          TakeOrElsePlatformSpanStyle(b.PlatformStyle, a.PlatformStyle),
-		DrawStyle:              graphics.TakeOrElseDrawStyle(b.DrawStyle, a.DrawStyle),
-	}
+	return cp
 }
 
-func CoalesceSpanStyle(ptr, def *SpanStyle) *SpanStyle {
-	if ptr == nil {
-		return def
-	}
-	return ptr
-}
+// SpanStyleCompanion is the single exported sentinel-family symbol for SpanStyle.
+var SpanStyleCompanion = companions.NewStructCompanion(
+	func() *SpanStyle { return spanStyleUnspecified },
+	stringSpanStyle,
+	isSpecifiedSpanStyle,
+	isUnspecifiedSpanStyle,
+	takeOrElseSpanStyle,
+	mergeSpanStyle,
+	sameSpanStyle,
+	semanticEqualSpanStyle,
+	equalSpanStyle,
+	coalesceSpanStyle,
+	copySpanStyle,
+)
 
 func LerpSpanStyle(width, start, stop *SpanStyle, fraction float32) *SpanStyle {
-	start = CoalesceSpanStyle(start, SpanStyleUnspecified)
-	stop = CoalesceSpanStyle(stop, SpanStyleUnspecified)
+	start = CoalesceSpanStyle(start, spanStyleUnspecified)
+	stop = CoalesceSpanStyle(stop, spanStyleUnspecified)
 
 	return &SpanStyle{
 		textForegroundStyle: style.LerpTextForegroundStyle(start.textForegroundStyle, stop.textForegroundStyle, fraction),
@@ -368,23 +440,23 @@ func LerpPlatformSpanStyle(start, stop *PlatformSpanStyle, fraction float32) *Pl
 }
 
 func ResolveSpanStyleDefaults(s *SpanStyle) *SpanStyle {
-	s = CoalesceSpanStyle(s, SpanStyleUnspecified)
+	s = coalesceSpanStyle(s, spanStyleUnspecified)
 	return &SpanStyle{
 		textForegroundStyle:    style.TakeOrElseTextForegroundStyle(s.textForegroundStyle, DefaultColorForegroundStyle),
-		FontSize:               s.FontSize.TakeOrElse(DefaultFontSize),
-		FontWeight:             s.FontWeight.TakeOrElse(font.FontWeightNormal),
-		FontStyle:              s.FontStyle.TakeOrElse(font.FontStyleNormal),
+		FontSize:               unit.TextUnitCompanion.TakeOrElse(s.FontSize, DefaultFontSize),
+		FontWeight:             font.FontWeightCompanion.TakeOrElse(s.FontWeight, font.FontWeightNormal),
+		FontStyle:              font.FontStyleCompanion.TakeOrElse(s.FontStyle, font.FontStyleNormal),
 		FontSynthesis:          font.TakeOrElseFontSynthesis(s.FontSynthesis, font.FontSynthesisAll),
 		FontFamily:             font.TakeOrElseFontFamily(s.FontFamily, font.FontFamilyDefault),
 		FontFeatureSettings:    stringutils.StringsCompanion.TakeOrElse(s.FontFeatureSettings, ""),
-		LetterSpacing:          s.LetterSpacing.TakeOrElse(DefaultLetterSpacing),
+		LetterSpacing:          unit.TextUnitCompanion.TakeOrElse(s.LetterSpacing, DefaultLetterSpacing),
 		BaselineShift:          style.TakeOrElseBaselineShift(s.BaselineShift, style.BaselineShiftNone),
 		TextGeometricTransform: style.TakeOrElseTextGeometricTransform(s.TextGeometricTransform, style.TextGeometricTransformNone), // TODO: check sentinel for nil
-		LocaleList:             intl.TakeOrElseLocaleList(s.LocaleList, nil),                                                       // TODO: verify default
-		Background:             s.Background.TakeOrElse(graphics.ColorTransparent),                                                 // Should be transparent?
+		LocaleList:             intl.LocaleListCompanion.TakeOrElse(s.LocaleList, nil),                                             // TODO: verify default
+		Background:             graphics.ColorCompanion.TakeOrElse(s.Background, graphics.ColorTransparent),                        // Should be transparent?
 		TextDecoration:         style.TakeOrElseTextDecoration(s.TextDecoration, nil),                                              // TODO verify
 		Shadow:                 graphics.TakeOrElseShadow(s.Shadow, graphics.ShadowNone),
-		PlatformStyle:          TakeOrElsePlatformSpanStyle(s.PlatformStyle, nil), // TODO
+		PlatformStyle:          takeOrElsePlatformSpanStyle(s.PlatformStyle, nil), // TODO
 		DrawStyle:              graphics.TakeOrElseDrawStyle(s.DrawStyle, nil),
 	}
 }

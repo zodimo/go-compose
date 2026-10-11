@@ -12,10 +12,10 @@ import (
 // paragraphStyleUnspecified is the sentinel for ParagraphStyle. It is deliberately
 // package-private: the only public way to obtain it is ParagraphStyleCompanion.Unspecified().
 var paragraphStyleUnspecified *ParagraphStyle = &ParagraphStyle{
-	textAlign:     style.TextAlignUnspecified,
-	textDirection: style.TextDirectionUnspecified,
-	lineHeight:    unit.TextUnitUnspecified,
-	lineBreak:     style.LineBreakUnspecified,
+	textAlign:     style.TextAlignCompanion.Unspecified(),
+	textDirection: style.TextDirectionCompanion.Unspecified(),
+	lineHeight:    unit.TextUnitCompanion.Unspecified(),
+	lineBreak:     style.LineBreakCompanion.Unspecified(),
 }
 
 var _ ParaghStyleInterface = (*ParagraphStyle)(nil)
@@ -143,10 +143,10 @@ func mergeParagraphStyle(a, b *ParagraphStyle) *ParagraphStyle {
 	}
 
 	return &ParagraphStyle{
-		textAlign:     b.textAlign.TakeOrElse(a.textAlign),
-		textDirection: b.textDirection.TakeOrElse(a.textDirection),
-		lineHeight:    b.lineHeight.TakeOrElse(a.lineHeight),
-		lineBreak:     b.lineBreak.TakeOrElse(a.lineBreak),
+		textAlign:     style.TextAlignCompanion.TakeOrElse(b.textAlign, a.textAlign),
+		textDirection: style.TextDirectionCompanion.TakeOrElse(b.textDirection, a.textDirection),
+		lineHeight:    unit.TextUnitCompanion.TakeOrElse(b.lineHeight, a.lineHeight),
+		lineBreak:     style.LineBreakCompanion.TakeOrElse(b.lineBreak, a.lineBreak),
 	}
 }
 
@@ -186,10 +186,10 @@ func paragraphStyleResolveDefaults(s *ParagraphStyle, direction unit.LayoutDirec
 	s = coalesceParagraphStyle(s, paragraphStyleUnspecified)
 
 	return &ParagraphStyle{
-		textAlign:     s.textAlign.TakeOrElse(DefaultTextAlign),
+		textAlign:     style.TextAlignCompanion.TakeOrElse(s.textAlign, DefaultTextAlign),
 		textDirection: style.ResolveTextDirection(direction, s.textDirection),
-		lineHeight:    s.lineHeight.TakeOrElse(DefaultLineHeight),
-		lineBreak:     s.lineBreak.TakeOrElse(DefaultLineBreak),
+		lineHeight:    unit.TextUnitCompanion.TakeOrElse(s.lineHeight, DefaultLineHeight),
+		lineBreak:     style.LineBreakCompanion.TakeOrElse(s.lineBreak, DefaultLineBreak),
 	}
 }
 

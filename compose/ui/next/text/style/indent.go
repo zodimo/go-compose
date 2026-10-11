@@ -4,9 +4,13 @@ import (
 	"fmt"
 
 	"github.com/zodimo/go-compose/compose/ui/next/text/unit"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
-var TextIndentUnspecified = &TextIndent{FirstLine: unit.TextUnitUnspecified, RestLine: unit.TextUnitUnspecified}
+// textIndentUnspecified is the sentinel for TextIndent. It is deliberately
+// package-private: the only public way to obtain it is
+// TextIndentCompanion.Unspecified().
+var textIndentUnspecified = &TextIndent{FirstLine: unit.TextUnitCompanion.Unspecified(), RestLine: unit.TextUnitCompanion.Unspecified()}
 
 //https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/style/TextIndent.kt;drc=4970f6e96cdb06089723da0ab8ec93ae3f067c7a;l=32
 
@@ -109,8 +113,8 @@ func LerpTextUnitInheritable(a, b unit.TextUnit, fraction float32) unit.TextUnit
 // timeline between start and stop. The interpolation can be extrapolated beyond 0.0 and 1.0, so
 // negative values and values greater than 1.0 are valid.
 func LerpTextIndent(start, stop *TextIndent, fraction float32) *TextIndent {
-	start = CoalesceTextIndent(start, TextIndentUnspecified)
-	stop = CoalesceTextIndent(stop, TextIndentUnspecified)
+	start = CoalesceTextIndent(start, textIndentUnspecified)
+	stop = CoalesceTextIndent(stop, textIndentUnspecified)
 
 	return &TextIndent{
 		FirstLine: LerpTextUnitInheritable(start.FirstLine, stop.FirstLine, fraction),
@@ -120,7 +124,7 @@ func LerpTextIndent(start, stop *TextIndent, fraction float32) *TextIndent {
 
 // String returns a string representation of the TextIndent.
 func StringTextIndent(s *TextIndent) string {
-	if !IsSpecifiedTextIndent(s) {
+	if !isSpecifiedTextIndent(s) {
 		return "TextIndentUnspecified"
 	}
 	return fmt.Sprintf("TextIndent(firstLine=%s, restLine=%s)",
@@ -128,49 +132,123 @@ func StringTextIndent(s *TextIndent) string {
 }
 
 func SameTextIndent(a, b *TextIndent) bool {
-	if a == nil && b == nil {
-		return true
-	}
-	if a == nil {
-		return b == TextIndentUnspecified
-	}
-	if b == nil {
-		return a == TextIndentUnspecified
-	}
-	return a == b
+	return sameTextIndent(a, b)
 }
 
 func EqualTextIndent(a, b *TextIndent) bool {
-	if !SameTextIndent(a, b) {
-		return SemanticEqualTextIndent(a, b)
-	}
-	return true
+	return equalTextIndent(a, b)
 }
 
 // Semantic equality (field-by-field, 20 ns)
 func SemanticEqualTextIndent(a, b *TextIndent) bool {
-
-	a = CoalesceTextIndent(a, TextIndentUnspecified)
-	b = CoalesceTextIndent(b, TextIndentUnspecified)
-
-	return a.FirstLine.Equals(b.FirstLine) &&
-		a.RestLine.Equals(b.RestLine)
+	return semanticEqualTextIndent(a, b)
 }
 
 func CoalesceTextIndent(ptr, def *TextIndent) *TextIndent {
+	return coalesceTextIndent(ptr, def)
+}
+
+func IsSpecifiedTextIndent(indent *TextIndent) bool {
+	return isSpecifiedTextIndent(indent)
+}
+
+func TakeOrElseTextIndent(a, b *TextIndent) *TextIndent {
+	return takeOrElseTextIndent(a, b)
+}
+
+// === Sentinel operations ===
+
+func isSpecifiedTextIndent(indent *TextIndent) bool {
+	return indent != nil && indent != textIndentUnspecified
+}
+
+func isUnspecifiedTextIndent(indent *TextIndent) bool {
+	return !isSpecifiedTextIndent(indent)
+}
+
+func takeOrElseTextIndent(a, b *TextIndent) *TextIndent {
+	if isSpecifiedTextIndent(a) {
+		return a
+	}
+	return b
+}
+
+func coalesceTextIndent(ptr, def *TextIndent) *TextIndent {
 	if ptr == nil {
 		return def
 	}
 	return ptr
 }
 
-func IsSpecifiedTextIndent(indent *TextIndent) bool {
-	return indent != nil && indent != TextIndentUnspecified
-}
-
-func TakeOrElseTextIndent(a, b *TextIndent) *TextIndent {
-	if IsSpecifiedTextIndent(a) {
-		return a
+func mergeTextIndent(a, b *TextIndent) *TextIndent {
+	if isUnspecifiedTextIndent(b) {
+		return coalesceTextIndent(a, textIndentUnspecified)
 	}
 	return b
 }
+
+func stringTextIndent(s *TextIndent) string {
+	return StringTextIndent(s)
+}
+
+func sameTextIndent(a, b *TextIndent) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil {
+		return b == textIndentUnspecified
+	}
+	if b == nil {
+		return a == textIndentUnspecified
+	}
+	return a == b
+}
+
+func semanticEqualTextIndent(a, b *TextIndent) bool {
+
+	a = coalesceTextIndent(a, textIndentUnspecified)
+	b = coalesceTextIndent(b, textIndentUnspecified)
+
+	if a == textIndentUnspecified && b == textIndentUnspecified {
+		return true
+	}
+
+	return a.FirstLine.Equals(b.FirstLine) &&
+		a.RestLine.Equals(b.RestLine)
+}
+
+func equalTextIndent(a, b *TextIndent) bool {
+	if !sameTextIndent(a, b) {
+		return semanticEqualTextIndent(a, b)
+	}
+	return true
+}
+
+// copyTextIndent returns a copy of ti with the given fields set on top; the
+// source is never mutated.
+func copyTextIndent(ti *TextIndent, options ...func(*TextIndent)) *TextIndent {
+	cp := &TextIndent{}
+	if isSpecifiedTextIndent(ti) {
+		cp.FirstLine = ti.FirstLine
+		cp.RestLine = ti.RestLine
+	}
+	for _, option := range options {
+		option(cp)
+	}
+	return cp
+}
+
+// TextIndentCompanion is the single exported sentinel-family symbol for TextIndent.
+var TextIndentCompanion = companions.NewStructCompanion(
+	func() *TextIndent { return textIndentUnspecified },
+	stringTextIndent,
+	isSpecifiedTextIndent,
+	isUnspecifiedTextIndent,
+	takeOrElseTextIndent,
+	mergeTextIndent,
+	sameTextIndent,
+	semanticEqualTextIndent,
+	equalTextIndent,
+	coalesceTextIndent,
+	copyTextIndent,
+)

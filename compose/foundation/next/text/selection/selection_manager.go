@@ -134,7 +134,7 @@ func NewSelectionManager(registrar *SelectionRegistrarImpl) *SelectionManager {
 
 	registrar.OnSelectionUpdateStartCallback = func(isInTouchMode bool, layoutCoordinates layout.LayoutCoordinates, position geometry.Offset, adjustment SelectionAdjustment) {
 		positionInContainer := m.convertToContainerCoordinates(layoutCoordinates, position)
-		if positionInContainer.IsOffset() {
+		if geometry.OffsetCompanion.IsSpecified(positionInContainer) {
 			m.mu.Lock()
 			m.isInTouchMode = isInTouchMode
 			m.mu.Unlock()
@@ -485,7 +485,7 @@ func (m *SelectionManager) convertToContainerCoordinates(layoutCoordinates layou
 	m.mu.RUnlock()
 
 	if containerCoords == nil || !containerCoords.IsAttached() {
-		return geometry.OffsetUnspecified
+		return geometry.OffsetCompanion.Unspecified()
 	}
 	return containerCoords.LocalPositionOf(layoutCoordinates, offset)
 }
@@ -495,11 +495,11 @@ func (m *SelectionManager) startSelection(position geometry.Offset, isStartHandl
 	m.previousSelectionLayout = nil
 	m.mu.Unlock()
 
-	m.updateSelectionInternal(position, geometry.OffsetUnspecified, isStartHandle, adjustment)
+	m.updateSelectionInternal(position, geometry.OffsetCompanion.Unspecified(), isStartHandle, adjustment)
 }
 
 func (m *SelectionManager) updateSelection(newPosition, previousPosition geometry.Offset, isStartHandle bool, adjustment SelectionAdjustment) bool {
-	if !newPosition.IsOffset() {
+	if !geometry.OffsetCompanion.IsSpecified(newPosition) {
 		return false
 	}
 	return m.updateSelectionInternal(newPosition, previousPosition, isStartHandle, adjustment)

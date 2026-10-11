@@ -4,16 +4,20 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
 	"github.com/zodimo/go-compose/compose/ui/next/text/unit"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
-var ParagraphStyleUnspecified *ParagraphStyle = &ParagraphStyle{
-	TextAlign:       style.TextAlignUnspecified,
-	TextDirection:   style.TextDirectionUnspecified,
-	LineHeight:      unit.TextUnitUnspecified,
+// paragraphStyleUnspecified is the sentinel for ParagraphStyle. It is
+// deliberately package-private: the only public way to obtain it is
+// ParagraphStyleCompanion.Unspecified().
+var paragraphStyleUnspecified *ParagraphStyle = &ParagraphStyle{
+	TextAlign:       style.TextAlignCompanion.Unspecified(),
+	TextDirection:   style.TextDirectionCompanion.Unspecified(),
+	LineHeight:      unit.TextUnitCompanion.Unspecified(),
 	TextIndent:      nil,
 	LineHeightStyle: nil,
-	LineBreak:       style.LineBreakUnspecified,
-	Hyphens:         style.HyphensUnspecified,
+	LineBreak:       style.LineBreakCompanion.Unspecified(),
+	Hyphens:         style.HyphensCompanion.Unspecified(),
 	TextMotion:      nil,
 }
 
@@ -104,28 +108,28 @@ type ParagraphStyleOption = func(*ParagraphStyleOptions)
 
 func (s ParagraphStyle) Copy(options ...ParagraphStyleOption) *ParagraphStyle {
 	opts := &ParagraphStyleOptions{
-		TextAlign:       style.TextAlignUnspecified,
-		TextDirection:   style.TextDirectionUnspecified,
-		LineHeight:      unit.TextUnitUnspecified,
+		TextAlign:       style.TextAlignCompanion.Unspecified(),
+		TextDirection:   style.TextDirectionCompanion.Unspecified(),
+		LineHeight:      unit.TextUnitCompanion.Unspecified(),
 		TextIndent:      nil,
 		PlatformStyle:   nil,
 		LineHeightStyle: nil,
-		LineBreak:       style.LineBreakUnspecified,
-		Hyphens:         style.HyphensUnspecified,
+		LineBreak:       style.LineBreakCompanion.Unspecified(),
+		Hyphens:         style.HyphensCompanion.Unspecified(),
 		TextMotion:      nil,
 	}
 	for _, option := range options {
 		option(opts)
 	}
 	return &ParagraphStyle{
-		TextAlign:       opts.TextAlign.TakeOrElse(s.TextAlign),
-		TextDirection:   opts.TextDirection.TakeOrElse(s.TextDirection),
-		LineHeight:      opts.LineHeight.TakeOrElse(s.LineHeight),
+		TextAlign:       style.TextAlignCompanion.TakeOrElse(opts.TextAlign, s.TextAlign),
+		TextDirection:   style.TextDirectionCompanion.TakeOrElse(opts.TextDirection, s.TextDirection),
+		LineHeight:      unit.TextUnitCompanion.TakeOrElse(opts.LineHeight, s.LineHeight),
 		TextIndent:      style.TakeOrElseTextIndent(opts.TextIndent, s.TextIndent),
 		PlatformStyle:   TakeOrElsePlatformParagraphStyle(opts.PlatformStyle, s.PlatformStyle),
 		LineHeightStyle: style.MergeLineHeightStyle(opts.LineHeightStyle, s.LineHeightStyle),
-		LineBreak:       opts.LineBreak.TakeOrElse(s.LineBreak),
-		Hyphens:         opts.Hyphens.TakeOrElse(s.Hyphens),
+		LineBreak:       style.LineBreakCompanion.TakeOrElse(opts.LineBreak, s.LineBreak),
+		Hyphens:         style.HyphensCompanion.TakeOrElse(opts.Hyphens, s.Hyphens),
 		TextMotion:      style.TakeOrElseTextMotion(opts.TextMotion, s.TextMotion),
 	}
 }
@@ -145,34 +149,108 @@ func StringParagraphStyle(s *ParagraphStyle) string {
 }
 
 func IsSpecifiedParagraphStyle(s *ParagraphStyle) bool {
-	return s != nil && s != ParagraphStyleUnspecified
+	return isSpecifiedParagraphStyle(s)
 }
 
 func TakeOrElseParagraphStyle(s, def *ParagraphStyle) *ParagraphStyle {
-	if !IsSpecifiedParagraphStyle(s) {
+	return takeOrElseParagraphStyle(s, def)
+}
+
+// Identity (2 ns)
+func SameParagraphStyle(a, b *ParagraphStyle) bool {
+	return sameParagraphStyle(a, b)
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualParagraphStyle(a, b *ParagraphStyle) bool {
+	return semanticEqualParagraphStyle(a, b)
+}
+
+func EqualParagraphStyle(a, b *ParagraphStyle) bool {
+	return equalParagraphStyle(a, b)
+}
+
+func MergeParagraphStyle(a, b *ParagraphStyle) *ParagraphStyle {
+	return mergeParagraphStyle(a, b)
+}
+
+func CoalesceParagraphStyle(ptr, def *ParagraphStyle) *ParagraphStyle {
+	return coalesceParagraphStyle(ptr, def)
+}
+
+// === Sentinel operations ===
+
+func isSpecifiedParagraphStyle(s *ParagraphStyle) bool {
+	return s != nil && s != paragraphStyleUnspecified
+}
+
+func isUnspecifiedParagraphStyle(s *ParagraphStyle) bool {
+	return !isSpecifiedParagraphStyle(s)
+}
+
+func takeOrElseParagraphStyle(s, def *ParagraphStyle) *ParagraphStyle {
+	if !isSpecifiedParagraphStyle(s) {
 		return def
 	}
 	return s
 }
 
-// Identity (2 ns)
-func SameParagraphStyle(a, b *ParagraphStyle) bool {
+func coalesceParagraphStyle(ptr, def *ParagraphStyle) *ParagraphStyle {
+	if ptr == nil {
+		return def
+	}
+	return ptr
+}
+
+func mergeParagraphStyle(a, b *ParagraphStyle) *ParagraphStyle {
+	a = coalesceParagraphStyle(a, paragraphStyleUnspecified)
+	b = coalesceParagraphStyle(b, paragraphStyleUnspecified)
+
+	if a == paragraphStyleUnspecified {
+		return b
+	}
+	if b == paragraphStyleUnspecified {
+		return a
+	}
+
+	// Both are custom: allocate new merged style. b wins where specified.
+	return &ParagraphStyle{
+		TextAlign:       style.TextAlignCompanion.TakeOrElse(b.TextAlign, a.TextAlign),
+		TextDirection:   style.TextDirectionCompanion.TakeOrElse(b.TextDirection, a.TextDirection),
+		LineHeight:      unit.TextUnitCompanion.TakeOrElse(b.LineHeight, a.LineHeight),
+		TextIndent:      style.TextIndentCompanion.TakeOrElse(b.TextIndent, a.TextIndent),
+		PlatformStyle:   takeOrElsePlatformParagraphStyle(b.PlatformStyle, a.PlatformStyle),
+		LineHeightStyle: style.MergeLineHeightStyle(a.LineHeightStyle, b.LineHeightStyle),
+		LineBreak:       style.LineBreakCompanion.TakeOrElse(b.LineBreak, a.LineBreak),
+		Hyphens:         style.HyphensCompanion.TakeOrElse(b.Hyphens, a.Hyphens),
+		TextMotion:      style.TakeOrElseTextMotion(b.TextMotion, a.TextMotion),
+	}
+}
+
+func stringParagraphStyle(s *ParagraphStyle) string {
+	return StringParagraphStyle(s)
+}
+
+func sameParagraphStyle(a, b *ParagraphStyle) bool {
 	if a == nil && b == nil {
 		return true
 	}
 	if a == nil {
-		return b == ParagraphStyleUnspecified
+		return b == paragraphStyleUnspecified
 	}
 	if b == nil {
-		return a == ParagraphStyleUnspecified
+		return a == paragraphStyleUnspecified
 	}
 	return a == b
 }
 
-// Semantic equality (field-by-field, 20 ns)
-func SemanticEqualParagraphStyle(a, b *ParagraphStyle) bool {
-	a = CoalesceParagraphStyle(a, ParagraphStyleUnspecified)
-	b = CoalesceParagraphStyle(b, ParagraphStyleUnspecified)
+func semanticEqualParagraphStyle(a, b *ParagraphStyle) bool {
+	a = coalesceParagraphStyle(a, paragraphStyleUnspecified)
+	b = coalesceParagraphStyle(b, paragraphStyleUnspecified)
+
+	if a == paragraphStyleUnspecified && b == paragraphStyleUnspecified {
+		return true
+	}
 
 	return a.TextAlign == b.TextAlign &&
 		a.TextDirection == b.TextDirection &&
@@ -182,47 +260,41 @@ func SemanticEqualParagraphStyle(a, b *ParagraphStyle) bool {
 		a.LineBreak == b.LineBreak &&
 		a.Hyphens == b.Hyphens &&
 		style.EqualTextMotion(a.TextMotion, b.TextMotion)
-
 }
 
-func EqualParagraphStyle(a, b *ParagraphStyle) bool {
-	if !SameParagraphStyle(a, b) {
-		return SemanticEqualParagraphStyle(a, b)
+func equalParagraphStyle(a, b *ParagraphStyle) bool {
+	if !sameParagraphStyle(a, b) {
+		return semanticEqualParagraphStyle(a, b)
 	}
 	return true
 }
 
-func MergeParagraphStyle(a, b *ParagraphStyle) *ParagraphStyle {
-	a = CoalesceParagraphStyle(a, ParagraphStyleUnspecified)
-	b = CoalesceParagraphStyle(b, ParagraphStyleUnspecified)
-
-	if a == ParagraphStyleUnspecified {
-		return b
+// copyParagraphStyle returns a copy of s; the source is never mutated.
+func copyParagraphStyle(s *ParagraphStyle, options ...func(*ParagraphStyle)) *ParagraphStyle {
+	cp := &ParagraphStyle{}
+	if isSpecifiedParagraphStyle(s) {
+		*cp = *s
 	}
-	if b == ParagraphStyleUnspecified {
-		return a
+	for _, option := range options {
+		option(cp)
 	}
-
-	// Both are custom: allocate new merged style
-	return &ParagraphStyle{
-		TextAlign:       b.TextAlign.TakeOrElse(a.TextAlign),
-		TextDirection:   b.TextDirection.TakeOrElse(a.TextDirection),
-		LineHeight:      b.LineHeight.TakeOrElse(a.LineHeight),
-		TextIndent:      style.TakeOrElseTextIndent(b.TextIndent, a.TextIndent),
-		PlatformStyle:   TakeOrElsePlatformParagraphStyle(b.PlatformStyle, a.PlatformStyle),
-		LineHeightStyle: style.MergeLineHeightStyle(a.LineHeightStyle, b.LineHeightStyle),
-		LineBreak:       b.LineBreak.TakeOrElse(a.LineBreak),
-		Hyphens:         b.Hyphens.TakeOrElse(a.Hyphens),
-		TextMotion:      style.TakeOrElseTextMotion(b.TextMotion, a.TextMotion),
-	}
+	return cp
 }
 
-func CoalesceParagraphStyle(ptr, def *ParagraphStyle) *ParagraphStyle {
-	if ptr == nil {
-		return def
-	}
-	return ptr
-}
+// ParagraphStyleCompanion is the single exported sentinel-family symbol for ParagraphStyle.
+var ParagraphStyleCompanion = companions.NewStructCompanion(
+	func() *ParagraphStyle { return paragraphStyleUnspecified },
+	stringParagraphStyle,
+	isSpecifiedParagraphStyle,
+	isUnspecifiedParagraphStyle,
+	takeOrElseParagraphStyle,
+	mergeParagraphStyle,
+	sameParagraphStyle,
+	semanticEqualParagraphStyle,
+	equalParagraphStyle,
+	coalesceParagraphStyle,
+	copyParagraphStyle,
+)
 
 // LerpParagraphStyle interpolates between two ParagraphStyles.
 func LerpParagraphStyle(start, stop *ParagraphStyle, fraction float32) *ParagraphStyle {
@@ -243,23 +315,23 @@ func lerpPlatformParagraphStyle(start, stop *PlatformParagraphStyle, fraction fl
 	if start == nil && stop == nil {
 		return nil
 	}
-	startNonNull := TakeOrElsePlatformParagraphStyle(start, PlatformParagraphStyleUnspecified)
-	stopNonNull := TakeOrElsePlatformParagraphStyle(stop, PlatformParagraphStyleUnspecified)
+	startNonNull := TakeOrElsePlatformParagraphStyle(start, platformParagraphStyleUnspecified)
+	stopNonNull := TakeOrElsePlatformParagraphStyle(stop, platformParagraphStyleUnspecified)
 	return lerp.LerpDiscrete(startNonNull, stopNonNull, fraction)
 }
 
 func ResolveParagraphStyleDefaults(s *ParagraphStyle, direction unit.LayoutDirection) *ParagraphStyle {
-	s = CoalesceParagraphStyle(s, ParagraphStyleUnspecified)
+	s = CoalesceParagraphStyle(s, paragraphStyleUnspecified)
 
 	return &ParagraphStyle{
-		TextAlign:       s.TextAlign.TakeOrElse(DefaultTextAlign),
+		TextAlign:       style.TextAlignCompanion.TakeOrElse(s.TextAlign, DefaultTextAlign),
 		TextDirection:   style.ResolveTextDirection(direction, s.TextDirection),
-		LineHeight:      s.LineHeight.TakeOrElse(DefaultLineHeight),
+		LineHeight:      unit.TextUnitCompanion.TakeOrElse(s.LineHeight, DefaultLineHeight),
 		TextIndent:      style.TakeOrElseTextIndent(s.TextIndent, DefaultTextIndent),
 		PlatformStyle:   s.PlatformStyle,
 		LineHeightStyle: s.LineHeightStyle,
-		LineBreak:       s.LineBreak.TakeOrElse(DefaultLineBreak),
-		Hyphens:         s.Hyphens.TakeOrElse(DefaultHyphens),
+		LineBreak:       style.LineBreakCompanion.TakeOrElse(s.LineBreak, DefaultLineBreak),
+		Hyphens:         style.HyphensCompanion.TakeOrElse(s.Hyphens, DefaultHyphens),
 		TextMotion:      style.TakeOrElseTextMotion(s.TextMotion, DefaultTextMotion),
 	}
 }

@@ -4,14 +4,16 @@ import (
 	"fmt"
 
 	"github.com/zodimo/go-compose/compose/ui/next/text/unit"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
 // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/style/TextDirection.kt
 
 const (
-	// TextDirectionUnspecified represents an unset value, a usual replacement for "null"
-	// when a primitive value is desired.
-	TextDirectionUnspecified TextDirection = 0
+	// textDirectionUnspecified represents an unset value, a usual replacement for "null"
+	// when a primitive value is desired. It is deliberately package-private: the
+	// only public way to obtain it is TextDirectionCompanion.Unspecified().
+	textDirectionUnspecified TextDirection = 0
 
 	// TextDirectionLtr always sets the text direction to be Left to Right.
 	TextDirectionLtr TextDirection = 1
@@ -56,7 +58,7 @@ func (t TextDirection) String() string {
 		return "ContentOrLtr"
 	case TextDirectionContentOrRtl:
 		return "ContentOrRtl"
-	case TextDirectionUnspecified:
+	case textDirectionUnspecified:
 		return "Unspecified"
 	default:
 		return "Invalid"
@@ -80,7 +82,7 @@ func TextDirectionValues() []TextDirection {
 // Returns an error if the given value is not recognized by the preset TextDirection values.
 func TextDirectionValueOf(value int) (TextDirection, error) {
 	if value < 0 || value > 5 {
-		return TextDirectionUnspecified, fmt.Errorf(
+		return textDirectionUnspecified, fmt.Errorf(
 			"the given value=%d is not recognized by TextDirection", value,
 		)
 	}
@@ -89,22 +91,71 @@ func TextDirectionValueOf(value int) (TextDirection, error) {
 
 // TextDirection returns true if this TextDirection is not TextDirectionUnspecified.
 func (t TextDirection) IsSpecified() bool {
-	return t != TextDirectionUnspecified
+	return isSpecifiedTextDirection(t)
 }
 
-// TakeOrElse returns this TextDirection if IsSpecified() is true,
-// otherwise executes the provided function and returns its result.
-func (t TextDirection) TakeOrElse(block TextDirection) TextDirection {
-	if t.IsSpecified() {
+// === Sentinel operations ===
+
+func isSpecifiedTextDirection(t TextDirection) bool {
+	return t != textDirectionUnspecified
+}
+
+func isUnspecifiedTextDirection(t TextDirection) bool {
+	return t == textDirectionUnspecified
+}
+
+func takeOrElseTextDirection(t, def TextDirection) TextDirection {
+	if isSpecifiedTextDirection(t) {
 		return t
 	}
-	return block
+	return def
 }
+
+func mergeTextDirection(a, b TextDirection) TextDirection {
+	if isUnspecifiedTextDirection(b) {
+		return a
+	}
+	return b
+}
+
+func stringTextDirection(t TextDirection) string {
+	return t.String()
+}
+
+func sameTextDirection(a, b TextDirection) bool {
+	return a == b
+}
+
+func semanticEqualTextDirection(a, b TextDirection) bool {
+	return a == b
+}
+
+func equalTextDirection(a, b TextDirection) bool {
+	return a == b
+}
+
+func copyTextDirection(t TextDirection) TextDirection {
+	return t
+}
+
+// TextDirectionCompanion is the single exported sentinel-family symbol for TextDirection.
+var TextDirectionCompanion = companions.NewScalarCompanion(
+	func() TextDirection { return textDirectionUnspecified },
+	stringTextDirection,
+	isSpecifiedTextDirection,
+	isUnspecifiedTextDirection,
+	takeOrElseTextDirection,
+	mergeTextDirection,
+	sameTextDirection,
+	semanticEqualTextDirection,
+	equalTextDirection,
+	copyTextDirection,
+)
 
 // ResolveTextDirection resolves the TextDirection, using the LayoutDirection if necessary.
 // If the TextDirection is unspecified, it defaults to Ltr.
 func ResolveTextDirection(layoutDirection unit.LayoutDirection, textDirection TextDirection) TextDirection {
-	if textDirection.IsSpecified() {
+	if isSpecifiedTextDirection(textDirection) {
 		return textDirection
 	}
 	if layoutDirection == unit.LayoutDirectionRtl {

@@ -61,6 +61,6 @@ func Shadow(elevation Dp, shape Shape, ambientColor, spotColor graphics.Color) u
 // Simple Shadow with defaults using theme Shadow role
 func Simple(elevation Dp, shape Shape) ui.Modifier {
 	// unspecified allow for theme defaults
-	unspecifiedColor := graphics.ColorUnspecified
+	unspecifiedColor := graphics.ColorCompanion.Unspecified()
 	return Shadow(elevation, shape, unspecifiedColor, unspecifiedColor)
 }

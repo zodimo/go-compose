@@ -27,8 +27,9 @@ func TestOffsetEqualInfinite(t *testing.T) {
 }
 
 func TestOffsetUnspecified(t *testing.T) {
-	if !math.IsNaN(float64(OffsetUnspecified.X())) || !math.IsNaN(float64(OffsetUnspecified.Y())) {
-		t.Errorf("OffsetUnspecified = %v, want (NaN, NaN)", OffsetUnspecified)
+	u := OffsetCompanion.Unspecified()
+	if !math.IsNaN(float64(u.X())) || !math.IsNaN(float64(u.Y())) {
+		t.Errorf("OffsetCompanion.Unspecified() = %v, want (NaN, NaN)", u)
 	}
 }
 
@@ -43,7 +44,7 @@ func TestOffsetIsValid(t *testing.T) {
 		{NewOffset(0, float32(math.Inf(1))), true},
 		{NewOffset(float32(math.NaN()), 0), false},
 		{NewOffset(0, float32(math.NaN())), false},
-		{OffsetUnspecified, false},
+		{OffsetCompanion.Unspecified(), false},
 		{OffsetInfinite, true},
 	}
 
@@ -55,29 +56,33 @@ func TestOffsetIsValid(t *testing.T) {
 }
 
 func TestOffsetIsSpecified(t *testing.T) {
-	if OffsetUnspecified.IsOffset() {
-		t.Error("OffsetUnspecified should not be specified")
+	if OffsetCompanion.IsSpecified(OffsetCompanion.Unspecified()) {
+		t.Error("Unspecified() should not be specified")
 	}
-	if !OffsetZero.IsOffset() {
+	if OffsetCompanion.IsUnspecified(OffsetCompanion.Unspecified()) {
+		// placeholder to keep intent clear; per-companion test below covers it
+		t.Log("IsUnspecified(Unspecified()) = true, as expected")
+	}
+	if !OffsetCompanion.IsSpecified(OffsetZero) {
 		t.Error("OffsetZero should be specified")
 	}
 	// Test partial NaN
 	partial := NewOffset(float32(math.NaN()), 1.0)
-	if !partial.IsOffset() {
+	if !OffsetCompanion.IsSpecified(partial) {
 		t.Error("Offset{NaN, 1.0} should be specified")
 	}
 }
 
 func TestOffsetIsUnspecified(t *testing.T) {
-	if !OffsetUnspecified.IsUnspecified() {
-		t.Error("OffsetUnspecified should be unspecified")
+	if !OffsetCompanion.IsUnspecified(OffsetCompanion.Unspecified()) {
+		t.Error("Unspecified() should be unspecified")
 	}
-	if OffsetZero.IsUnspecified() {
+	if OffsetCompanion.IsUnspecified(OffsetZero) {
 		t.Error("OffsetZero should not be unspecified")
 	}
 	// Test partial NaN
 	partial := NewOffset(float32(math.NaN()), 1.0)
-	if partial.IsUnspecified() {
+	if OffsetCompanion.IsUnspecified(partial) {
 		t.Error("Offset{NaN, 1.0} should NOT be unspecified")
 	}
 }
@@ -93,7 +98,7 @@ func TestOffsetIsFinite(t *testing.T) {
 		{NewOffset(0, float32(math.Inf(1))), false},
 		{NewOffset(float32(math.NaN()), 0), false},
 		{OffsetInfinite, false},
-		{OffsetUnspecified, false},
+		{OffsetCompanion.Unspecified(), false},
 	}
 
 	for _, tt := range tests {

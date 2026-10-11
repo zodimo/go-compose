@@ -6,13 +6,15 @@ import (
 
 	"github.com/zodimo/go-compose/pkg/floatutils"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
 // Sentinel Values, Values are Stack allocated == FAST
 
-// SizeUnspecified Represents an unspecified [Size] value, usually a replacement for `null` when a
-// primitive value is desired.
-var SizeUnspecified = NewSize(floatutils.Float32Unspecified, floatutils.Float32Unspecified)
+// sizeUnspecified Represents an unspecified [Size] value, usually a replacement for `null` when a
+// primitive value is desired. It is deliberately package-private: the only public
+// way to obtain it is SizeCompanion.Unspecified().
+var sizeUnspecified = NewSize(floatutils.Float32Unspecified, floatutils.Float32Unspecified)
 
 // Size represents a 2D floating-point size.
 // You can think of this as an Offset from the origin.
@@ -66,7 +68,7 @@ func (s Size) MaxDimension() float32 {
 
 // String returns a string representation of the object.
 func (s Size) String() string {
-	if s.IsSpecified() {
+	if isSpecifiedSize(s) {
 		return fmt.Sprintf("Size(%.1f, %.1f)", s.Width(), s.Height())
 	}
 	return "Size.Unspecified"
@@ -79,7 +81,7 @@ func (s Size) Center() Offset {
 
 // Equal checks equality with another Size.
 func (s Size) Equal(other Size) bool {
-	if s == SizeUnspecified && other == SizeUnspecified {
+	if s == sizeUnspecified && other == sizeUnspecified {
 		return true
 	}
 	return floatutils.Float32Equals(s.Width(), other.Width(), floatutils.Float32EqualityThreshold) &&
@@ -96,19 +98,70 @@ func LerpSize(start, stop Size, fraction float32) Size {
 
 // IsSpecified returns false when this is Size.Unspecified.
 func (s Size) IsSpecified() bool {
-	return s != SizeUnspecified
+	return isSpecifiedSize(s)
 }
 
-// IsUnspecified returns true when this is Size.Unspecified.
-func (s Size) IsUnspecified() bool {
-	return s == SizeUnspecified
+func isSpecifiedSize(s Size) bool {
+	return s != sizeUnspecified
 }
 
-//////////////// Sentinel HELPERS //////////////////////////
+func isUnspecifiedSize(s Size) bool {
+	return s == sizeUnspecified
+}
 
-func (s Size) TakeOrElse(block Size) Size {
-	if s == SizeUnspecified {
-		return block
+func takeOrElseSize(s, def Size) Size {
+	if isUnspecifiedSize(s) {
+		return def
 	}
 	return s
 }
+
+// mergeSize layers b onto a: a value from b wins only where b is specified.
+func mergeSize(a, b Size) Size {
+	if isUnspecifiedSize(b) {
+		return a
+	}
+	return b
+}
+
+func stringSize(s Size) string {
+	if isUnspecifiedSize(s) {
+		return "Size.Unspecified"
+	}
+	return fmt.Sprintf("Size(%.1f, %.1f)", s.Width(), s.Height())
+}
+
+func sameSize(a, b Size) bool {
+	return a == b
+}
+
+// semanticEqualSize treats two unspecified sizes as equal; comparing the packed
+// NaN representation with == would otherwise report them as different.
+func semanticEqualSize(a, b Size) bool {
+	if isUnspecifiedSize(a) && isUnspecifiedSize(b) {
+		return true
+	}
+	return a == b
+}
+
+func equalSize(a, b Size) bool {
+	return a.Equal(b)
+}
+
+func copySize(s Size) Size {
+	return s
+}
+
+// SizeCompanion is the single exported sentinel-family symbol for Size.
+var SizeCompanion = companions.NewScalarCompanion(
+	func() Size { return sizeUnspecified },
+	stringSize,
+	isSpecifiedSize,
+	isUnspecifiedSize,
+	takeOrElseSize,
+	mergeSize,
+	sameSize,
+	semanticEqualSize,
+	equalSize,
+	copySize,
+)

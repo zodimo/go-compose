@@ -7,10 +7,10 @@ import (
 )
 
 var ButtonColorsUnspecified = &ButtonColors{
-	ContainerColor:         graphics.ColorUnspecified,
-	ContentColor:           graphics.ColorUnspecified,
-	DisabledContainerColor: graphics.ColorUnspecified,
-	DisabledContentColor:   graphics.ColorUnspecified,
+	ContainerColor:         graphics.ColorCompanion.Unspecified(),
+	ContentColor:           graphics.ColorCompanion.Unspecified(),
+	DisabledContainerColor: graphics.ColorCompanion.Unspecified(),
+	DisabledContentColor:   graphics.ColorCompanion.Unspecified(),
 }
 
 type ButtonColors struct {
@@ -46,10 +46,10 @@ func MergeButtonColors(a, b *ButtonColors) *ButtonColors {
 
 	// Both are custom: allocate new merged style
 	return &ButtonColors{
-		ContainerColor:         b.ContainerColor.TakeOrElse(a.ContainerColor),
-		ContentColor:           b.ContentColor.TakeOrElse(a.ContentColor),
-		DisabledContainerColor: b.DisabledContainerColor.TakeOrElse(a.DisabledContainerColor),
-		DisabledContentColor:   b.DisabledContentColor.TakeOrElse(a.DisabledContentColor),
+		ContainerColor:         graphics.ColorCompanion.TakeOrElse(b.ContainerColor, a.ContainerColor),
+		ContentColor:           graphics.ColorCompanion.TakeOrElse(b.ContentColor, a.ContentColor),
+		DisabledContainerColor: graphics.ColorCompanion.TakeOrElse(b.DisabledContainerColor, a.DisabledContainerColor),
+		DisabledContentColor:   graphics.ColorCompanion.TakeOrElse(b.DisabledContentColor, a.DisabledContentColor),
 	}
 }
 
@@ -151,9 +151,9 @@ func CopyButtonColors(c *ButtonColors, options ...ButtonColorsOption) *ButtonCol
 	c = CoalesceButtonColors(c, ButtonColorsUnspecified)
 
 	return &ButtonColors{
-		ContainerColor:         opt.ContainerColor.TakeOrElse(c.ContainerColor),
-		ContentColor:           opt.ContentColor.TakeOrElse(c.ContentColor),
-		DisabledContainerColor: opt.DisabledContainerColor.TakeOrElse(c.DisabledContainerColor),
-		DisabledContentColor:   opt.DisabledContentColor.TakeOrElse(c.DisabledContentColor),
+		ContainerColor:         graphics.ColorCompanion.TakeOrElse(opt.ContainerColor, c.ContainerColor),
+		ContentColor:           graphics.ColorCompanion.TakeOrElse(opt.ContentColor, c.ContentColor),
+		DisabledContainerColor: graphics.ColorCompanion.TakeOrElse(opt.DisabledContainerColor, c.DisabledContainerColor),
+		DisabledContentColor:   graphics.ColorCompanion.TakeOrElse(opt.DisabledContentColor, c.DisabledContentColor),
 	}
 }

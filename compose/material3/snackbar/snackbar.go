@@ -18,6 +18,7 @@ import (
 	"github.com/zodimo/go-compose/compose/material3/icon"
 	"github.com/zodimo/go-compose/compose/material3/surface"
 	"github.com/zodimo/go-compose/compose/material3/tokens"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/graphics/shape"
 	"github.com/zodimo/go-compose/lifecycle"
 	"github.com/zodimo/go-compose/modifiers/clickable"
@@ -49,11 +50,11 @@ func Snackbar(
 		snackbarDefaults := SnackbarDefaults(theme)
 
 		// Defaults from Material 3 spec
-		containerColor := opts.ContainerColor.TakeOrElse(snackbarDefaults.Color)
-		contentColor := opts.ContentColor.TakeOrElse(snackbarDefaults.ContentColor)
-		// actionColor := opts.ActionColor.TakeOrElse(snackbarDefaults.ActionColor)
-		actionContentColor := opts.ActionContentColor.TakeOrElse(snackbarDefaults.ActionContentColor)
-		dismissActionContentColor := opts.DismissActionContentColor.TakeOrElse(snackbarDefaults.DismissActionContentColor)
+		containerColor := graphics.ColorCompanion.TakeOrElse(opts.ContainerColor, snackbarDefaults.Color)
+		contentColor := graphics.ColorCompanion.TakeOrElse(opts.ContentColor, snackbarDefaults.ContentColor)
+		// actionColor := graphics.ColorCompanion.TakeOrElse(opts.ActionColor, snackbarDefaults.ActionColor)
+		actionContentColor := graphics.ColorCompanion.TakeOrElse(opts.ActionContentColor, snackbarDefaults.ActionContentColor)
+		dismissActionContentColor := graphics.ColorCompanion.TakeOrElse(opts.DismissActionContentColor, snackbarDefaults.DismissActionContentColor)
 		shape := shape.TakeOrElseShape(opts.Shape, snackbarDefaults.Shape)
 
 		return box.Box(

@@ -4,7 +4,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/next/text"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/pkg/sentinel"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )
 
 type TextFieldOptions struct {
@@ -64,13 +64,13 @@ func DefaultTextFieldOptions() TextFieldOptions {
 		Enabled:        true,
 		ReadOnly:       false,
 		TextStyle:      nil,
-		Label:          sentinel.StringUnspecified,
-		Placeholder:    sentinel.StringUnspecified,
+		Label:          stringutils.StringsCompanion.Unspecified(),
+		Placeholder:    stringutils.StringsCompanion.Unspecified(),
 		LeadingIcon:    nil,
 		TrailingIcon:   nil,
 		Prefix:         nil,
 		Suffix:         nil,
-		SupportingText: sentinel.StringUnspecified,
+		SupportingText: stringutils.StringsCompanion.Unspecified(),
 		IsError:        false,
 		SingleLine:     true,
 		MaxLines:       1,

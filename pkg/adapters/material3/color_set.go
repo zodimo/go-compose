@@ -5,7 +5,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 )
 
-var ColorUnspecified = graphics.ColorUnspecified
+var ColorUnspecified = graphics.ColorCompanion.Unspecified()
 
 type Color = graphics.Color
 
@@ -87,8 +87,8 @@ func MergeColorSet(a, b *ColorSet) *ColorSet {
 	b = CoalesceColorSet(b, ColorSetUnspecified)
 
 	return &ColorSet{
-		Color:   b.Color.TakeOrElse(a.Color),
-		OnColor: b.OnColor.TakeOrElse(a.OnColor),
+		Color:   graphics.ColorCompanion.TakeOrElse(b.Color, a.Color),
+		OnColor: graphics.ColorCompanion.TakeOrElse(b.OnColor, a.OnColor),
 	}
 }
 

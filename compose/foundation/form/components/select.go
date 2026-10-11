@@ -14,8 +14,8 @@ import (
 	boxm "github.com/zodimo/go-compose/modifiers/box"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/pkg/sentinel"
 	"github.com/zodimo/go-compose/state"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )
 
 // SelectOption is one selectable entry in a SelectComponent. Value is what the
@@ -45,11 +45,11 @@ func SelectComponent(binding *fform.FormFieldBinding[string], options []SelectOp
 	}
 
 	return func(c api.Composer) api.Composer {
-		label := sentinel.TakeOrElseString(opts.Label, "")
-		placeholder := sentinel.TakeOrElseString(opts.Placeholder, "")
+		label := stringutils.StringsCompanion.TakeOrElse(opts.Label, "")
+		placeholder := stringutils.StringsCompanion.TakeOrElse(opts.Placeholder, "")
 
 		message, hasError := fieldError(binding)
-		support := supportingText(sentinel.TakeOrElseString(opts.HintText, ""), message, hasError)
+		support := supportingText(stringutils.StringsCompanion.TakeOrElse(opts.HintText, ""), message, hasError)
 
 		expandedKey := fmt.Sprintf("%d/%s/selectExpanded", c.GenerateID(), c.GetPath())
 		expanded := state.MustRemember(c, expandedKey, func() bool { return false })

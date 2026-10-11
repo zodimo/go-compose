@@ -5,9 +5,13 @@ import (
 
 	"github.com/zodimo/go-compose/pkg/floatutils"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
-var TextGeometricTransformUnspecified = &TextGeometricTransform{
+// textGeometricTransformUnspecified is the sentinel for TextGeometricTransform. It
+// is deliberately package-private: the only public way to obtain it is
+// TextGeometricTransformCompanion.Unspecified().
+var textGeometricTransformUnspecified = &TextGeometricTransform{
 	ScaleX: floatutils.Float32Unspecified,
 	SkewX:  floatutils.Float32Unspecified,
 }
@@ -45,75 +49,145 @@ func LerpGeometricTransform(
 }
 
 func StringTextGeometricTransform(gt *TextGeometricTransform) string {
-	if !IsSpecifiedTextGeometricTransform(gt) {
+	if !isSpecifiedTextGeometricTransform(gt) {
 		return "TextGeometricTransformUnspecified"
 	}
 	return fmt.Sprintf("TextGeometricTransform(scaleX=%f, skewX=%f)", gt.ScaleX, gt.SkewX)
 }
 
 func IsSpecifiedTextGeometricTransform(gt *TextGeometricTransform) bool {
-	return gt != nil && gt != TextGeometricTransformUnspecified
+	return isSpecifiedTextGeometricTransform(gt)
 }
 
 func TakeOrElseTextGeometricTransform(gt *TextGeometricTransform, defaultGT *TextGeometricTransform) *TextGeometricTransform {
-	if !IsSpecifiedTextGeometricTransform(gt) {
+	return takeOrElseTextGeometricTransform(gt, defaultGT)
+}
+
+// Identity (2 ns)
+func SameTextGeometricTransform(a, b *TextGeometricTransform) bool {
+	return sameTextGeometricTransform(a, b)
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualTextGeometricTransform(a, b *TextGeometricTransform) bool {
+	return semanticEqualTextGeometricTransform(a, b)
+}
+
+func EqualTextGeometricTransform(a, b *TextGeometricTransform) bool {
+	return equalTextGeometricTransform(a, b)
+}
+
+func MergeTextGeometricTransform(a, b *TextGeometricTransform) *TextGeometricTransform {
+	return mergeTextGeometricTransform(a, b)
+}
+
+func CoalesceTextGeometricTransform(ptr, def *TextGeometricTransform) *TextGeometricTransform {
+	return coalesceTextGeometricTransform(ptr, def)
+}
+
+// === Sentinel operations ===
+
+func isSpecifiedTextGeometricTransform(gt *TextGeometricTransform) bool {
+	return gt != nil && gt != textGeometricTransformUnspecified
+}
+
+func isUnspecifiedTextGeometricTransform(gt *TextGeometricTransform) bool {
+	return !isSpecifiedTextGeometricTransform(gt)
+}
+
+func takeOrElseTextGeometricTransform(gt, defaultGT *TextGeometricTransform) *TextGeometricTransform {
+	if !isSpecifiedTextGeometricTransform(gt) {
 		return defaultGT
 	}
 	return gt
 }
 
-// Identity (2 ns)
-func SameTextGeometricTransform(a, b *TextGeometricTransform) bool {
-	if a == nil && b == nil {
-		return true
+func coalesceTextGeometricTransform(ptr, def *TextGeometricTransform) *TextGeometricTransform {
+	if ptr == nil {
+		return def
 	}
-	if a == nil {
-		return b == TextGeometricTransformUnspecified
-	}
-	if b == nil {
-		return a == TextGeometricTransformUnspecified
-	}
-	return a == b
+	return ptr
 }
 
-// Semantic equality (field-by-field, 20 ns)
-func SemanticEqualTextGeometricTransform(a, b *TextGeometricTransform) bool {
+func mergeTextGeometricTransform(a, b *TextGeometricTransform) *TextGeometricTransform {
+	a = coalesceTextGeometricTransform(a, textGeometricTransformUnspecified)
+	b = coalesceTextGeometricTransform(b, textGeometricTransformUnspecified)
 
-	a = CoalesceTextGeometricTransform(a, TextGeometricTransformUnspecified)
-	b = CoalesceTextGeometricTransform(b, TextGeometricTransformUnspecified)
-
-	return a.ScaleX == b.ScaleX &&
-		a.SkewX == b.SkewX
-}
-
-func EqualTextGeometricTransform(a, b *TextGeometricTransform) bool {
-	if !SameTextGeometricTransform(a, b) {
-		return SemanticEqualTextGeometricTransform(a, b)
-	}
-	return true
-}
-
-func MergeTextGeometricTransform(a, b *TextGeometricTransform) *TextGeometricTransform {
-	a = CoalesceTextGeometricTransform(a, TextGeometricTransformUnspecified)
-	b = CoalesceTextGeometricTransform(b, TextGeometricTransformUnspecified)
-
-	if a == TextGeometricTransformUnspecified {
+	if a == textGeometricTransformUnspecified {
 		return b
 	}
-	if b == TextGeometricTransformUnspecified {
+	if b == textGeometricTransformUnspecified {
 		return a
 	}
 
-	// Both are custom: allocate new merged style
+	// Both are custom: allocate new merged style. b wins where specified.
 	return &TextGeometricTransform{
 		ScaleX: floatutils.TakeOrElse(b.ScaleX, a.ScaleX),
 		SkewX:  floatutils.TakeOrElse(b.SkewX, a.SkewX),
 	}
 }
 
-func CoalesceTextGeometricTransform(ptr, def *TextGeometricTransform) *TextGeometricTransform {
-	if ptr == nil {
-		return def
-	}
-	return ptr
+func stringTextGeometricTransform(gt *TextGeometricTransform) string {
+	return StringTextGeometricTransform(gt)
 }
+
+func sameTextGeometricTransform(a, b *TextGeometricTransform) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil {
+		return b == textGeometricTransformUnspecified
+	}
+	if b == nil {
+		return a == textGeometricTransformUnspecified
+	}
+	return a == b
+}
+
+func semanticEqualTextGeometricTransform(a, b *TextGeometricTransform) bool {
+
+	a = coalesceTextGeometricTransform(a, textGeometricTransformUnspecified)
+	b = coalesceTextGeometricTransform(b, textGeometricTransformUnspecified)
+
+	if a == textGeometricTransformUnspecified && b == textGeometricTransformUnspecified {
+		return true
+	}
+
+	return floatutils.Float32Equals(a.ScaleX, b.ScaleX, floatutils.Float32EqualityThreshold) &&
+		floatutils.Float32Equals(a.SkewX, b.SkewX, floatutils.Float32EqualityThreshold)
+}
+
+func equalTextGeometricTransform(a, b *TextGeometricTransform) bool {
+	if !sameTextGeometricTransform(a, b) {
+		return semanticEqualTextGeometricTransform(a, b)
+	}
+	return true
+}
+
+// copyTextGeometricTransform returns a copy of gt; the source is never mutated.
+func copyTextGeometricTransform(gt *TextGeometricTransform, options ...func(*TextGeometricTransform)) *TextGeometricTransform {
+	cp := &TextGeometricTransform{}
+	if isSpecifiedTextGeometricTransform(gt) {
+		cp.ScaleX = gt.ScaleX
+		cp.SkewX = gt.SkewX
+	}
+	for _, option := range options {
+		option(cp)
+	}
+	return cp
+}
+
+// TextGeometricTransformCompanion is the single exported sentinel-family symbol for TextGeometricTransform.
+var TextGeometricTransformCompanion = companions.NewStructCompanion(
+	func() *TextGeometricTransform { return textGeometricTransformUnspecified },
+	stringTextGeometricTransform,
+	isSpecifiedTextGeometricTransform,
+	isUnspecifiedTextGeometricTransform,
+	takeOrElseTextGeometricTransform,
+	mergeTextGeometricTransform,
+	sameTextGeometricTransform,
+	semanticEqualTextGeometricTransform,
+	equalTextGeometricTransform,
+	coalesceTextGeometricTransform,
+	copyTextGeometricTransform,
+)

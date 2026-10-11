@@ -76,7 +76,7 @@ func TestCopyTextStyleWithOptions_OptionsOverride(t *testing.T) {
 	// style that simply never set it.
 	t.Run("passing_the_sentinel_defers_to_the_source", func(t *testing.T) {
 		base := TextStyleFromOptions(WithColor(graphics.ColorRed))
-		cp := copyTextStyle(base, WithColor(graphics.ColorUnspecified))
+		cp := copyTextStyle(base, WithColor(graphics.ColorCompanion.Unspecified()))
 		if cp.Color() != graphics.ColorRed {
 			t.Errorf("Color() = %v, want Red — an unspecified option value must defer to the source", cp.Color())
 		}

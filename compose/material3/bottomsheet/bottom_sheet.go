@@ -37,8 +37,8 @@ func ModalBottomSheet(
 	return func(c Composer) Composer {
 
 		theme := material3.Theme(c)
-		opts.ContainerColor = opts.ContainerColor.TakeOrElse(theme.ColorScheme().SurfaceContainerLow)
-		opts.ScrimColor = opts.ScrimColor.TakeOrElse(theme.ColorScheme().Scrim)
+		opts.ContainerColor = graphics.ColorCompanion.TakeOrElse(opts.ContainerColor, theme.ColorScheme().SurfaceContainerLow)
+		opts.ScrimColor = graphics.ColorCompanion.TakeOrElse(opts.ScrimColor, theme.ColorScheme().Scrim)
 
 		sheetShape := opts.Shape
 		if sheetShape == (token.CornerShape{}) {

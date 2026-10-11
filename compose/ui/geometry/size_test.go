@@ -16,20 +16,20 @@ func TestSizeConstruction(t *testing.T) {
 }
 
 func TestSizeUnspecified(t *testing.T) {
-	s := SizeUnspecified
-	if !s.IsUnspecified() {
-		t.Errorf("SizeUnspecified.IsUnspecified() = false, want true")
+	s := SizeCompanion.Unspecified()
+	if !SizeCompanion.IsUnspecified(s) {
+		t.Errorf("IsUnspecified(Unspecified()) = false, want true")
 	}
-	if s.IsSpecified() {
-		t.Errorf("SizeUnspecified.IsSpecified() = true, want false")
+	if SizeCompanion.IsSpecified(s) {
+		t.Errorf("IsSpecified(Unspecified()) = true, want false")
 	}
 
 	s2 := NewSize(10, 20)
-	if s2.IsUnspecified() {
-		t.Errorf("Size(10, 20).IsUnspecified() = true, want false")
+	if SizeCompanion.IsUnspecified(s2) {
+		t.Errorf("Size(10, 20) should be specified")
 	}
-	if !s2.IsSpecified() {
-		t.Errorf("Size(10, 20).IsSpecified() = false, want true")
+	if !SizeCompanion.IsSpecified(s2) {
+		t.Errorf("Size(10, 20) should be specified")
 	}
 }
 
@@ -44,7 +44,7 @@ func TestSizeIsEmpty(t *testing.T) {
 		{NewSize(-10, 20), true},
 		{NewSize(10, -20), true},
 		{SizeZero, true},
-		{SizeUnspecified, false},
+		{SizeCompanion.Unspecified(), false},
 	}
 
 	for _, tt := range tests {
@@ -116,22 +116,22 @@ func TestSizeString(t *testing.T) {
 		t.Errorf("NewSize(10.5, 20.0).String() should not be Size.Unspecified")
 	}
 
-	sUnspec := SizeUnspecified
+	sUnspec := SizeCompanion.Unspecified()
 	if sUnspec.String() != "Size.Unspecified" {
-		t.Errorf("SizeUnspecified.String() = %v, want Size.Unspecified", sUnspec.String())
+		t.Errorf("Unspecified().String() = %v, want Size.Unspecified", sUnspec.String())
 	}
 }
 
 func TestSizeTakeOrElse(t *testing.T) {
 	s := NewSize(10, 20)
-	res := s.TakeOrElse(NewSize(30, 40))
+	res := SizeCompanion.TakeOrElse(s, NewSize(30, 40))
 	if !res.Equal(s) {
 		t.Errorf("TakeOrElse on specified size should return itself")
 	}
 
-	sUnspec := SizeUnspecified
+	sUnspec := SizeCompanion.Unspecified()
 	fallback := NewSize(30, 40)
-	res2 := sUnspec.TakeOrElse(fallback)
+	res2 := SizeCompanion.TakeOrElse(sUnspec, fallback)
 	if !res2.Equal(fallback) {
 		t.Errorf("TakeOrElse on unspecified size should return fallback")
 	}
@@ -157,9 +157,9 @@ func TestSizeEquality(t *testing.T) {
 		t.Errorf("%v should not equal %v", s1, s4)
 	}
 
-	// u1 := SizeUnspecified
-	// u2 := SizeUnspecified
-	// if !u1.Equal(u2) {
-	// 	t.Errorf("SizeUnspecified should equal SizeUnspecified")
-	// }
+	u1 := SizeCompanion.Unspecified()
+	u2 := SizeCompanion.Unspecified()
+	if !SizeCompanion.SemanticEqual(u1, u2) {
+		t.Errorf("two unspecified sizes should be semantically equal")
+	}
 }

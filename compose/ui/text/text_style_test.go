@@ -236,7 +236,7 @@ func TestTextStyleFromOptions(t *testing.T) {
 	t.Run("no_options", func(t *testing.T) {
 		ts := TextStyleFromOptions()
 		// Should have unspecified values
-		if ts.Color() != graphics.ColorUnspecified {
+		if ts.Color() != graphics.ColorCompanion.Unspecified() {
 			t.Errorf("textStyleFromOptions() with no options Color() = %v, want Unspecified", ts.Color())
 		}
 	})

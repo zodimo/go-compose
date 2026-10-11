@@ -82,16 +82,16 @@ func Slider(value float32, onValueChange func(float32), options ...SliderOption)
 func resolveSliderColors(c Composer, colors SliderColors) SliderColors {
 	theme := material3.Theme(c)
 	return SliderColors{
-		ThumbColor:            colors.ThumbColor.TakeOrElse(theme.ColorScheme().Primary),                                            //, selector.PrimaryRoles.Primary),
-		ActiveTrackColor:      colors.ActiveTrackColor.TakeOrElse(theme.ColorScheme().Primary),                                      //, selector.PrimaryRoles.Primary),
-		ActiveTickColor:       colors.ActiveTickColor.TakeOrElse(graphics.SetOpacity(theme.ColorScheme().OnPrimary, 0.38)),          //, selector.PrimaryRoles.OnPrimary.SetOpacity(0.38)),
-		InactiveTrackColor:    colors.InactiveTrackColor.TakeOrElse(theme.ColorScheme().SurfaceContainerHighest),                    //, selector.SurfaceRoles.ContainerHighest),
-		InactiveTickColor:     colors.InactiveTickColor.TakeOrElse(graphics.SetOpacity(theme.ColorScheme().OnSurfaceVariant, 0.38)), //, selector.SurfaceRoles.OnVariant.SetOpacity(0.38)),
-		DisabledThumbColor:    colors.DisabledThumbColor.TakeOrElse(graphics.SetOpacity(theme.ColorScheme().OnSurface, 0.38)),       //, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
-		DisabledActiveTrack:   colors.DisabledActiveTrack.TakeOrElse(graphics.SetOpacity(theme.ColorScheme().OnSurface, 0.38)),      //, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
-		DisabledActiveTick:    colors.DisabledActiveTick.TakeOrElse(graphics.SetOpacity(theme.ColorScheme().OnSurface, 0.38)),       //, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
-		DisabledInactiveTrack: colors.DisabledInactiveTrack.TakeOrElse(graphics.SetOpacity(theme.ColorScheme().OnSurface, 0.12)),    //, selector.SurfaceRoles.OnSurface.SetOpacity(0.12)),
-		DisabledInactiveTick:  colors.DisabledInactiveTick.TakeOrElse(graphics.SetOpacity(theme.ColorScheme().OnSurface, 0.12)),     //, selector.SurfaceRoles.OnSurface.SetOpacity(0.12)),
+		ThumbColor:            graphics.ColorCompanion.TakeOrElse(colors.ThumbColor, theme.ColorScheme().Primary),                                            //, selector.PrimaryRoles.Primary),
+		ActiveTrackColor:      graphics.ColorCompanion.TakeOrElse(colors.ActiveTrackColor, theme.ColorScheme().Primary),                                      //, selector.PrimaryRoles.Primary),
+		ActiveTickColor:       graphics.ColorCompanion.TakeOrElse(colors.ActiveTickColor, graphics.SetOpacity(theme.ColorScheme().OnPrimary, 0.38)),          //, selector.PrimaryRoles.OnPrimary.SetOpacity(0.38)),
+		InactiveTrackColor:    graphics.ColorCompanion.TakeOrElse(colors.InactiveTrackColor, theme.ColorScheme().SurfaceContainerHighest),                    //, selector.SurfaceRoles.ContainerHighest),
+		InactiveTickColor:     graphics.ColorCompanion.TakeOrElse(colors.InactiveTickColor, graphics.SetOpacity(theme.ColorScheme().OnSurfaceVariant, 0.38)), //, selector.SurfaceRoles.OnVariant.SetOpacity(0.38)),
+		DisabledThumbColor:    graphics.ColorCompanion.TakeOrElse(colors.DisabledThumbColor, graphics.SetOpacity(theme.ColorScheme().OnSurface, 0.38)),       //, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
+		DisabledActiveTrack:   graphics.ColorCompanion.TakeOrElse(colors.DisabledActiveTrack, graphics.SetOpacity(theme.ColorScheme().OnSurface, 0.38)),      //, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
+		DisabledActiveTick:    graphics.ColorCompanion.TakeOrElse(colors.DisabledActiveTick, graphics.SetOpacity(theme.ColorScheme().OnSurface, 0.38)),       //, selector.SurfaceRoles.OnSurface.SetOpacity(0.38)),
+		DisabledInactiveTrack: graphics.ColorCompanion.TakeOrElse(colors.DisabledInactiveTrack, graphics.SetOpacity(theme.ColorScheme().OnSurface, 0.12)),    //, selector.SurfaceRoles.OnSurface.SetOpacity(0.12)),
+		DisabledInactiveTick:  graphics.ColorCompanion.TakeOrElse(colors.DisabledInactiveTick, graphics.SetOpacity(theme.ColorScheme().OnSurface, 0.12)),     //, selector.SurfaceRoles.OnSurface.SetOpacity(0.12)),
 	}
 }
 

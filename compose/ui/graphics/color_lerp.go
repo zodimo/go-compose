@@ -9,7 +9,7 @@ import (
 func LerpColor(start, stop Color, fraction float32) Color {
 	// If both are unspecified, return unspecified.
 	if start.IsUnspecified() && stop.IsUnspecified() {
-		return ColorUnspecified
+		return colorUnspecified
 	}
 	// If one is unspecified, maybe treat as transparent or return unspecified?
 	// Kotlin Color.kt says: "If one of the arguments is Color.Unspecified, the result is Color.Unspecified"
@@ -17,7 +17,7 @@ func LerpColor(start, stop Color, fraction float32) Color {
 	// Actually, TextForegroundStyle behavior relies on this.
 	// If ANY is unspecified, result is unspecified.
 	if start.IsUnspecified() || stop.IsUnspecified() {
-		return ColorUnspecified
+		return colorUnspecified
 	}
 
 	// Basic Lerp in sRGB or Oklab?

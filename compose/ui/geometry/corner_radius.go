@@ -5,6 +5,7 @@ import (
 
 	"github.com/zodimo/go-compose/pkg/floatutils"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
 // CornerRadius represents the radii for corners of a rounded rectangle.
@@ -15,8 +16,10 @@ type CornerRadius int64
 // CornerRadiusZero is a CornerRadius with both x and y radii equal to zero (sharp corners).
 var CornerRadiusZero = NewCornerRadius(0, 0)
 
-// CornerRadiusUnspecified represents an unspecified corner radius.
-var CornerRadiusUnspecified = NewCornerRadius(floatutils.Float32Unspecified, floatutils.Float32Unspecified)
+// cornerRadiusUnspecified represents an unspecified corner radius. It is
+// deliberately package-private: the only public way to obtain it is
+// CornerRadiusCompanion.Unspecified().
+var cornerRadiusUnspecified = NewCornerRadius(floatutils.Float32Unspecified, floatutils.Float32Unspecified)
 
 // NewCornerRadius creates a CornerRadius from the given x and y radii.
 // x is the radius of the corners along the x-axis.
@@ -45,7 +48,7 @@ func (c CornerRadius) String() string {
 	if c == CornerRadiusZero {
 		return "CornerRadius.Zero"
 	}
-	if c == CornerRadiusUnspecified {
+	if c == cornerRadiusUnspecified {
 		return "CornerRadius.Unspecified"
 	}
 	return fmt.Sprintf("CornerRadius(%.1f, %.1f)", c.X(), c.Y())
@@ -62,21 +65,76 @@ func (c CornerRadius) Equal(other CornerRadius) bool {
 
 // IsSpecified returns true if this is not CornerRadius.Unspecified.
 func (c CornerRadius) IsSpecified() bool {
-	return c != CornerRadiusUnspecified
+	return isSpecifiedCornerRadius(c)
 }
 
-// IsUnspecified returns true if this is CornerRadius.Unspecified.
-func (c CornerRadius) IsUnspecified() bool {
-	return c == CornerRadiusUnspecified
+func isSpecifiedCornerRadius(c CornerRadius) bool {
+	return c != cornerRadiusUnspecified
 }
 
-// TakeOrElse returns this corner radius if Specified, otherwise returns the fallback.
-func (c CornerRadius) TakeOrElse(fallback CornerRadius) CornerRadius {
-	if c == CornerRadiusUnspecified {
-		return fallback
+func isUnspecifiedCornerRadius(c CornerRadius) bool {
+	return c == cornerRadiusUnspecified
+}
+
+func takeOrElseCornerRadius(c, def CornerRadius) CornerRadius {
+	if isUnspecifiedCornerRadius(c) {
+		return def
 	}
 	return c
 }
+
+// mergeCornerRadius layers b onto a: a value from b wins only where b is specified.
+func mergeCornerRadius(a, b CornerRadius) CornerRadius {
+	if isUnspecifiedCornerRadius(b) {
+		return a
+	}
+	return b
+}
+
+func stringCornerRadius(c CornerRadius) string {
+	if c == CornerRadiusZero {
+		return "CornerRadius.Zero"
+	}
+	if isUnspecifiedCornerRadius(c) {
+		return "CornerRadius.Unspecified"
+	}
+	return fmt.Sprintf("CornerRadius(%.1f, %.1f)", c.X(), c.Y())
+}
+
+func sameCornerRadius(a, b CornerRadius) bool {
+	return a == b
+}
+
+// semanticEqualCornerRadius treats two unspecified radii as equal; comparing the
+// packed NaN representation with == would otherwise report them as different.
+func semanticEqualCornerRadius(a, b CornerRadius) bool {
+	if isUnspecifiedCornerRadius(a) && isUnspecifiedCornerRadius(b) {
+		return true
+	}
+	return a == b
+}
+
+func equalCornerRadius(a, b CornerRadius) bool {
+	return a.Equal(b)
+}
+
+func copyCornerRadius(c CornerRadius) CornerRadius {
+	return c
+}
+
+// CornerRadiusCompanion is the single exported sentinel-family symbol for CornerRadius.
+var CornerRadiusCompanion = companions.NewScalarCompanion(
+	func() CornerRadius { return cornerRadiusUnspecified },
+	stringCornerRadius,
+	isSpecifiedCornerRadius,
+	isUnspecifiedCornerRadius,
+	takeOrElseCornerRadius,
+	mergeCornerRadius,
+	sameCornerRadius,
+	semanticEqualCornerRadius,
+	equalCornerRadius,
+	copyCornerRadius,
+)
 
 // Plus returns a CornerRadius with radii that are the sum of both corner radii.
 func (c CornerRadius) Plus(other CornerRadius) CornerRadius {

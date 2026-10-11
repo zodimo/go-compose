@@ -83,8 +83,8 @@ func MergeColorSet(a, b *ColorSet) *ColorSet {
 	b = CoalesceColorSet(b, ColorSetUnspecified)
 
 	return &ColorSet{
-		Color:   b.Color.TakeOrElse(a.Color),
-		OnColor: b.OnColor.TakeOrElse(a.OnColor),
+		Color:   graphics.ColorCompanion.TakeOrElse(b.Color, a.Color),
+		OnColor: graphics.ColorCompanion.TakeOrElse(b.OnColor, a.OnColor),
 	}
 }
 

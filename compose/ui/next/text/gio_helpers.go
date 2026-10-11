@@ -21,7 +21,7 @@ import (
 // This extracts the font family, weight, and style from the TextStyle
 // and converts them to Gio's font representation.
 func ToGioFont(ts *TextStyle) gioFont.Font {
-	ts = CoalesceTextStyle(ts, TextStyleUnspecified)
+	ts = coalesceTextStyle(ts, textStyleUnspecified)
 
 	return font.ToGioFont(
 		ts.FontFamily(),

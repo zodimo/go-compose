@@ -2,7 +2,8 @@ package style
 
 import (
 	"fmt"
-	
+
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
 // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/style/TextAlign.kt
@@ -13,9 +14,10 @@ type TextAlign int
 
 // TextAlign constants
 const (
-	// TextAlignUnspecified represents an unset value, a usual replacement for "null"
-	// when a primitive value is desired.
-	TextAlignUnspecified TextAlign = 0
+	// textAlignUnspecified represents an unset value, a usual replacement for "null"
+	// when a primitive value is desired. It is deliberately package-private: the
+	// only public way to obtain it is TextAlignCompanion.Unspecified().
+	textAlignUnspecified TextAlign = 0
 
 	// TextAlignLeft aligns the text on the left edge of the container.
 	TextAlignLeft TextAlign = 1
@@ -57,7 +59,7 @@ func (t TextAlign) String() string {
 		return "Start"
 	case TextAlignEnd:
 		return "End"
-	case TextAlignUnspecified:
+	case textAlignUnspecified:
 		return "Unspecified"
 	default:
 		return "Invalid"
@@ -94,22 +96,71 @@ func TextAlignValueOf(value int) (TextAlign, error) {
 	case 6:
 		return TextAlignEnd, nil
 	case 0:
-		return TextAlignUnspecified, nil
+		return textAlignUnspecified, nil
 	default:
-		return TextAlignUnspecified, fmt.Errorf("the given value=%d is not recognized by TextAlign", value)
+		return textAlignUnspecified, fmt.Errorf("the given value=%d is not recognized by TextAlign", value)
 	}
 }
 
 // IsSpecified returns true if this TextAlign is not TextAlignUnspecified.
 func (t TextAlign) IsSpecified() bool {
-	return t != TextAlignUnspecified
+	return isSpecifiedTextAlign(t)
 }
 
-// TakeOrElse returns this TextAlign if IsSpecified() is true,
-// otherwise executes the provided function and returns its result.
-func (t TextAlign) TakeOrElse(other TextAlign) TextAlign {
-	if t.IsSpecified() {
+// === Sentinel operations ===
+
+func isSpecifiedTextAlign(t TextAlign) bool {
+	return t != textAlignUnspecified
+}
+
+func isUnspecifiedTextAlign(t TextAlign) bool {
+	return t == textAlignUnspecified
+}
+
+func takeOrElseTextAlign(t, def TextAlign) TextAlign {
+	if isSpecifiedTextAlign(t) {
 		return t
 	}
-	return other
+	return def
 }
+
+func mergeTextAlign(a, b TextAlign) TextAlign {
+	if isUnspecifiedTextAlign(b) {
+		return a
+	}
+	return b
+}
+
+func stringTextAlign(t TextAlign) string {
+	return t.String()
+}
+
+func sameTextAlign(a, b TextAlign) bool {
+	return a == b
+}
+
+func semanticEqualTextAlign(a, b TextAlign) bool {
+	return a == b
+}
+
+func equalTextAlign(a, b TextAlign) bool {
+	return a == b
+}
+
+func copyTextAlign(t TextAlign) TextAlign {
+	return t
+}
+
+// TextAlignCompanion is the single exported sentinel-family symbol for TextAlign.
+var TextAlignCompanion = companions.NewScalarCompanion(
+	func() TextAlign { return textAlignUnspecified },
+	stringTextAlign,
+	isSpecifiedTextAlign,
+	isUnspecifiedTextAlign,
+	takeOrElseTextAlign,
+	mergeTextAlign,
+	sameTextAlign,
+	semanticEqualTextAlign,
+	equalTextAlign,
+	copyTextAlign,
+)

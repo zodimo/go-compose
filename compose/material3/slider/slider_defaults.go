@@ -13,16 +13,16 @@ type sliderDefaults struct{}
 // Colors returns the default SliderColors.
 func (d sliderDefaults) Colors() SliderColors {
 	return SliderColors{
-		ThumbColor:            graphics.ColorUnspecified,
-		ActiveTrackColor:      graphics.ColorUnspecified,
-		ActiveTickColor:       graphics.ColorUnspecified,
-		InactiveTrackColor:    graphics.ColorUnspecified,
-		InactiveTickColor:     graphics.ColorUnspecified,
-		DisabledThumbColor:    graphics.ColorUnspecified,
-		DisabledActiveTrack:   graphics.ColorUnspecified,
-		DisabledActiveTick:    graphics.ColorUnspecified,
-		DisabledInactiveTrack: graphics.ColorUnspecified,
-		DisabledInactiveTick:  graphics.ColorUnspecified,
+		ThumbColor:            graphics.ColorCompanion.Unspecified(),
+		ActiveTrackColor:      graphics.ColorCompanion.Unspecified(),
+		ActiveTickColor:       graphics.ColorCompanion.Unspecified(),
+		InactiveTrackColor:    graphics.ColorCompanion.Unspecified(),
+		InactiveTickColor:     graphics.ColorCompanion.Unspecified(),
+		DisabledThumbColor:    graphics.ColorCompanion.Unspecified(),
+		DisabledActiveTrack:   graphics.ColorCompanion.Unspecified(),
+		DisabledActiveTick:    graphics.ColorCompanion.Unspecified(),
+		DisabledInactiveTrack: graphics.ColorCompanion.Unspecified(),
+		DisabledInactiveTick:  graphics.ColorCompanion.Unspecified(),
 	}
 }
 

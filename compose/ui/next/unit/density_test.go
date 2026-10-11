@@ -105,16 +105,16 @@ func TestSizeToDpSize(t *testing.T) {
 
 func TestDpSizeUnspecifiedToSize(t *testing.T) {
 	density := NewDensity(2.0, 3.0)
-	size := density.DpSizeToSize(DpSizeUnspecified)
-	if !size.IsUnspecified() {
+	size := density.DpSizeToSize(DpSizeCompanion.Unspecified())
+	if !geometry.SizeCompanion.IsUnspecified(size) {
 		t.Errorf("Expected Unspecified, got %v", size)
 	}
 }
 
 func TestSizeUnspecifiedToDpSize(t *testing.T) {
 	density := NewDensity(2.0, 3.0)
-	dpSize := density.SizeToDpSize(geometry.SizeUnspecified)
-	if !dpSize.Width.IsUnspecified() || !dpSize.Height.IsUnspecified() {
+	dpSize := density.SizeToDpSize(geometry.SizeCompanion.Unspecified())
+	if !DpCompanion.IsUnspecified(dpSize.Width) || !DpCompanion.IsUnspecified(dpSize.Height) {
 		t.Errorf("Expected valid Unspecified parts, got %v", dpSize)
 	}
 	// Strict equality might be tricky with NaN, but IsUnspecified checks are sufficient.

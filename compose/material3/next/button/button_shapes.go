@@ -8,8 +8,8 @@ import (
 
 // ButtonShapesUnspecified is the sentinel value for unspecified ButtonShapes
 var ButtonShapesUnspecified = &ButtonShapes{
-	Shape:        shape.ShapeUnspecified,
-	PressedShape: shape.ShapeUnspecified,
+	Shape:        shape.ShapeCompanion.Unspecified(),
+	PressedShape: shape.ShapeCompanion.Unspecified(),
 }
 
 // ButtonShapes holds shape configuration for button states

@@ -26,13 +26,13 @@ func (r RadialGradient) IntrinsicSize() geometry.Size {
 	if !math.IsInf(float64(r.Radius), 0) && !math.IsNaN(float64(r.Radius)) {
 		return geometry.NewSize(r.Radius*2, r.Radius*2)
 	}
-	return geometry.SizeUnspecified
+	return geometry.SizeCompanion.Unspecified()
 }
 
 func (r RadialGradient) CreateShader(size geometry.Size) Shader {
 	centerX := r.Center.X()
 	centerY := r.Center.Y()
-	if r.Center.IsUnspecified() {
+	if geometry.OffsetCompanion.IsUnspecified(r.Center) {
 		center := size.Center()
 		centerX = center.X()
 		centerY = center.Y()
@@ -69,8 +69,8 @@ func RadialGradientBrush(colors []Color, center geometry.Offset, radius float32,
 }
 
 func SemanticEqualRadialGradient(a, b *RadialGradient) bool {
-	a = CoalesceBrush(a, BrushUnspecified).(*RadialGradient)
-	b = CoalesceBrush(b, BrushUnspecified).(*RadialGradient)
+	a = CoalesceBrush(a, brushUnspecified).(*RadialGradient)
+	b = CoalesceBrush(b, brushUnspecified).(*RadialGradient)
 
 	// colors
 	if len(a.Colors) != len(b.Colors) {

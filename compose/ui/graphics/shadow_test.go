@@ -8,10 +8,10 @@ import (
 
 func TestShadow_SentinelPattern(t *testing.T) {
 	// Test EmptyShadow singleton
-	if ShadowUnspecified == nil {
+	if ShadowCompanion.Unspecified() == nil {
 		t.Error("EmptyShadow should not be nil")
 	}
-	if IsSpecifiedShadow(ShadowUnspecified) {
+	if IsSpecifiedShadow(ShadowCompanion.Unspecified()) {
 		t.Error("EmptyShadow should not be specified")
 	}
 
@@ -33,7 +33,7 @@ func TestShadow_SentinelPattern(t *testing.T) {
 		}
 
 		// Case 3: s is EmptyShadow
-		res = TakeOrElseShadow(ShadowUnspecified, defaultShadow)
+		res = TakeOrElseShadow(ShadowCompanion.Unspecified(), defaultShadow)
 		if res != defaultShadow {
 			t.Error("TakeOrElse should return default when s is EmptyShadow")
 		}
@@ -41,8 +41,8 @@ func TestShadow_SentinelPattern(t *testing.T) {
 
 	// Test String()
 	t.Run("String", func(t *testing.T) {
-		if StringShadow(ShadowUnspecified) != "Shadow{Unspecified}" {
-			t.Errorf("Expected 'Shadow{Unspecified}', got '%s'", StringShadow(ShadowUnspecified))
+		if StringShadow(ShadowCompanion.Unspecified()) != "Shadow{Unspecified}" {
+			t.Errorf("Expected 'Shadow{Unspecified}', got '%s'", StringShadow(ShadowCompanion.Unspecified()))
 		}
 	})
 }

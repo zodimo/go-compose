@@ -8,6 +8,7 @@ import (
 	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/material3/surface"
 	"github.com/zodimo/go-compose/compose/material3/text"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-compose/modifiers/clickable"
 	"github.com/zodimo/go-compose/modifiers/padding"
@@ -97,11 +98,11 @@ func SegmentedButton(
 	return func(c Composer) Composer {
 		theme := material3.Theme(c)
 
-		opts.SelectedColor = opts.SelectedColor.TakeOrElse(theme.ColorScheme().SecondaryContainer)                 //, theme.ColorHelper.ColorSelector().SecondaryRoles.Container)
-		opts.UnselectedColor = opts.UnselectedColor.TakeOrElse(theme.ColorScheme().Surface)                        //, theme.ColorHelper.ColorSelector().SurfaceRoles.Surface)
-		opts.SelectedContentColor = opts.SelectedContentColor.TakeOrElse(theme.ColorScheme().OnSecondaryContainer) //, theme.ColorHelper.ColorSelector().SecondaryRoles.OnContainer)
-		opts.UnselectedContentColor = opts.UnselectedContentColor.TakeOrElse(theme.ColorScheme().OnSurface)        //, theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface)
-		opts.BorderColor = opts.BorderColor.TakeOrElse(theme.ColorScheme().Outline)                                //, theme.ColorHelper.ColorSelector().OutlineRoles.Outline)
+		opts.SelectedColor = graphics.ColorCompanion.TakeOrElse(opts.SelectedColor, theme.ColorScheme().SecondaryContainer)                 //, theme.ColorHelper.ColorSelector().SecondaryRoles.Container)
+		opts.UnselectedColor = graphics.ColorCompanion.TakeOrElse(opts.UnselectedColor, theme.ColorScheme().Surface)                        //, theme.ColorHelper.ColorSelector().SurfaceRoles.Surface)
+		opts.SelectedContentColor = graphics.ColorCompanion.TakeOrElse(opts.SelectedContentColor, theme.ColorScheme().OnSecondaryContainer) //, theme.ColorHelper.ColorSelector().SecondaryRoles.OnContainer)
+		opts.UnselectedContentColor = graphics.ColorCompanion.TakeOrElse(opts.UnselectedContentColor, theme.ColorScheme().OnSurface)        //, theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface)
+		opts.BorderColor = graphics.ColorCompanion.TakeOrElse(opts.BorderColor, theme.ColorScheme().Outline)                                //, theme.ColorHelper.ColorSelector().OutlineRoles.Outline)
 
 		// State for clickable
 		key := c.GenerateID()

@@ -9,4 +9,4 @@ type Composer = api.Composer
 
 type Color = graphics.Color
 
-var ColorUnspecified = graphics.ColorUnspecified
+var ColorUnspecified = graphics.ColorCompanion.Unspecified()

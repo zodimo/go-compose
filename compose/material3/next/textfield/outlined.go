@@ -8,7 +8,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/platform"
 	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/internal/layoutnode"
-	"github.com/zodimo/go-compose/pkg/sentinel"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 
 	"gioui.org/widget"
 	"gioui.org/widget/material"
@@ -32,7 +32,7 @@ func Outlined(
 	return func(c Composer) Composer {
 
 		opts.Colors = ResolveTextFieldColors(c, opts.Colors)
-		opts.SupportingText = sentinel.TakeOrElseString(opts.SupportingText, "")
+		opts.SupportingText = stringutils.StringsCompanion.TakeOrElse(opts.SupportingText, "")
 
 		textStyle := material3.LocalTextStyle.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)

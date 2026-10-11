@@ -31,9 +31,9 @@ func Surface(
 	return func(c Composer) Composer {
 
 		theme := material3.Theme(c)
-		opts.Color = opts.Color.TakeOrElse(theme.ColorScheme().Surface)                 //theme.ColorHelper.ColorSelector().SurfaceRoles.Surface)
-		opts.ContentColor = opts.ContentColor.TakeOrElse(theme.ColorScheme().OnSurface) // theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface)
-		opts.BorderColor = opts.BorderColor.TakeOrElse(graphics.ColorTransparent)       // theme.ColorHelper.SpecificColor(graphics.ColorTransparent))
+		opts.Color = graphics.ColorCompanion.TakeOrElse(opts.Color, theme.ColorScheme().Surface)                 //theme.ColorHelper.ColorSelector().SurfaceRoles.Surface)
+		opts.ContentColor = graphics.ColorCompanion.TakeOrElse(opts.ContentColor, theme.ColorScheme().OnSurface) // theme.ColorHelper.ColorSelector().SurfaceRoles.OnSurface)
+		opts.BorderColor = graphics.ColorCompanion.TakeOrElse(opts.BorderColor, graphics.ColorTransparent)       // theme.ColorHelper.SpecificColor(graphics.ColorTransparent))
 
 		// Apply modifiers: Clip then Background.
 		// Shadow should be behind everything.

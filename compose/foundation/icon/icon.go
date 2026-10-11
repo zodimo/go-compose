@@ -11,6 +11,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/platform"
 	uitext "github.com/zodimo/go-compose/compose/ui/text"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 
 	"gioui.org/layout"
@@ -33,7 +34,7 @@ func Icon(iconByte []byte, options ...IconOption) Composable {
 
 	return func(c Composer) Composer {
 
-		opts.Color = opts.Color.TakeOrElse(compose.LocalContentColor.Current(c))
+		opts.Color = graphics.ColorCompanion.TakeOrElse(opts.Color, compose.LocalContentColor.Current(c))
 
 		localTextStyle := compose.LocalTextStyle.Current(c)
 		localDensity := compose.LocalDensity.Current(c)
@@ -42,7 +43,7 @@ func Icon(iconByte []byte, options ...IconOption) Composable {
 		// Resolve text style with defaults
 		defaultTextStyles := uitext.ResolveTextStyleDefaults(localTextStyle, layoutDirection)
 
-		iconSizeInPx := localDensity.DpRoundToPx(opts.Size.TakeOrElse(localDensity.TextUnitToDp(defaultTextStyles.FontSize())))
+		iconSizeInPx := localDensity.DpRoundToPx(unit.DpCompanion.TakeOrElse(opts.Size, localDensity.TextUnitToDp(defaultTextStyles.FontSize())))
 
 		c.StartBlock("Icon")
 		c.Modifier(func(modifier ui.Modifier) ui.Modifier {

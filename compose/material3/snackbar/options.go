@@ -75,12 +75,12 @@ func DefaultOptions() SnackbarOptions {
 		Modifier:                  ui.EmptyModifier,
 		Context:                   context.Background(),
 		Duration:                  SnackbarDurationShort,
-		Shape:                     shape.ShapeUnspecified,
-		ContainerColor:            graphics.ColorUnspecified,
-		ContentColor:              graphics.ColorUnspecified,
-		ActionColor:               graphics.ColorUnspecified,
-		ActionContentColor:        graphics.ColorUnspecified,
-		DismissActionContentColor: graphics.ColorUnspecified,
+		Shape:                     shape.ShapeCompanion.Unspecified(),
+		ContainerColor:            graphics.ColorCompanion.Unspecified(),
+		ContentColor:              graphics.ColorCompanion.Unspecified(),
+		ActionColor:               graphics.ColorCompanion.Unspecified(),
+		ActionContentColor:        graphics.ColorCompanion.Unspecified(),
+		DismissActionContentColor: graphics.ColorCompanion.Unspecified(),
 	}
 }
 

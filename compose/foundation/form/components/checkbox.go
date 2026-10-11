@@ -9,7 +9,7 @@ import (
 	"github.com/zodimo/go-compose/compose/material3/text"
 	"github.com/zodimo/go-compose/modifiers/padding"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/pkg/sentinel"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )
 
 // CheckboxComponent renders a Material 3 checkbox bound to a bool control, with
@@ -29,8 +29,8 @@ func CheckboxComponent(binding *fform.FormFieldBinding[bool], options ...Checkbo
 	}
 
 	return func(c api.Composer) api.Composer {
-		label := sentinel.TakeOrElseString(opts.Label, "")
-		hint := sentinel.TakeOrElseString(opts.HintText, "")
+		label := stringutils.StringsCompanion.TakeOrElse(opts.Label, "")
+		hint := stringutils.StringsCompanion.TakeOrElse(opts.HintText, "")
 
 		message, hasError := fieldError(binding)
 		support := supportingText(hint, message, hasError)

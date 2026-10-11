@@ -3,7 +3,7 @@ package components
 import (
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/pkg/sentinel"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )
 
 // CheckboxComponentOptions configures CheckboxComponent.
@@ -30,8 +30,8 @@ type CheckboxComponentOption func(o *CheckboxComponentOptions)
 func DefaultCheckboxComponentOptions() CheckboxComponentOptions {
 	return CheckboxComponentOptions{
 		Modifier:     modifier.EmptyModifier,
-		Label:        sentinel.StringValueUnspecified,
-		HintText:     sentinel.StringValueUnspecified,
+		Label:        stringutils.StringsCompanion.Unspecified(),
+		HintText:     stringutils.StringsCompanion.Unspecified(),
 		ErrorIndent:  0,
 		ErrorSpacing: 4,
 	}

@@ -231,7 +231,7 @@ func TestTextStyleOptions_AppliedToCopy(t *testing.T) {
 	if original.Color() != graphics.ColorRed {
 		t.Error("Original should be unchanged after copy")
 	}
-	if original.FontWeight() != font.FontWeightUnspecified {
+	if original.FontWeight() != font.FontWeightCompanion.Unspecified() {
 		t.Error("Original FontWeight should be unchanged")
 	}
 

@@ -139,14 +139,14 @@ func (d *densityImpl) DpSizeToSize(size DpSize) geometry.Size {
 	if size.IsSpecified() {
 		return geometry.NewSize(d.DpToPx(size.Width), d.DpToPx(size.Height))
 	}
-	return geometry.SizeUnspecified
+	return geometry.SizeCompanion.Unspecified()
 }
 
 func (d *densityImpl) SizeToDpSize(size geometry.Size) DpSize {
 	if size.IsSpecified() {
 		return NewDpSize(d.FloatToDp(size.Width()), d.FloatToDp(size.Height()))
 	}
-	return DpSizeUnspecified
+	return DpSizeCompanion.Unspecified()
 }
 
 func (d *densityImpl) DpToTextUnit(dp Dp) TextUnit {

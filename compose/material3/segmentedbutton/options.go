@@ -68,11 +68,11 @@ func DefaultSegmentOptions() SegmentOptions {
 		ShowSelectedIcon: true,
 		Enabled:          true,
 		// Colors will be resolved from theme at render time
-		SelectedColor:          graphics.ColorUnspecified,
-		UnselectedColor:        graphics.ColorUnspecified,
-		SelectedContentColor:   graphics.ColorUnspecified,
-		UnselectedContentColor: graphics.ColorUnspecified,
-		BorderColor:            graphics.ColorUnspecified,
+		SelectedColor:          graphics.ColorCompanion.Unspecified(),
+		UnselectedColor:        graphics.ColorCompanion.Unspecified(),
+		SelectedContentColor:   graphics.ColorCompanion.Unspecified(),
+		UnselectedContentColor: graphics.ColorCompanion.Unspecified(),
+		BorderColor:            graphics.ColorCompanion.Unspecified(),
 		BorderWidth:            unit.Dp(1),
 	}
 }

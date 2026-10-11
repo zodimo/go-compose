@@ -26,8 +26,8 @@ func WithTabRowModifier(modifier ui.Modifier) TabRowOption {
 func DefaultTabRowOptions() TabRowOptions {
 	return TabRowOptions{
 		Modifier:       modifier.EmptyModifier,
-		ContainerColor: graphics.ColorUnspecified,
-		ContentColor:   graphics.ColorUnspecified,
+		ContainerColor: graphics.ColorCompanion.Unspecified(),
+		ContentColor:   graphics.ColorCompanion.Unspecified(),
 		Indicator:      TabRowDefaults.Indicator(),
 	}
 }

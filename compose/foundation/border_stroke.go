@@ -19,8 +19,8 @@ type BorderStroke struct {
 
 // 1. BorderStrokeUnspecified is the sentinel singleton for an unspecified BorderStroke.
 var BorderStrokeUnspecified = &BorderStroke{
-	Width: unit.DpUnspecified,
-	Brush: graphics.BrushUnspecified,
+	Width: unit.DpCompanion.Unspecified(),
+	Brush: graphics.BrushCompanion.Unspecified(),
 }
 
 // 2. IsSpecifiedBorderStroke returns true if the BorderStroke is specified (not nil and not the Unspecified singleton).
@@ -50,7 +50,7 @@ func MergeBorderStroke(a, b *BorderStroke) *BorderStroke {
 
 	// Both are custom: allocate new merged struct
 	return &BorderStroke{
-		Width: b.Width.TakeOrElse(a.Width),
+		Width: unit.DpCompanion.TakeOrElse(b.Width, a.Width),
 		Brush: graphics.TakeOrElseBrush(b.Brush, a.Brush),
 	}
 }
@@ -134,7 +134,7 @@ func CopyBorderStroke(bs *BorderStroke, options ...BorderStrokeOption) *BorderSt
 	bs = CoalesceBorderStroke(bs, BorderStrokeUnspecified)
 
 	return &BorderStroke{
-		Width: opt.Width.TakeOrElse(bs.Width),
+		Width: unit.DpCompanion.TakeOrElse(opt.Width, bs.Width),
 		Brush: graphics.TakeOrElseBrush(opt.Brush, bs.Brush),
 	}
 }

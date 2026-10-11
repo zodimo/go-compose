@@ -9,6 +9,6 @@ func DefaultDividerOptions() DividerOptions {
 	return DividerOptions{
 		Modifier:  ui.EmptyModifier,
 		Thickness: 1,
-		Color:     graphics.ColorUnspecified,
+		Color:     graphics.ColorCompanion.Unspecified(),
 	}
 }

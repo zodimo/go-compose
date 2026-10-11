@@ -10,7 +10,7 @@ func TestTextAlignConstants(t *testing.T) {
 		align    TextAlign
 		expected int
 	}{
-		{"Unspecified", TextAlignUnspecified, 0},
+		{"Unspecified", TextAlignCompanion.Unspecified(), 0},
 		{"Left", TextAlignLeft, 1},
 		{"Right", TextAlignRight, 2},
 		{"Center", TextAlignCenter, 3},
@@ -33,7 +33,7 @@ func TestTextAlign_String(t *testing.T) {
 		align    TextAlign
 		expected string
 	}{
-		{TextAlignUnspecified, "Unspecified"},
+		{TextAlignCompanion.Unspecified(), "Unspecified"},
 		{TextAlignLeft, "Left"},
 		{TextAlignRight, "Right"},
 		{TextAlignCenter, "Center"},
@@ -58,7 +58,7 @@ func TestTextAlign_IsSpecified(t *testing.T) {
 		align    TextAlign
 		expected bool
 	}{
-		{"Unspecified", TextAlignUnspecified, false},
+		{"Unspecified", TextAlignCompanion.Unspecified(), false},
 		{"Left", TextAlignLeft, true},
 		{"Right", TextAlignRight, true},
 		{"Center", TextAlignCenter, true},
@@ -100,7 +100,7 @@ func TestTextAlignValues(t *testing.T) {
 
 	// Verify Unspecified is not in the list
 	for _, v := range values {
-		if v == TextAlignUnspecified {
+		if v == TextAlignCompanion.Unspecified() {
 			t.Error("TextAlignValues() should not contain Unspecified")
 		}
 	}
@@ -112,16 +112,16 @@ func TestTextAlignValueOf(t *testing.T) {
 		expected    TextAlign
 		expectError bool
 	}{
-		{0, TextAlignUnspecified, false},
+		{0, TextAlignCompanion.Unspecified(), false},
 		{1, TextAlignLeft, false},
 		{2, TextAlignRight, false},
 		{3, TextAlignCenter, false},
 		{4, TextAlignJustify, false},
 		{5, TextAlignStart, false},
 		{6, TextAlignEnd, false},
-		{-1, TextAlignUnspecified, true},
-		{7, TextAlignUnspecified, true},
-		{100, TextAlignUnspecified, true},
+		{-1, TextAlignCompanion.Unspecified(), true},
+		{7, TextAlignCompanion.Unspecified(), true},
+		{100, TextAlignCompanion.Unspecified(), true},
 	}
 
 	for _, tt := range tests {
@@ -149,15 +149,15 @@ func TestTextAlign_TakeOrElse(t *testing.T) {
 
 	t.Run("specified value returns itself", func(t *testing.T) {
 		align := TextAlignCenter
-		result := align.TakeOrElse(defaultAlign)
+		result := TextAlignCompanion.TakeOrElse(align, defaultAlign)
 		if result != TextAlignCenter {
 			t.Errorf("TakeOrElse() = %v, want %v", result, TextAlignCenter)
 		}
 	})
 
 	t.Run("unspecified value returns block result", func(t *testing.T) {
-		align := TextAlignUnspecified
-		result := align.TakeOrElse(defaultAlign)
+		align := TextAlignCompanion.Unspecified()
+		result := TextAlignCompanion.TakeOrElse(align, defaultAlign)
 		if result != defaultAlign {
 			t.Errorf("TakeOrElse() = %v, want %v", result, defaultAlign)
 		}
@@ -165,15 +165,15 @@ func TestTextAlign_TakeOrElse(t *testing.T) {
 
 	t.Run("block is not called when specified", func(t *testing.T) {
 		align := TextAlignRight
-		takeAlign := align.TakeOrElse(defaultAlign)
+		takeAlign := TextAlignCompanion.TakeOrElse(align, defaultAlign)
 		if takeAlign != TextAlignRight {
 			t.Errorf("TakeOrElse() = %v, want %v", takeAlign, TextAlignRight)
 		}
 	})
 
 	t.Run("block is called when unspecified", func(t *testing.T) {
-		align := TextAlignUnspecified
-		takeAlign := align.TakeOrElse(defaultAlign)
+		align := TextAlignCompanion.Unspecified()
+		takeAlign := TextAlignCompanion.TakeOrElse(align, defaultAlign)
 		if takeAlign != defaultAlign {
 			t.Errorf("TakeOrElse() = %v, want %v", takeAlign, defaultAlign)
 		}

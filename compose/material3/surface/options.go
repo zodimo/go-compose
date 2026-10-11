@@ -33,12 +33,12 @@ func DefaultSurfaceOptions() SurfaceOptions {
 	return SurfaceOptions{
 		Modifier:        modifier.EmptyModifier,
 		Shape:           shape.ShapeRectangle,
-		Color:           graphics.ColorUnspecified,
-		ContentColor:    graphics.ColorUnspecified,
+		Color:           graphics.ColorCompanion.Unspecified(),
+		ContentColor:    graphics.ColorCompanion.Unspecified(),
 		TonalElevation:  0,
 		ShadowElevation: 0,
 		BorderWidth:     0,
-		BorderColor:     graphics.ColorUnspecified,
+		BorderColor:     graphics.ColorCompanion.Unspecified(),
 		Alignment:       box.NW,
 	}
 }

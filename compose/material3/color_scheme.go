@@ -96,7 +96,7 @@ func (c *ColorScheme) ContentColorFor(backgroundColor Color) Color {
 	case backgroundColor == c.TertiaryFixed.Color:
 		return c.TertiaryFixed.OnColor
 	default:
-		return graphics.ColorUnspecified
+		return graphics.ColorCompanion.Unspecified()
 	}
 }
 

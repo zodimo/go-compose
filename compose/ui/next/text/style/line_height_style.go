@@ -2,10 +2,15 @@ package style
 
 import (
 	"fmt"
+
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
-var LineHeightStyleUnspecified *LineHeightStyle = &LineHeightStyle{
-	Alignment: LineHeightStyleAlignmentUnspecified,
+// lineHeightStyleUnspecified is the sentinel for LineHeightStyle. It is
+// deliberately package-private: the only public way to obtain it is
+// LineHeightStyleCompanion.Unspecified().
+var lineHeightStyleUnspecified = &LineHeightStyle{
+	Alignment: lineHeightStyleAlignmentUnspecified,
 	Trim:      LineHeightStyleTrimUnspecified,
 	Mode:      LineHeightStyleModeUnspecified,
 }
@@ -24,7 +29,7 @@ type LineHeightStyleAlignment struct {
 }
 
 var (
-	LineHeightStyleAlignmentUnspecified = &LineHeightStyleAlignment{TopRatio: -1}
+	lineHeightStyleAlignmentUnspecified = &LineHeightStyleAlignment{TopRatio: -1}
 
 	// LineHeightStyleAlignmentTop aligns the line to the top of the space reserved for that line.
 	LineHeightStyleAlignmentTop = &LineHeightStyleAlignment{TopRatio: 0}
@@ -38,7 +43,7 @@ var (
 
 func StringLineHeightStyleAlignment(a *LineHeightStyleAlignment) string {
 	switch a {
-	case LineHeightStyleAlignmentUnspecified:
+	case lineHeightStyleAlignmentUnspecified:
 		return "LineHeightStyle.Alignment.Unspecified"
 	case LineHeightStyleAlignmentTop:
 		return "LineHeightStyle.Alignment.Top"
@@ -54,7 +59,7 @@ func StringLineHeightStyleAlignment(a *LineHeightStyleAlignment) string {
 }
 
 func IsSpecifiedLineHeightStyleAlignment(a *LineHeightStyleAlignment) bool {
-	return a != nil && a != LineHeightStyleAlignmentUnspecified
+	return a != nil && a != lineHeightStyleAlignmentUnspecified
 }
 func TakeOrElseLineHeightStyleAlignment(a, b *LineHeightStyleAlignment) *LineHeightStyleAlignment {
 	if !IsSpecifiedLineHeightStyleAlignment(a) {
@@ -130,60 +135,71 @@ var DefaultLineHeightStyle = &LineHeightStyle{
 }
 
 func IsSpecifiedLineHeightStyle(s *LineHeightStyle) bool {
-	return s != nil && s != LineHeightStyleUnspecified
+	return isSpecifiedLineHeightStyle(s)
 }
 
 // Identity (2 ns)
 func SameLineHeightStyle(a, b *LineHeightStyle) bool {
-	if a == nil && b == nil {
-		return true
-	}
-	if a == nil {
-		return b == LineHeightStyleUnspecified
-	}
-	if b == nil {
-		return a == LineHeightStyleUnspecified
-	}
-	return a == b
+	return sameLineHeightStyle(a, b)
 }
 
 // Semantic equality (field-by-field, 20 ns)
 func SemanticEqualLineHeightStyle(a, b *LineHeightStyle) bool {
-
-	a = CoalesceLineHeightStyle(a, LineHeightStyleUnspecified)
-	b = CoalesceLineHeightStyle(b, LineHeightStyleUnspecified)
-
-	return a.Alignment == b.Alignment &&
-		a.Trim == b.Trim &&
-		a.Mode == b.Mode
+	return semanticEqualLineHeightStyle(a, b)
 }
 
 func EqualLineHeightStyle(a, b *LineHeightStyle) bool {
-	if !SameLineHeightStyle(a, b) {
-		return SemanticEqualLineHeightStyle(a, b)
-	}
-	return true
+	return equalLineHeightStyle(a, b)
 }
 
 func CoalesceLineHeightStyle(ptr, def *LineHeightStyle) *LineHeightStyle {
+	return coalesceLineHeightStyle(ptr, def)
+}
+
+func MergeLineHeightStyle(a, b *LineHeightStyle) *LineHeightStyle {
+	return mergeLineHeightStyle(a, b)
+}
+
+func TakeOrElseLineHeightStyle(s, def *LineHeightStyle) *LineHeightStyle {
+	return takeOrElseLineHeightStyle(s, def)
+}
+
+// === Sentinel operations ===
+
+func isSpecifiedLineHeightStyle(s *LineHeightStyle) bool {
+	return s != nil && s != lineHeightStyleUnspecified
+}
+
+func isUnspecifiedLineHeightStyle(s *LineHeightStyle) bool {
+	return !isSpecifiedLineHeightStyle(s)
+}
+
+func takeOrElseLineHeightStyle(s, def *LineHeightStyle) *LineHeightStyle {
+	if !isSpecifiedLineHeightStyle(s) {
+		return def
+	}
+	return s
+}
+
+func coalesceLineHeightStyle(ptr, def *LineHeightStyle) *LineHeightStyle {
 	if ptr == nil {
 		return def
 	}
 	return ptr
 }
 
-func MergeLineHeightStyle(a, b *LineHeightStyle) *LineHeightStyle {
-	a = CoalesceLineHeightStyle(a, LineHeightStyleUnspecified)
-	b = CoalesceLineHeightStyle(b, LineHeightStyleUnspecified)
+func mergeLineHeightStyle(a, b *LineHeightStyle) *LineHeightStyle {
+	a = coalesceLineHeightStyle(a, lineHeightStyleUnspecified)
+	b = coalesceLineHeightStyle(b, lineHeightStyleUnspecified)
 
-	if a == LineHeightStyleUnspecified {
+	if a == lineHeightStyleUnspecified {
 		return b
 	}
-	if b == LineHeightStyleUnspecified {
+	if b == lineHeightStyleUnspecified {
 		return a
 	}
 
-	// Both are custom: allocate new merged style
+	// Both are custom: allocate new merged style. b wins where specified.
 	return &LineHeightStyle{
 		Alignment: TakeOrElseLineHeightStyleAlignment(b.Alignment, a.Alignment),
 		Trim:      b.Trim.TakeOrElse(a.Trim),
@@ -191,12 +207,72 @@ func MergeLineHeightStyle(a, b *LineHeightStyle) *LineHeightStyle {
 	}
 }
 
-func TakeOrElseLineHeightStyle(s, def *LineHeightStyle) *LineHeightStyle {
-	if !IsSpecifiedLineHeightStyle(s) {
-		return def
-	}
-	return s
+func stringLineHeightStyle(s *LineHeightStyle) string {
+	return StringLineHeightStyle(s)
 }
+
+func sameLineHeightStyle(a, b *LineHeightStyle) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil {
+		return b == lineHeightStyleUnspecified
+	}
+	if b == nil {
+		return a == lineHeightStyleUnspecified
+	}
+	return a == b
+}
+
+func semanticEqualLineHeightStyle(a, b *LineHeightStyle) bool {
+
+	a = coalesceLineHeightStyle(a, lineHeightStyleUnspecified)
+	b = coalesceLineHeightStyle(b, lineHeightStyleUnspecified)
+
+	if a == lineHeightStyleUnspecified && b == lineHeightStyleUnspecified {
+		return true
+	}
+
+	return a.Alignment == b.Alignment &&
+		a.Trim == b.Trim &&
+		a.Mode == b.Mode
+}
+
+func equalLineHeightStyle(a, b *LineHeightStyle) bool {
+	if !sameLineHeightStyle(a, b) {
+		return semanticEqualLineHeightStyle(a, b)
+	}
+	return true
+}
+
+// copyLineHeightStyle returns a copy of s; the source is never mutated.
+func copyLineHeightStyle(s *LineHeightStyle, options ...func(*LineHeightStyle)) *LineHeightStyle {
+	cp := &LineHeightStyle{}
+	if isSpecifiedLineHeightStyle(s) {
+		cp.Alignment = s.Alignment
+		cp.Trim = s.Trim
+		cp.Mode = s.Mode
+	}
+	for _, option := range options {
+		option(cp)
+	}
+	return cp
+}
+
+// LineHeightStyleCompanion is the single exported sentinel-family symbol for LineHeightStyle.
+var LineHeightStyleCompanion = companions.NewStructCompanion(
+	func() *LineHeightStyle { return lineHeightStyleUnspecified },
+	stringLineHeightStyle,
+	isSpecifiedLineHeightStyle,
+	isUnspecifiedLineHeightStyle,
+	takeOrElseLineHeightStyle,
+	mergeLineHeightStyle,
+	sameLineHeightStyle,
+	semanticEqualLineHeightStyle,
+	equalLineHeightStyle,
+	coalesceLineHeightStyle,
+	copyLineHeightStyle,
+)
 
 func StringLineHeightStyle(s *LineHeightStyle) string {
 	if !IsSpecifiedLineHeightStyle(s) {

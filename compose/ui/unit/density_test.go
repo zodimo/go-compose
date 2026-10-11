@@ -105,16 +105,16 @@ func TestSizeToDpSize(t *testing.T) {
 
 func TestDpSizeUnspecifiedToSize(t *testing.T) {
 	density := NewDensity(2.0, 3.0)
-	size := density.DpSizeToSize(DpSizeUnspecified)
-	if !size.IsUnspecified() {
+	size := density.DpSizeToSize(DpSizeCompanion.Unspecified())
+	if !geometry.SizeCompanion.IsUnspecified(size) {
 		t.Errorf("Expected Unspecified, got %v", size)
 	}
 }
 
 func TestSizeUnspecifiedToDpSize(t *testing.T) {
 	density := NewDensity(2.0, 3.0)
-	dpSize := density.SizeToDpSize(geometry.SizeUnspecified)
-	if !dpSize.IsUnspecified() {
+	dpSize := density.SizeToDpSize(geometry.SizeCompanion.Unspecified())
+	if !DpSizeCompanion.IsUnspecified(dpSize) {
 		t.Errorf("Expected DpSize.Unspecified, got %v", dpSize)
 	}
 }

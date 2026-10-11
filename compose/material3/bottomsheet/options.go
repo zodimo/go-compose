@@ -24,8 +24,8 @@ type ModalBottomSheetOption func(*ModalBottomSheetOptions)
 func DefaultModalBottomSheetOptions() ModalBottomSheetOptions {
 	return ModalBottomSheetOptions{
 		IsOpen:         false,
-		ContainerColor: graphics.ColorUnspecified,
-		ScrimColor:     graphics.ColorUnspecified,
+		ContainerColor: graphics.ColorCompanion.Unspecified(),
+		ScrimColor:     graphics.ColorCompanion.Unspecified(),
 	}
 }
 

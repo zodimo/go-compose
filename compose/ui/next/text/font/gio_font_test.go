@@ -16,7 +16,7 @@ func TestToGioWeight(t *testing.T) {
 		{"Normal/400", FontWeightW400, giofont.Normal},
 		{"Bold/700", FontWeightW700, giofont.Bold},
 		{"Black/900", FontWeightW900, giofont.Black},
-		{"Unspecified", FontWeightUnspecified, giofont.Normal},
+		{"Unspecified", FontWeightCompanion.Unspecified(), giofont.Normal},
 		{"Custom/250", FontWeight(250), giofont.Weight(-150)},
 	}
 
@@ -38,7 +38,7 @@ func TestToGioStyle(t *testing.T) {
 	}{
 		{"Normal", FontStyleNormal, giofont.Regular},
 		{"Italic", FontStyleItalic, giofont.Italic},
-		{"Unspecified", FontStyleUnspecified, giofont.Regular},
+		{"Unspecified", FontStyleCompanion.Unspecified(), giofont.Regular},
 	}
 
 	for _, tt := range tests {

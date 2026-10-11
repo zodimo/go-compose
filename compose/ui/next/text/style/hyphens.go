@@ -1,5 +1,9 @@
 package style
 
+import (
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
+)
+
 // Automatic hyphenation configuration.
 //
 // Hyphenation is a dash-like punctuation mark used to join two-words into one or separate
@@ -21,9 +25,10 @@ package style
 type Hyphens int
 
 const (
-	// This represents an unset value, a usual replacement for "null" when a primitive value is
-	// desired.
-	HyphensUnspecified Hyphens = 0
+	// hyphensUnspecified represents an unset value, a usual replacement for "null" when a
+	// primitive value is desired. It is deliberately package-private: the only public
+	// way to obtain it is HyphensCompanion.Unspecified().
+	hyphensUnspecified Hyphens = 0
 
 	// Lines will break with no hyphenation.
 	//
@@ -55,7 +60,7 @@ func (h Hyphens) String() string {
 		return "Hyphens.None"
 	case HyphensAuto:
 		return "Hyphens.Auto"
-	case HyphensUnspecified:
+	case hyphensUnspecified:
 		return "Hyphens.Unspecified"
 	default:
 		return "Invalid"
@@ -64,14 +69,63 @@ func (h Hyphens) String() string {
 
 // Returns true if it is not [HyphensUnspecified].
 func (h Hyphens) IsSpecified() bool {
-	return h != HyphensUnspecified
+	return isSpecifiedHyphens(h)
 }
 
-// If [IsSpecified] is true then this is returned, otherwise [block] is executed and its result is
-// returned.
-func (h Hyphens) TakeOrElse(block Hyphens) Hyphens {
-	if h.IsSpecified() {
+// === Sentinel operations ===
+
+func isSpecifiedHyphens(h Hyphens) bool {
+	return h != hyphensUnspecified
+}
+
+func isUnspecifiedHyphens(h Hyphens) bool {
+	return h == hyphensUnspecified
+}
+
+func takeOrElseHyphens(h, def Hyphens) Hyphens {
+	if isSpecifiedHyphens(h) {
 		return h
 	}
-	return block
+	return def
 }
+
+func mergeHyphens(a, b Hyphens) Hyphens {
+	if isUnspecifiedHyphens(b) {
+		return a
+	}
+	return b
+}
+
+func stringHyphens(h Hyphens) string {
+	return h.String()
+}
+
+func sameHyphens(a, b Hyphens) bool {
+	return a == b
+}
+
+func semanticEqualHyphens(a, b Hyphens) bool {
+	return a == b
+}
+
+func equalHyphens(a, b Hyphens) bool {
+	return a == b
+}
+
+func copyHyphens(h Hyphens) Hyphens {
+	return h
+}
+
+// HyphensCompanion is the single exported sentinel-family symbol for Hyphens.
+var HyphensCompanion = companions.NewScalarCompanion(
+	func() Hyphens { return hyphensUnspecified },
+	stringHyphens,
+	isSpecifiedHyphens,
+	isUnspecifiedHyphens,
+	takeOrElseHyphens,
+	mergeHyphens,
+	sameHyphens,
+	semanticEqualHyphens,
+	equalHyphens,
+	copyHyphens,
+)

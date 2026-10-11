@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/zodimo/go-compose/pkg/floatutils"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
 // Dp is a value class that represents a density-independent pixel.
@@ -12,11 +13,12 @@ import (
 // The value is stored as a float32.
 type Dp float32
 
-// DpUnspecified is the constant for an unspecified Dp.
-var DpUnspecified = Dp(floatutils.Float32Unspecified)
+// dpUnspecified is the constant for an unspecified Dp. It is deliberately
+// package-private: the only public way to obtain it is DpCompanion.Unspecified().
+var dpUnspecified = Dp(floatutils.Float32Unspecified)
 
 // DpInfinity represents infinite dp dimension.
-var DpInfinity = Dp(float32(math.Inf(1)))
+var DpInfinity = Dp(floatutils.FloatInfinite)
 
 // DpHairline is the constant for a hairline Dp.
 const DpHairline Dp = 0
@@ -101,12 +103,12 @@ func (d Dp) String() string {
 
 // IsSpecified checks if the Dp is specified (not NaN).
 func (d Dp) IsSpecified() bool {
-	return !math.IsNaN(float64(d))
+	return isSpecifiedDp(d)
 }
 
 // IsUnspecified checks if the Dp is unspecified (NaN).
 func (d Dp) IsUnspecified() bool {
-	return floatutils.IsUnspecified(d)
+	return isUnspecifiedDp(d)
 }
 
 // IsFinite returns true when it is finite.
@@ -114,13 +116,78 @@ func (d Dp) IsFinite() bool {
 	return !math.IsInf(float64(d), 0) && !math.IsNaN(float64(d))
 }
 
-// TakeOrElse returns this Dp if Specified, otherwise executes the block.
-func (d Dp) TakeOrElse(def Dp) Dp {
-	if d.IsSpecified() {
+// === Sentinel operations ===
+
+func isSpecifiedDp(d Dp) bool {
+	return floatutils.IsSpecified(d)
+}
+
+func isUnspecifiedDp(d Dp) bool {
+	return floatutils.IsUnspecified(d)
+}
+
+func takeOrElseDp(d, def Dp) Dp {
+	if isSpecifiedDp(d) {
 		return d
 	}
 	return def
 }
+
+// mergeDp layers b onto a: a value from b wins only where b is specified.
+func mergeDp(a, b Dp) Dp {
+	if isUnspecifiedDp(b) {
+		return a
+	}
+	return b
+}
+
+func stringDp(d Dp) string {
+	if isUnspecifiedDp(d) {
+		return "Dp{Unspecified}"
+	}
+	return fmt.Sprintf("Dp{%.1f}", d)
+}
+
+func sameDp(a, b Dp) bool {
+	if isUnspecifiedDp(a) && isUnspecifiedDp(b) {
+		return true
+	}
+	return a == b
+}
+
+// semanticEqualDp treats two unspecified Dps as equal; comparing the NaN
+// representation with == would otherwise report them as different.
+func semanticEqualDp(a, b Dp) bool {
+	if isUnspecifiedDp(a) && isUnspecifiedDp(b) {
+		return true
+	}
+	return a == b
+}
+
+func equalDp(a, b Dp) bool {
+	if isUnspecifiedDp(a) && isUnspecifiedDp(b) {
+		return true
+	}
+	return floatutils.Float32Equals(float32(a), float32(b), floatutils.Float32EqualityThreshold)
+}
+
+func copyDp(d Dp) Dp {
+	return d
+}
+
+// DpCompanion is the single exported sentinel-family symbol for Dp.
+var DpCompanion = companions.NewScalarCompanion(
+	func() Dp { return dpUnspecified },
+	stringDp,
+	isSpecifiedDp,
+	isUnspecifiedDp,
+	takeOrElseDp,
+	mergeDp,
+	sameDp,
+	semanticEqualDp,
+	equalDp,
+	copyDp,
+)
 
 // MinDp returns the smaller of two Dps.
 func MinDp(a, b Dp) Dp {
@@ -182,7 +249,10 @@ func NewDpOffset(x, y Dp) DpOffset {
 }
 
 var DpOffsetZero = DpOffset{X: 0, Y: 0}
-var DpOffsetUnspecified = DpOffset{X: DpUnspecified, Y: DpUnspecified}
+
+// dpOffsetUnspecified is the sentinel for DpOffset, package-private so the only
+// public door is DpOffsetCompanion.Unspecified().
+var dpOffsetUnspecified = DpOffset{X: dpUnspecified, Y: dpUnspecified}
 
 func (o DpOffset) Copy(x, y Dp) DpOffset {
 	return DpOffset{X: x, Y: y}
@@ -204,11 +274,18 @@ func (o DpOffset) String() string {
 }
 
 func (o DpOffset) IsSpecified() bool {
-	return o.X.IsSpecified() && o.Y.IsSpecified()
+	return isSpecifiedDpOffset(o)
 }
 
-func (o DpOffset) IsUnspecified() bool {
-	return o.X.IsUnspecified() || o.Y.IsUnspecified()
+// === DpOffset sentinel operations ===
+
+func isSpecifiedDpOffset(o DpOffset) bool {
+	return isSpecifiedDp(o.X) && isSpecifiedDp(o.Y)
+}
+
+// isUnspecifiedDpOffset reports true when either component is unspecified.
+func isUnspecifiedDpOffset(o DpOffset) bool {
+	return isUnspecifiedDp(o.X) || isUnspecifiedDp(o.Y)
 	// Kotlin checks packedValue equality to NaN_NaN, so both must be NaN roughly.
 	// However DpOffset.kt says: packedValue == 0x7fc00000_7fc00000L
 	// which implies both are NaN.
@@ -216,12 +293,54 @@ func (o DpOffset) IsUnspecified() bool {
 	// Let's stick strictly to "both must be valid" for IsSpecified.
 }
 
-func (o DpOffset) TakeOrElse(block DpOffset) DpOffset {
-	if o.IsSpecified() {
+func takeOrElseDpOffset(o, def DpOffset) DpOffset {
+	if isSpecifiedDpOffset(o) {
 		return o
 	}
-	return block
+	return def
 }
+
+// mergeDpOffset layers b onto a: a value from b wins only where b is specified.
+func mergeDpOffset(a, b DpOffset) DpOffset {
+	return DpOffset{X: mergeDp(a.X, b.X), Y: mergeDp(a.Y, b.Y)}
+}
+
+func stringDpOffset(o DpOffset) string {
+	if isSpecifiedDpOffset(o) {
+		return fmt.Sprintf("(%v, %v)", o.X, o.Y)
+	}
+	return "DpOffset.Unspecified"
+}
+
+func sameDpOffset(a, b DpOffset) bool {
+	return sameDp(a.X, b.X) && sameDp(a.Y, b.Y)
+}
+
+func semanticEqualDpOffset(a, b DpOffset) bool {
+	return semanticEqualDp(a.X, b.X) && semanticEqualDp(a.Y, b.Y)
+}
+
+func equalDpOffset(a, b DpOffset) bool {
+	return equalDp(a.X, b.X) && equalDp(a.Y, b.Y)
+}
+
+func copyDpOffset(o DpOffset) DpOffset {
+	return o
+}
+
+// DpOffsetCompanion is the single exported sentinel-family symbol for DpOffset.
+var DpOffsetCompanion = companions.NewScalarCompanion(
+	func() DpOffset { return dpOffsetUnspecified },
+	stringDpOffset,
+	isSpecifiedDpOffset,
+	isUnspecifiedDpOffset,
+	takeOrElseDpOffset,
+	mergeDpOffset,
+	sameDpOffset,
+	semanticEqualDpOffset,
+	equalDpOffset,
+	copyDpOffset,
+)
 
 func LerpDpOffset(start, stop DpOffset, fraction float32) DpOffset {
 	return DpOffset{
@@ -241,7 +360,9 @@ func NewDpSize(width, height Dp) DpSize {
 	return DpSize{Width: width, Height: height}
 }
 
-var DpSizeUnspecified = DpSize{Width: DpUnspecified, Height: DpUnspecified}
+// dpSizeUnspecified is the sentinel for DpSize, package-private so the only
+// public door is DpSizeCompanion.Unspecified().
+var dpSizeUnspecified = DpSize{Width: dpUnspecified, Height: dpUnspecified}
 var DpSizeZero = DpSize{Width: 0, Height: 0}
 
 func (s DpSize) Copy(width, height Dp) DpSize {
@@ -273,31 +394,14 @@ func (s DpSize) DivInt(other int) DpSize {
 }
 
 func (s DpSize) IsSpecified() bool {
-	// Kotlin: packedValue != NaN_NaN. So if ANY part is not NaN, it is NOT Unspecified?
-	// Wait, IsUnspecified is packedValue == NaN_NaN.
-	// So IsSpecified is != NaN_NaN.
-	// If one is NaN and other is 0, it is NOT IsUnspecified, so it IS IsSpecified?
-	// No, DpSize is value class.
-	// Let's assume strict checks: valid if both valid.
-	return s.Width.IsSpecified() && s.Height.IsSpecified()
-}
-
-func (s DpSize) IsUnspecified() bool {
-	return s.Width.IsUnspecified() && s.Height.IsUnspecified()
+	return isSpecifiedDpSize(s)
 }
 
 func (s DpSize) String() string {
-	if s.IsSpecified() {
+	if isSpecifiedDpSize(s) {
 		return fmt.Sprintf("%v x %v", s.Width, s.Height)
 	}
 	return "DpSize.Unspecified"
-}
-
-func (s DpSize) TakeOrElse(block DpSize) DpSize {
-	if s.IsSpecified() {
-		return s
-	}
-	return block
 }
 
 func (s DpSize) Center() DpOffset {
@@ -306,6 +410,71 @@ func (s DpSize) Center() DpOffset {
 		Y: s.Height.Div(2),
 	}
 }
+
+// === DpSize sentinel operations ===
+
+func isSpecifiedDpSize(s DpSize) bool {
+	// Kotlin: packedValue != NaN_NaN. So if ANY part is not NaN, it is NOT Unspecified?
+	// Wait, IsUnspecified is packedValue == NaN_NaN.
+	// So IsSpecified is != NaN_NaN.
+	// If one is NaN and other is 0, it is NOT IsUnspecified, so it IS IsSpecified?
+	// No, DpSize is value class.
+	// Let's assume strict checks: valid if both valid.
+	return isSpecifiedDp(s.Width) && isSpecifiedDp(s.Height)
+}
+
+func isUnspecifiedDpSize(s DpSize) bool {
+	return isUnspecifiedDp(s.Width) && isUnspecifiedDp(s.Height)
+}
+
+func takeOrElseDpSize(s, def DpSize) DpSize {
+	if isSpecifiedDpSize(s) {
+		return s
+	}
+	return def
+}
+
+// mergeDpSize layers b onto a: a value from b wins only where b is specified.
+func mergeDpSize(a, b DpSize) DpSize {
+	return DpSize{Width: mergeDp(a.Width, b.Width), Height: mergeDp(a.Height, b.Height)}
+}
+
+func stringDpSize(s DpSize) string {
+	if isSpecifiedDpSize(s) {
+		return fmt.Sprintf("%v x %v", s.Width, s.Height)
+	}
+	return "DpSize.Unspecified"
+}
+
+func sameDpSize(a, b DpSize) bool {
+	return sameDp(a.Width, b.Width) && sameDp(a.Height, b.Height)
+}
+
+func semanticEqualDpSize(a, b DpSize) bool {
+	return semanticEqualDp(a.Width, b.Width) && semanticEqualDp(a.Height, b.Height)
+}
+
+func equalDpSize(a, b DpSize) bool {
+	return equalDp(a.Width, b.Width) && equalDp(a.Height, b.Height)
+}
+
+func copyDpSize(s DpSize) DpSize {
+	return s
+}
+
+// DpSizeCompanion is the single exported sentinel-family symbol for DpSize.
+var DpSizeCompanion = companions.NewScalarCompanion(
+	func() DpSize { return dpSizeUnspecified },
+	stringDpSize,
+	isSpecifiedDpSize,
+	isUnspecifiedDpSize,
+	takeOrElseDpSize,
+	mergeDpSize,
+	sameDpSize,
+	semanticEqualDpSize,
+	equalDpSize,
+	copyDpSize,
+)
 
 func LerpDpSize(start, stop DpSize, fraction float32) DpSize {
 	return DpSize{

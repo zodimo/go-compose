@@ -8,7 +8,9 @@ import (
 // Struct wrapper prevents `TextUnit(24)` - must use `Sp(24)` or `Em(1.5)`.
 type TextUnit = textunit.TextUnit
 
-var TextUnitUnspecified = textunit.TextUnitUnspecified
+// TextUnitCompanion re-exports the text-unit companion; the unspecified value is
+// reachable only through TextUnitCompanion.Unspecified().
+var TextUnitCompanion = textunit.TextUnitCompanion
 
 var Sp = textunit.Sp
 var Em = textunit.Em

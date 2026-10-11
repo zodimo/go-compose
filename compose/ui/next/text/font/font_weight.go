@@ -5,14 +5,19 @@ import (
 	"math"
 
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
 // FontWeight represents the thickness of the glyphs, in a range of [1, 1000].
 type FontWeight int
 
 const (
-	weightUnspecified                = -1
-	FontWeightUnspecified FontWeight = weightUnspecified
+	weightUnspecified = -1
+
+	// fontWeightUnspecified is the sentinel for FontWeight. It is deliberately
+	// package-private: the only public way to obtain it is
+	// FontWeightCompanion.Unspecified().
+	fontWeightUnspecified FontWeight = weightUnspecified
 )
 
 // NewFontWeight creates a FontWeight with validation.
@@ -57,15 +62,69 @@ func (w FontWeight) String() string {
 }
 
 func (w FontWeight) IsFontWeight() bool {
-	return w != FontWeightUnspecified
+	return isSpecifiedFontWeight(w)
 }
 
-func (w FontWeight) TakeOrElse(other FontWeight) FontWeight {
-	if w.IsFontWeight() {
+// === Sentinel operations ===
+
+func isSpecifiedFontWeight(w FontWeight) bool {
+	return w != fontWeightUnspecified
+}
+
+func isUnspecifiedFontWeight(w FontWeight) bool {
+	return w == fontWeightUnspecified
+}
+
+func takeOrElseFontWeight(w, def FontWeight) FontWeight {
+	if isSpecifiedFontWeight(w) {
 		return w
 	}
-	return other
+	return def
 }
+
+func mergeFontWeight(a, b FontWeight) FontWeight {
+	if isUnspecifiedFontWeight(b) {
+		return a
+	}
+	return b
+}
+
+func stringFontWeight(w FontWeight) string {
+	if isUnspecifiedFontWeight(w) {
+		return "FontWeightUnspecified"
+	}
+	return fmt.Sprintf("FontWeight(weight=%d)", w)
+}
+
+func sameFontWeight(a, b FontWeight) bool {
+	return a == b
+}
+
+func semanticEqualFontWeight(a, b FontWeight) bool {
+	return a == b
+}
+
+func equalFontWeight(a, b FontWeight) bool {
+	return a == b
+}
+
+func copyFontWeight(w FontWeight) FontWeight {
+	return w
+}
+
+// FontWeightCompanion is the single exported sentinel-family symbol for FontWeight.
+var FontWeightCompanion = companions.NewScalarCompanion(
+	func() FontWeight { return fontWeightUnspecified },
+	stringFontWeight,
+	isSpecifiedFontWeight,
+	isUnspecifiedFontWeight,
+	takeOrElseFontWeight,
+	mergeFontWeight,
+	sameFontWeight,
+	semanticEqualFontWeight,
+	equalFontWeight,
+	copyFontWeight,
+)
 
 // Standard font weight constants
 const (

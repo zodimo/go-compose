@@ -33,10 +33,10 @@ func Badge(options ...BadgeOption) api.Composable {
 			return modifier.Then(opts.Modifier)
 		})
 
-		containerColor := opts.ContainerColor.TakeOrElse(material3.Theme(c).ColorScheme().Error)
+		containerColor := graphics.ColorCompanion.TakeOrElse(opts.ContainerColor, material3.Theme(c).ColorScheme().Error)
 
-		contentColor := opts.ContentColor.TakeOrElse(
-			material3.Theme(c).ColorScheme().ContentFor(containerColor).TakeOrElse(
+		contentColor := graphics.ColorCompanion.TakeOrElse(opts.ContentColor,
+			graphics.ColorCompanion.TakeOrElse(material3.Theme(c).ColorScheme().ContentFor(containerColor),
 				graphics.ColorBlack,
 			),
 		)

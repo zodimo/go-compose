@@ -16,7 +16,7 @@ type OverlayOption func(*OverlayOptions)
 func DefaultOverlayOptions() OverlayOptions {
 	return OverlayOptions{
 		Modifier:   ui.EmptyModifier,
-		ScrimColor: graphics.ColorUnspecified,
+		ScrimColor: graphics.ColorCompanion.Unspecified(),
 	}
 }
 

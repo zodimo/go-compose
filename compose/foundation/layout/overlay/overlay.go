@@ -25,7 +25,7 @@ func Overlay(content Composable, options ...OverlayOption) Composable {
 	return func(c Composer) Composer {
 
 		theme := material3.Theme(c)
-		opts.ScrimColor = opts.ScrimColor.TakeOrElse(graphics.SetOpacity(theme.ColorScheme().Scrim, 0.32))
+		opts.ScrimColor = graphics.ColorCompanion.TakeOrElse(opts.ScrimColor, graphics.SetOpacity(theme.ColorScheme().Scrim, 0.32))
 
 		c.StartBlock("Overlay")
 		c.Modifier(func(modifier ui.Modifier) ui.Modifier {

@@ -19,7 +19,7 @@ func DefaultTextOptions() TextOptions {
 		MaxLines:      math.MaxInt32,
 		MinLines:      1,
 		InlineContent: map[string]InlineTextContent{},
-		Color:         graphics.ColorUnspecified,
+		Color:         graphics.ColorCompanion.Unspecified(),
 		AutoSize:      nil,
 	}
 }

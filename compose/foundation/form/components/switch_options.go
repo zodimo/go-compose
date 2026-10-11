@@ -3,7 +3,7 @@ package components
 import (
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/pkg/sentinel"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )
 
 // SwitchComponentOptions configures SwitchComponent.
@@ -29,8 +29,8 @@ type SwitchComponentOption func(o *SwitchComponentOptions)
 func DefaultSwitchComponentOptions() SwitchComponentOptions {
 	return SwitchComponentOptions{
 		Modifier:     modifier.EmptyModifier,
-		Label:        sentinel.StringValueUnspecified,
-		HintText:     sentinel.StringValueUnspecified,
+		Label:        stringutils.StringsCompanion.Unspecified(),
+		HintText:     stringutils.StringsCompanion.Unspecified(),
 		ErrorIndent:  0,
 		ErrorSpacing: 4,
 	}

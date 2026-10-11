@@ -8,8 +8,8 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/column"
 	"github.com/zodimo/go-compose/compose/material3/textfield"
 	"github.com/zodimo/go-compose/pkg/api"
-	"github.com/zodimo/go-compose/pkg/sentinel"
 	"github.com/zodimo/go-compose/state"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )
 
 // OptionalNumberFieldComponent renders an Outlined text field bound to an
@@ -40,8 +40,8 @@ func OptionalNumberFieldComponent(binding *fform.FormFieldBinding[fform.Optional
 	syncedKey := baseKey + "/synced"
 
 	return func(c api.Composer) api.Composer {
-		label := sentinel.TakeOrElseString(opts.Label, "")
-		hint := sentinel.TakeOrElseString(opts.HintText, "")
+		label := stringutils.StringsCompanion.TakeOrElse(opts.Label, "")
+		hint := stringutils.StringsCompanion.TakeOrElse(opts.HintText, "")
 
 		// The text buffer is the authority for what the user sees while typing.
 		// synced holds the last control value the buffer was derived from, so an

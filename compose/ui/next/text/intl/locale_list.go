@@ -1,8 +1,17 @@
 package intl
 
+import (
+	"fmt"
+
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
+)
+
 // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/commonMain/kotlin/androidx/compose/ui/next/text/intl/LocaleList.kt;drc=4970f6e96cdb06089723da0ab8ec93ae3f067c7a;l=31
 
-var LocaleListUnspecified = &LocaleList{}
+// localeListUnspecified is the sentinel for LocaleList. It is deliberately
+// package-private: the only public way to obtain it is
+// LocaleListCompanion.Unspecified().
+var localeListUnspecified = &LocaleList{}
 
 type LocaleList struct {
 	List []Locale
@@ -17,35 +26,79 @@ var LocalListCurrent = &LocaleList{
 }
 
 func IsSpecifiedLocaleList(s *LocaleList) bool {
-	return s != nil && s != LocaleListUnspecified
+	return isSpecifiedLocaleList(s)
 }
 func TakeOrElseLocaleList(s, def *LocaleList) *LocaleList {
-	if !IsSpecifiedLocaleList(s) {
+	return takeOrElseLocaleList(s, def)
+}
+
+// Identity (2 ns)
+func SameLocaleList(a, b *LocaleList) bool {
+	return sameLocaleList(a, b)
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualLocaleList(a, b *LocaleList) bool {
+	return semanticEqualLocaleList(a, b)
+}
+
+// EqualLocaleList returns true if both LocaleLists have the same locales.
+func EqualLocaleList(a, b *LocaleList) bool {
+	return equalLocaleList(a, b)
+}
+
+func CoalesceLocaleList(ptr, def *LocaleList) *LocaleList {
+	return coalesceLocaleList(ptr, def)
+}
+
+// === Sentinel operations ===
+
+func isSpecifiedLocaleList(s *LocaleList) bool {
+	return s != nil && s != localeListUnspecified
+}
+
+func isUnspecifiedLocaleList(s *LocaleList) bool {
+	return !isSpecifiedLocaleList(s)
+}
+
+func takeOrElseLocaleList(s, def *LocaleList) *LocaleList {
+	if !isSpecifiedLocaleList(s) {
 		return def
 	}
 	return s
 }
 
-// Identity (2 ns)
-func SameLocaleList(a, b *LocaleList) bool {
+func coalesceLocaleList(ptr, def *LocaleList) *LocaleList {
+	if ptr == nil {
+		return def
+	}
+	return ptr
+}
+
+func sameLocaleList(a, b *LocaleList) bool {
 	if a == nil && b == nil {
 		return true
 	}
 	if a == nil {
-		return b == LocaleListUnspecified
+		return b == localeListUnspecified
 	}
 	if b == nil {
-		return a == LocaleListUnspecified
+		return a == localeListUnspecified
 	}
 	return a == b
 }
 
-// Semantic equality (field-by-field, 20 ns)
-func SemanticEqualLocaleList(a, b *LocaleList) bool {
+func semanticEqualLocaleList(a, b *LocaleList) bool {
 
-	a = CoalesceLocaleList(a, LocaleListUnspecified)
-	b = CoalesceLocaleList(b, LocaleListUnspecified)
+	a = coalesceLocaleList(a, localeListUnspecified)
+	b = coalesceLocaleList(b, localeListUnspecified)
 
+	if a == localeListUnspecified && b == localeListUnspecified {
+		return true
+	}
+	if len(a.List) != len(b.List) {
+		return false
+	}
 	for i, locale := range a.List {
 		if locale != b.List[i] {
 			return false
@@ -54,17 +107,56 @@ func SemanticEqualLocaleList(a, b *LocaleList) bool {
 	return true
 }
 
-// EqualLocaleList returns true if both LocaleLists have the same locales.
-func EqualLocaleList(a, b *LocaleList) bool {
-	if !SameLocaleList(a, b) {
-		return SemanticEqualLocaleList(a, b)
+func equalLocaleList(a, b *LocaleList) bool {
+	if !sameLocaleList(a, b) {
+		return semanticEqualLocaleList(a, b)
 	}
 	return true
 }
 
-func CoalesceLocaleList(ptr, def *LocaleList) *LocaleList {
-	if ptr == nil {
-		return def
+func mergeLocaleList(a, b *LocaleList) *LocaleList {
+	if isUnspecifiedLocaleList(b) {
+		return coalesceLocaleList(a, localeListUnspecified)
 	}
-	return ptr
+	return b
 }
+
+func stringLocaleList(s *LocaleList) string {
+	if !isSpecifiedLocaleList(s) {
+		return "LocaleList{Unspecified}"
+	}
+	out := "LocaleList{"
+	for i, locale := range s.List {
+		if i > 0 {
+			out += ", "
+		}
+		out += fmt.Sprintf("%v", locale)
+	}
+	return out + "}"
+}
+
+func copyLocaleList(s *LocaleList, options ...func(*LocaleList)) *LocaleList {
+	cp := &LocaleList{}
+	if s != nil {
+		cp.List = append([]Locale(nil), s.List...)
+	}
+	for _, option := range options {
+		option(cp)
+	}
+	return cp
+}
+
+// LocaleListCompanion is the single exported sentinel-family symbol for LocaleList.
+var LocaleListCompanion = companions.NewStructCompanion(
+	func() *LocaleList { return localeListUnspecified },
+	stringLocaleList,
+	isSpecifiedLocaleList,
+	isUnspecifiedLocaleList,
+	takeOrElseLocaleList,
+	mergeLocaleList,
+	sameLocaleList,
+	semanticEqualLocaleList,
+	equalLocaleList,
+	coalesceLocaleList,
+	copyLocaleList,
+)

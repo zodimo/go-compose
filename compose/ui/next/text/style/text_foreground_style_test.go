@@ -7,13 +7,13 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 )
 
-// --- Tests for TextForegroundStyleUnspecified ---
+// --- Tests for TextForegroundStyleCompanion ---
 
 func TestTextForegroundStyleUnspecified(t *testing.T) {
-	u := TextForegroundStyleUnspecified
+	u := TextForegroundStyleCompanion.Unspecified()
 
 	// Color should be unspecified
-	if u.Color != graphics.ColorUnspecified {
+	if u.Color != graphics.ColorCompanion.Unspecified() {
 		t.Errorf("Expected unspecified color")
 	}
 
@@ -29,7 +29,7 @@ func TestTextForegroundStyleUnspecified(t *testing.T) {
 }
 
 func TestTextForegroundStyleUnspecified_TakeOrElse(t *testing.T) {
-	u := TextForegroundStyleUnspecified
+	u := TextForegroundStyleCompanion.Unspecified()
 
 	// A specified color
 	specifiedColor := graphics.ColorRed
@@ -66,11 +66,11 @@ func TestTextForegroundStyleFromColor_Specified(t *testing.T) {
 }
 
 func TestTextForegroundStyleFromColor_Unspecified(t *testing.T) {
-	style := TextForegroundStyleFromColor(graphics.ColorUnspecified)
+	style := TextForegroundStyleFromColor(graphics.ColorCompanion.Unspecified())
 
 	// Should return Unspecified
-	if style != TextForegroundStyleUnspecified {
-		t.Errorf("Expected TextForegroundStyleUnspecified")
+	if style != TextForegroundStyleCompanion.Unspecified() {
+		t.Errorf("Expected TextForegroundStyleCompanion.Unspecified()")
 	}
 }
 
@@ -79,7 +79,7 @@ func TestColorStyle_TakeOrElse(t *testing.T) {
 	style := TextForegroundStyleFromColor(specifiedColor)
 
 	// TakeOrElse should return the style itself
-	result := TakeOrElseTextForegroundStyle(style, TextForegroundStyleUnspecified)
+	result := TakeOrElseTextForegroundStyle(style, TextForegroundStyleCompanion.Unspecified())
 
 	if !result.Color.IsSpecified() {
 		t.Errorf("Expected specified color to be returned")
@@ -92,8 +92,8 @@ func TestTextForegroundStyleFromBrush_Nil(t *testing.T) {
 	style := TextForegroundStyleFromBrush(nil, 1.0)
 
 	// Should return Unspecified
-	if style != TextForegroundStyleUnspecified {
-		t.Errorf("Expected TextForegroundStyleUnspecified for nil brush")
+	if style != TextForegroundStyleCompanion.Unspecified() {
+		t.Errorf("Expected TextForegroundStyleCompanion.Unspecified() for nil brush")
 	}
 }
 
@@ -125,7 +125,7 @@ func TestTextForegroundStyleFromBrush_ShaderBrush(t *testing.T) {
 	}
 
 	// Color should be unspecified
-	if style.Color != graphics.ColorUnspecified {
+	if style.Color != graphics.ColorCompanion.Unspecified() {
 		t.Errorf("Expected unspecified color for BrushStyle")
 	}
 
@@ -145,7 +145,7 @@ func TestBrushStyle_TakeOrElse(t *testing.T) {
 	style := TextForegroundStyleFromBrush(brush, 0.8)
 
 	// TakeOrElse should return the style itself
-	result := TakeOrElseTextForegroundStyle(style, TextForegroundStyleUnspecified)
+	result := TakeOrElseTextForegroundStyle(style, TextForegroundStyleCompanion.Unspecified())
 
 	if !result.isBrushStyle() {
 		t.Errorf("Expected BrushStyle to be returned")
@@ -196,7 +196,7 @@ func TestMerge_ColorStyleAndUnspecified(t *testing.T) {
 	color := graphics.ColorRed
 	colorStyle := TextForegroundStyleFromColor(color)
 
-	merged := MergeTextForegroundStyle(colorStyle, TextForegroundStyleUnspecified)
+	merged := MergeTextForegroundStyle(colorStyle, TextForegroundStyleCompanion.Unspecified())
 
 	// Unspecified should fallback to colorStyle
 	if !merged.Color.IsSpecified() {
@@ -207,9 +207,9 @@ func TestMerge_ColorStyleAndUnspecified(t *testing.T) {
 // --- Tests for Lerp ---
 
 func TestLerpTextForegroundStyle_BothUnspecified(t *testing.T) {
-	result := LerpTextForegroundStyle(TextForegroundStyleUnspecified, TextForegroundStyleUnspecified, 0.5)
+	result := LerpTextForegroundStyle(TextForegroundStyleCompanion.Unspecified(), TextForegroundStyleCompanion.Unspecified(), 0.5)
 
-	if result != TextForegroundStyleUnspecified {
+	if result != TextForegroundStyleCompanion.Unspecified() {
 		t.Errorf("Lerping two unspecified should return unspecified")
 	}
 }

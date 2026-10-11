@@ -3,7 +3,7 @@ package components
 import (
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/internal/modifier"
-	"github.com/zodimo/go-compose/pkg/sentinel"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )
 
 // NumberFieldComponentOptions configures NumberFieldComponent.
@@ -30,8 +30,8 @@ type NumberFieldComponentOption func(o *NumberFieldComponentOptions)
 func DefaultNumberFieldComponentOptions() NumberFieldComponentOptions {
 	return NumberFieldComponentOptions{
 		Modifier:     modifier.EmptyModifier,
-		Label:        sentinel.StringValueUnspecified,
-		HintText:     sentinel.StringValueUnspecified,
+		Label:        stringutils.StringsCompanion.Unspecified(),
+		HintText:     stringutils.StringsCompanion.Unspecified(),
 		TextStateKey: "",
 	}
 }

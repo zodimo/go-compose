@@ -54,7 +54,7 @@ func NewShadowNode(element ShadowElement) *ShadowNode {
 					shadowSize := float32(gtx.Metric.Dp(unit.DpToGioUnitUnsafe(elevation)))
 
 					//@TODO get shadow from theme, for now default to black
-					col := graphics.ColorToNRGBA(n.shadowData.AmbientColor.TakeOrElse(graphics.ColorBlack))
+					col := graphics.ColorToNRGBA(graphics.ColorCompanion.TakeOrElse(n.shadowData.AmbientColor, graphics.ColorBlack))
 					// Apply some opacity if it's fully opaque?
 					// gio-mw uses 0.12*255 approx 30 alpha.
 					if col.A == 255 {

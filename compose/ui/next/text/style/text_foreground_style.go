@@ -6,11 +6,14 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/pkg/floatutils"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
-// TextForegroundStyleUnspecified is the unspecified TextForegroundStyle.
-var TextForegroundStyleUnspecified *TextForegroundStyle = &TextForegroundStyle{
-	Color: graphics.ColorUnspecified,
+// textForegroundStyleUnspecified is the unspecified TextForegroundStyle. It is
+// deliberately package-private: the only public way to obtain it is
+// TextForegroundStyleCompanion.Unspecified().
+var textForegroundStyleUnspecified = &TextForegroundStyle{
+	Color: graphics.ColorCompanion.Unspecified(),
 	Brush: nil,
 	Alpha: floatutils.Float32Unspecified,
 }
@@ -48,7 +51,7 @@ func TextForegroundStyleFromColor(color graphics.Color) *TextForegroundStyle {
 			Alpha: floatutils.Float32Unspecified,
 		}
 	}
-	return TextForegroundStyleUnspecified
+	return textForegroundStyleUnspecified
 }
 
 // TextForegroundStyleFromBrush creates a TextForegroundStyle from a Brush and alpha.
@@ -57,7 +60,7 @@ func TextForegroundStyleFromColor(color graphics.Color) *TextForegroundStyle {
 // If brush is a ShaderBrush, returns a BrushStyle.
 func TextForegroundStyleFromBrush(brush graphics.Brush, alpha float32) *TextForegroundStyle {
 	if brush == nil {
-		return TextForegroundStyleUnspecified
+		return textForegroundStyleUnspecified
 	}
 
 	if sc := graphics.AsSolidColor(brush); sc != nil {
@@ -67,13 +70,13 @@ func TextForegroundStyleFromBrush(brush graphics.Brush, alpha float32) *TextFore
 
 	if sb := graphics.AsShaderBrush(brush); sb != nil {
 		return &TextForegroundStyle{
-			Color: graphics.ColorUnspecified,
+			Color: graphics.ColorCompanion.Unspecified(),
 			Brush: sb,
 			Alpha: alpha,
 		}
 	}
 
-	return TextForegroundStyleUnspecified
+	return textForegroundStyleUnspecified
 }
 
 // --- Lerp function ---
@@ -83,8 +86,8 @@ func TextForegroundStyleFromBrush(brush graphics.Brush, alpha float32) *TextFore
 // Otherwise, lerps discretely.
 func LerpTextForegroundStyle(start, stop *TextForegroundStyle, fraction float32) *TextForegroundStyle {
 
-	start = CoalesceTextForegroundStyle(start, TextForegroundStyleUnspecified)
-	stop = CoalesceTextForegroundStyle(stop, TextForegroundStyleUnspecified)
+	start = CoalesceTextForegroundStyle(start, textForegroundStyleUnspecified)
+	stop = CoalesceTextForegroundStyle(stop, textForegroundStyleUnspecified)
 
 	if !start.isBrushStyle() && !stop.isBrushStyle() {
 		// Both are colors - lerp colors
@@ -119,7 +122,7 @@ func ModulateColor(color graphics.Color, alpha float32) graphics.Color {
 
 // isColorSpecified checks if a color is specified (not the Unspecified sentinel).
 func isColorSpecified(color graphics.Color) bool {
-	return color != graphics.ColorUnspecified
+	return color != graphics.ColorCompanion.Unspecified()
 }
 
 // takeOrElseFloat returns the value if it's not NaN, otherwise calls block().
@@ -133,8 +136,8 @@ func takeOrElseFloat(value float32, block func() float32) float32 {
 // MergeTextForegroundStyle implements the merge logic for TextForegroundStyle.
 // This prevents Color or Unspecified TextForegroundStyle from overriding an existing Brush.
 func MergeTextForegroundStyle(current, other *TextForegroundStyle) *TextForegroundStyle {
-	current = CoalesceTextForegroundStyle(current, TextForegroundStyleUnspecified)
-	other = CoalesceTextForegroundStyle(other, TextForegroundStyleUnspecified)
+	current = CoalesceTextForegroundStyle(current, textForegroundStyleUnspecified)
+	other = CoalesceTextForegroundStyle(other, textForegroundStyleUnspecified)
 
 	switch {
 	case other.isBrushStyle() && current.isBrushStyle():
@@ -158,47 +161,139 @@ func MergeTextForegroundStyle(current, other *TextForegroundStyle) *TextForegrou
 }
 
 func CoalesceTextForegroundStyle(ptr, def *TextForegroundStyle) *TextForegroundStyle {
+	return coalesceTextForegroundStyle(ptr, def)
+}
+
+func TakeOrElseTextForegroundStyle(style, defaultStyle *TextForegroundStyle) *TextForegroundStyle {
+	return takeOrElseTextForegroundStyle(style, defaultStyle)
+}
+
+// Identity (2 ns)
+func SameTextForegroundStyle(a, b *TextForegroundStyle) bool {
+	return sameTextForegroundStyle(a, b)
+}
+
+// Semantic equality (field-by-field, 20 ns)
+func SemanticEqualTextForegroundStyle(a, b *TextForegroundStyle) bool {
+	return semanticEqualTextForegroundStyle(a, b)
+}
+
+func EqualTextForegroundStyle(a, b *TextForegroundStyle) bool {
+	return equalTextForegroundStyle(a, b)
+}
+
+// === Sentinel operations ===
+
+func isSpecifiedTextForegroundStyle(s *TextForegroundStyle) bool {
+	return s != nil && s != textForegroundStyleUnspecified
+}
+
+func isUnspecifiedTextForegroundStyle(s *TextForegroundStyle) bool {
+	return !isSpecifiedTextForegroundStyle(s)
+}
+
+func takeOrElseTextForegroundStyle(style, defaultStyle *TextForegroundStyle) *TextForegroundStyle {
+	if style == nil || style == textForegroundStyleUnspecified {
+		return defaultStyle
+	}
+	return style
+}
+
+func coalesceTextForegroundStyle(ptr, def *TextForegroundStyle) *TextForegroundStyle {
 	if ptr == nil {
 		return def
 	}
 	return ptr
 }
 
-func TakeOrElseTextForegroundStyle(style, defaultStyle *TextForegroundStyle) *TextForegroundStyle {
-	if style == nil || style == TextForegroundStyleUnspecified {
-		return defaultStyle
-	}
-	return style
+func mergeTextForegroundStyle(current, other *TextForegroundStyle) *TextForegroundStyle {
+	return MergeTextForegroundStyle(current, other)
 }
 
-// Identity (2 ns)
-func SameTextForegroundStyle(a, b *TextForegroundStyle) bool {
+func stringTextForegroundStyle(s *TextForegroundStyle) string {
+	if !isSpecifiedTextForegroundStyle(s) {
+		return "TextForegroundStyle.Unspecified"
+	}
+	return "TextForegroundStyle{color=" + s.Color.String() +
+		", brush=" + fmtBrush(s.Brush) +
+		", alpha=" + float32ToString(s.Alpha) + "}"
+}
+
+func fmtBrush(b graphics.Brush) string {
+	if b == nil {
+		return "nil"
+	}
+	return "Brush"
+}
+
+func sameTextForegroundStyle(a, b *TextForegroundStyle) bool {
 	if a == nil && b == nil {
 		return true
 	}
 	if a == nil {
-		return b == TextForegroundStyleUnspecified
+		return b == textForegroundStyleUnspecified
 	}
 	if b == nil {
-		return a == TextForegroundStyleUnspecified
+		return a == textForegroundStyleUnspecified
 	}
 	return a == b
 }
 
-// Semantic equality (field-by-field, 20 ns)
-func SemanticEqualTextForegroundStyle(a, b *TextForegroundStyle) bool {
+func semanticEqualTextForegroundStyle(a, b *TextForegroundStyle) bool {
 
-	a = CoalesceTextForegroundStyle(a, TextForegroundStyleUnspecified)
-	b = CoalesceTextForegroundStyle(b, TextForegroundStyleUnspecified)
+	a = coalesceTextForegroundStyle(a, textForegroundStyleUnspecified)
+	b = coalesceTextForegroundStyle(b, textForegroundStyleUnspecified)
+
+	if a == textForegroundStyleUnspecified && b == textForegroundStyleUnspecified {
+		return true
+	}
 
 	return a.Color == b.Color &&
 		graphics.EqualBrush(a.Brush, b.Brush) &&
-		floatutils.Float32Equals(a.Alpha, b.Alpha, floatutils.Float32EqualityThreshold)
+		equalAlpha(a.Alpha, b.Alpha)
 }
 
-func EqualTextForegroundStyle(a, b *TextForegroundStyle) bool {
-	if !SameTextForegroundStyle(a, b) {
-		return SemanticEqualTextForegroundStyle(a, b)
+// equalAlpha compares two alpha values treating two NaN values as equal, since
+// the unspecified sentinel carries a NaN alpha.
+func equalAlpha(a, b float32) bool {
+	if math.IsNaN(float64(a)) && math.IsNaN(float64(b)) {
+		return true
+	}
+	return floatutils.Float32Equals(a, b, floatutils.Float32EqualityThreshold)
+}
+
+func equalTextForegroundStyle(a, b *TextForegroundStyle) bool {
+	if !sameTextForegroundStyle(a, b) {
+		return semanticEqualTextForegroundStyle(a, b)
 	}
 	return true
 }
+
+// copyTextForegroundStyle returns a copy of s; the source is never mutated.
+func copyTextForegroundStyle(s *TextForegroundStyle, options ...func(*TextForegroundStyle)) *TextForegroundStyle {
+	cp := &TextForegroundStyle{}
+	if isSpecifiedTextForegroundStyle(s) {
+		cp.Color = s.Color
+		cp.Brush = s.Brush
+		cp.Alpha = s.Alpha
+	}
+	for _, option := range options {
+		option(cp)
+	}
+	return cp
+}
+
+// TextForegroundStyleCompanion is the single exported sentinel-family symbol for TextForegroundStyle.
+var TextForegroundStyleCompanion = companions.NewStructCompanion(
+	func() *TextForegroundStyle { return textForegroundStyleUnspecified },
+	stringTextForegroundStyle,
+	isSpecifiedTextForegroundStyle,
+	isUnspecifiedTextForegroundStyle,
+	takeOrElseTextForegroundStyle,
+	mergeTextForegroundStyle,
+	sameTextForegroundStyle,
+	semanticEqualTextForegroundStyle,
+	equalTextForegroundStyle,
+	coalesceTextForegroundStyle,
+	copyTextForegroundStyle,
+)

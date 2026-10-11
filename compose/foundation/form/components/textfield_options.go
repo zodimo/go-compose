@@ -2,7 +2,7 @@ package components
 
 import (
 	"github.com/zodimo/go-compose/compose/ui"
-	"github.com/zodimo/go-compose/pkg/sentinel"
+	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 
 	"github.com/zodimo/go-compose/internal/modifier"
 )
@@ -28,8 +28,8 @@ type TextFieldComponentOption func(o *TextFieldComponentOptions)
 func DefaultTextFieldComponentOptions() TextFieldComponentOptions {
 	return TextFieldComponentOptions{
 		Modifier: modifier.EmptyModifier,
-		Label:    sentinel.StringValueUnspecified,
-		HintText: sentinel.StringValueUnspecified,
+		Label:    stringutils.StringsCompanion.Unspecified(),
+		HintText: stringutils.StringsCompanion.Unspecified(),
 		Inline:   false,
 	}
 }

@@ -58,8 +58,8 @@ func TestLineBreak_Presets(t *testing.T) {
 }
 
 func TestLineBreak_Unspecified(t *testing.T) {
-	if LineBreakUnspecified.IsSpecified() {
-		t.Error("LineBreakUnspecified should not be specified")
+	if LineBreakCompanion.Unspecified().IsSpecified() {
+		t.Error("LineBreakCompanion.Unspecified() should not be specified")
 	}
 	if LineBreakSimple.IsSpecified() == false {
 		t.Error("LineBreakSimple should be specified")

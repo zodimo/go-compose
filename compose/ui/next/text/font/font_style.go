@@ -1,10 +1,17 @@
 package font
 
+import (
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
+)
+
 // FontStyle defines whether the font is Italic or Normal.
 type FontStyle int
 
 const (
-	FontStyleUnspecified = -1
+	// fontStyleUnspecified is the sentinel for FontStyle. It is deliberately
+	// package-private: the only public way to obtain it is
+	// FontStyleCompanion.Unspecified().
+	fontStyleUnspecified = -1
 	// FontStyleNormal uses the upright glyphs
 	FontStyleNormal FontStyle = 0
 	// FontStyleItalic uses glyphs designed for slanting
@@ -18,7 +25,7 @@ func (s FontStyle) String() string {
 		return "Normal"
 	case FontStyleItalic:
 		return "Italic"
-	case FontStyleUnspecified:
+	case fontStyleUnspecified:
 		return "Unspecified"
 	default:
 		return "Invalid"
@@ -36,15 +43,69 @@ func (s FontStyle) Equals(other FontStyle) bool {
 }
 
 func (s FontStyle) IsSpecified() bool {
-	return s != FontStyleUnspecified
+	return isSpecifiedFontStyle(s)
 }
 
-func (s FontStyle) TakeOrElse(block FontStyle) FontStyle {
-	if s.IsSpecified() {
+// === Sentinel operations ===
+
+func isSpecifiedFontStyle(s FontStyle) bool {
+	return s != fontStyleUnspecified
+}
+
+func isUnspecifiedFontStyle(s FontStyle) bool {
+	return s == fontStyleUnspecified
+}
+
+func takeOrElseFontStyle(s, def FontStyle) FontStyle {
+	if isSpecifiedFontStyle(s) {
 		return s
 	}
-	return block
+	return def
 }
+
+func mergeFontStyle(a, b FontStyle) FontStyle {
+	if isUnspecifiedFontStyle(b) {
+		return a
+	}
+	return b
+}
+
+func stringFontStyle(s FontStyle) string {
+	if isUnspecifiedFontStyle(s) {
+		return "Unspecified"
+	}
+	return s.String()
+}
+
+func sameFontStyle(a, b FontStyle) bool {
+	return a == b
+}
+
+func semanticEqualFontStyle(a, b FontStyle) bool {
+	return a == b
+}
+
+func equalFontStyle(a, b FontStyle) bool {
+	return a == b
+}
+
+func copyFontStyle(s FontStyle) FontStyle {
+	return s
+}
+
+// FontStyleCompanion is the single exported sentinel-family symbol for FontStyle.
+var FontStyleCompanion = companions.NewScalarCompanion(
+	func() FontStyle { return fontStyleUnspecified },
+	stringFontStyle,
+	isSpecifiedFontStyle,
+	isUnspecifiedFontStyle,
+	takeOrElseFontStyle,
+	mergeFontStyle,
+	sameFontStyle,
+	semanticEqualFontStyle,
+	equalFontStyle,
+	copyFontStyle,
+)
 
 // FontStyleValues returns a list of possible FontStyle values.
 func FontStyleValues() []FontStyle {

@@ -26,7 +26,7 @@ func TextAlignToGioTextAlignment(textAlign TextAlign) gioText.Alignment {
 }
 
 func LineBreakToGioWrapPolicy(l LineBreak) gioText.WrapPolicy {
-	linebreak := l.TakeOrElse(LineBreakParagraph)
+	linebreak := LineBreakCompanion.TakeOrElse(l, LineBreakParagraph)
 	return gioText.WrapPolicy(linebreak)
 }
 

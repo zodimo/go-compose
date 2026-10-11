@@ -54,8 +54,8 @@ func DefaultBadgeOptions() BadgeOptions {
 	return BadgeOptions{
 		Modifier: ui.EmptyModifier,
 
-		ContainerColor: graphics.ColorUnspecified,
-		ContentColor:   graphics.ColorUnspecified,
+		ContainerColor: graphics.ColorCompanion.Unspecified(),
+		ContentColor:   graphics.ColorCompanion.Unspecified(),
 
 		// ContainerColor: theme.ColorHelper.ColorSelector().ErrorRoles.Error,
 		// ContentColor:   theme.ColorHelper.ColorSelector().ErrorRoles.OnError,

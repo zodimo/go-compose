@@ -26,7 +26,7 @@ func Divider(options ...DividerOption) api.Composable {
 			option(&opts)
 		}
 
-		opts.Color = opts.Color.TakeOrElse(graphics.ColorBlack)
+		opts.Color = graphics.ColorCompanion.TakeOrElse(opts.Color, graphics.ColorBlack)
 		opts.Axis = opts.Axis.TakeOrElse(layout.AxisHorizontal)
 
 		c.StartBlock(FoundationDivideNodeID)
@@ -50,7 +50,7 @@ func HorizontalDivider(options ...DividerOption) api.Composable {
 			option(&opts)
 		}
 
-		opts.Color = opts.Color.TakeOrElse(graphics.ColorBlack)
+		opts.Color = graphics.ColorCompanion.TakeOrElse(opts.Color, graphics.ColorBlack)
 		opts.Axis = layout.AxisHorizontal
 
 		return Divider(options...)(c)
@@ -68,7 +68,7 @@ func VerticalDivider(options ...DividerOption) api.Composable {
 			option(&opts)
 		}
 
-		opts.Color = opts.Color.TakeOrElse(graphics.ColorBlack)
+		opts.Color = graphics.ColorCompanion.TakeOrElse(opts.Color, graphics.ColorBlack)
 		opts.Axis = layout.AxisVertical
 
 		return Divider(options...)(c)

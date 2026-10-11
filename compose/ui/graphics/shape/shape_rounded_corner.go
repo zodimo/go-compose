@@ -9,13 +9,13 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
-var RoundedCornerShapeUnspecified = &RoundedCornerShape{
-	Radius: unit.DpUnspecified,
+var roundedCornerShapeUnspecified = &RoundedCornerShape{
+	Radius: unit.DpCompanion.Unspecified(),
 
-	TopStart:    unit.DpUnspecified,
-	TopEnd:      unit.DpUnspecified,
-	BottomEnd:   unit.DpUnspecified,
-	BottomStart: unit.DpUnspecified,
+	TopStart:    unit.DpCompanion.Unspecified(),
+	TopEnd:      unit.DpCompanion.Unspecified(),
+	BottomEnd:   unit.DpCompanion.Unspecified(),
+	BottomStart: unit.DpCompanion.Unspecified(),
 }
 
 // RoundedCornerShape supports uniform radius via Radius, or per-corner radius
@@ -36,7 +36,7 @@ type RoundedCornerShape struct {
 }
 
 func (r *RoundedCornerShape) CreateOutline(size image.Point, metric gioUnit.Metric) Outline {
-	rValid := coalesceRoundedCornerShape(r, RoundedCornerShapeUnspecified)
+	rValid := coalesceRoundedCornerShape(r, roundedCornerShapeUnspecified)
 
 	var nw, ne, se, sw int
 
@@ -49,10 +49,10 @@ func (r *RoundedCornerShape) CreateOutline(size image.Point, metric gioUnit.Metr
 	} else {
 		// Fall back to per-corner values if uniform Radius is not set or is 0
 		// Per-corner values are only used if at least one is > 0
-		topStart := rValid.TopStart.TakeOrElse(unit.Dp(0))
-		topEnd := rValid.TopEnd.TakeOrElse(unit.Dp(0))
-		bottomEnd := rValid.BottomEnd.TakeOrElse(unit.Dp(0))
-		bottomStart := rValid.BottomStart.TakeOrElse(unit.Dp(0))
+		topStart := unit.DpCompanion.TakeOrElse(rValid.TopStart, unit.Dp(0))
+		topEnd := unit.DpCompanion.TakeOrElse(rValid.TopEnd, unit.Dp(0))
+		bottomEnd := unit.DpCompanion.TakeOrElse(rValid.BottomEnd, unit.Dp(0))
+		bottomStart := unit.DpCompanion.TakeOrElse(rValid.BottomStart, unit.Dp(0))
 
 		if topStart > 0 || topEnd > 0 || bottomEnd > 0 || bottomStart > 0 {
 			nw = metric.Dp(unit.DpToGioUnitUnsafe(topStart))
@@ -79,11 +79,11 @@ func (r *RoundedCornerShape) CreateOutline(size image.Point, metric gioUnit.Metr
 func (r *RoundedCornerShape) mergeShape(other Shape) Shape {
 	if otherRoundedCorner, ok := other.(*RoundedCornerShape); ok {
 		return &RoundedCornerShape{
-			Radius:      otherRoundedCorner.Radius.TakeOrElse(r.Radius),
-			TopStart:    otherRoundedCorner.TopStart.TakeOrElse(r.TopStart),
-			TopEnd:      otherRoundedCorner.TopEnd.TakeOrElse(r.TopEnd),
-			BottomEnd:   otherRoundedCorner.BottomEnd.TakeOrElse(r.BottomEnd),
-			BottomStart: otherRoundedCorner.BottomStart.TakeOrElse(r.BottomStart),
+			Radius:      unit.DpCompanion.TakeOrElse(otherRoundedCorner.Radius, r.Radius),
+			TopStart:    unit.DpCompanion.TakeOrElse(otherRoundedCorner.TopStart, r.TopStart),
+			TopEnd:      unit.DpCompanion.TakeOrElse(otherRoundedCorner.TopEnd, r.TopEnd),
+			BottomEnd:   unit.DpCompanion.TakeOrElse(otherRoundedCorner.BottomEnd, r.BottomEnd),
+			BottomStart: unit.DpCompanion.TakeOrElse(otherRoundedCorner.BottomStart, r.BottomStart),
 		}
 	}
 	panic(fmt.Sprintf("RoundedCornerShape.mergeShape: cannot merge with %s", other.stringShape()))
@@ -102,7 +102,7 @@ func (r *RoundedCornerShape) semanticEqualShape(other Shape) bool {
 }
 func (r *RoundedCornerShape) copyShape(options ...ShapeOption) Shape {
 
-	rValid := coalesceRoundedCornerShape(r, RoundedCornerShapeUnspecified)
+	rValid := coalesceRoundedCornerShape(r, roundedCornerShapeUnspecified)
 
 	copy := *rValid
 	for _, option := range options {
@@ -122,7 +122,7 @@ func (r *RoundedCornerShape) stringShape() string {
 }
 
 func isSpecifiedRoundedCornerShape(r *RoundedCornerShape) bool {
-	return r != nil && r != RoundedCornerShapeUnspecified
+	return r != nil && r != roundedCornerShapeUnspecified
 }
 
 func coalesceRoundedCornerShape(ptr, def *RoundedCornerShape) *RoundedCornerShape {

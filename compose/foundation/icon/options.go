@@ -18,8 +18,8 @@ type IconOption func(*IconOptions)
 func DefaultIconOptions() IconOptions {
 	return IconOptions{
 		Modifier: ui.EmptyModifier,
-		Color:    graphics.ColorUnspecified,
-		Size:     unit.DpUnspecified,
+		Color:    graphics.ColorCompanion.Unspecified(),
+		Size:     unit.DpCompanion.Unspecified(),
 	}
 }
 
