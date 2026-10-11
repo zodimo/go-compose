@@ -64,8 +64,8 @@ func WithAdditionalTextStyle(ts *text.TextStyle) TextOption {
 func WithTextStyleOptions(options ...text.TextStyleOption) TextOption {
 	return func(o *TextOptions) {
 		// Use CopyTextStyle to avoid mutating the shared TextStyleUnspecified singleton
-		textStyle := text.CopyTextStyleWithOptions(
-			text.TextStyleCompanion.Coalesce(o.TextStyle, text.TextStyleCompanion.Unspecified()),
+		textStyle := text.TextStyleCompanion.Copy(
+			o.TextStyle,
 			options...,
 		)
 		o.TextStyle = textStyle

@@ -127,7 +127,7 @@ func UI() api.Composable {
 								return box.Box(
 									func(c api.Composer) api.Composer {
 										defaultIconsSizeProvider := compose.LocalTextStyle.Provides(
-											uiText.CopyTextStyleWithOptions(uiText.TextStyleCompanion.Unspecified(), uiText.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
+											uiText.TextStyleCompanion.Copy(uiText.TextStyleCompanion.Unspecified(), uiText.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
 										)
 										return compose.CompositionLocalProvider(
 											[]api.ProvidedValue{

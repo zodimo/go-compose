@@ -37,7 +37,7 @@ func TestTextStyle_Getters(t *testing.T) {
 	testLineHeight := unit.Sp(32)
 	testLineBreak := style.LineBreakSimple
 
-	ts := textStyleFromOptions(
+	ts := TextStyleFromOptions(
 		WithColor(testColor),
 		WithBackground(testBg),
 		WithFontSize(testFontSize),
@@ -93,7 +93,7 @@ func TestIsSpecifiedTextStyle(t *testing.T) {
 	}{
 		{"nil", nil, false},
 		{"Unspecified", textStyleUnspecified, false},
-		{"CustomStyle", textStyleFromOptions(WithColor(graphics.ColorRed)), true},
+		{"CustomStyle", TextStyleFromOptions(WithColor(graphics.ColorRed)), true},
 	}
 
 	for _, tc := range tests {
@@ -107,8 +107,8 @@ func TestIsSpecifiedTextStyle(t *testing.T) {
 }
 
 func TestTakeOrElseTextStyle(t *testing.T) {
-	defaultStyle := textStyleFromOptions(WithColor(graphics.ColorBlue))
-	customStyle := textStyleFromOptions(WithColor(graphics.ColorRed))
+	defaultStyle := TextStyleFromOptions(WithColor(graphics.ColorBlue))
+	customStyle := TextStyleFromOptions(WithColor(graphics.ColorRed))
 
 	tests := []struct {
 		name     string
@@ -132,13 +132,13 @@ func TestTakeOrElseTextStyle(t *testing.T) {
 }
 
 func TestCopyTextStyle(t *testing.T) {
-	original := textStyleFromOptions(
+	original := TextStyleFromOptions(
 		WithColor(graphics.ColorRed),
 		WithFontSize(unit.Sp(20)),
 	)
 
 	// Copy with modifications
-	copied := copyTextStyleWithOptions(original, WithColor(graphics.ColorBlue))
+	copied := copyTextStyle(original, WithColor(graphics.ColorBlue))
 
 	// Original should be unchanged
 	if original.Color() != graphics.ColorRed {
@@ -166,7 +166,7 @@ func TestMergeTextStyle(t *testing.T) {
 	})
 
 	t.Run("a_unspecified", func(t *testing.T) {
-		b := textStyleFromOptions(WithColor(graphics.ColorRed))
+		b := TextStyleFromOptions(WithColor(graphics.ColorRed))
 		result := mergeTextStyle(textStyleUnspecified, b)
 		if result != b {
 			t.Error("mergeTextStyle with a=Unspecified should return b")
@@ -174,7 +174,7 @@ func TestMergeTextStyle(t *testing.T) {
 	})
 
 	t.Run("b_unspecified", func(t *testing.T) {
-		a := textStyleFromOptions(WithColor(graphics.ColorRed))
+		a := TextStyleFromOptions(WithColor(graphics.ColorRed))
 		result := mergeTextStyle(a, textStyleUnspecified)
 		if result != a {
 			t.Error("mergeTextStyle with b=Unspecified should return a")
@@ -182,11 +182,11 @@ func TestMergeTextStyle(t *testing.T) {
 	})
 
 	t.Run("both_specified", func(t *testing.T) {
-		a := textStyleFromOptions(
+		a := TextStyleFromOptions(
 			WithColor(graphics.ColorRed),
 			WithFontSize(unit.Sp(16)),
 		)
-		b := textStyleFromOptions(
+		b := TextStyleFromOptions(
 			WithColor(graphics.ColorBlue),
 			WithFontWeight(font.FontWeightBold),
 		)
@@ -209,8 +209,8 @@ func TestMergeTextStyle(t *testing.T) {
 }
 
 func TestCoalesceTextStyle(t *testing.T) {
-	defaultStyle := textStyleFromOptions(WithColor(graphics.ColorBlue))
-	customStyle := textStyleFromOptions(WithColor(graphics.ColorRed))
+	defaultStyle := TextStyleFromOptions(WithColor(graphics.ColorBlue))
+	customStyle := TextStyleFromOptions(WithColor(graphics.ColorRed))
 
 	tests := []struct {
 		name     string
@@ -234,7 +234,7 @@ func TestCoalesceTextStyle(t *testing.T) {
 
 func TestTextStyleFromOptions(t *testing.T) {
 	t.Run("no_options", func(t *testing.T) {
-		ts := textStyleFromOptions()
+		ts := TextStyleFromOptions()
 		// Should have unspecified values
 		if ts.Color() != graphics.ColorUnspecified {
 			t.Errorf("textStyleFromOptions() with no options Color() = %v, want Unspecified", ts.Color())
@@ -242,7 +242,7 @@ func TestTextStyleFromOptions(t *testing.T) {
 	})
 
 	t.Run("with_options", func(t *testing.T) {
-		ts := textStyleFromOptions(
+		ts := TextStyleFromOptions(
 			WithColor(graphics.ColorRed),
 			WithFontSize(unit.Sp(18)),
 			WithTextAlign(style.TextAlignMiddle),
@@ -280,7 +280,7 @@ func TestTextStyleResolveDefaults(t *testing.T) {
 }
 
 func TestStringTextStyle(t *testing.T) {
-	ts := textStyleFromOptions(WithColor(graphics.ColorRed))
+	ts := TextStyleFromOptions(WithColor(graphics.ColorRed))
 	str := stringTextStyle(ts)
 
 	// Should contain TextStyle prefix

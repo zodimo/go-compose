@@ -13,7 +13,7 @@ import (
 // === Span Style Options ===
 
 func TestWithColor(t *testing.T) {
-	ts := textStyleFromOptions(WithColor(graphics.ColorRed))
+	ts := TextStyleFromOptions(WithColor(graphics.ColorRed))
 
 	if ts.Color() != graphics.ColorRed {
 		t.Errorf("WithColor() Color() = %v, want %v", ts.Color(), graphics.ColorRed)
@@ -22,7 +22,7 @@ func TestWithColor(t *testing.T) {
 
 func TestWithFontSize(t *testing.T) {
 	testSize := unit.Sp(24)
-	ts := textStyleFromOptions(WithFontSize(testSize))
+	ts := TextStyleFromOptions(WithFontSize(testSize))
 
 	if ts.FontSize() != testSize {
 		t.Errorf("WithFontSize() FontSize() = %v, want %v", ts.FontSize(), testSize)
@@ -30,7 +30,7 @@ func TestWithFontSize(t *testing.T) {
 }
 
 func TestWithFontWeight(t *testing.T) {
-	ts := textStyleFromOptions(WithFontWeight(font.FontWeightBold))
+	ts := TextStyleFromOptions(WithFontWeight(font.FontWeightBold))
 
 	if ts.FontWeight() != font.FontWeightBold {
 		t.Errorf("WithFontWeight() FontWeight() = %v, want %v", ts.FontWeight(), font.FontWeightBold)
@@ -38,7 +38,7 @@ func TestWithFontWeight(t *testing.T) {
 }
 
 func TestWithFontStyle(t *testing.T) {
-	ts := textStyleFromOptions(WithFontStyle(font.FontStyleItalic))
+	ts := TextStyleFromOptions(WithFontStyle(font.FontStyleItalic))
 
 	if ts.FontStyle() != font.FontStyleItalic {
 		t.Errorf("WithFontStyle() FontStyle() = %v, want %v", ts.FontStyle(), font.FontStyleItalic)
@@ -47,7 +47,7 @@ func TestWithFontStyle(t *testing.T) {
 
 func TestWithFontFamily(t *testing.T) {
 	customFamily := font.FontFamilyDefault
-	ts := textStyleFromOptions(WithFontFamily(customFamily))
+	ts := TextStyleFromOptions(WithFontFamily(customFamily))
 
 	// Direct comparison since we're using a known constant
 	if ts.FontFamily() != customFamily {
@@ -57,7 +57,7 @@ func TestWithFontFamily(t *testing.T) {
 
 func TestWithLetterSpacing(t *testing.T) {
 	testSpacing := unit.Sp(2.5)
-	ts := textStyleFromOptions(WithLetterSpacing(testSpacing))
+	ts := TextStyleFromOptions(WithLetterSpacing(testSpacing))
 
 	if ts.LetterSpacing() != testSpacing {
 		t.Errorf("WithLetterSpacing() LetterSpacing() = %v, want %v", ts.LetterSpacing(), testSpacing)
@@ -65,7 +65,7 @@ func TestWithLetterSpacing(t *testing.T) {
 }
 
 func TestWithBackground(t *testing.T) {
-	ts := textStyleFromOptions(WithBackground(graphics.ColorBlue))
+	ts := TextStyleFromOptions(WithBackground(graphics.ColorBlue))
 
 	if ts.Background() != graphics.ColorBlue {
 		t.Errorf("WithBackground() Background() = %v, want %v", ts.Background(), graphics.ColorBlue)
@@ -74,7 +74,7 @@ func TestWithBackground(t *testing.T) {
 
 func TestWithTextDecoration(t *testing.T) {
 	decoration := style.TextDecorationUnderline
-	ts := textStyleFromOptions(WithTextDecoration(decoration))
+	ts := TextStyleFromOptions(WithTextDecoration(decoration))
 
 	if ts.TextDecoration() != decoration {
 		t.Errorf("WithTextDecoration() TextDecoration() = %v, want %v", ts.TextDecoration(), decoration)
@@ -88,7 +88,7 @@ func TestWithShadow(t *testing.T) {
 		geometry.NewOffset(5, 5),
 		10,
 	)
-	ts := textStyleFromOptions(WithShadow(shadow))
+	ts := TextStyleFromOptions(WithShadow(shadow))
 
 	if ts.spanStyle.Shadow() != shadow {
 		t.Errorf("WithShadow() Shadow() = %v, want %v", ts.spanStyle.Shadow(), shadow)
@@ -106,7 +106,7 @@ func TestWithTextAlign(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.String(), func(t *testing.T) {
-			ts := textStyleFromOptions(WithTextAlign(tc))
+			ts := TextStyleFromOptions(WithTextAlign(tc))
 			if ts.TextAlign() != tc {
 				t.Errorf("WithTextAlign(%v) TextAlign() = %v, want %v", tc, ts.TextAlign(), tc)
 			}
@@ -126,7 +126,7 @@ func TestWithTextDirection(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ts := textStyleFromOptions(WithTextDirection(tc.direction))
+			ts := TextStyleFromOptions(WithTextDirection(tc.direction))
 			if ts.TextDirection() != tc.direction {
 				t.Errorf("WithTextDirection(%v) TextDirection() = %v, want %v", tc.direction, ts.TextDirection(), tc.direction)
 			}
@@ -136,7 +136,7 @@ func TestWithTextDirection(t *testing.T) {
 
 func TestWithLineHeight(t *testing.T) {
 	testHeight := unit.Sp(28)
-	ts := textStyleFromOptions(WithLineHeight(testHeight))
+	ts := TextStyleFromOptions(WithLineHeight(testHeight))
 
 	if ts.LineHeight() != testHeight {
 		t.Errorf("WithLineHeight() LineHeight() = %v, want %v", ts.LineHeight(), testHeight)
@@ -152,7 +152,7 @@ func TestWithLineBreak(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.String(), func(t *testing.T) {
-			ts := textStyleFromOptions(WithLineBreak(tc))
+			ts := TextStyleFromOptions(WithLineBreak(tc))
 			if ts.LineBreak() != tc {
 				t.Errorf("WithLineBreak(%v) LineBreak() = %v, want %v", tc, ts.LineBreak(), tc)
 			}
@@ -163,7 +163,7 @@ func TestWithLineBreak(t *testing.T) {
 // === Chaining Options ===
 
 func TestTextStyleOptions_Chaining(t *testing.T) {
-	ts := textStyleFromOptions(
+	ts := TextStyleFromOptions(
 		// Span style options
 		WithColor(graphics.ColorRed),
 		WithFontSize(unit.Sp(20)),
@@ -216,13 +216,13 @@ func TestTextStyleOptions_Chaining(t *testing.T) {
 // === Options Applied to Copy ===
 
 func TestTextStyleOptions_AppliedToCopy(t *testing.T) {
-	original := textStyleFromOptions(
+	original := TextStyleFromOptions(
 		WithColor(graphics.ColorRed),
 		WithFontSize(unit.Sp(16)),
 	)
 
 	// Apply new options via copyTextStyleWithOptions
-	copied := copyTextStyleWithOptions(original,
+	copied := copyTextStyle(original,
 		WithColor(graphics.ColorBlue),
 		WithFontWeight(font.FontWeightBold),
 	)
@@ -252,7 +252,7 @@ func TestTextStyleOptions_AppliedToCopy(t *testing.T) {
 
 func TestTextStyleOptions_FromNil(t *testing.T) {
 	// Options should handle nil base gracefully via coalesceTextStyle
-	ts := textStyleFromOptions(WithColor(graphics.ColorGreen))
+	ts := TextStyleFromOptions(WithColor(graphics.ColorGreen))
 
 	if ts.Color() != graphics.ColorGreen {
 		t.Errorf("textStyleFromOptions with nil base Color() = %v, want %v", ts.Color(), graphics.ColorGreen)

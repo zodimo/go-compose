@@ -53,79 +53,59 @@ type SpanStyleOptions struct {
 	Shadow         *graphics.Shadow
 }
 
-func newSpanStyleOptions() SpanStyleOptions {
-	return SpanStyleOptions{
-		Color:          graphics.ColorUnspecified,
-		FontSize:       unit.TextUnitUnspecified,
-		FontWeight:     font.FontWeightUnspecified,
-		FontStyle:      font.FontStyleUnspecified,
-		FontFamily:     nil,
-		LetterSpacing:  unit.TextUnitUnspecified,
-		Background:     graphics.ColorUnspecified,
-		TextDecoration: nil,
-		Shadow:         nil,
-	}
-}
-
-type SpanStyleOption = func(*SpanStyleOptions)
-
-// asOption lets an already-populated SpanStyleOptions seed a SpanStyleOptions
-// target, so the whole struct can be passed as a single SpanStyleOption.
-func (o SpanStyleOptions) asOption(opts *SpanStyleOptions) {
-	*opts = o
-}
+type SpanStyleOption = func(*SpanStyle)
 
 func SpanStyleWithColor(color graphics.Color) SpanStyleOption {
-	return func(opts *SpanStyleOptions) {
-		opts.Color = color
+	return func(opts *SpanStyle) {
+		opts.color = color
 	}
 }
 
 func SpanStyleWithFontSize(size unit.TextUnit) SpanStyleOption {
-	return func(opts *SpanStyleOptions) {
-		opts.FontSize = size
+	return func(opts *SpanStyle) {
+		opts.fontSize = size
 	}
 }
 
 func SpanStyleWithFontWeight(weight font.FontWeight) SpanStyleOption {
-	return func(opts *SpanStyleOptions) {
-		opts.FontWeight = weight
+	return func(opts *SpanStyle) {
+		opts.fontWeight = weight
 	}
 }
 
 func SpanStyleWithFontStyle(fontStyle font.FontStyle) SpanStyleOption {
-	return func(opts *SpanStyleOptions) {
-		opts.FontStyle = fontStyle
+	return func(opts *SpanStyle) {
+		opts.fontStyle = fontStyle
 	}
 }
 
 func SpanStyleWithFontFamily(family font.FontFamily) SpanStyleOption {
-	return func(opts *SpanStyleOptions) {
-		opts.FontFamily = family
+	return func(opts *SpanStyle) {
+		opts.fontFamily = family
 	}
 }
 
 func SpanStyleWithLetterSpacing(spacing unit.TextUnit) SpanStyleOption {
-	return func(opts *SpanStyleOptions) {
-		opts.LetterSpacing = spacing
+	return func(opts *SpanStyle) {
+		opts.letterSpacing = spacing
 	}
 }
 
 func SpanStyleWithBackground(color graphics.Color) SpanStyleOption {
-	return func(opts *SpanStyleOptions) {
-		opts.Background = color
+	return func(opts *SpanStyle) {
+		opts.background = color
 	}
 }
 
 func SpanStyleWithTextDecoration(decoration *style.TextDecoration) SpanStyleOption {
-	return func(opts *SpanStyleOptions) {
-		opts.TextDecoration = decoration
+	return func(opts *SpanStyle) {
+		opts.textDecoration = decoration
 	}
 }
 
 func SpanStyleWithShadow(shadow *graphics.Shadow) SpanStyleOption {
-	return func(opts *SpanStyleOptions) {
-		opts.Shadow = shadow
+	return func(opts *SpanStyle) {
+		opts.shadow = shadow
 	}
 }
 
@@ -163,39 +143,28 @@ func (s SpanStyle) Shadow() *graphics.Shadow {
 // By the time an option runs, the working copy of s has already been seeded from the
 // source, so an option that only touches one field leaves the rest intact.
 func copySpanStyle(s *SpanStyle, options ...func(*SpanStyle)) *SpanStyle {
-	s = coalesceSpanStyle(s, spanStyleUnspecified)
-	work := *s
+	localSs := coalesceSpanStyle(s, spanStyleUnspecified)
+	changed := *spanStyleUnspecified
 	for _, option := range options {
-		option(&work)
-	}
-	return &work
-}
-
-// copySpanStyleWithOptions is the option-constructor form used by callers.
-// Options are applied to a fresh SpanStyleOptions seeded with sentinels, then only
-// the fields the caller actually set are overlaid onto s.
-func copySpanStyleWithOptions(s *SpanStyle, options ...SpanStyleOption) *SpanStyle {
-	s = coalesceSpanStyle(s, spanStyleUnspecified)
-	opts := newSpanStyleOptions()
-	for _, option := range options {
-		option(&opts)
+		option(&changed)
 	}
 	return &SpanStyle{
-		color:          opts.Color.TakeOrElse(s.color),
-		fontSize:       opts.FontSize.TakeOrElse(s.fontSize),
-		fontWeight:     opts.FontWeight.TakeOrElse(s.fontWeight),
-		fontStyle:      opts.FontStyle.TakeOrElse(s.fontStyle),
-		fontFamily:     font.TakeOrElseFontFamily(opts.FontFamily, s.fontFamily),
-		letterSpacing:  opts.LetterSpacing.TakeOrElse(s.letterSpacing),
-		background:     opts.Background.TakeOrElse(s.background),
-		textDecoration: style.TakeOrElseTextDecoration(opts.TextDecoration, s.textDecoration),
-		shadow:         graphics.TakeOrElseShadow(opts.Shadow, s.shadow),
+		color:          changed.color.TakeOrElse(localSs.color),
+		fontSize:       changed.fontSize.TakeOrElse(localSs.fontSize),
+		fontWeight:     changed.fontWeight.TakeOrElse(localSs.fontWeight),
+		fontStyle:      changed.fontStyle.TakeOrElse(localSs.fontStyle),
+		fontFamily:     font.TakeOrElseFontFamily(changed.fontFamily, localSs.fontFamily),
+		letterSpacing:  changed.letterSpacing.TakeOrElse(localSs.letterSpacing),
+		background:     changed.background.TakeOrElse(localSs.background),
+		textDecoration: style.TakeOrElseTextDecoration(changed.textDecoration, localSs.textDecoration),
+		shadow:         graphics.TakeOrElseShadow(changed.shadow, localSs.shadow),
 	}
+
 }
 
 func stringSpanStyle(s *SpanStyle) string {
-	s = coalesceSpanStyle(s, spanStyleUnspecified)
-	if !isSpecifiedSpanStyle(s) {
+	localSs := coalesceSpanStyle(s, spanStyleUnspecified)
+	if !isSpecifiedSpanStyle(localSs) {
 		return "SpanStyle{Unspecified}"
 	}
 	return fmt.Sprintf("SpanStyle("+
@@ -274,31 +243,32 @@ func equalSpanStyle(a, b *SpanStyle) bool {
 
 // mergeSpanStyle layers b onto a: a value from b wins only where b actually set it.
 func mergeSpanStyle(a, b *SpanStyle) *SpanStyle {
-	a = coalesceSpanStyle(a, spanStyleUnspecified)
-	b = coalesceSpanStyle(b, spanStyleUnspecified)
+	localA := coalesceSpanStyle(a, spanStyleUnspecified)
+	localB := coalesceSpanStyle(b, spanStyleUnspecified)
 
-	if a == spanStyleUnspecified {
-		return b
+	if localA == spanStyleUnspecified {
+		return localB
 	}
-	if b == spanStyleUnspecified {
-		return a
+	if localB == spanStyleUnspecified {
+		return localA
 	}
 
 	return &SpanStyle{
-		color:          b.color.TakeOrElse(a.color),
-		fontSize:       b.fontSize.TakeOrElse(a.fontSize),
-		fontWeight:     b.fontWeight.TakeOrElse(a.fontWeight),
-		fontStyle:      b.fontStyle.TakeOrElse(a.fontStyle),
-		fontFamily:     font.TakeOrElseFontFamily(b.fontFamily, a.fontFamily),
-		letterSpacing:  b.letterSpacing.TakeOrElse(a.letterSpacing),
-		background:     b.background.TakeOrElse(a.background),
-		textDecoration: style.TakeOrElseTextDecoration(b.textDecoration, a.textDecoration),
-		shadow:         graphics.TakeOrElseShadow(b.shadow, a.shadow),
+		color:          localB.color.TakeOrElse(localA.color),
+		fontSize:       localB.fontSize.TakeOrElse(localA.fontSize),
+		fontWeight:     localB.fontWeight.TakeOrElse(localA.fontWeight),
+		fontStyle:      localB.fontStyle.TakeOrElse(localA.fontStyle),
+		fontFamily:     font.TakeOrElseFontFamily(localB.fontFamily, localA.fontFamily),
+		letterSpacing:  localB.letterSpacing.TakeOrElse(localA.letterSpacing),
+		background:     localB.background.TakeOrElse(localA.background),
+		textDecoration: style.TakeOrElseTextDecoration(localB.textDecoration, localA.textDecoration),
+		shadow:         graphics.TakeOrElseShadow(localB.shadow, localA.shadow),
 	}
 }
 
 func coalesceSpanStyle(ptr, def *SpanStyle) *SpanStyle {
-	if ptr == nil {
+	var zero *SpanStyle
+	if ptr == zero {
 		return def
 	}
 	return ptr
@@ -323,17 +293,17 @@ func lerpSpanStyle(start, stop *SpanStyle, fraction float32) *SpanStyle {
 }
 
 func spanStyleResolveDefaults(s *SpanStyle) *SpanStyle {
-	s = coalesceSpanStyle(s, spanStyleUnspecified)
+	localSs := coalesceSpanStyle(s, spanStyleUnspecified)
 	return &SpanStyle{
-		color:          s.color.TakeOrElse(DefaultColor),
-		fontSize:       s.fontSize.TakeOrElse(DefaultFontSize),
-		fontWeight:     s.fontWeight.TakeOrElse(DefaultFontWeight),
-		fontStyle:      s.fontStyle.TakeOrElse(DefaultFontStyle),
-		fontFamily:     font.TakeOrElseFontFamily(s.fontFamily, DefaultFontFamily),
-		letterSpacing:  s.letterSpacing.TakeOrElse(DefaultLetterSpacing),
-		background:     s.background.TakeOrElse(DefaultBackgroundColor),
-		textDecoration: style.TakeOrElseTextDecoration(s.textDecoration, DefaultTextDecoration),
-		shadow:         graphics.TakeOrElseShadow(s.shadow, DefaultShadow),
+		color:          localSs.color.TakeOrElse(DefaultColor),
+		fontSize:       localSs.fontSize.TakeOrElse(DefaultFontSize),
+		fontWeight:     localSs.fontWeight.TakeOrElse(DefaultFontWeight),
+		fontStyle:      localSs.fontStyle.TakeOrElse(DefaultFontStyle),
+		fontFamily:     font.TakeOrElseFontFamily(localSs.fontFamily, DefaultFontFamily),
+		letterSpacing:  localSs.letterSpacing.TakeOrElse(DefaultLetterSpacing),
+		background:     localSs.background.TakeOrElse(DefaultBackgroundColor),
+		textDecoration: style.TakeOrElseTextDecoration(localSs.textDecoration, DefaultTextDecoration),
+		shadow:         graphics.TakeOrElseShadow(localSs.shadow, DefaultShadow),
 	}
 }
 
@@ -351,3 +321,16 @@ var SpanStyleCompanion = companions.NewStructCompanion(
 	coalesceSpanStyle,
 	copySpanStyle,
 )
+
+// ensureMutableSpanStyle panics if ts is a sentinel value.
+// Call this at the start of any function that mutates a SpanStyle to fail-fast on misuse.
+func ensureMutableSpanStyle(s *SpanStyle) {
+	if SpanStyleCompanion.IsUnspecified(s) {
+		panic("attempt to mutate sentinel; use XCompanion.Copy first")
+	}
+}
+
+// SpanStyleFromOptions builds a SpanStyle from options applied over the sentinel.
+func SpanStyleFromOptions(options ...SpanStyleOption) *SpanStyle {
+	return SpanStyleCompanion.Copy(spanStyleUnspecified, options...)
+}

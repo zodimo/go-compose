@@ -60,7 +60,7 @@ func NavigationDrawerItem(
 						// We just layout children.
 
 						defaultIconsSizeProvider := compose.LocalTextStyle.Provides(
-							text.CopyTextStyleWithOptions(text.TextStyleCompanion.Unspecified(), text.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
+							text.TextStyleCompanion.Copy(text.TextStyleCompanion.Unspecified(), text.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
 						)
 
 						if icon != nil {

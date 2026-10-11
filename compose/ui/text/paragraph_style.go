@@ -27,55 +27,29 @@ type ParagraphStyle struct {
 	lineBreak     style.LineBreak
 }
 
-// ParagraphStyleOptions carries one field per ParagraphStyle property. A field left at
-// its sentinel (or nil) means "leave the source value alone"; a field set to any other
-// value overrides it. Options start from the sentinel set, so they defer by default.
-type ParagraphStyleOptions struct {
-	TextAlign     style.TextAlign
-	TextDirection style.TextDirection
-	LineHeight    unit.TextUnit
-	LineBreak     style.LineBreak
-}
-
-func newParagraphStyleOptions() ParagraphStyleOptions {
-	return ParagraphStyleOptions{
-		TextAlign:     style.TextAlignUnspecified,
-		TextDirection: style.TextDirectionUnspecified,
-		LineHeight:    unit.TextUnitUnspecified,
-		LineBreak:     style.LineBreakUnspecified,
-	}
-}
-
-type ParagraphStyleOption = func(*ParagraphStyleOptions)
-
-// asOption lets an already-populated ParagraphStyleOptions seed a
-// ParagraphStyleOptions target, so the whole struct can be passed as a single
-// ParagraphStyleOption.
-func (o ParagraphStyleOptions) asOption(opts *ParagraphStyleOptions) {
-	*opts = o
-}
+type ParagraphStyleOption = func(*ParagraphStyle)
 
 func ParagraphStyleWithTextAlign(textAlign style.TextAlign) ParagraphStyleOption {
-	return func(opts *ParagraphStyleOptions) {
-		opts.TextAlign = textAlign
+	return func(opts *ParagraphStyle) {
+		opts.textAlign = textAlign
 	}
 }
 
 func ParagraphStyleWithTextDirection(textDirection style.TextDirection) ParagraphStyleOption {
-	return func(opts *ParagraphStyleOptions) {
-		opts.TextDirection = textDirection
+	return func(opts *ParagraphStyle) {
+		opts.textDirection = textDirection
 	}
 }
 
 func ParagraphStyleWithLineHeight(lineHeight unit.TextUnit) ParagraphStyleOption {
-	return func(opts *ParagraphStyleOptions) {
-		opts.LineHeight = lineHeight
+	return func(opts *ParagraphStyle) {
+		opts.lineHeight = lineHeight
 	}
 }
 
 func ParagraphStyleWithLineBreak(lineBreak style.LineBreak) ParagraphStyleOption {
-	return func(opts *ParagraphStyleOptions) {
-		opts.LineBreak = lineBreak
+	return func(opts *ParagraphStyle) {
+		opts.lineBreak = lineBreak
 	}
 }
 
@@ -92,7 +66,8 @@ func (ps ParagraphStyle) LineBreak() style.LineBreak {
 	return ps.lineBreak
 }
 
-func stringParagraphStyle(s *ParagraphStyle) string {	s = coalesceParagraphStyle(s, paragraphStyleUnspecified)
+func stringParagraphStyle(s *ParagraphStyle) string {
+	s = coalesceParagraphStyle(s, paragraphStyleUnspecified)
 	if !isSpecifiedParagraphStyle(s) {
 		return "ParagraphStyle{Unspecified}"
 	}
@@ -187,28 +162,11 @@ func coalesceParagraphStyle(ptr, def *ParagraphStyle) *ParagraphStyle {
 // source, so an option that only touches one field leaves the rest intact.
 func copyParagraphStyle(s *ParagraphStyle, options ...func(*ParagraphStyle)) *ParagraphStyle {
 	s = coalesceParagraphStyle(s, paragraphStyleUnspecified)
-	work := *s
+	changed := *paragraphStyleUnspecified
 	for _, option := range options {
-		option(&work)
+		option(&changed)
 	}
-	return &work
-}
-
-// copyParagraphStyleWithOptions is the option-constructor form used by callers.
-// Options are applied to a fresh ParagraphStyleOptions seeded with sentinels, then
-// only the fields the caller actually set are overlaid onto s.
-func copyParagraphStyleWithOptions(s *ParagraphStyle, options ...ParagraphStyleOption) *ParagraphStyle {
-	s = coalesceParagraphStyle(s, paragraphStyleUnspecified)
-	opts := newParagraphStyleOptions()
-	for _, option := range options {
-		option(&opts)
-	}
-	return &ParagraphStyle{
-		textAlign:     opts.TextAlign.TakeOrElse(s.textAlign),
-		textDirection: opts.TextDirection.TakeOrElse(s.textDirection),
-		lineHeight:    opts.LineHeight.TakeOrElse(s.lineHeight),
-		lineBreak:     opts.LineBreak.TakeOrElse(s.lineBreak),
-	}
+	return mergeParagraphStyle(s, &changed)
 }
 
 // lerpParagraphStyle interpolates between two ParagraphStyles.
@@ -249,3 +207,16 @@ var ParagraphStyleCompanion = companions.NewStructCompanion(
 	coalesceParagraphStyle,
 	copyParagraphStyle,
 )
+
+// ensureMutableParagraphStyle panics if ts is a sentinel value.
+// Call this at the start of any function that mutates a SpanStyle to fail-fast on misuse.
+func ensureMutableParagraphStyle(s *ParagraphStyle) {
+	if ParagraphStyleCompanion.IsUnspecified(s) {
+		panic("attempt to mutate sentinel; use XCompanion.Copy first")
+	}
+}
+
+// SpanStyleFromOptions builds a SpanStyle from options applied over the sentinel.
+func ParagraphStyleFromOptions(options ...ParagraphStyleOption) *ParagraphStyle {
+	return ParagraphStyleCompanion.Copy(paragraphStyleUnspecified, options...)
+}

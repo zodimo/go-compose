@@ -53,7 +53,7 @@ func NavigationRailItem(
 		// Usually 56x32dp or similar for indicator.
 		// We'll wrap the icon in a Surface that acts as the indicator.
 		defaultIconsSizeProvider := compose.LocalTextStyle.Provides(
-			text.CopyTextStyleWithOptions(text.TextStyleCompanion.Unspecified(), text.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
+			text.TextStyleCompanion.Copy(text.TextStyleCompanion.Unspecified(), text.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
 		)
 
 		return column.Column(

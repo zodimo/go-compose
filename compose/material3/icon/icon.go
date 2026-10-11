@@ -121,7 +121,8 @@ func iconFromSymbol(name SymbolName, opts IconOptions) Composable {
 			string(name),
 			text.WithModifier(opts.Modifier),
 			text.WithTextStyle(
-				uitext.TextStyleFromOptions(
+				uitext.TextStyleCompanion.Copy(
+					uitext.TextStyleCompanion.Unspecified(),
 					uitext.WithFontFamily(MaterialSymbolsFontFamily),
 					uitext.WithFontSize(fontSize),
 					uitext.WithColor(iconColor),

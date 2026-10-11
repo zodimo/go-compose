@@ -52,7 +52,7 @@ func TestCopyTextStyleWithOptions_OptionsOverride(t *testing.T) {
 			WithFontSize(unit.Sp(16)),
 			WithFontWeight(font.FontWeightBold),
 		)
-		cp := CopyTextStyleWithOptions(base,
+		cp := copyTextStyle(base,
 			WithColor(graphics.ColorBlue),
 			WithFontSize(unit.Sp(22)),
 		)
@@ -76,7 +76,7 @@ func TestCopyTextStyleWithOptions_OptionsOverride(t *testing.T) {
 	// style that simply never set it.
 	t.Run("passing_the_sentinel_defers_to_the_source", func(t *testing.T) {
 		base := TextStyleFromOptions(WithColor(graphics.ColorRed))
-		cp := CopyTextStyleWithOptions(base, WithColor(graphics.ColorUnspecified))
+		cp := copyTextStyle(base, WithColor(graphics.ColorUnspecified))
 		if cp.Color() != graphics.ColorRed {
 			t.Errorf("Color() = %v, want Red — an unspecified option value must defer to the source", cp.Color())
 		}
@@ -86,11 +86,12 @@ func TestCopyTextStyleWithOptions_OptionsOverride(t *testing.T) {
 		base := TextStyleFromOptions(WithColor(graphics.ColorRed), WithFontSize(unit.Sp(16)))
 		// Rebuild from the sentinel and set only what should remain — the way to
 		// express "no color" is to never apply a color option.
-		cleared := CopyTextStyleWithOptions(
+		cleared := TextStyleCompanion.Copy(
 			TextStyleCompanion.Unspecified(),
 			WithFontSize(unit.Sp(16)),
 		)
-		if cleared.Color() != graphics.ColorUnspecified {
+
+		if !cleared.Color().IsUnspecified() {
 			t.Errorf("Color() = %v, want Unspecified", cleared.Color())
 		}
 		if cleared.FontSize() != unit.Sp(16) {
@@ -122,7 +123,7 @@ func TestCompanions_Unspecified(t *testing.T) {
 
 	// A derived style is never the sentinel, even when built with no options.
 	if TextStyleFromOptions() == TextStyleCompanion.Unspecified() {
-		t.Error("TextStyleFromOptions() must return a fresh specified style, not the sentinel")
+		t.Error("textStyleFromOptions() must return a fresh specified style, not the sentinel")
 	}
 }
 
@@ -152,9 +153,9 @@ func TestCompanions_IsSpecifiedAndString(t *testing.T) {
 func TestNilSafety(t *testing.T) {
 	t.Run("copy_from_nil_does_not_panic", func(t *testing.T) {
 		var nilTS *TextStyle
-		ts := CopyTextStyleWithOptions(nilTS, WithColor(graphics.ColorRed))
+		ts := copyTextStyle(nilTS, WithColor(graphics.ColorRed))
 		if ts == nil {
-			t.Fatal("CopyTextStyleWithOptions(nil) returned nil")
+			t.Fatal("copyTextStyle(nil) returned nil")
 		}
 		if ts.Color() != graphics.ColorRed {
 			t.Errorf("Color() = %v, want Red", ts.Color())
@@ -163,14 +164,14 @@ func TestNilSafety(t *testing.T) {
 
 	t.Run("span_and_paragraph_copy_from_nil", func(t *testing.T) {
 		var nilSpan *SpanStyle
-		if s := CopySpanStyleWithOptions(nilSpan, SpanStyleWithFontWeight(font.FontWeightBold)); s == nil {
+		if s := copySpanStyle(nilSpan, SpanStyleWithFontWeight(font.FontWeightBold)); s == nil {
 			t.Error("CopySpanStyleWithOptions(nil) returned nil")
 		} else if s.FontWeight() != font.FontWeightBold {
 			t.Errorf("FontWeight() = %v, want Bold", s.FontWeight())
 		}
 
 		var nilPara *ParagraphStyle
-		if p := CopyParagraphStyleWithOptions(nilPara, ParagraphStyleWithTextAlign(style.TextAlignMiddle)); p == nil {
+		if p := copyParagraphStyle(nilPara, ParagraphStyleWithTextAlign(style.TextAlignMiddle)); p == nil {
 			t.Error("CopyParagraphStyleWithOptions(nil) returned nil")
 		} else if p.TextAlign() != style.TextAlignMiddle {
 			t.Errorf("TextAlign() = %v, want Middle", p.TextAlign())
@@ -183,7 +184,7 @@ func TestNilSafety(t *testing.T) {
 		if resolved == nil {
 			t.Fatal("ResolveTextStyleDefaults(nil) returned nil")
 		}
-		if resolved.FontSize() != DefaultFontSize {
+		if !resolved.FontSize().Equals(DefaultFontSize) {
 			t.Errorf("FontSize() = %v, want %v", resolved.FontSize(), DefaultFontSize)
 		}
 	})
@@ -310,15 +311,15 @@ func TestCopyDoesNotMutateSource(t *testing.T) {
 	)
 	before := TextStyleCompanion.String(source)
 
-	_ = CopyTextStyleWithOptions(source, WithColor(graphics.ColorBlue))
-	_ = CopyTextStyleWithOptions(source, WithFontSize(unit.Sp(40)))
+	_ = copyTextStyle(source, WithColor(graphics.ColorBlue))
+	_ = copyTextStyle(source, WithFontSize(unit.Sp(40)))
 
 	if after := TextStyleCompanion.String(source); after != before {
 		t.Errorf("source mutated by copy:\n before: %s\n after:  %s", before, after)
 	}
 
 	// Options must not be applied in place to a non-sentinel source either.
-	cp := CopyTextStyleWithOptions(source, WithColor(graphics.ColorBlue))
+	cp := copyTextStyle(source, WithColor(graphics.ColorBlue))
 	if source.Color() != graphics.ColorRed {
 		t.Error("source Color changed after copy")
 	}

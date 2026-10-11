@@ -85,7 +85,7 @@ func WithTextStyle(style *text.TextStyle) TreeOption {
 
 func WithTextStyleOption(textStyleOption text.TextStyleOption) TreeOption {
 	return func(o *TreeOptions) {
-		o.TextStyle = text.CopyTextStyleWithOptions(o.TextStyle, textStyleOption)
+		o.TextStyle = text.TextStyleCompanion.Copy(o.TextStyle, textStyleOption)
 	}
 }
 

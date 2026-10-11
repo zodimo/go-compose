@@ -10,7 +10,7 @@ import (
 func TextStyleFromGioFont(gf gioFont.Font) *TextStyle {
 	fontFamily, fontWeight, fontStyle := font.FromGioFont(gf)
 
-	return textStyleFromOptions(
+	return TextStyleFromOptions(
 		WithFontFamily(fontFamily),
 		WithFontWeight(fontWeight),
 		WithFontStyle(fontStyle),
