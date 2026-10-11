@@ -8,22 +8,8 @@ func FromGioTextAlign(gioTextAlign gioText.Alignment) TextAlign {
 	return TextAlign(gioTextAlign)
 }
 
-func TextAlignToGioTextAlignment(t TextAlign) gioText.Alignment {
-	align := t.TakeOrElse(TextAlignStart)
-	return gioText.Alignment(align)
-}
-
-func LineBreakToGioWrapPolicy(l LineBreak) gioText.WrapPolicy {
-	linebreak := l.TakeOrElse(LineBreakParagraph)
-	return gioText.WrapPolicy(linebreak)
-}
-
-func GioWrapPolicyToLineBreak(gioWrapPolicy gioText.WrapPolicy) LineBreak {
-	return LineBreak(gioWrapPolicy)
-}
-
 // textAlignToGioAlign converts compose TextAlign to gio text.Alignment.
-func TextAlignToGioAlign(textAlign TextAlign) gioText.Alignment {
+func TextAlignToGioTextAlignment(textAlign TextAlign) gioText.Alignment {
 	switch textAlign {
 	case TextAlignLeft:
 		return gioText.Start
@@ -37,4 +23,13 @@ func TextAlignToGioAlign(textAlign TextAlign) gioText.Alignment {
 	default:
 		return gioText.Start
 	}
+}
+
+func LineBreakToGioWrapPolicy(l LineBreak) gioText.WrapPolicy {
+	linebreak := l.TakeOrElse(LineBreakParagraph)
+	return gioText.WrapPolicy(linebreak)
+}
+
+func GioWrapPolicyToLineBreak(gioWrapPolicy gioText.WrapPolicy) LineBreak {
+	return LineBreak(gioWrapPolicy)
 }

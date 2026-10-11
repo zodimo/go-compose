@@ -92,7 +92,7 @@ func (c *TextLayoutController) SetTruncator(truncator string) {
 
 // SetAlignment sets text alignment.
 func (c *TextLayoutController) SetAlignment(alignment style.TextAlign) {
-	c.alignment = style.TextAlignToGioAlign(alignment)
+	c.alignment = style.TextAlignToGioTextAlignment(alignment)
 	c.view.Alignment = c.alignment
 }
 
