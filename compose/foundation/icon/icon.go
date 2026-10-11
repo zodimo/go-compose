@@ -9,7 +9,7 @@ import (
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
-	"github.com/zodimo/go-compose/compose/ui/next/platform"
+	"github.com/zodimo/go-compose/compose/ui/platform"
 	uitext "github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 

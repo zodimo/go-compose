@@ -14,7 +14,7 @@ import (
 	gioText "gioui.org/text"
 	gioUnit "gioui.org/unit"
 	"gioui.org/widget"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/compose/ui/next/unit"
 
 	"github.com/zodimo/go-compose/compose/ui/next/text"
 	uiFont "github.com/zodimo/go-compose/compose/ui/next/text/font"

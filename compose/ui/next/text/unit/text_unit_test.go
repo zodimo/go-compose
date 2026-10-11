@@ -151,14 +151,14 @@ func TestLerpTextUnit(t *testing.T) {
 }
 
 func TestTextUnitString(t *testing.T) {
-	if Sp(12.5).String() != "12.5.sp" {
-		t.Errorf("Expected 12.5.sp, got %v", Sp(12.5).String())
+	if Sp(12.5).String() != "TextUnit{12.5 Sp}" {
+		t.Errorf("Expected TextUnit{12.5 Sp}, got %v", Sp(12.5).String())
 	}
 	// Note: Float string formatting might vary slightly, but 12.5 is exact.
-	if Em(2).String() != "2.em" {
-		t.Errorf("Expected 2.em, got %v", Em(2).String())
+	if Em(2).String() != "TextUnit{2 Em}" {
+		t.Errorf("Expected TextUnit{2 Em}, got %v", Em(2).String())
 	}
-	if TextUnitUnspecified.String() != "Unspecified" {
-		t.Errorf("Expected Unspecified, got %v", TextUnitUnspecified.String())
+	if TextUnitUnspecified.String() != "TextUnit{Unspecified}" {
+		t.Errorf("Expected TextUnit{Unspecified}, got %v", TextUnitUnspecified.String())
 	}
 }

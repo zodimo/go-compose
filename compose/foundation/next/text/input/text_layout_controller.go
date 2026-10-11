@@ -10,7 +10,8 @@ import (
 	gioOp "gioui.org/op"
 	gioText "gioui.org/text"
 	gioUnit "gioui.org/unit"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	textunit "github.com/zodimo/go-compose/compose/ui/next/text/unit"
+	"github.com/zodimo/go-compose/compose/ui/next/unit"
 
 	"github.com/zodimo/go-compose/compose/foundation/next/text/widget"
 	"github.com/zodimo/go-compose/compose/ui/next/text"
@@ -218,9 +219,9 @@ func (c *TextLayoutController) GetFont() font.Font {
 }
 
 // GetFontSize returns the font size in Sp.
-func (c *TextLayoutController) GetFontSize() unit.TextUnit {
+func (c *TextLayoutController) GetFontSize() textunit.TextUnit {
 	if c.textStyle == nil {
-		return unit.Sp(14) // Default font size
+		return textunit.Sp(14) // Default font size
 	}
 	return c.textStyle.FontSize()
 }

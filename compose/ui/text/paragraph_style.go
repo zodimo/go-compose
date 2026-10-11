@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/zodimo/go-compose/compose/ui/text/style"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/compose/ui/text/unit"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )

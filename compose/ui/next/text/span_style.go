@@ -7,7 +7,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/next/text/font"
 	"github.com/zodimo/go-compose/compose/ui/next/text/intl"
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/compose/ui/next/text/unit"
 	"github.com/zodimo/go-compose/pkg/floatutils/lerp"
 	"github.com/zodimo/go-sentinel-helper/sentinel/stringutils"
 )

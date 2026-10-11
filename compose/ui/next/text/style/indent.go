@@ -3,7 +3,7 @@ package style
 import (
 	"fmt"
 
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/compose/ui/next/text/unit"
 )
 
 var TextIndentUnspecified = &TextIndent{FirstLine: unit.TextUnitUnspecified, RestLine: unit.TextUnitUnspecified}

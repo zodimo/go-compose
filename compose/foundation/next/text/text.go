@@ -19,7 +19,7 @@ import (
 
 	"github.com/zodimo/go-compose/compose/ui/next/text/font"
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/compose/ui/next/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/modifier"
 	"github.com/zodimo/go-ternary"

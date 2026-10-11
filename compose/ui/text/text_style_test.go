@@ -6,7 +6,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/compose/ui/text/unit"
 )
 
 func TestTextStyleUnspecified(t *testing.T) {
@@ -32,7 +32,7 @@ func TestTextStyle_Getters(t *testing.T) {
 	testFontWeight := font.FontWeightBold
 	testFontStyle := font.FontStyleItalic
 	testLetterSpacing := unit.Sp(2)
-	testTextAlign := style.TextAlignMiddle
+	testTextAlign := style.TextAlignCenter
 	testTextDirection := style.TextDirectionRtl
 	testLineHeight := unit.Sp(32)
 	testLineBreak := style.LineBreakSimple
@@ -245,7 +245,7 @@ func TestTextStyleFromOptions(t *testing.T) {
 		ts := TextStyleFromOptions(
 			WithColor(graphics.ColorRed),
 			WithFontSize(unit.Sp(18)),
-			WithTextAlign(style.TextAlignMiddle),
+			WithTextAlign(style.TextAlignCenter),
 		)
 
 		if ts.Color() != graphics.ColorRed {
@@ -254,8 +254,8 @@ func TestTextStyleFromOptions(t *testing.T) {
 		if ts.FontSize() != unit.Sp(18) {
 			t.Errorf("FontSize() = %v, want %v", ts.FontSize(), unit.Sp(18))
 		}
-		if ts.TextAlign() != style.TextAlignMiddle {
-			t.Errorf("TextAlign() = %v, want %v", ts.TextAlign(), style.TextAlignMiddle)
+		if ts.TextAlign() != style.TextAlignCenter {
+			t.Errorf("TextAlign() = %v, want %v", ts.TextAlign(), style.TextAlignCenter)
 		}
 	})
 }

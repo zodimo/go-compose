@@ -21,3 +21,20 @@ func LineBreakToGioWrapPolicy(l LineBreak) gioText.WrapPolicy {
 func GioWrapPolicyToLineBreak(gioWrapPolicy gioText.WrapPolicy) LineBreak {
 	return LineBreak(gioWrapPolicy)
 }
+
+// textAlignToGioAlign converts compose TextAlign to gio text.Alignment.
+func TextAlignToGioAlign(textAlign TextAlign) gioText.Alignment {
+	switch textAlign {
+	case TextAlignLeft:
+		return gioText.Start
+	case TextAlignCenter:
+		return gioText.Middle
+	case TextAlignRight:
+		return gioText.End
+	case TextAlignJustify:
+		// Gio doesn't support justify, fall back to Start
+		return gioText.Start
+	default:
+		return gioText.Start
+	}
+}

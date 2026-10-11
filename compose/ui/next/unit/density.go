@@ -88,7 +88,7 @@ func (d *densityImpl) DpRoundToPx(dp Dp) int {
 }
 
 func (d *densityImpl) TextUnitToPx(tu TextUnit) float32 {
-	if tu.Type() != TextUnitTypeSp {
+	if !tu.IsSp() {
 		panic("Only Sp can convert to Px")
 	}
 	// Sp -> Dp -> Px

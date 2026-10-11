@@ -6,7 +6,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/compose/ui/text/unit"
 )
 
 // === Options must override, and must not be swallowed ===
@@ -26,7 +26,7 @@ func TestCopyTextStyleWithOptions_OptionsOverride(t *testing.T) {
 			WithFontSize(unit.Sp(20)),
 			WithColor(graphics.ColorRed),
 			WithFontWeight(font.FontWeightBold),
-			WithTextAlign(style.TextAlignMiddle),
+			WithTextAlign(style.TextAlignCenter),
 			WithLineHeight(unit.Sp(30)),
 		)
 		if ts.FontSize() != unit.Sp(20) {
@@ -38,7 +38,7 @@ func TestCopyTextStyleWithOptions_OptionsOverride(t *testing.T) {
 		if ts.FontWeight() != font.FontWeightBold {
 			t.Errorf("FontWeight() = %v, want Bold", ts.FontWeight())
 		}
-		if ts.TextAlign() != style.TextAlignMiddle {
+		if ts.TextAlign() != style.TextAlignCenter {
 			t.Errorf("TextAlign() = %v, want Middle", ts.TextAlign())
 		}
 		if ts.LineHeight() != unit.Sp(30) {
@@ -171,9 +171,9 @@ func TestNilSafety(t *testing.T) {
 		}
 
 		var nilPara *ParagraphStyle
-		if p := copyParagraphStyle(nilPara, ParagraphStyleWithTextAlign(style.TextAlignMiddle)); p == nil {
+		if p := copyParagraphStyle(nilPara, ParagraphStyleWithTextAlign(style.TextAlignCenter)); p == nil {
 			t.Error("CopyParagraphStyleWithOptions(nil) returned nil")
-		} else if p.TextAlign() != style.TextAlignMiddle {
+		} else if p.TextAlign() != style.TextAlignCenter {
 			t.Errorf("TextAlign() = %v, want Middle", p.TextAlign())
 		}
 	})

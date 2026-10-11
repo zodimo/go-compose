@@ -3,7 +3,7 @@ package style
 import (
 	"testing"
 
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/compose/ui/next/text/unit"
 )
 
 func TestTextIndentNone(t *testing.T) {

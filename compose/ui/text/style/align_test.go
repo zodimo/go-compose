@@ -10,10 +10,13 @@ func TestTextAlignConstants(t *testing.T) {
 		align    TextAlign
 		expected int
 	}{
-		{"Unspecified", TextAlignUnspecified, 99},
-		{"Start", TextAlignStart, 0},
-		{"End", TextAlignEnd, 1},
-		{"Middle", TextAlignMiddle, 2},
+		{"Unspecified", TextAlignUnspecified, 0},
+		{"Left", TextAlignLeft, 1},
+		{"Right", TextAlignRight, 2},
+		{"Center", TextAlignCenter, 3},
+		{"Justify", TextAlignJustify, 4},
+		{"Start", TextAlignStart, 5},
+		{"End", TextAlignEnd, 6},
 	}
 
 	for _, tt := range tests {
@@ -31,10 +34,13 @@ func TestTextAlign_String(t *testing.T) {
 		expected string
 	}{
 		{TextAlignUnspecified, "Unspecified"},
+		{TextAlignLeft, "Left"},
+		{TextAlignRight, "Right"},
+		{TextAlignCenter, "Center"},
+		{TextAlignJustify, "Justify"},
 		{TextAlignStart, "Start"},
 		{TextAlignEnd, "End"},
-		{TextAlignMiddle, "Middle"},
-		{TextAlign(100), "Invalid"},
+		{TextAlign(99), "Invalid"},
 	}
 
 	for _, tt := range tests {
@@ -53,9 +59,12 @@ func TestTextAlign_IsSpecified(t *testing.T) {
 		expected bool
 	}{
 		{"Unspecified", TextAlignUnspecified, false},
+		{"Left", TextAlignLeft, true},
+		{"Right", TextAlignRight, true},
+		{"Center", TextAlignCenter, true},
+		{"Justify", TextAlignJustify, true},
 		{"Start", TextAlignStart, true},
 		{"End", TextAlignEnd, true},
-		{"Middle", TextAlignMiddle, true},
 	}
 
 	for _, tt := range tests {
@@ -71,9 +80,12 @@ func TestTextAlignValues(t *testing.T) {
 	values := TextAlignValues()
 
 	expected := []TextAlign{
+		TextAlignLeft,
+		TextAlignRight,
+		TextAlignCenter,
+		TextAlignJustify,
 		TextAlignStart,
 		TextAlignEnd,
-		TextAlignMiddle,
 	}
 
 	if len(values) != len(expected) {
@@ -100,10 +112,15 @@ func TestTextAlignValueOf(t *testing.T) {
 		expected    TextAlign
 		expectError bool
 	}{
-		{99, TextAlignUnspecified, false},
-		{0, TextAlignStart, false},
-		{1, TextAlignEnd, false},
-		{2, TextAlignMiddle, false},
+		{0, TextAlignUnspecified, false},
+		{1, TextAlignLeft, false},
+		{2, TextAlignRight, false},
+		{3, TextAlignCenter, false},
+		{4, TextAlignJustify, false},
+		{5, TextAlignStart, false},
+		{6, TextAlignEnd, false},
+		{-1, TextAlignUnspecified, true},
+		{7, TextAlignUnspecified, true},
 		{100, TextAlignUnspecified, true},
 	}
 
@@ -128,13 +145,13 @@ func TestTextAlignValueOf(t *testing.T) {
 }
 
 func TestTextAlign_TakeOrElse(t *testing.T) {
-	defaultAlign := TextAlignStart
+	defaultAlign := TextAlignLeft
 
 	t.Run("specified value returns itself", func(t *testing.T) {
-		align := TextAlignMiddle
+		align := TextAlignCenter
 		result := align.TakeOrElse(defaultAlign)
-		if result != TextAlignMiddle {
-			t.Errorf("TakeOrElse() = %v, want %v", result, TextAlignMiddle)
+		if result != TextAlignCenter {
+			t.Errorf("TakeOrElse() = %v, want %v", result, TextAlignCenter)
 		}
 	})
 
@@ -143,6 +160,14 @@ func TestTextAlign_TakeOrElse(t *testing.T) {
 		result := align.TakeOrElse(defaultAlign)
 		if result != defaultAlign {
 			t.Errorf("TakeOrElse() = %v, want %v", result, defaultAlign)
+		}
+	})
+
+	t.Run("block is not called when specified", func(t *testing.T) {
+		align := TextAlignRight
+		takeAlign := align.TakeOrElse(defaultAlign)
+		if takeAlign != TextAlignRight {
+			t.Errorf("TakeOrElse() = %v, want %v", takeAlign, TextAlignRight)
 		}
 	})
 
@@ -157,18 +182,18 @@ func TestTextAlign_TakeOrElse(t *testing.T) {
 
 func TestTextAlign_Equality(t *testing.T) {
 	t.Run("same values are equal", func(t *testing.T) {
-		a := TextAlignMiddle
-		b := TextAlignMiddle
+		a := TextAlignCenter
+		b := TextAlignCenter
 		if a != b {
-			t.Errorf("TextAlignMiddle != TextAlignMiddle")
+			t.Errorf("TextAlignCenter != TextAlignCenter")
 		}
 	})
 
 	t.Run("different values are not equal", func(t *testing.T) {
-		a := TextAlignStart
-		b := TextAlignEnd
+		a := TextAlignLeft
+		b := TextAlignRight
 		if a == b {
-			t.Errorf("TextAlignStart == TextAlignEnd")
+			t.Errorf("TextAlignLeft == TextAlignRight")
 		}
 	})
 }

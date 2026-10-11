@@ -13,9 +13,9 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/unit"
 
 	"github.com/zodimo/go-compose/compose/foundation/next/text/widget"
-	"github.com/zodimo/go-compose/compose/ui/next/text"
-	uiFont "github.com/zodimo/go-compose/compose/ui/next/text/font"
-	"github.com/zodimo/go-compose/compose/ui/next/text/style"
+	"github.com/zodimo/go-compose/compose/ui/text"
+	uiFont "github.com/zodimo/go-compose/compose/ui/text/font"
+	"github.com/zodimo/go-compose/compose/ui/text/style"
 )
 
 // TextLayoutController manages text layout state and bridges between
@@ -92,7 +92,7 @@ func (c *TextLayoutController) SetTruncator(truncator string) {
 
 // SetAlignment sets text alignment.
 func (c *TextLayoutController) SetAlignment(alignment style.TextAlign) {
-	c.alignment = textAlignToGioAlign(alignment)
+	c.alignment = style.TextAlignToGioAlign(alignment)
 	c.view.Alignment = c.alignment
 }
 
@@ -161,23 +161,6 @@ func (c *TextLayoutController) TextView() *widget.TextView {
 // Source returns the text source adapter.
 func (c *TextLayoutController) Source() *TextSourceAdapter {
 	return c.source
-}
-
-// textAlignToGioAlign converts compose TextAlign to gio text.Alignment.
-func textAlignToGioAlign(textAlign style.TextAlign) gioText.Alignment {
-	switch textAlign {
-	case style.TextAlignLeft:
-		return gioText.Start
-	case style.TextAlignCenter:
-		return gioText.Middle
-	case style.TextAlignRight:
-		return gioText.End
-	case style.TextAlignJustify:
-		// Gio doesn't support justify, fall back to Start
-		return gioText.Start
-	default:
-		return gioText.Start
-	}
 }
 
 // ConfigureFromTextStyle applies settings from a TextStyle.

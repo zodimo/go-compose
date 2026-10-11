@@ -1,0 +1,41 @@
+package next
+
+import (
+	gioText "gioui.org/text"
+	"github.com/zodimo/go-compose/assets/fonts"
+	"github.com/zodimo/go-compose/compose"
+	"github.com/zodimo/go-compose/compose/ui/graphics"
+	"github.com/zodimo/go-compose/compose/ui/next/text"
+	"github.com/zodimo/go-compose/compose/ui/next/unit"
+)
+
+// LocalContentColor is a CompositionLocal containing the preferred content color for a given
+// position in the hierarchy. This typically represents the "on" color for a color in ColorScheme.
+// For example, if the background color is ColorScheme.surface, this color is typically set to
+// ColorScheme.onSurface.
+//
+// This color should be used for any typography / iconography, to ensure that the color of these
+// adjusts when the background color changes. For example, on a dark background, text should be
+// light, and on a light background, text should be dark.
+//
+// Defaults to Color.Black if no color has been explicitly set.
+var LocalContentColor = compose.CompositionLocalOf(func() graphics.Color {
+	return graphics.ColorBlack
+})
+
+var LocalTextShaper = compose.CompositionLocalOf(func() *text.TextShaper {
+	// Use bundled fonts collection which includes Go fonts + Noto Color Emoji
+	// for portable emoji support without relying on system fonts
+	shaper := gioText.NewShaper(gioText.NoSystemFonts(), gioText.WithCollection(fonts.Collection()))
+	return &text.TextShaper{Shaper: shaper}
+})
+
+var LocalTextStyle = compose.CompositionLocalOf(func() *text.TextStyle {
+	return text.TextStyleUnspecified
+})
+
+// LocalDensity.current
+
+var LocalDensity = compose.CompositionLocalOf(func() unit.Density {
+	panic("No Density provided")
+})

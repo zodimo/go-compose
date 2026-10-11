@@ -127,7 +127,7 @@ func UI() api.Composable {
 								return box.Box(
 									func(c api.Composer) api.Composer {
 										defaultIconsSizeProvider := compose.LocalTextStyle.Provides(
-											uiText.TextStyleCompanion.Copy(uiText.TextStyleCompanion.Unspecified(), uiText.WithFontSize(unit.NewTextUnit(24, unit.TextUnitTypeSp))),
+											uiText.TextStyleCompanion.Copy(uiText.TextStyleCompanion.Unspecified(), uiText.WithFontSize(unit.Sp(24))),
 										)
 										return compose.CompositionLocalProvider(
 											[]api.ProvidedValue{
@@ -193,7 +193,7 @@ func UI() api.Composable {
 												ftext.WithTextStyleOptions(
 													uiText.WithColor(textColor),
 												),
-												ftext.WithAlignment(style.TextAlignMiddle),
+												ftext.WithAlignment(style.TextAlignCenter),
 											)(c)
 										},
 										ui.EmptyModifier,

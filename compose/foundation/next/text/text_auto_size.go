@@ -4,7 +4,6 @@ import (
 	"math"
 
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
-	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // TextAutoSizeDefaults contains defaults for TextAutoSize APIs.
@@ -80,7 +79,7 @@ func (s *stepBasedTextAutoSize) init() {
 	}
 
 	// check if stepSize is too small
-	if s.stepSize.Type() == unit.TextUnitTypeSp && s.stepSize.Value() < 0.0001 {
+	if s.stepSize.IsSp() && s.stepSize.Value() < 0.0001 {
 		panic("AutoSize.StepBased: stepSize must be greater than or equal to 0.0001f.sp")
 	}
 

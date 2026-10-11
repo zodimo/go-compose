@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/compose/ui/next/text/unit"
 )
 
 func TestParagraphStyle_String(t *testing.T) {

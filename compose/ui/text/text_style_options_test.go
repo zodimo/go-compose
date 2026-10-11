@@ -7,7 +7,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/compose/ui/text/unit"
 )
 
 // === Span Style Options ===
@@ -101,7 +101,7 @@ func TestWithTextAlign(t *testing.T) {
 	testCases := []style.TextAlign{
 		style.TextAlignStart,
 		style.TextAlignEnd,
-		style.TextAlignMiddle,
+		style.TextAlignCenter,
 	}
 
 	for _, tc := range testCases {
@@ -172,7 +172,7 @@ func TestTextStyleOptions_Chaining(t *testing.T) {
 		WithLetterSpacing(unit.Sp(1)),
 		WithBackground(graphics.ColorYellow),
 		// Paragraph style options
-		WithTextAlign(style.TextAlignMiddle),
+		WithTextAlign(style.TextAlignCenter),
 		WithTextDirection(style.TextDirectionRtl),
 		WithLineHeight(unit.Sp(30)),
 		WithLineBreak(style.LineBreakSimple),
@@ -199,8 +199,8 @@ func TestTextStyleOptions_Chaining(t *testing.T) {
 	}
 
 	// Verify all paragraph style values
-	if ts.TextAlign() != style.TextAlignMiddle {
-		t.Errorf("Chained TextAlign() = %v, want %v", ts.TextAlign(), style.TextAlignMiddle)
+	if ts.TextAlign() != style.TextAlignCenter {
+		t.Errorf("Chained TextAlign() = %v, want %v", ts.TextAlign(), style.TextAlignCenter)
 	}
 	if ts.TextDirection() != style.TextDirectionRtl {
 		t.Errorf("Chained TextDirection() = %v, want %v", ts.TextDirection(), style.TextDirectionRtl)

@@ -8,12 +8,13 @@ import (
 
 	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/next/text/input"
+	composenext "github.com/zodimo/go-compose/compose/next"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
+	"github.com/zodimo/go-compose/compose/ui/next/platform"
 	"github.com/zodimo/go-compose/compose/ui/next/text"
-	"github.com/zodimo/go-compose/compose/ui/platform"
-	uiText "github.com/zodimo/go-compose/compose/ui/text"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	uiText "github.com/zodimo/go-compose/compose/ui/next/text"
+	"github.com/zodimo/go-compose/compose/ui/next/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/internal/modifier"
 )
@@ -55,7 +56,7 @@ func BasicTextField(
 
 		c.StartBlock(BasicTextFieldNodeID)
 
-		textShaper := compose.LocalTextShaper.Current(c)
+		textShaper := composenext.LocalTextShaper.Current(c)
 		familyResolver := platform.LocalFontFamilyResolver.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 

@@ -2,7 +2,7 @@ package platform
 
 import (
 	"github.com/zodimo/go-compose/compose"
-	"github.com/zodimo/go-compose/compose/ui/unit"
+	"github.com/zodimo/go-compose/compose/ui/next/unit"
 )
 
 // LocalLayoutDirection is a CompositionLocal that provides the layout direction to the composition.
