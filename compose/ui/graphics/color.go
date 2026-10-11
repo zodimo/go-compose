@@ -172,11 +172,11 @@ func (c Color) ColorSpaceId() int {
 }
 
 func (c Color) IsSpecified() bool {
-	return isSpecifiedColor(c)
+	return ColorCompanion.IsSpecified(c)
 }
 
 func (c Color) IsUnspecified() bool {
-	return isUnspecifiedColor(c)
+	return ColorCompanion.IsUnspecified(c)
 }
 
 // === Sentinel operations ===

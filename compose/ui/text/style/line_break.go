@@ -46,7 +46,7 @@ func (l LineBreak) String() string {
 
 // IsSpecified returns true if it is not [LineBreakUnspecified].
 func (l LineBreak) IsSpecified() bool {
-	return isSpecifiedLineBreak(l)
+	return LineBreakCompanion.IsSpecified(l)
 }
 
 // === Sentinel operations ===

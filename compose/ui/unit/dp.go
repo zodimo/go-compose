@@ -103,12 +103,12 @@ func (d Dp) String() string {
 
 // IsSpecified checks if the Dp is specified (not NaN).
 func (d Dp) IsSpecified() bool {
-	return isSpecifiedDp(d)
+	return DpCompanion.IsSpecified(d)
 }
 
 // IsUnspecified checks if the Dp is unspecified (NaN).
 func (d Dp) IsUnspecified() bool {
-	return isUnspecifiedDp(d)
+	return DpCompanion.IsUnspecified(d)
 }
 
 // IsFinite returns true when it is finite.
@@ -274,7 +274,7 @@ func (o DpOffset) String() string {
 }
 
 func (o DpOffset) IsSpecified() bool {
-	return isSpecifiedDpOffset(o)
+	return DpOffsetCompanion.IsSpecified(o)
 }
 
 // === DpOffset sentinel operations ===
@@ -394,7 +394,7 @@ func (s DpSize) DivInt(other int) DpSize {
 }
 
 func (s DpSize) IsSpecified() bool {
-	return isSpecifiedDpSize(s)
+	return DpSizeCompanion.IsSpecified(s)
 }
 
 func (s DpSize) String() string {

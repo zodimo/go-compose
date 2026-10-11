@@ -207,7 +207,7 @@ var ShadowCompanion = companions.NewStructCompanion(
 
 // Short for isSpecifiedShadow
 func IsSpecifiedShadow(s *Shadow) bool {
-	return isSpecifiedShadow(s)
+	return ShadowCompanion.IsSpecified(s)
 }
 func TakeOrElseShadow(s, def *Shadow) *Shadow {
 	return takeOrElseShadow(s, def)

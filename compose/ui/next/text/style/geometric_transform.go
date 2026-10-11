@@ -56,7 +56,7 @@ func StringTextGeometricTransform(gt *TextGeometricTransform) string {
 }
 
 func IsSpecifiedTextGeometricTransform(gt *TextGeometricTransform) bool {
-	return isSpecifiedTextGeometricTransform(gt)
+	return TextGeometricTransformCompanion.IsSpecified(gt)
 }
 
 func TakeOrElseTextGeometricTransform(gt *TextGeometricTransform, defaultGT *TextGeometricTransform) *TextGeometricTransform {

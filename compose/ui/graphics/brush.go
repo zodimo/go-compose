@@ -290,7 +290,7 @@ var BrushCompanion = companions.NewStructCompanion(
 
 // Short for IsSpecifiedShadow
 func IsSpecifiedBrush(s Brush) bool {
-	return isSpecifiedBrush(s)
+	return BrushCompanion.IsSpecified(s)
 }
 func TakeOrElseBrush(s, def Brush) Brush {
 	return takeOrElseBrush(s, def)

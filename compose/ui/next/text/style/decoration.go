@@ -82,7 +82,7 @@ func NewTextDecoration(mask TextDecorationMask) TextDecoration {
 }
 
 func IsSpecifiedTextDecoration(t *TextDecoration) bool {
-	return isSpecifiedTextDecoration(t)
+	return TextDecorationCompanion.IsSpecified(t)
 }
 
 // === Sentinel operations ===
@@ -191,7 +191,7 @@ var TextDecorationCompanion = companions.NewStructCompanion(
 func StringTextDecoration(t *TextDecoration) string {
 	t = coalesceTextDecoration(t, textDecorationUnspecified)
 
-	if !IsSpecifiedTextDecoration(t) {
+	if !isSpecifiedTextDecoration(t) {
 		return "textDecorationUnspecified"
 	}
 	if t.mask == 0 {

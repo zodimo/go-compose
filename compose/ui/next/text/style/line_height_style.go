@@ -135,7 +135,7 @@ var DefaultLineHeightStyle = &LineHeightStyle{
 }
 
 func IsSpecifiedLineHeightStyle(s *LineHeightStyle) bool {
-	return isSpecifiedLineHeightStyle(s)
+	return LineHeightStyleCompanion.IsSpecified(s)
 }
 
 // Identity (2 ns)
@@ -275,7 +275,7 @@ var LineHeightStyleCompanion = companions.NewStructCompanion(
 )
 
 func StringLineHeightStyle(s *LineHeightStyle) string {
-	if !IsSpecifiedLineHeightStyle(s) {
+	if !isSpecifiedLineHeightStyle(s) {
 		return "LineHeightStyle.Unspecified"
 	}
 	return "LineHeightStyle(" +

@@ -149,7 +149,7 @@ func StringParagraphStyle(s *ParagraphStyle) string {
 }
 
 func IsSpecifiedParagraphStyle(s *ParagraphStyle) bool {
-	return isSpecifiedParagraphStyle(s)
+	return ParagraphStyleCompanion.IsSpecified(s)
 }
 
 func TakeOrElseParagraphStyle(s, def *ParagraphStyle) *ParagraphStyle {

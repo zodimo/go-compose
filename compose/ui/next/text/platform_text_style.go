@@ -33,15 +33,15 @@ type PlatformTextStyle struct {
 }
 
 func IsSpecifiedPlatformTextStyle(s *PlatformTextStyle) bool {
-	return isSpecifiedPlatformTextStyle(s)
+	return PlatformTextStyleCompanion.IsSpecified(s)
 }
 
 func IsSpecifiedPlatformSpanStyle(s *PlatformSpanStyle) bool {
-	return isSpecifiedPlatformSpanStyle(s)
+	return PlatformSpanStyleCompanion.IsSpecified(s)
 }
 
 func IsSpecifiedPlatformParagraphStyle(s *PlatformParagraphStyle) bool {
-	return isSpecifiedPlatformParagraphStyle(s)
+	return PlatformParagraphStyleCompanion.IsSpecified(s)
 }
 
 func TakeOrElsePlatformTextStyle(s, def *PlatformTextStyle) *PlatformTextStyle {

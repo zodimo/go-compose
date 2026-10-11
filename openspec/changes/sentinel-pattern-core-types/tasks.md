@@ -1,7 +1,7 @@
 ## 1. Foundation
 
 - [x] 1.1 Promote `github.com/zodimo/go-sentinel-helper` from `// indirect` to a direct require in `go.mod`; run `go mod tidy`.
-- [x] 1.2 Add `compose/ui/sentinel_companion_test.go` with shared assertion helpers (`assertSentinelIsNotZero`, `assertMergeDirection`, `assertUnspecifiedSemanticEqual`, `assertCopyLeavesSource`) that per-type tests will reuse, modeled on `compose/ui/text/sentinel_companion_test.go`.
+- [x] 1.2 Add the shared assertion helpers (`AssertSentinelIsNotZero`, `AssertMergeDirection`, `AssertUnspecifiedSemanticEqual`, `AssertCopyLeavesSource`, plus `AssertCoalesceFoldsNil`) a per-type test can reuse. **Placed in `internal/testutils/sentinel/companions.go`** (generic over the companion interfaces) rather than a single `compose/ui/sentinel_companion_test.go`: a test-only file cannot be imported across packages, so a shared non-test util package is required. Per-type conformance tests live in a `sentinel_companion_test.go` per in-scope package (mirroring the existing `compose/ui/text/sentinel_companion_test.go`) and import the helpers from there.
 - [x] 1.3 Confirm the `companions` API against the vendored v0.2.0 source: `NewScalarCompanion` 10 args, `NewStructCompanion` 11 args (`coalesce` before `copy`), and record the exact order in a comment on the helper.
 
 ## 2. Geometry (`compose/ui/geometry`)
@@ -68,5 +68,5 @@
 - [x] 9.3 For each in-scope package, `go doc -all <pkg> | grep -i unspecified` returns nothing.
 - [x] 9.4 Confirm one exported `XCompanion` per migrated type and no exported `*Unspecified` remains in `compose/ui/**`.
 - [x] 9.5 Confirm `pkg/sentinel` is gone: the directory does not exist and `grep -rn "pkg/sentinel" --include=*.go .` (excluding `openspec/` and docs) returns nothing.
-- [x] 9.6 Confirm runtime output is unchanged: run a representative demo (e.g. `go run ./cmd/demo/kitchen/`) and compare against pre-change rendering.
+- [x] 9.6 Confirm runtime output is unchanged. **Method: manual + suite-level, not a pixel diff.** No golden-image baseline or screenshot test exists in the repo (`internal/screenshot/` provides the headless capture helper but no test consumes it), and this change is API-surface only — no rendering, layout, or text-shaping logic was touched. Evidence: `go test ./...` passes with no changed rendering expectations, and a manual run of `go run ./cmd/demo/kitchen/` was compared against pre-change rendering. **TODO (follow-up, not this change):** add a golden-image smoke test over a representative demo so this claim becomes automatically checkable.
 - [x] 9.7 Update `docs/sentinel_pattern.md` and `AGENTS.md` with the core-surface contract, the "one export = Companion" rule, the explicit out-of-scope list (`foundation`, `material3`, `theme`, `pkg/adapters`), and a note that `pkg/sentinel` is deleted in favour of `go-sentinel-helper`.

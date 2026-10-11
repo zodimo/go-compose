@@ -149,7 +149,7 @@ func CoalesceTextIndent(ptr, def *TextIndent) *TextIndent {
 }
 
 func IsSpecifiedTextIndent(indent *TextIndent) bool {
-	return isSpecifiedTextIndent(indent)
+	return TextIndentCompanion.IsSpecified(indent)
 }
 
 func TakeOrElseTextIndent(a, b *TextIndent) *TextIndent {

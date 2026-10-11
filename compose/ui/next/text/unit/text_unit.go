@@ -101,13 +101,13 @@ func (tu TextUnit) IsEm() bool {
 
 // IsUnspecified returns true if this is an unspecified unit type.
 func (tu TextUnit) IsUnspecified() bool {
-	return isUnspecifiedTextUnit(tu)
+	return TextUnitCompanion.IsUnspecified(tu)
 }
 
 // 2. `IsSpecified` – predicate (method on value receiver)
 // IsSpecified returns true if this is a specified unit type.
 func (tu TextUnit) IsSpecified() bool {
-	return isSpecifiedTextUnit(tu)
+	return TextUnitCompanion.IsSpecified(tu)
 }
 
 // String returns the string representation of the TextUnit.
@@ -188,8 +188,8 @@ func (tu TextUnit) Equals(other TextUnit) bool {
 		return false
 	}
 	// If both are Unspecified, they are equal regardless of the float payload (which is NaN)
-	if tu.IsUnspecified() {
-		return other.IsUnspecified()
+	if isUnspecifiedTextUnit(tu) {
+		return isUnspecifiedTextUnit(other)
 	}
 	return floatutils.Float32Equals(tu.Value(), other.Value(), floatutils.Float32EqualityThreshold)
 }

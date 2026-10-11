@@ -104,7 +104,7 @@ func TextAlignValueOf(value int) (TextAlign, error) {
 
 // IsSpecified returns true if this TextAlign is not TextAlignUnspecified.
 func (t TextAlign) IsSpecified() bool {
-	return isSpecifiedTextAlign(t)
+	return TextAlignCompanion.IsSpecified(t)
 }
 
 // === Sentinel operations ===

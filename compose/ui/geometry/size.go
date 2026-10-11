@@ -96,9 +96,11 @@ func LerpSize(start, stop Size, fraction float32) Size {
 	)
 }
 
-// IsSpecified returns false when this is Size.Unspecified.
+// IsSpecified returns false when this is Size.Unspecified. It delegates to
+// SizeCompanion so the companion remains the single source of truth for the
+// predicate; the sentinel itself stays unreachable from outside the package.
 func (s Size) IsSpecified() bool {
-	return isSpecifiedSize(s)
+	return SizeCompanion.IsSpecified(s)
 }
 
 func isSpecifiedSize(s Size) bool {

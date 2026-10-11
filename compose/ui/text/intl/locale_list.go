@@ -26,7 +26,7 @@ var LocalListCurrent = &LocaleList{
 }
 
 func IsSpecifiedLocaleList(s *LocaleList) bool {
-	return isSpecifiedLocaleList(s)
+	return LocaleListCompanion.IsSpecified(s)
 }
 func TakeOrElseLocaleList(s, def *LocaleList) *LocaleList {
 	return takeOrElseLocaleList(s, def)

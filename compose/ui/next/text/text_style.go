@@ -175,7 +175,7 @@ func (s TextStyle) ToString() string {
 }
 
 func IsSpecifiedTextStyle(style *TextStyle) bool {
-	return isSpecifiedTextStyle(style)
+	return TextStyleCompanion.IsSpecified(style)
 }
 
 func TakeOrElseTextStyle(style, defaultStyle *TextStyle) *TextStyle {

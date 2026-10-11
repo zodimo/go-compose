@@ -69,7 +69,7 @@ func (h Hyphens) String() string {
 
 // Returns true if it is not [HyphensUnspecified].
 func (h Hyphens) IsSpecified() bool {
-	return isSpecifiedHyphens(h)
+	return HyphensCompanion.IsSpecified(h)
 }
 
 // === Sentinel operations ===

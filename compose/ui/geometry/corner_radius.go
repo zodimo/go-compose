@@ -63,9 +63,11 @@ func (c CornerRadius) Equal(other CornerRadius) bool {
 		floatutils.Float32Equals(c.Y(), other.Y(), floatutils.Float32EqualityThreshold)
 }
 
-// IsSpecified returns true if this is not CornerRadius.Unspecified.
+// IsSpecified returns true if this is not CornerRadius.Unspecified. It delegates
+// to CornerRadiusCompanion so the companion remains the single source of truth
+// for the predicate.
 func (c CornerRadius) IsSpecified() bool {
-	return isSpecifiedCornerRadius(c)
+	return CornerRadiusCompanion.IsSpecified(c)
 }
 
 func isSpecifiedCornerRadius(c CornerRadius) bool {

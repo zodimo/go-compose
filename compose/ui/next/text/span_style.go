@@ -238,7 +238,7 @@ func StringSpanStyle(s *SpanStyle) string {
 }
 
 func IsSpecifiedSpanStyle(s *SpanStyle) bool {
-	return isSpecifiedSpanStyle(s)
+	return SpanStyleCompanion.IsSpecified(s)
 }
 
 func TakeOrElseSpanStyle(s, def *SpanStyle) *SpanStyle {

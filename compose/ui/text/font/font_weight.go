@@ -62,7 +62,7 @@ func (w FontWeight) String() string {
 }
 
 func (w FontWeight) IsFontWeight() bool {
-	return isSpecifiedFontWeight(w)
+	return FontWeightCompanion.IsSpecified(w)
 }
 
 // === Sentinel operations ===

@@ -43,7 +43,7 @@ func (s FontStyle) Equals(other FontStyle) bool {
 }
 
 func (s FontStyle) IsSpecified() bool {
-	return isSpecifiedFontStyle(s)
+	return FontStyleCompanion.IsSpecified(s)
 }
 
 // === Sentinel operations ===

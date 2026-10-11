@@ -30,7 +30,7 @@ var baselineShiftUnspecified = BaselineShift(floatutils.Float32Unspecified)
 
 // IsBaselineShift returns true if this baseline shift is not Unspecified (i.e., not NaN)
 func IsBaselineShift(bs BaselineShift) bool {
-	return isSpecifiedBaselineShift(bs)
+	return BaselineShiftCompanion.IsSpecified(bs)
 }
 
 // TakeOrElseBaselineShift returns this BaselineShift if it's specified, otherwise returns the result of block.
@@ -51,7 +51,7 @@ func NewBaselineShift(multiplier float32) BaselineShift {
 
 // MergeBaselineShift returns the first argument if it is specified, otherwise the second.
 func MergeBaselineShift(a, b BaselineShift) BaselineShift {
-	if IsBaselineShift(a) {
+	if isSpecifiedBaselineShift(a) {
 		return a
 	}
 	return b
@@ -60,7 +60,7 @@ func MergeBaselineShift(a, b BaselineShift) BaselineShift {
 // StringBaselineShift returns a string representation of the BaselineShift
 func StringBaselineShift(bs BaselineShift) string {
 	switch {
-	case !IsBaselineShift(bs):
+	case !isSpecifiedBaselineShift(bs):
 		return "BaselineShift.Unspecified"
 	case bs == BaselineShiftSuperscript:
 		return "BaselineShift.Superscript"
