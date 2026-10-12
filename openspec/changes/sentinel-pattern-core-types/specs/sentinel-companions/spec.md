@@ -9,14 +9,24 @@ and reachable by callers only through `XCompanion.Unspecified()`.
 #### Scenario: No exported sentinel remains
 
 - **WHEN** `go doc -all` is run for an in-scope package (e.g. `compose/ui/geometry`)
-- **THEN** no exported symbol whose name ends in `Unspecified` appears in the output
+- **THEN** no exported sentinel for a sentinel-carrying type appears in the output
 - **AND** the only exported sentinel-family symbol is `XCompanion`
+
+##### Exclusion: companion-less helper enums
+
+A constant named `*Unspecified` that belongs to a helper enum carrying **no companion** is not a
+sentinel under this contract and MAY remain exported (its first member is simply the iota zero
+value, and its receiver method *is* the implementation). The in-scope exclusions are
+`TextDecorationMask`, `TextUnitType` and the `next/text/style` enums
+(`LineBreakStrategy`, `LineBreakStrictness`, `LineBreakWordBreak`); `layout.Axis` is
+additionally outside the sentinel contract entirely. These are the same exemptions recorded in
+`AGENTS.md` and `docs/sentinel_pattern.md`.
 
 #### Scenario: Sentinel is reachable only through the companion
 
-- **WHEN** a caller outside the package needs the unspecified value
+- **WHEN** a caller outside the package needs the unspecified value of a sentinel-carrying type
 - **THEN** the caller obtains it via `XCompanion.Unspecified()`
-- **AND** there is no exported `XUnspecified` variable or constant to compare against
+- **AND** there is no exported `XUnspecified` variable or constant for that type to compare against
 
 ### Requirement: Each sentinel type wires the ten canonical operations
 

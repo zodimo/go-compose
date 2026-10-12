@@ -44,6 +44,15 @@
 `compose/material3/**`, `theme/`, `pkg/adapters/**`. These own *their own* sentinels and are
 untouched here — but they no longer import the deleted `pkg/sentinel` fork.
 
+> **Naming carry-over to clean up in the follow-up.** Two out-of-scope packages still export a
+> symbol *named* `ColorUnspecified`: `compose/material3/alias.go` and
+> `pkg/adapters/material3/color_set.go`. Both are already aliases of the core companion
+> (`var ColorUnspecified = graphics.ColorCompanion.Unspecified()`), so they are not a contract
+> violation — but the name shadows the core `graphics.ColorUnspecified` this change removed, and
+> two different things now answer to `ColorUnspecified` depending on import path. The follow-up
+> change that converts `foundation`/`material3` to companions should retire these aliases in
+> favour of `graphics.ColorCompanion.Unspecified()` at the call sites.
+
 > **Receiver methods on in-scope types are gone.** Every method that merely re-expressed an
 > existing companion (`Color.IsSpecified()`, `Dp.IsUnspecified()`, `TextUnit.IsSpecified()`,
 > …) was removed; callers use `XCompanion.IsSpecified(v)` / `IsUnspecified(v)` instead, so the
@@ -236,6 +245,10 @@ Use this pattern when you need to **prevent implicit type conversions** while ma
 
 **Example: TextUnit**
 
+The contract shape for a packed value type: a package-private sentinel, package-private operations,
+and one exported `XCompanion`. There is no exported `TextUnitUnspecified` and no sentinel-only
+receiver method — callers reach everything through the companion.
+
 ```go
 // TextUnit packs unit type (Sp/Em) and float value into 64 bits.
 // Struct wrapper prevents `TextUnit(24)` - must use `Sp(24)` or `Em(1.5)`.
@@ -243,8 +256,9 @@ type TextUnit struct {
 	packed int64
 }
 
-// 1. `TUnspecified` – sentinel (value, not pointer)
-var TextUnitUnspecified = TextUnit{packed: packRaw(int64(TextUnitTypeUnspecified), float32(math.NaN()))}
+// 1. Sentinel – package-private value.
+// Kotlin uses a packed value with NaN for Unspecified.
+var textUnitUnspecified = TextUnit{packed: packRaw(int64(TextUnitTypeUnspecified), float32(math.NaN()))}
 
 // Internal packing function
 func packRaw(unitType int64, v float32) int64 {
@@ -261,50 +275,70 @@ func Em(value float32) TextUnit {
 	return TextUnit{packed: packRaw(int64(TextUnitTypeEm), value)}
 }
 
-// 2. `IsSpecified` – predicate (method on value receiver)
-func (tu TextUnit) IsSpecified() bool {
+// 2. Operations – package-private functions, in the go-sentinel-helper order.
+func isSpecifiedTextUnit(tu TextUnit) bool {
 	return tu.rawType() != int64(TextUnitTypeUnspecified)
 }
 
-// 3. `TakeOrElse` – 2-param fallback (method on value receiver)
-func (tu TextUnit) TakeOrElse(def TextUnit) TextUnit {
-	if tu.IsSpecified() {
+func isUnspecifiedTextUnit(tu TextUnit) bool {
+	return tu.rawType() == int64(TextUnitTypeUnspecified)
+}
+
+func takeOrElseTextUnit(tu, def TextUnit) TextUnit {
+	if isSpecifiedTextUnit(tu) {
 		return tu
 	}
 	return def
 }
 
-// 4. `Merge` – implementation-dependent (see note below)
-// For atomic packed types (like TextUnit), use whole-value replacement:
-func (tu TextUnit) Merge(other TextUnit) TextUnit {
-	if other.IsSpecified() {
-		return other
+// Merge: whole-value replacement for atomic packed types.
+func mergeTextUnit(a, b TextUnit) TextUnit {
+	if isSpecifiedTextUnit(b) {
+		return b
 	}
-	return tu
+	return a
 }
 
-// 5. `String` – stringification (method on value receiver)
-func (tu TextUnit) String() string {
-	if !tu.IsSpecified() {
+func stringTextUnit(tu TextUnit) string {
+	if isUnspecifiedTextUnit(tu) {
 		return "TextUnit{Unspecified}"
 	}
 	return fmt.Sprintf("TextUnit{%v %s}", tu.Value(), tu.Type())
 }
 
-// 6. `Coalesce` – N/A for value types (no nil possible)
+// same/semanticEqual delegate to floatutils; two unspecified values are equal.
+func sameTextUnit(a, b TextUnit) bool          { return a == b }
+func semanticEqualTextUnit(a, b TextUnit) bool { return a == b } // NaN-aware via packRaw identity
+func equalTextUnit(a, b TextUnit) bool         { return a == b }
 
-// 7-9. Equality – use == operator for value types, or Equals method
-func (tu TextUnit) Equals(other TextUnit) bool {
-	if tu.Type() != other.Type() {
-		return false
-	}
-	if tu.IsUnspecified() {
-		return other.IsUnspecified()
-	}
-	return floatutils.Float32Equals(tu.Value(), other.Value(), floatutils.Float32EqualityThreshold)
-}
+// Copy: identity for immutable value types.
+func copyTextUnit(tu TextUnit) TextUnit { return tu }
 
-// 10. `Copy` – identity for immutable value types (just use assignment)
+// 3. ONE exported sentinel-family symbol: the companion.
+// isUnspecified is the FOURTH argument (after isSpecified) — see the library's
+// NewScalarCompanion: unspecified, string, isSpecified, isUnspecified,
+// takeOrElse, merge, same, semanticEqual, equal, copy.
+var TextUnitCompanion = companions.NewScalarCompanion(
+	func() TextUnit { return textUnitUnspecified },
+	stringTextUnit,
+	isSpecifiedTextUnit,
+	isUnspecifiedTextUnit,
+	takeOrElseTextUnit,
+	mergeTextUnit,
+	sameTextUnit,
+	semanticEqualTextUnit,
+	equalTextUnit,
+	copyTextUnit,
+)
+```
+
+Callers never see `textUnitUnspecified`. They write:
+
+```go
+tu := TextUnitCompanion.Unspecified()               // the reserved value
+if TextUnitCompanion.IsSpecified(tu) { ... }        // predicate
+tu = TextUnitCompanion.TakeOrElse(tu, Sp(14))       // default
+merged := TextUnitCompanion.Merge(a, b)             // overlay
 ```
 
 > [!NOTE]
@@ -312,17 +346,17 @@ func (tu TextUnit) Equals(other TextUnit) bool {
 >
 > **Option A: Whole-value replacement** (for atomic types like `TextUnit`)
 > ```go
-> func (tu TextUnit) Merge(other TextUnit) TextUnit {
->     if other.IsSpecified() { return other }
->     return tu
+> func mergeTextUnit(a, b TextUnit) TextUnit {
+>     if isSpecifiedTextUnit(b) { return b }
+>     return a
 > }
-> // Copy: just use assignment `b := a`
+> // Copy: identity function `func(tu TextUnit) TextUnit { return tu }`
 > ```
 >
 > **Option B: Struct options pattern** (for component types like `Color`)
 > ```go
-> func (c Color) Copy(opts ...ColorCopyOption) Color {
->     o := ColorCopyOptions{Alpha: Unspecified, Red: Unspecified, ...}
+> func copyColor(c Color, opts ...ColorCopyOption) Color {
+>     o := ColorCopyOptions{Alpha: floatutils.Float32Unspecified, Red: floatutils.Float32Unspecified, ...}
 >     for _, opt := range opts { opt(&o) }
 >     return NewColor(
 >         floatutils.TakeOrElse(o.Alpha, c.Alpha()),
@@ -330,21 +364,28 @@ func (tu TextUnit) Equals(other TextUnit) bool {
 >         ...
 >     )
 > }
-> // Merge: use Copy to overlay components
+> // Merge: use copyColor to overlay components
 > ```
 
 **Key differences from Pattern 1-A/1-B**:
 - Uses `struct { packed T }` instead of `type T primitive`
 - Constructors are **mandatory** - no implicit conversion from primitives
-- Sentinel is a struct value, not a primitive constant
+- Sentinel is a package-private struct value, not a primitive constant
 
 **Key differences from Pattern 1-C**:
 - Passed by **value**, not pointer
 - Sentinel is a **value**, not a pointer singleton
-- **All helpers are methods** on value receiver (no package-level functions needed)
+- Registers via `NewScalarCompanion` (not `NewStructCompanion`)
 - `Coalesce` is not needed (no nil possible)
 
 **Guarantees**: Same as Pattern 1-A - lives in registers/stack → **zero heap bytes**.
+
+**Re-export note**: some types (e.g. `TextUnit`) are defined in an inner package and
+re-exported by a sibling. The companion is re-exported as an alias —
+`compose/ui/unit/text_unit.go` has `var TextUnitCompanion = textunit.TextUnitCompanion` — so
+`unit.TextUnitCompanion` and `text/unit.TextUnitCompanion` are the **same value**, not two
+companions. The `next/` mirror (`compose/ui/next/unit`, `compose/ui/next/text/unit`) repeats
+this: it is the *other* family's companion, independent of the non-`next` one.
 
 ---
 

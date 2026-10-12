@@ -199,10 +199,21 @@ module will not compile mid-migration; that is accepted and the change lands as 
 
 ## Open Questions
 
-- Should `compose/ui/next/**` and `compose/ui/text/**`'s parallel `TextStyle`/`SpanStyle`/
-  `ParagraphStyle` (the `next/` mirror) be unified onto the same companion as their non-`next`
-  counterparts, or keep separate companions for now? (Scope says "include", but unification vs.
-  parallel registration is undecided.)
+### Resolved during implementation
+
+- **`next/` vs non-`next` `TextStyle`/`SpanStyle`/`ParagraphStyle` — separate companions
+  (parallel registration), not unified.** Implemented as independent companions: each family
+  registers its own `TextStyleCompanion`/`SpanStyleCompanion`/`ParagraphStyleCompanion`
+  (`compose/ui/text/text_style.go:194` and `compose/ui/next/text/text_style.go:305`, etc.), and
+  neither package imports the other's companion. Unification was rejected because it would make
+  the two `next/` and non-`next` type families share a public sentinel-family symbol, recreating
+  exactly the "two types, one source of truth" ambiguity this contract exists to remove; the
+  `next/` tree is an evolving mirror expected to diverge. The same per-type shape and the
+  `companions.NewStructCompanion` argument order are shared, so the duplication is structural
+  only. `docs/sentinel_pattern.md` lists the whole `compose/ui/next/**` mirror as in scope.
+
+### Still open
+
 - Do `compose/foundation/**` and `compose/material3/**` follow in a second change for their *own*
   sentinels, and if so, does `fontWeight`/`Color` re-export in `material3/alias.go` change the
   ordering? (Note: their *imports* of `pkg/sentinel` are migrated now, regardless.)
