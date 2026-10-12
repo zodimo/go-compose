@@ -44,6 +44,13 @@
 `compose/material3/**`, `theme/`, `pkg/adapters/**`. These own *their own* sentinels and are
 untouched here — but they no longer import the deleted `pkg/sentinel` fork.
 
+> **Receiver methods on in-scope types are gone.** Every method that merely re-expressed an
+> existing companion (`Color.IsSpecified()`, `Dp.IsUnspecified()`, `TextUnit.IsSpecified()`,
+> …) was removed; callers use `XCompanion.IsSpecified(v)` / `IsUnspecified(v)` instead, so the
+> companion is the single door even for predicates. Receiver methods that remain belong to
+> types with **no companion** (`Linearity`, `SubpixelTextPositioning`, `LineHeightStyleTrim`,
+> `LineHeightStyleMode`) or outside the contract (`layout.Axis`).
+
 > **`pkg/sentinel` is deleted.** It was a parallel fork of `go-sentinel-helper` (its own
 > `Companion` interfaces, a 9-argument `NewScalarCompanion` missing `isUnspecified`, a
 > `StructCompoanion` typo). All importers now use `github.com/zodimo/go-sentinel-helper`

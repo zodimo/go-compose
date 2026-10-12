@@ -43,7 +43,7 @@ func (r *RoundedCornerShape) CreateOutline(size image.Point, metric gioUnit.Metr
 	// Check if uniform Radius is specified first (this is the most common case)
 	// Note: Dp(0) is technically "specified" but means no rounding, which is correct.
 	// The uniform Radius field takes precedence when set.
-	if rValid.Radius.IsSpecified() {
+	if unit.DpCompanion.IsSpecified(rValid.Radius) {
 		radius := metric.Dp(unit.DpToGioUnitUnsafe(rValid.Radius))
 		nw, ne, se, sw = radius, radius, radius, radius
 	} else {

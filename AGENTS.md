@@ -135,6 +135,12 @@ that re-implements sentinel logic — that duplicates the companion, which the c
 as a second public source of truth. Genuine domain methods stay (e.g. `Offset.X()`,
 `IsValid()`, `String()`).
 
+Two kinds of receiver method legitimately remain and are NOT covered by the rule above:
+(1) helper enums that carry **no companion** and whose method *is* the implementation
+(`Linearity`, `SubpixelTextPositioning`, `LineHeightStyleTrim`, `LineHeightStyleMode`),
+and (2) types outside the sentinel contract (`layout.Axis`). For a type that *does* carry a
+companion, the method is the violation and must be removed — call the companion instead.
+
 DO NOT import a `pkg/sentinel`-style fork. `pkg/sentinel` was deleted; use
 `github.com/zodimo/go-sentinel-helper` directly (`stringutils.StringsCompanion`,
 `floatutils.Float32Companion`, `companions.NewScalarCompanion` / `NewStructCompanion`).

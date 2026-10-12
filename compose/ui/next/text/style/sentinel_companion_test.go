@@ -146,3 +146,31 @@ func TestTextForegroundStyleCompanionConformance(t *testing.T) {
 		sentinel.AssertCoalesceFoldsNil(t, TextForegroundStyleCompanion, TextForegroundStyleFromColor(graphics.ColorRed))
 	})
 }
+
+func TestTextMotionCompanionConformance(t *testing.T) {
+	t.Run("sentinel_is_not_zero", func(t *testing.T) {
+		sentinel.AssertSentinelIsNotZero(t, TextMotionCompanion, (*TextMotion)(nil), false)
+	})
+	t.Run("merge_direction", func(t *testing.T) {
+		base := TextMotionStatic
+		override := TextMotionAnimated
+		sentinel.AssertMergeDirection(t, TextMotionCompanion, base, override)
+	})
+	t.Run("unspecified_semantic_equal", func(t *testing.T) {
+		sentinel.AssertUnspecifiedSemanticEqual(t, TextMotionCompanion)
+	})
+	t.Run("coalesce_folds_nil_onto_default", func(t *testing.T) {
+		sentinel.AssertCoalesceFoldsNil(t, TextMotionCompanion, TextMotionStatic)
+	})
+	t.Run("copy_leaves_source_unchanged", func(t *testing.T) {
+		source := &TextMotion{Linearity: LinearityFontHinting, SubpixelTextPositioning: SubpixelTextPositioningFalse}
+		sentinel.AssertCopyLeavesSource(t, TextMotionCompanion, source,
+			func(m *TextMotion) { m.Linearity = LinearityLinear },
+			func(m *TextMotion) any {
+				if m == nil {
+					return LinearityUnspecified
+				}
+				return m.Linearity
+			})
+	})
+}

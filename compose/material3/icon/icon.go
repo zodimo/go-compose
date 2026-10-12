@@ -110,7 +110,7 @@ func iconFromSymbol(name SymbolName, opts IconOptions) Composable {
 
 		// Resolve size - prefer unified Size, fallback to FontSize, then default 24sp
 		var fontSize unit.TextUnit
-		if opts.Size.IsSpecified() {
+		if unit.DpCompanion.IsSpecified(opts.Size) {
 			// Convert Dp to Sp (treat them as equivalent for font sizing)
 			fontSize = localDensity.DpToTextUnit(opts.Size)
 		} else {

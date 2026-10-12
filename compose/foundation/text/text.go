@@ -12,6 +12,7 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/text"
 	"github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/compose/ui/text/style"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/state"
 
@@ -132,7 +133,7 @@ func textWidgetConstructor(constructorArgs BasicTextConstructorArgs) layoutnode.
 			// } else {
 
 			lineHeight := textStyle.LineHeight()
-			if lineHeight.IsSpecified() {
+			if unit.TextUnitCompanion.IsSpecified(lineHeight) {
 				if !lineHeight.IsSp() {
 					panic("lineHeight, only sp is supported")
 				}

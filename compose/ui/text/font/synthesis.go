@@ -2,6 +2,8 @@ package font
 
 import (
 	"fmt"
+
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
 // FontSynthesis specifies whether the system should fake bold or slanted glyphs
@@ -18,7 +20,10 @@ const (
 )
 
 var (
-	FontSynthesisUnspecified = &FontSynthesis{value: -1}
+	// fontSynthesisUnspecified is the sentinel for FontSynthesis. It is
+	// deliberately package-private: the only public way to obtain it is
+	// FontSynthesisCompanion.Unspecified().
+	fontSynthesisUnspecified = &FontSynthesis{value: -1}
 	// FontSynthesisNone turns off font synthesis.
 	// Neither bold nor slanted faces are synthesized.
 	FontSynthesisNone = &FontSynthesis{value: 0}
@@ -81,7 +86,7 @@ func StringFontSynthesis(f *FontSynthesis) string {
 }
 
 func IsFontSynthesis(f *FontSynthesis) bool {
-	return f != nil && f != FontSynthesisUnspecified
+	return f != nil && f != fontSynthesisUnspecified
 }
 
 func TakeOrElseFontSynthesis(f, defaultFontSynthesis *FontSynthesis) *FontSynthesis {
@@ -97,10 +102,10 @@ func SameFontSynthesis(a, b *FontSynthesis) bool {
 		return true
 	}
 	if a == nil {
-		return b == FontSynthesisUnspecified
+		return b == fontSynthesisUnspecified
 	}
 	if b == nil {
-		return a == FontSynthesisUnspecified
+		return a == fontSynthesisUnspecified
 	}
 	return a == b
 }
@@ -115,8 +120,8 @@ func EqualFontSynthesis(a, b *FontSynthesis) bool {
 // Semantic equality (field-by-field, 20 ns)
 func SemanticEqualFontSynthesis(a, b *FontSynthesis) bool {
 
-	a = CoalesceFontSynthesis(a, FontSynthesisUnspecified)
-	b = CoalesceFontSynthesis(b, FontSynthesisUnspecified)
+	a = CoalesceFontSynthesis(a, fontSynthesisUnspecified)
+	b = CoalesceFontSynthesis(b, fontSynthesisUnspecified)
 
 	return a.value == b.value
 }
@@ -127,3 +132,75 @@ func CoalesceFontSynthesis(ptr, def *FontSynthesis) *FontSynthesis {
 	}
 	return ptr
 }
+
+// === Sentinel operations ===
+//
+// These package-private operations back FontSynthesisCompanion, the single
+// exported sentinel-family symbol for FontSynthesis. Callers reach the
+// reserved "unspecified" value only through FontSynthesisCompanion.Unspecified().
+
+func isSpecifiedFontSynthesis(f *FontSynthesis) bool {
+	return IsFontSynthesis(f)
+}
+
+func isUnspecifiedFontSynthesis(f *FontSynthesis) bool {
+	return !IsFontSynthesis(f)
+}
+
+func takeOrElseFontSynthesis(f, def *FontSynthesis) *FontSynthesis {
+	return TakeOrElseFontSynthesis(f, def)
+}
+
+func mergeFontSynthesis(a, b *FontSynthesis) *FontSynthesis {
+	if isUnspecifiedFontSynthesis(b) {
+		return coalesceFontSynthesis(a, fontSynthesisUnspecified)
+	}
+	return b
+}
+
+func stringFontSynthesis(f *FontSynthesis) string {
+	return StringFontSynthesis(f)
+}
+
+func sameFontSynthesis(a, b *FontSynthesis) bool {
+	return SameFontSynthesis(a, b)
+}
+
+func semanticEqualFontSynthesis(a, b *FontSynthesis) bool {
+	return SemanticEqualFontSynthesis(a, b)
+}
+
+func equalFontSynthesis(a, b *FontSynthesis) bool {
+	return EqualFontSynthesis(a, b)
+}
+
+func coalesceFontSynthesis(ptr, def *FontSynthesis) *FontSynthesis {
+	return CoalesceFontSynthesis(ptr, def)
+}
+
+// copyFontSynthesis returns a copy of s. The source is never mutated.
+func copyFontSynthesis(s *FontSynthesis, options ...func(*FontSynthesis)) *FontSynthesis {
+	cp := &FontSynthesis{}
+	if s != nil {
+		cp.value = s.value
+	}
+	for _, option := range options {
+		option(cp)
+	}
+	return cp
+}
+
+// FontSynthesisCompanion is the single exported sentinel-family symbol for FontSynthesis.
+var FontSynthesisCompanion = companions.NewStructCompanion(
+	func() *FontSynthesis { return fontSynthesisUnspecified },
+	stringFontSynthesis,
+	isSpecifiedFontSynthesis,
+	isUnspecifiedFontSynthesis,
+	takeOrElseFontSynthesis,
+	mergeFontSynthesis,
+	sameFontSynthesis,
+	semanticEqualFontSynthesis,
+	equalFontSynthesis,
+	coalesceFontSynthesis,
+	copyFontSynthesis,
+)

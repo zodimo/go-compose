@@ -14,7 +14,7 @@ func TestTextUnitPacking(t *testing.T) {
 		if sp.IsEm() {
 			t.Errorf("Expected IsEm() to be false")
 		}
-		if sp.IsUnspecified() {
+		if TextUnitCompanion.IsUnspecified(sp) {
 			t.Errorf("Expected IsUnspecified() to be false")
 		}
 		if sp.Type() != TextUnitTypeSp {
@@ -33,7 +33,7 @@ func TestTextUnitPacking(t *testing.T) {
 		if em.IsSp() {
 			t.Errorf("Expected IsSp() to be false")
 		}
-		if em.IsUnspecified() {
+		if TextUnitCompanion.IsUnspecified(em) {
 			t.Errorf("Expected IsUnspecified() to be false")
 		}
 		if em.Type() != TextUnitTypeEm {
@@ -46,10 +46,10 @@ func TestTextUnitPacking(t *testing.T) {
 
 	t.Run("Unspecified packing", func(t *testing.T) {
 		u := TextUnitCompanion.Unspecified()
-		if !u.IsUnspecified() {
+		if !TextUnitCompanion.IsUnspecified(u) {
 			t.Errorf("Expected IsUnspecified() to be true")
 		}
-		if u.IsSpecified() {
+		if TextUnitCompanion.IsSpecified(u) {
 			t.Errorf("Expected IsSpecified() to be false")
 		}
 		if u.Type() != TextUnitTypeUnspecified {

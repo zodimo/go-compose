@@ -98,7 +98,7 @@ func lerpDiscrete[T any](a, b T, fraction float32) T {
 //
 // This matches Kotlin's lerpTextUnitInheritable behavior in Jetpack Compose.
 func LerpTextUnitInheritable(a, b unit.TextUnit, fraction float32) unit.TextUnit {
-	if a.IsUnspecified() || b.IsUnspecified() {
+	if unit.TextUnitCompanion.IsUnspecified(a) || unit.TextUnitCompanion.IsUnspecified(b) {
 		return lerpDiscrete(a, b, fraction)
 	}
 	return unit.LerpTextUnit(a, b, fraction)

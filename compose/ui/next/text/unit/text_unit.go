@@ -99,17 +99,6 @@ func (tu TextUnit) IsEm() bool {
 	return tu.rawType() == int64(TextUnitTypeEm)
 }
 
-// IsUnspecified returns true if this is an unspecified unit type.
-func (tu TextUnit) IsUnspecified() bool {
-	return TextUnitCompanion.IsUnspecified(tu)
-}
-
-// 2. `IsSpecified` – predicate (method on value receiver)
-// IsSpecified returns true if this is a specified unit type.
-func (tu TextUnit) IsSpecified() bool {
-	return TextUnitCompanion.IsSpecified(tu)
-}
-
 // String returns the string representation of the TextUnit.
 func (tu TextUnit) String() string {
 	if !isSpecifiedTextUnit(tu) {
@@ -229,7 +218,7 @@ func (tu TextUnit) Compare(other TextUnit) int {
 }
 
 func (tu TextUnit) AsGioSp() gioUnit.Sp {
-	if !tu.IsSpecified() {
+	if !TextUnitCompanion.IsSpecified(tu) {
 		return gioUnit.Sp(0)
 	}
 	if tu.IsEm() {
@@ -246,19 +235,19 @@ func LerpTextUnit(start, stop TextUnit, fraction float32) TextUnit {
 }
 
 func LerpTextUnitInheritable(a, b TextUnit, t float32) TextUnit {
-	if a.IsUnspecified() || b.IsUnspecified() {
+	if TextUnitCompanion.IsUnspecified(a) || TextUnitCompanion.IsUnspecified(b) {
 		return lerp.LerpDiscrete(a, b, t)
 	}
 	return LerpTextUnit(a, b, t)
 }
 
 func checkArithmetic(a TextUnit) {
-	requirePrecondition(!a.IsUnspecified(), "Cannot perform operation for Unspecified type.")
+	requirePrecondition(!TextUnitCompanion.IsUnspecified(a), "Cannot perform operation for Unspecified type.")
 }
 
 func checkArithmetic2(a, b TextUnit) {
 
-	requirePrecondition(!a.IsUnspecified() && !b.IsUnspecified(), "Cannot perform operation for Unspecified type.")
+	requirePrecondition(!TextUnitCompanion.IsUnspecified(a) && !TextUnitCompanion.IsUnspecified(b), "Cannot perform operation for Unspecified type.")
 	requirePrecondition(a.Type() == b.Type(), fmt.Sprintf("Cannot perform operation for %s and %s", a.Type(), b.Type()))
 }
 

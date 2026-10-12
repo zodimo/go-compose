@@ -130,14 +130,14 @@ func (d *densityImpl) DpRectToRect(rect DpRect) geometry.Rect {
 }
 
 func (d *densityImpl) DpSizeToSize(size DpSize) geometry.Size {
-	if size.IsSpecified() {
+	if DpSizeCompanion.IsSpecified(size) {
 		return geometry.NewSize(d.DpToPx(size.Width), d.DpToPx(size.Height))
 	}
 	return geometry.SizeCompanion.Unspecified()
 }
 
 func (d *densityImpl) SizeToDpSize(size geometry.Size) DpSize {
-	if size.IsSpecified() {
+	if geometry.SizeCompanion.IsSpecified(size) {
 		return NewDpSize(d.FloatToDp(size.Width()), d.FloatToDp(size.Height()))
 	}
 	return DpSizeCompanion.Unspecified()

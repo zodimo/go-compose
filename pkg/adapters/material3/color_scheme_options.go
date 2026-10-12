@@ -1,5 +1,9 @@
 package material3
 
+import (
+	"github.com/zodimo/go-compose/compose/ui/graphics"
+)
+
 type ColorSchemeOption func(*ColorScheme)
 
 func WithPrimary(colSet *ColorSet) ColorSchemeOption {
@@ -129,7 +133,7 @@ func WithSurfaceVariant(colSet *ColorSet) ColorSchemeOption {
 }
 
 func WithSurfaceDim(col Color) ColorSchemeOption {
-	if !col.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(col) {
 		panic("surfaceDim cannot be unspecified")
 	}
 	return func(c *ColorScheme) {
@@ -138,7 +142,7 @@ func WithSurfaceDim(col Color) ColorSchemeOption {
 }
 
 func WithSurfaceBright(col Color) ColorSchemeOption {
-	if !col.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(col) {
 		panic("surfaceBright cannot be unspecified")
 	}
 	return func(c *ColorScheme) {
@@ -147,7 +151,7 @@ func WithSurfaceBright(col Color) ColorSchemeOption {
 }
 
 func WithSurfaceContainerLowest(col Color) ColorSchemeOption {
-	if !col.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(col) {
 		panic("surfaceContainerLowest cannot be unspecified")
 	}
 	return func(c *ColorScheme) {
@@ -156,7 +160,7 @@ func WithSurfaceContainerLowest(col Color) ColorSchemeOption {
 }
 
 func WithSurfaceContainerLow(col Color) ColorSchemeOption {
-	if !col.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(col) {
 		panic("surfaceContainerLow cannot be unspecified")
 	}
 	return func(c *ColorScheme) {
@@ -165,7 +169,7 @@ func WithSurfaceContainerLow(col Color) ColorSchemeOption {
 }
 
 func WithSurfaceContainer(col Color) ColorSchemeOption {
-	if !col.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(col) {
 		panic("surfaceContainer cannot be unspecified")
 	}
 	return func(c *ColorScheme) {
@@ -174,7 +178,7 @@ func WithSurfaceContainer(col Color) ColorSchemeOption {
 }
 
 func WithSurfaceContainerHigh(col Color) ColorSchemeOption {
-	if !col.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(col) {
 		panic("surfaceContainerHigh cannot be unspecified")
 	}
 	return func(c *ColorScheme) {
@@ -183,7 +187,7 @@ func WithSurfaceContainerHigh(col Color) ColorSchemeOption {
 }
 
 func WithSurfaceContainerHighest(col Color) ColorSchemeOption {
-	if !col.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(col) {
 		panic("surfaceContainerHighest cannot be unspecified")
 	}
 	return func(c *ColorScheme) {
@@ -202,7 +206,7 @@ func WithInverseSurface(colSet *ColorSet) ColorSchemeOption {
 }
 
 func WithInversePrimary(col Color) ColorSchemeOption {
-	if !col.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(col) {
 		panic("inversePrimary cannot be unspecified")
 	}
 	return func(c *ColorScheme) {
@@ -220,7 +224,7 @@ func WithBackground(colSet *ColorSet) ColorSchemeOption {
 }
 
 func WithOutline(col Color) ColorSchemeOption {
-	if !col.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(col) {
 		panic("outline cannot be unspecified")
 	}
 	return func(c *ColorScheme) {
@@ -229,7 +233,7 @@ func WithOutline(col Color) ColorSchemeOption {
 }
 
 func WithOutlineVariant(col Color) ColorSchemeOption {
-	if !col.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(col) {
 		panic("outlineVariant cannot be unspecified")
 	}
 	return func(c *ColorScheme) {
@@ -256,7 +260,7 @@ func WithErrorContainer(colSet *ColorSet) ColorSchemeOption {
 }
 
 func WithScrim(col Color) ColorSchemeOption {
-	if !col.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(col) {
 		panic("scrim cannot be unspecified")
 	}
 	return func(c *ColorScheme) {
@@ -265,7 +269,7 @@ func WithScrim(col Color) ColorSchemeOption {
 }
 
 func WithShadow(col Color) ColorSchemeOption {
-	if !col.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(col) {
 		panic("shadow cannot be unspecified")
 	}
 	return func(c *ColorScheme) {

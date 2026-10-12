@@ -66,7 +66,7 @@ func TestTextDirection_IsSpecified(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.direction.IsSpecified(); got != tt.expected {
+			if got := TextDirectionCompanion.IsSpecified(tt.direction); got != tt.expected {
 				t.Errorf("TextDirection%s.IsSpecified() = %v, want %v", tt.name, got, tt.expected)
 			}
 		})

@@ -171,14 +171,6 @@ func (c Color) ColorSpaceId() int {
 	return int(c & 0x3F)
 }
 
-func (c Color) IsSpecified() bool {
-	return ColorCompanion.IsSpecified(c)
-}
-
-func (c Color) IsUnspecified() bool {
-	return ColorCompanion.IsUnspecified(c)
-}
-
 // === Sentinel operations ===
 
 func isSpecifiedColor(c Color) bool {

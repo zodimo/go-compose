@@ -75,11 +75,11 @@ func (d Dp) TimesInt(other int) Dp {
 
 // CompareTo compares this Dp to another Dp.
 func (d Dp) CompareTo(other Dp) int {
-	if d.IsUnspecified() || other.IsUnspecified() {
-		if d.IsUnspecified() && other.IsUnspecified() {
+	if DpCompanion.IsUnspecified(d) || DpCompanion.IsUnspecified(other) {
+		if DpCompanion.IsUnspecified(d) && DpCompanion.IsUnspecified(other) {
 			return 0
 		}
-		if d.IsUnspecified() {
+		if DpCompanion.IsUnspecified(d) {
 			return 1 // NaN is "larger"
 		}
 		return -1
@@ -95,20 +95,10 @@ func (d Dp) CompareTo(other Dp) int {
 
 // String returns the string representation.
 func (d Dp) String() string {
-	if d.IsUnspecified() {
+	if DpCompanion.IsUnspecified(d) {
 		return "Dp{Unspecified}"
 	}
 	return fmt.Sprintf("Dp{%.1f}", d)
-}
-
-// IsSpecified checks if the Dp is specified (not NaN).
-func (d Dp) IsSpecified() bool {
-	return DpCompanion.IsSpecified(d)
-}
-
-// IsUnspecified checks if the Dp is unspecified (NaN).
-func (d Dp) IsUnspecified() bool {
-	return DpCompanion.IsUnspecified(d)
 }
 
 // IsFinite returns true when it is finite.
@@ -267,14 +257,10 @@ func (o DpOffset) Add(other DpOffset) DpOffset {
 }
 
 func (o DpOffset) String() string {
-	if o.IsSpecified() {
+	if DpOffsetCompanion.IsSpecified(o) {
 		return fmt.Sprintf("(%v, %v)", o.X, o.Y)
 	}
 	return "DpOffset.Unspecified"
-}
-
-func (o DpOffset) IsSpecified() bool {
-	return DpOffsetCompanion.IsSpecified(o)
 }
 
 // === DpOffset sentinel operations ===
@@ -391,10 +377,6 @@ func (s DpSize) Div(other float32) DpSize {
 
 func (s DpSize) DivInt(other int) DpSize {
 	return DpSize{Width: s.Width.DivInt(other), Height: s.Height.DivInt(other)}
-}
-
-func (s DpSize) IsSpecified() bool {
-	return DpSizeCompanion.IsSpecified(s)
 }
 
 func (s DpSize) String() string {

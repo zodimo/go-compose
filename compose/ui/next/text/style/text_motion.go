@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/zodimo/go-ternary"
+	"github.com/zodimo/go-sentinel-helper/sentinel/companions"
 )
 
 // TextMotion defines ways to render and place glyphs to provide readability
@@ -92,7 +93,10 @@ type TextMotion struct {
 }
 
 var (
-	TextMotionUnspecified = &TextMotion{
+	// textMotionUnspecified is the sentinel for TextMotion. It is
+	// deliberately package-private: the only public way to obtain it is
+	// TextMotionCompanion.Unspecified().
+	textMotionUnspecified = &TextMotion{
 		Linearity:               LinearityUnspecified,
 		SubpixelTextPositioning: SubpixelTextPositioningUnspecified,
 	}
@@ -150,10 +154,10 @@ func (t TextMotion) Copy(options ...TextMotionOption) *TextMotion {
 }
 
 func StringTextMotion(s *TextMotion) string {
-	s = CoalesceTextMotion(s, TextMotionUnspecified)
+	s = CoalesceTextMotion(s, textMotionUnspecified)
 
 	switch s {
-	case TextMotionUnspecified:
+	case textMotionUnspecified:
 		return "TextMotion.Unspecified"
 	case TextMotionStatic:
 		return "TextMotion.Static"
@@ -166,7 +170,7 @@ func StringTextMotion(s *TextMotion) string {
 }
 
 func IsSpecifiedTextMotion(s *TextMotion) bool {
-	return s != nil && s != TextMotionUnspecified
+	return s != nil && s != textMotionUnspecified
 }
 func TakeOrElseTextMotion(s, def *TextMotion) *TextMotion {
 	if !IsSpecifiedTextMotion(s) {
@@ -181,10 +185,10 @@ func SameTextMotion(a, b *TextMotion) bool {
 		return true
 	}
 	if a == nil {
-		return b == TextMotionUnspecified
+		return b == textMotionUnspecified
 	}
 	if b == nil {
-		return a == TextMotionUnspecified
+		return a == textMotionUnspecified
 	}
 	return a == b
 }
@@ -199,8 +203,8 @@ func EqualTextMotion(a, b *TextMotion) bool {
 // Semantic equality (field-by-field, 20 ns)
 func SemanticEqualTextMotion(a, b *TextMotion) bool {
 
-	a = CoalesceTextMotion(a, TextMotionUnspecified)
-	b = CoalesceTextMotion(b, TextMotionUnspecified)
+	a = CoalesceTextMotion(a, textMotionUnspecified)
+	b = CoalesceTextMotion(b, textMotionUnspecified)
 
 	return a.Linearity == b.Linearity &&
 		a.SubpixelTextPositioning == b.SubpixelTextPositioning
@@ -212,3 +216,76 @@ func CoalesceTextMotion(ptr, def *TextMotion) *TextMotion {
 	}
 	return ptr
 }
+
+// === Sentinel operations ===
+//
+// These package-private operations back TextMotionCompanion, the single
+// exported sentinel-family symbol for TextMotion. Callers reach the
+// reserved "unspecified" value only through TextMotionCompanion.Unspecified().
+
+func isSpecifiedTextMotion(s *TextMotion) bool {
+	return IsSpecifiedTextMotion(s)
+}
+
+func isUnspecifiedTextMotion(s *TextMotion) bool {
+	return !IsSpecifiedTextMotion(s)
+}
+
+func takeOrElseTextMotion(s, def *TextMotion) *TextMotion {
+	return TakeOrElseTextMotion(s, def)
+}
+
+func mergeTextMotion(a, b *TextMotion) *TextMotion {
+	if isUnspecifiedTextMotion(b) {
+		return coalesceTextMotion(a, textMotionUnspecified)
+	}
+	return b
+}
+
+func stringTextMotion(s *TextMotion) string {
+	return StringTextMotion(s)
+}
+
+func sameTextMotion(a, b *TextMotion) bool {
+	return SameTextMotion(a, b)
+}
+
+func semanticEqualTextMotion(a, b *TextMotion) bool {
+	return SemanticEqualTextMotion(a, b)
+}
+
+func equalTextMotion(a, b *TextMotion) bool {
+	return EqualTextMotion(a, b)
+}
+
+func coalesceTextMotion(ptr, def *TextMotion) *TextMotion {
+	return CoalesceTextMotion(ptr, def)
+}
+
+// copyTextMotion returns a copy of s. The source is never mutated.
+func copyTextMotion(s *TextMotion, options ...func(*TextMotion)) *TextMotion {
+	cp := &TextMotion{}
+	if s != nil {
+		cp.Linearity = s.Linearity
+		cp.SubpixelTextPositioning = s.SubpixelTextPositioning
+	}
+	for _, option := range options {
+		option(cp)
+	}
+	return cp
+}
+
+// TextMotionCompanion is the single exported sentinel-family symbol for TextMotion.
+var TextMotionCompanion = companions.NewStructCompanion(
+	func() *TextMotion { return textMotionUnspecified },
+	stringTextMotion,
+	isSpecifiedTextMotion,
+	isUnspecifiedTextMotion,
+	takeOrElseTextMotion,
+	mergeTextMotion,
+	sameTextMotion,
+	semanticEqualTextMotion,
+	equalTextMotion,
+	coalesceTextMotion,
+	copyTextMotion,
+)

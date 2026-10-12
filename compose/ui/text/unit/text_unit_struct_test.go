@@ -133,8 +133,8 @@ func TestTextUnitStruct_Equivalence(t *testing.T) {
 		t.Errorf("Value mismatch: int64=%v, struct=%v", int64Unit.Value(), structUnit.Value())
 	}
 
-	if int64Unit.IsSpecified() != structUnit.IsSpecified() {
-		t.Errorf("IsSpecified mismatch: int64=%v, struct=%v", int64Unit.IsSpecified(), structUnit.IsSpecified())
+	if TextUnitCompanion.IsSpecified(int64Unit) != structUnit.IsSpecified() {
+		t.Errorf("IsSpecified mismatch: int64=%v, struct=%v", TextUnitCompanion.IsSpecified(int64Unit), structUnit.IsSpecified())
 	}
 
 	// Test unspecified

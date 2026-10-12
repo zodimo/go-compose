@@ -78,10 +78,10 @@ type Placeholder struct {
 // NewPlaceholder creates a new Placeholder with validation.
 // Panics if width or height is unspecified.
 func NewPlaceholder(width, height unit.TextUnit, placeholderVerticalAlign PlaceholderVerticalAlign) Placeholder {
-	if !width.IsSpecified() {
+	if !unit.TextUnitCompanion.IsSpecified(width) {
 		panic("width cannot be TextUnit.Unspecified")
 	}
-	if !height.IsSpecified() {
+	if !unit.TextUnitCompanion.IsSpecified(height) {
 		panic("height cannot be TextUnit.Unspecified")
 	}
 	return Placeholder{

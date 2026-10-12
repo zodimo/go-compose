@@ -89,11 +89,6 @@ func TextDirectionValueOf(value int) (TextDirection, error) {
 	return TextDirection(value), nil
 }
 
-// TextDirection returns true if this TextDirection is not TextDirectionUnspecified.
-func (t TextDirection) IsSpecified() bool {
-	return TextDirectionCompanion.IsSpecified(t)
-}
-
 // === Sentinel operations ===
 
 func isSpecifiedTextDirection(t TextDirection) bool {

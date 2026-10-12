@@ -99,13 +99,13 @@ func TestNewColorNonSrgb(t *testing.T) {
 }
 
 func TestIsSpecified(t *testing.T) {
-	if !graphics.ColorRed.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(graphics.ColorRed) {
 		t.Error("ColorRed should be specified")
 	}
-	if graphics.ColorCompanion.Unspecified().IsSpecified() {
+	if graphics.ColorCompanion.IsSpecified(graphics.ColorCompanion.Unspecified()) {
 		t.Error("ColorUnspecified should not be specified")
 	}
-	if !graphics.ColorCompanion.Unspecified().IsUnspecified() {
+	if !graphics.ColorCompanion.IsUnspecified(graphics.ColorCompanion.Unspecified()) {
 		t.Error("ColorUnspecified should be unspecified")
 	}
 }

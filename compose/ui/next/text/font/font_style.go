@@ -42,10 +42,6 @@ func (s FontStyle) Equals(other FontStyle) bool {
 	return s == other
 }
 
-func (s FontStyle) IsSpecified() bool {
-	return FontStyleCompanion.IsSpecified(s)
-}
-
 // === Sentinel operations ===
 
 func isSpecifiedFontStyle(s FontStyle) bool {

@@ -89,7 +89,7 @@ func TestResolveParagraphStyleDefaults(t *testing.T) {
 	if resolved.TextDirection != style.TextDirectionLtr {
 		t.Error("Expected default TextDirection Ltr (from LayoutDirection)")
 	}
-	if resolved.LineHeight.IsSpecified() {
+	if unit.TextUnitCompanion.IsSpecified(resolved.LineHeight) {
 		// Should be Unspecified as it defaults to Unspecified in implementation?
 		// "lineHeight = if (style.lineHeight.isUnspecified) DefaultLineHeight else style.lineHeight"
 		// DefaultLineHeight is Unspecified.

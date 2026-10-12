@@ -42,10 +42,10 @@ func TabRow(
 
 		SurfaceOptions := []surface.SurfaceOption{}
 		// Surface Options
-		if opts.ContainerColor.IsSpecified() {
+		if graphics.ColorCompanion.IsSpecified(opts.ContainerColor) {
 			SurfaceOptions = append(SurfaceOptions, surface.WithColor(opts.ContainerColor))
 		}
-		if opts.ContentColor.IsSpecified() {
+		if graphics.ColorCompanion.IsSpecified(opts.ContentColor) {
 			SurfaceOptions = append(SurfaceOptions, surface.WithContentColor(opts.ContentColor))
 		}
 

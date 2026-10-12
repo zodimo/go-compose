@@ -200,11 +200,6 @@ func unpackByte3(mask int32) int32 {
 	return 0x000000FF & (mask >> 16)
 }
 
-// IsSpecified returns true if it is not [LineBreakUnspecified].
-func (l LineBreak) IsSpecified() bool {
-	return LineBreakCompanion.IsSpecified(l)
-}
-
 // === Sentinel operations ===
 
 func isSpecifiedLineBreak(l LineBreak) bool {

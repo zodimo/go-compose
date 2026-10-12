@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/zodimo/go-compose/compose/ui/next/text/style"
+	"github.com/zodimo/go-compose/compose/ui/unit"
 )
 
 // TextAutoSizeDefaults contains defaults for TextAutoSize APIs.
@@ -34,13 +35,13 @@ func NewStepBasedTextAutoSize(
 	maxFontSize uiTextUnit,
 	stepSize uiTextUnit,
 ) TextAutoSize {
-	if minFontSize.IsUnspecified() {
+	if unit.TextUnitCompanion.IsUnspecified(minFontSize) {
 		minFontSize = TextAutoSizeDefaults.MinFontSize
 	}
-	if maxFontSize.IsUnspecified() {
+	if unit.TextUnitCompanion.IsUnspecified(maxFontSize) {
 		maxFontSize = TextAutoSizeDefaults.MaxFontSize
 	}
-	if stepSize.IsUnspecified() {
+	if unit.TextUnitCompanion.IsUnspecified(stepSize) {
 		stepSize = TextAutoSizeDefaults.StepSize
 	}
 	s := &stepBasedTextAutoSize{
@@ -64,13 +65,13 @@ func (s *stepBasedTextAutoSize) init() {
 	// The Kotlin init block throws exceptions.
 	// We'll panic for now to match strictness or just log/ignore?
 	// Kotlin throws IllegalArgumentException.
-	if s.minFontSize.IsUnspecified() {
+	if unit.TextUnitCompanion.IsUnspecified(s.minFontSize) {
 		panic("AutoSize.StepBased: TextUnit.Unspecified is not a valid value for minFontSize. Try using other values e.g. 10.sp")
 	}
-	if s.maxFontSize.IsUnspecified() {
+	if unit.TextUnitCompanion.IsUnspecified(s.maxFontSize) {
 		panic("AutoSize.StepBased: TextUnit.Unspecified is not a valid value for maxFontSize. Try using other values e.g. 100.sp")
 	}
-	if s.stepSize.IsUnspecified() {
+	if unit.TextUnitCompanion.IsUnspecified(s.stepSize) {
 		panic("AutoSize.StepBased: TextUnit.Unspecified is not a valid value for stepSize. Try using other values e.g. 0.25.sp")
 	}
 

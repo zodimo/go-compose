@@ -44,7 +44,7 @@ func (s TextForegroundStyle) isBrushStyle() bool {
 // TextForegroundStyleFromColor creates a TextForegroundStyle from a Color.
 // Returns Unspecified if the color is unspecified.
 func TextForegroundStyleFromColor(color graphics.Color) *TextForegroundStyle {
-	if color.IsSpecified() {
+	if graphics.ColorCompanion.IsSpecified(color) {
 		return &TextForegroundStyle{
 			Color: color,
 			Brush: nil,

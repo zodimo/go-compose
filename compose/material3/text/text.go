@@ -5,6 +5,7 @@ import (
 	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/material3/tokens"
 
+	"github.com/zodimo/go-compose/compose/ui/graphics"
 	uiText "github.com/zodimo/go-compose/compose/ui/text"
 
 	"github.com/zodimo/go-compose/pkg/api"
@@ -36,7 +37,7 @@ func textWithStyle(value string, tokenStyle tokens.TypographyTokenKey, options .
 
 		baseStyle := typography.FromToken(tokenStyle)
 
-		if contentColor.IsSpecified() {
+		if graphics.ColorCompanion.IsSpecified(contentColor) {
 			baseStyle = uiText.TextStyleCompanion.Copy(baseStyle, uiText.WithColor(contentColor))
 		}
 

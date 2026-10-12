@@ -91,7 +91,7 @@ func TestCopyTextStyleWithOptions_OptionsOverride(t *testing.T) {
 			WithFontSize(unit.Sp(16)),
 		)
 
-		if !cleared.Color().IsUnspecified() {
+		if !graphics.ColorCompanion.IsUnspecified(cleared.Color()) {
 			t.Errorf("Color() = %v, want Unspecified", cleared.Color())
 		}
 		if cleared.FontSize() != unit.Sp(16) {

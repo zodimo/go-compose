@@ -8,7 +8,7 @@ import (
 // LerpColor interpolates between two colors.
 func LerpColor(start, stop Color, fraction float32) Color {
 	// If both are unspecified, return unspecified.
-	if start.IsUnspecified() && stop.IsUnspecified() {
+	if ColorCompanion.IsUnspecified(start) && ColorCompanion.IsUnspecified(stop) {
 		return colorUnspecified
 	}
 	// If one is unspecified, maybe treat as transparent or return unspecified?
@@ -16,7 +16,7 @@ func LerpColor(start, stop Color, fraction float32) Color {
 	// Wait, let's verify.
 	// Actually, TextForegroundStyle behavior relies on this.
 	// If ANY is unspecified, result is unspecified.
-	if start.IsUnspecified() || stop.IsUnspecified() {
+	if ColorCompanion.IsUnspecified(start) || ColorCompanion.IsUnspecified(stop) {
 		return colorUnspecified
 	}
 

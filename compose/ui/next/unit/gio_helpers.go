@@ -8,7 +8,7 @@ import (
 )
 
 func DpToGioUnit(u Dp) (gioUnit.Dp, error) {
-	if u.IsUnspecified() {
+	if DpCompanion.IsUnspecified(u) {
 		return 0, errors.New("Dp is an unspecified unit, cannot convert to GioUnit")
 	}
 	return gioUnit.Dp(float32(u)), nil
@@ -23,7 +23,7 @@ func DpToGioUnitUnsafe(u Dp) gioUnit.Dp {
 }
 
 func TextUnitToGioSp(tu TextUnit) (gioUnit.Sp, error) {
-	if tu.IsUnspecified() {
+	if TextUnitCompanion.IsUnspecified(tu) {
 		return 0, errors.New("TextUnit is an unspecified unit, cannot convert to Sp")
 	}
 	if tu.IsSp() {
@@ -34,7 +34,7 @@ func TextUnitToGioSp(tu TextUnit) (gioUnit.Sp, error) {
 }
 
 func TextUnitToGioDp(tu TextUnit, density float32) (gioUnit.Dp, error) {
-	if tu.IsUnspecified() {
+	if TextUnitCompanion.IsUnspecified(tu) {
 		return 0, errors.New("TextUnit is an unspecified unit, cannot convert to Dp")
 	}
 	if tu.IsSp() {

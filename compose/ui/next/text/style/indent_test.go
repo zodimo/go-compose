@@ -151,13 +151,13 @@ func TestLerpTextUnitInheritable_StartUnspecified(t *testing.T) {
 
 	// Discrete interpolation: before 0.5 returns Unspecified
 	resultBefore := LerpTextUnitInheritable(a, b, 0.25)
-	if !resultBefore.IsUnspecified() {
+	if !unit.TextUnitCompanion.IsUnspecified(resultBefore) {
 		t.Errorf("LerpTextUnitInheritable(Unspecified, 16sp, 0.25) should be Unspecified, got %s", resultBefore)
 	}
 
 	// Discrete interpolation: at/after 0.5 returns the specified value
 	resultAfter := LerpTextUnitInheritable(a, b, 0.5)
-	if resultAfter.IsUnspecified() || resultAfter.Value() != 16 {
+	if unit.TextUnitCompanion.IsUnspecified(resultAfter) || resultAfter.Value() != 16 {
 		t.Errorf("LerpTextUnitInheritable(Unspecified, 16sp, 0.5) should be 16sp, got %s", resultAfter)
 	}
 }
@@ -168,13 +168,13 @@ func TestLerpTextUnitInheritable_StopUnspecified(t *testing.T) {
 
 	// Discrete interpolation: before 0.5 returns the specified value
 	resultBefore := LerpTextUnitInheritable(a, b, 0.25)
-	if resultBefore.IsUnspecified() || resultBefore.Value() != 16 {
+	if unit.TextUnitCompanion.IsUnspecified(resultBefore) || resultBefore.Value() != 16 {
 		t.Errorf("LerpTextUnitInheritable(16sp, Unspecified, 0.25) should be 16sp, got %s", resultBefore)
 	}
 
 	// Discrete interpolation: at/after 0.5 returns Unspecified
 	resultAfter := LerpTextUnitInheritable(a, b, 0.5)
-	if !resultAfter.IsUnspecified() {
+	if !unit.TextUnitCompanion.IsUnspecified(resultAfter) {
 		t.Errorf("LerpTextUnitInheritable(16sp, Unspecified, 0.5) should be Unspecified, got %s", resultAfter)
 	}
 }
@@ -185,7 +185,7 @@ func TestLerpTextUnitInheritable_BothUnspecified(t *testing.T) {
 
 	// Both unspecified: always returns Unspecified
 	result := LerpTextUnitInheritable(a, b, 0.5)
-	if !result.IsUnspecified() {
+	if !unit.TextUnitCompanion.IsUnspecified(result) {
 		t.Errorf("LerpTextUnitInheritable(Unspecified, Unspecified, 0.5) should be Unspecified, got %s", result)
 	}
 }
@@ -210,7 +210,7 @@ func TestLerpTextIndent_WithUnspecified(t *testing.T) {
 
 	// Before 0.5: FirstLine is Unspecified (from start)
 	resultBefore := LerpTextIndent(start, stop, 0.25)
-	if !resultBefore.FirstLine.IsUnspecified() {
+	if !unit.TextUnitCompanion.IsUnspecified(resultBefore.FirstLine) {
 		t.Errorf("LerpTextIndent FirstLine at 0.25 should be Unspecified, got %s", resultBefore.FirstLine)
 	}
 	// RestLine interpolates normally since both are specified
@@ -220,7 +220,7 @@ func TestLerpTextIndent_WithUnspecified(t *testing.T) {
 
 	// After 0.5: FirstLine snaps to specified value
 	resultAfter := LerpTextIndent(start, stop, 0.75)
-	if resultAfter.FirstLine.IsUnspecified() || resultAfter.FirstLine.Value() != 20 {
+	if unit.TextUnitCompanion.IsUnspecified(resultAfter.FirstLine) || resultAfter.FirstLine.Value() != 20 {
 		t.Errorf("LerpTextIndent FirstLine at 0.75 should be 20sp, got %s", resultAfter.FirstLine)
 	}
 }

@@ -67,11 +67,6 @@ func (h Hyphens) String() string {
 	}
 }
 
-// Returns true if it is not [HyphensUnspecified].
-func (h Hyphens) IsSpecified() bool {
-	return HyphensCompanion.IsSpecified(h)
-}
-
 // === Sentinel operations ===
 
 func isSpecifiedHyphens(h Hyphens) bool {

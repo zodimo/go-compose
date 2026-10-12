@@ -38,7 +38,7 @@ func TestTextForegroundStyleUnspecified_TakeOrElse(t *testing.T) {
 	result := TakeOrElseTextForegroundStyle(u, fallback)
 
 	// Should return the fallback since u is unspecified
-	if !result.Color.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(result.Color) {
 		t.Errorf("Expected specified color from fallback")
 	}
 }
@@ -50,7 +50,7 @@ func TestTextForegroundStyleFromColor_Specified(t *testing.T) {
 	style := TextForegroundStyleFromColor(specifiedColor)
 
 	// Color should be the specified color
-	if !style.Color.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(style.Color) {
 		t.Errorf("Expected specified color")
 	}
 
@@ -81,7 +81,7 @@ func TestColorStyle_TakeOrElse(t *testing.T) {
 	// TakeOrElse should return the style itself
 	result := TakeOrElseTextForegroundStyle(style, TextForegroundStyleCompanion.Unspecified())
 
-	if !result.Color.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(result.Color) {
 		t.Errorf("Expected specified color to be returned")
 	}
 }
@@ -109,7 +109,7 @@ func TestTextForegroundStyleFromBrush_SolidColor(t *testing.T) {
 	}
 
 	// Color should be specified
-	if !style.Color.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(style.Color) {
 		t.Errorf("Expected specified color")
 	}
 }
@@ -199,7 +199,7 @@ func TestMerge_ColorStyleAndUnspecified(t *testing.T) {
 	merged := MergeTextForegroundStyle(colorStyle, TextForegroundStyleCompanion.Unspecified())
 
 	// Unspecified should fallback to colorStyle
-	if !merged.Color.IsSpecified() {
+	if !graphics.ColorCompanion.IsSpecified(merged.Color) {
 		t.Errorf("Expected specified color after merge with unspecified")
 	}
 }
