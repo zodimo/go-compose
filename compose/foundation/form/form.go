@@ -33,6 +33,7 @@ func Form(
 	return func(c api.Composer) api.Composer {
 		versionKey := fmt.Sprintf("%d/%s/formVersion", c.GenerateID(), c.GetPath())
 		version := state.MustRemember(c, versionKey, func() int { return 0 })
+		columnState := lazy.RememberLazyListState(c)
 
 		// Subscribe ONCE to the tree's change stream. Group.OnValueChange fires on
 		// any descendant mutation (propagation), so a single root subscription
@@ -44,6 +45,8 @@ func Form(
 				version.Set(version.Get() + 1)
 			})
 		})
+
+		lazyOpts = append(lazyOpts, lazy.WithState(columnState))
 
 		return lazy.LazyColumn(
 			func(scope lazy.LazyListScope) {

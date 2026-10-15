@@ -3,6 +3,7 @@ package fform
 import (
 	"fmt"
 
+	"github.com/zodimo/go-compose/compose"
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/lazy"
 	"github.com/zodimo/go-compose/modifiers/padding"
@@ -189,9 +190,7 @@ func ControlFieldOf[T any](scope FormScope, key string, content func(binding *Fo
 	}
 
 	binding := NewFormFieldBinding(control)
-	impl.listScope.Item(impl.itemKey(key), func(c api.Composer) api.Composer {
-		return content(binding)(c)
-	})
+	impl.listScope.Item(impl.itemKey(key), content(binding))
 }
 
 // ControlViewOf returns content bound to the *Control[T] at key for embedding
@@ -200,7 +199,7 @@ func ControlFieldOf[T any](scope FormScope, key string, content func(binding *Fo
 func ControlViewOf[T any](resolver Resolver, key string, content func(binding *FormFieldBinding[T]) api.Composable) api.Composable {
 	control, ok := ControlOf[T](resolver, key)
 	if !ok {
-		return func(c api.Composer) api.Composer { return c }
+		return compose.Id()
 	}
 	return content(NewFormFieldBinding(control))
 }

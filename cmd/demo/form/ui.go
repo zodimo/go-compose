@@ -179,37 +179,45 @@ func formStatusLine(formState *fform.FormState) api.Composable {
 
 // formContent binds named tree nodes to their rendered components.
 func formContent(fs fform.FormScope) {
-	fs.Form("identity", text.TitleLarge("Identity"), func(fs fform.FormScope) {
-		fform.ControlFieldOf[string](fs, "name", func(b *fform.FormFieldBinding[string]) api.Composable {
-			return components.TextFieldComponent(
-				b,
-				components.TextFieldWithLabel("Name"),
-				components.TextFieldWithHintText("Minimum 3 letters"),
+	fs.Form(
+		"identity",
+		text.TitleLarge("Identity"),
+		func(fs fform.FormScope) {
+			fform.ControlFieldOf[string](
+				fs,
+				"name",
+				func(b *fform.FormFieldBinding[string]) api.Composable {
+					return components.TextFieldComponent(
+						b,
+						components.TextFieldWithLabel("Name"),
+						components.TextFieldWithHintText("Minimum 3 letters"),
+					)
+				},
 			)
-		})
-		fform.ControlFieldOf[fform.Optional[int]](fs, "age", func(b *fform.FormFieldBinding[fform.Optional[int]]) api.Composable {
-			return components.OptionalNumberFieldComponent(
-				b,
-				components.NumberFieldWithLabel("Age"),
-				components.NumberFieldWithHintText("Leave blank if unknown"),
-				components.NumberFieldWithTextStateKey("identity-age-text"),
-			)
-		})
-		fform.ControlFieldOf[string](fs, "password", func(b *fform.FormFieldBinding[string]) api.Composable {
-			return components.TextFieldComponent(
-				b,
-				components.TextFieldWithLabel("Password"),
-				components.TextFieldWithHintText("Minimum 8 characters"),
-			)
-		})
-		fform.ControlFieldOf[string](fs, "confirm", func(b *fform.FormFieldBinding[string]) api.Composable {
-			return components.TextFieldComponent(
-				b,
-				components.TextFieldWithLabel("Confirm password"),
-				components.TextFieldWithHintText("Must match the password"),
-			)
-		})
-	})
+			fform.ControlFieldOf[fform.Optional[int]](fs, "age", func(b *fform.FormFieldBinding[fform.Optional[int]]) api.Composable {
+				return components.OptionalNumberFieldComponent(
+					b,
+					components.NumberFieldWithLabel("Age"),
+					components.NumberFieldWithHintText("Leave blank if unknown"),
+					components.NumberFieldWithTextStateKey("identity-age-text"),
+				)
+			})
+			fform.ControlFieldOf[string](fs, "password", func(b *fform.FormFieldBinding[string]) api.Composable {
+				return components.TextFieldComponent(
+					b,
+					components.TextFieldWithLabel("Password"),
+					components.TextFieldWithHintText("Minimum 8 characters"),
+				)
+			})
+			fform.ControlFieldOf[string](fs, "confirm", func(b *fform.FormFieldBinding[string]) api.Composable {
+				return components.TextFieldComponent(
+					b,
+					components.TextFieldWithLabel("Confirm password"),
+					components.TextFieldWithHintText("Must match the password"),
+				)
+			})
+		},
+	)
 
 	// The contact group renders its fields, and the group-level validator's
 	// failure ("at least one of email/phone") surfaces as an error under the
