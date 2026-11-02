@@ -4,12 +4,11 @@ import (
 	"container/list"
 	"fmt"
 	"hash/fnv"
+	"image"
 	"image/color"
 	"sync"
 
 	"github.com/zodimo/go-compose/compose"
-	"github.com/zodimo/go-compose/compose/foundation/layout/box"
-	"github.com/zodimo/go-compose/compose/foundation/text"
 	"github.com/zodimo/go-compose/compose/material3"
 	"github.com/zodimo/go-compose/compose/ui"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
@@ -18,7 +17,6 @@ import (
 	"github.com/zodimo/go-compose/compose/ui/text/font"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
-	"github.com/zodimo/go-compose/modifiers/size"
 
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -32,6 +30,10 @@ const Material3IconNodeID = "Material3Icon"
 
 // MaterialSymbolsFontFamily is the font family for Material Symbols.
 // It assumes the font "Material Symbols Outlined" has been loaded into the shaper.
+//
+// Deprecated: symbol icons no longer render through the text shaper, so they do
+// not consult the shaper's font collection. This remains exported only for
+// callers that referenced it directly; icons need no font registration.
 var MaterialSymbolsFontFamily = font.NewGenericFontFamily("Material Symbols Outlined", "Material Symbols Outlined")
 
 // Icon renders an icon from an IconSource.
@@ -94,10 +96,13 @@ func iconFromBytes(iconByte []byte, opts IconOptions) Composable {
 	}
 }
 
-// iconFromSymbol renders an icon using the Material Symbols font.
+// iconFromSymbol renders a Material Symbol as a vector outline.
+//
+// Unlike the text-based rendering this replaces, the glyph is extracted from the
+// variable font directly, so its axes are reachable and its geometry can be
+// filled or stroked like any other shape.
 func iconFromSymbol(name SymbolName, opts IconOptions) Composable {
 	return func(c Composer) Composer {
-		// Resolve color
 		contentColor := material3.LocalContentColor.Current(c)
 		iconColor := graphics.ColorCompanion.TakeOrElse(opts.Color, contentColor)
 
@@ -105,32 +110,42 @@ func iconFromSymbol(name SymbolName, opts IconOptions) Composable {
 		localDensity := compose.LocalDensity.Current(c)
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 
-		// Resolve text style with defaults
+		// Unspecified size falls back to the inherited font size, as before.
 		defaultTextStyles := uitext.ResolveTextStyleDefaults(localTextStyle, layoutDirection)
+		sizeDp := unit.DpCompanion.TakeOrElse(
+			opts.Size,
+			localDensity.TextUnitToDp(defaultTextStyles.FontSize()),
+		)
+		sizePx := localDensity.DpRoundToPx(sizeDp)
 
-		// Resolve size - prefer unified Size, fallback to FontSize, then default 24sp
-		var fontSize unit.TextUnit
-		if unit.DpCompanion.IsSpecified(opts.Size) {
-			// Convert Dp to Sp (treat them as equivalent for font sizing)
-			fontSize = localDensity.DpToTextUnit(opts.Size)
-		} else {
-			fontSize = unit.TextUnitCompanion.TakeOrElse(opts.FontSize, defaultTextStyles.FontSize())
+		c.StartBlock(Material3IconNodeID)
+		c.Modifier(func(modifier ui.Modifier) ui.Modifier {
+			return modifier.Then(opts.Modifier)
+		})
+
+		axes := resolveAxes(opts, sizePx)
+		render, err := buildSymbolRender(opts.SymbolStyle, name, sizePx, axes)
+		if err != nil {
+			// Nothing to draw; report rather than render an empty box silently.
+			reportSymbolError(name, err)
+			render = symbolRender{size: image.Pt(sizePx, sizePx)}
 		}
 
-		return box.Box(text.Text(
-			string(name),
-			text.WithModifier(opts.Modifier),
-			text.WithTextStyle(
-				uitext.TextStyleCompanion.Copy(
-					uitext.TextStyleCompanion.Unspecified(),
-					uitext.WithFontFamily(MaterialSymbolsFontFamily),
-					uitext.WithFontSize(fontSize),
-					uitext.WithColor(iconColor),
-				),
-			),
-		),
-			box.WithModifier(size.WrapContentSize()),
-		)(c)
+		// Brush wins over an explicit color, which wins over the ambient
+		// content color resolved above.
+		paintStyle := fill{
+			brush: opts.Brush,
+			color: graphics.ColorToNRGBA(iconColor),
+		}
+		var strokeWidthPx float32
+		if opts.hasStroke {
+			strokeWidthPx = strokeWidthPxFromDp(opts.StrokeWidth, localDensity)
+		}
+
+		geomKey := geometryKey{symbol: name, style: opts.SymbolStyle, axes: axes, sizePx: sizePx}
+		c.SetWidgetConstructor(symbolWidgetConstructor(geomKey, render, paintStyle, strokeWidthPx))
+
+		return c.EndBlock()
 	}
 }
 

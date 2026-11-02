@@ -73,6 +73,34 @@ mean two rendering behaviors to keep in sync, two golden-test baselines, and the
 silently diverge on axes anyway. The regression risk this creates is accepted and covered by
 golden tests (see Risks).
 
+### D2a. Resolve names by shaping, not by codepoint lookup
+
+`SymbolName` carries the icon *name* (`"home"`), not a codepoint. The current text path relies
+on the font's ligature table turning the name into a single glyph. The vector path needs the same
+resolution, and `shaping.Input` takes a `*font.Face` — so shaping can be run on a face that has
+already had `SetVariations` applied. Verified: `home`, `search`, `settings` and `style` each shape
+to exactly one glyph under applied variations.
+
+A name→codepoint table was rejected: the committed `symbols.go` codepoints are from an older
+upstream revision than the bundled TTF. The file says `search` is `U+EF7A`, but the bundled font
+has no glyph at that codepoint; the *name* shapes correctly to gid 11. Reusing the ligature path
+keeps name resolution exactly as correct as it is today and costs no new table.
+
+**This also exposes an existing bug.** An unknown name shapes to one glyph per letter —
+`not_a_real_icon` produces 15 glyphs — so today a typo silently renders as text. The vector path
+counts shaped glyphs and reports any name that is not exactly one glyph instead of drawing it.
+That is a deliberate, spec'd behavior change (spec: "An unknown symbol name is reported, not drawn
+as text").
+
+**Names are resolved at the default instance, never at the requested axes.** Material Symbols
+declines to substitute some ligatures at extreme axis values: at exactly `FILL=1` the bundled font
+stops mapping `home`, `search` and `settings` to their icon glyphs and shapes them as 4, 6 and 8
+letter glyphs respectively, while `FILL=0`, `0.25`, `0.5` and `0.75` all resolve to one glyph.
+Shaping at the default instance and applying axes only to outline extraction keeps an icon's
+identity independent of how it is styled, and the default glyph id extracts correct filled
+geometry at `FILL=1`. Glyph identity is cached by `(style, name)`, so this costs one shape per
+symbol per process.
+
 ### D3. Axis options are typed, clamped values, not raw variation settings
 
 Four explicit options — `WithFill(float32)`, `WithGrade(float32)`, `WithOpticalSize(float32)`,
@@ -137,6 +165,26 @@ segment→path). Recording ops is cheap. So:
   the two paths stay symmetrical.
 
 The two-level split matters because paint changes frequently (hover, theme) while axes rarely do.
+
+### D7a. Recorded ops must be written into the recording context, not `gtx.Ops`
+
+The paint cache records into a private `op.Ops` and replays the resulting
+`op.CallOp` on later frames. That only works if the drawing code actually writes
+into the private list: a first implementation passed the recording `op.Ops` to
+the cache but still drew through `gtx.Ops`, so the recorded macro was empty. The
+opening frame looked correct (it drew directly) and every subsequent frame — a
+cache *hit* replaying emptiness — drew nothing at all.
+
+`draw` therefore takes the target `*op.Ops` explicitly instead of reading
+`gtx.Ops`, and the cache's record callback hands its own list through. The
+existing `IconBytes` path already does the equivalent (`gtxCache.Ops = entryOps`),
+which is the pattern the symbol path had deviated from.
+
+The reason this shipped: every test asserted geometry or dimensions, and both
+stay correct when nothing is painted. `TestSymbol_PaintsPixelsAcrossFrames` now
+rasterises two consecutive frames through the widget and requires ink on both,
+which fails on the empty-replay bug and passes only when ops are recorded where
+they are replayed.
 
 ### D8. Style is a font asset, selected up front
 

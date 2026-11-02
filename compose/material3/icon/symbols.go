@@ -3518,7 +3518,7 @@ const (
 	SymbolStrokeFull                            SymbolName = "stroke_full"
 	SymbolStrokePartial                         SymbolName = "stroke_partial"
 	SymbolStroller                              SymbolName = "stroller"
-	SymbolStyle                                 SymbolName = "style"
+	SymbolStyleIcon                             SymbolName = "style"
 	SymbolStyler                                SymbolName = "styler"
 	SymbolStylus                                SymbolName = "stylus"
 	SymbolStylusBrush                           SymbolName = "stylus_brush"

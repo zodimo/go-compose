@@ -4,6 +4,12 @@
 // This program generates symbols.go by downloading the Material Symbols codepoints
 // from Google's Material Design Icons repository.
 //
+// Constant names are Symbol + PascalCase(icon name), except where that would
+// collide with a hand-written Symbol<Something> declaration in this package; such
+// icons get an "Icon" suffix instead (see reservedNames and qualifiedConstName).
+// Regenerating against a newer upstream codepoints list adds icons, so expect a
+// diff larger than any naming change.
+//
 // Usage: go generate ./compose/material3/icon/...
 
 package main
@@ -82,14 +88,55 @@ func main() {
 	fmt.Fprintln(out, "// Generated from:", codepointsURL)
 	fmt.Fprintln(out, "const (")
 
+	taken := make(map[string]string, len(icons))
 	for _, icon := range icons {
-		constName := toGoConstName(icon.name)
+		constName := qualifiedConstName(icon.name, reservedNames, taken)
+		taken[constName] = icon.name
 		fmt.Fprintf(out, "\tSymbol%s SymbolName = %q\n", constName, icon.name)
 	}
 
 	fmt.Fprintln(out, ")")
 
 	fmt.Printf("Generated symbols.go with %d icons\n", len(icons))
+}
+
+// reservedNames lists the PascalCase stems already used by hand-written
+// package-level declarations whose full name is Symbol<stem>. Only those can
+// collide: a generated constant is always Symbol + stem, so an identifier that
+// does not itself begin with "Symbol" (IconSource, IconOptions, IconBytes) is
+// never in conflict and must not be listed here.
+//
+// Keep this list in sync when adding a Symbol<Something> declaration to the icon
+// package. A stale entry only costs a needless suffix; a missing one breaks the
+// build of the generated file.
+var reservedNames = []string{
+	"Name",  // SymbolName, the icon-name type itself
+	"Style", // SymbolStyle, the typeface style selector
+}
+
+// qualifiedConstName returns the PascalCase stem to append to the Symbol
+// prefix, appending "Icon" when the stem is reserved or already taken by an
+// earlier icon.
+//
+// Suffixing rather than skipping keeps every icon reachable: an icon called
+// "style" generates SymbolStyleIcon, not nothing at all. Generation is
+// deterministic - icons are processed in input order - so the result is stable
+// across runs.
+func qualifiedConstName(name string, reserved []string, taken map[string]string) string {
+	stem := toGoConstName(name)
+
+	isReserved := false
+	for _, r := range reserved {
+		if stem == r {
+			isReserved = true
+			break
+		}
+	}
+	if !isReserved && taken[stem] == "" {
+		return stem
+	}
+
+	return stem + "Icon"
 }
 
 // toGoConstName converts a snake_case icon name to PascalCase.

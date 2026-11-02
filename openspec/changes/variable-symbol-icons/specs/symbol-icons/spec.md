@@ -89,6 +89,20 @@ these paints SHALL combine with axis and style selection rather than overriding 
 - **WHEN** an icon is rendered with no color or brush specified
 - **THEN** it is painted with the ambient content color
 
+### Requirement: An unknown symbol name is reported, not drawn as text
+
+A `SymbolName` that does not resolve to a single icon glyph SHALL NOT be drawn as literal
+letters. The renderer SHALL report the unresolved name and draw nothing, so a typo fails visibly
+instead of rendering plausible-looking glyphs.
+
+#### Scenario: Typo renders no glyphs
+- **WHEN** a symbol name that is not a Material icon, such as `not_a_real_icon`, is rendered
+- **THEN** no letter glyphs are drawn, and the unresolved name is reported
+
+#### Scenario: Valid name resolves to exactly one icon glyph
+- **WHEN** a known symbol such as `home` is rendered
+- **THEN** it resolves to a single glyph and draws its icon geometry
+
 ### Requirement: Icon geometry is cached across frames
 
 The renderer SHALL cache converted glyph geometry keyed by symbol, style, effective axes and

@@ -15,7 +15,7 @@ import (
 var emojiFont embed.FS
 
 //go:embed MaterialSymbolsOutlined.ttf
-var materialSymbolsFont embed.FS
+var materialSymbolsOutlined embed.FS
 
 var (
 	cachedCollection []font.FontFace
@@ -42,7 +42,7 @@ func Collection() []font.FontFace {
 		}
 
 		// Load and add the Material Symbols font
-		symbolsData, err := materialSymbolsFont.ReadFile("MaterialSymbolsOutlined.ttf")
+		symbolsData, err := materialSymbolsOutlined.ReadFile("MaterialSymbolsOutlined.ttf")
 		if err == nil {
 			symbolsFaces, err := opentype.ParseCollection(symbolsData)
 			if err == nil {
@@ -58,4 +58,54 @@ func Collection() []font.FontFace {
 // Use this if you don't need emoji support and want smaller binary size.
 func GoFontsOnly() []font.FontFace {
 	return gofont.Collection()
+}
+
+// SymbolFace identifies a Material Symbols typeface.
+// It mirrors icon.SymbolFace so that this package stays dependency-free.
+type SymbolFace int
+
+const (
+	// SymbolFaceOutlined is the outlined Material Symbols face.
+	SymbolFaceOutlined SymbolFace = iota
+	// SymbolFaceRounded is the rounded Material Symbols face.
+	SymbolFaceRounded
+	// SymbolFaceSharp is the sharp Material Symbols face.
+	SymbolFaceSharp
+)
+
+// symbolAssets maps a style to its embedded file name.
+var symbolAssets = map[SymbolFace]string{
+	SymbolFaceOutlined: "MaterialSymbolsOutlined.ttf",
+	SymbolFaceRounded:  "MaterialSymbolsRounded.ttf",
+	SymbolFaceSharp:    "MaterialSymbolsSharp.ttf",
+}
+
+// SymbolTTF returns the raw variable TTF bytes for style, and whether they are
+// embedded in this build. Only SymbolFaceOutlined is embedded unconditionally; the
+// rounded and sharp faces are present when their assets are included, so a
+// binary that renders only outlined icons does not pay for the other two.
+//
+// The bytes are returned as-is (not parsed) because the caller owns a different
+// migration path: go-compose's icon package parses them with
+// go-text/typesetting to reach the font's variable axes, which the Gio shaper
+// cannot express.
+func SymbolTTF(style SymbolFace) ([]byte, bool) {
+	name, ok := symbolAssets[style]
+	if !ok {
+		return nil, false
+	}
+
+	// Outlined ships in every build. Rounded and Sharp are opt-in through the
+	// symbols_extra_fonts build tag: go:embed embeds every file a pattern matches,
+	// so merely shipping the .ttf files would add ~24MB to every binary that
+	// imports this package, including ones that never render an icon.
+	if style == SymbolFaceOutlined {
+		data, err := materialSymbolsOutlined.ReadFile(name)
+		if err != nil {
+			return nil, false
+		}
+		return data, true
+	}
+
+	return extraSymbolTTF(style)
 }

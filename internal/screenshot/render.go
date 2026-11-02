@@ -9,6 +9,7 @@ import (
 	"gioui.org/unit"
 
 	"github.com/zodimo/go-compose/compose"
+	composeunit "github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/internal/layoutnode"
 	"github.com/zodimo/go-compose/pkg/api"
 	"github.com/zodimo/go-compose/store"
@@ -59,11 +60,20 @@ func Render(ui api.Composable, width, height int) RenderResult {
 
 	composer := compose.NewComposer(api.ComposerWithStore(store.NewPersistentState()))
 
+	// Mirror runtime.Run: provide the composition locals the runtime provides.
+	// Without LocalDensity, Material components that read density (icons
+	// included) panic during composition rather than laying out.
+	density := composeunit.DensityFromLayoutContext(gtx)
+	provider := compose.CompositionLocalProvider(
+		[]api.ProvidedValue{compose.LocalDensity.Provides(density)},
+		ui,
+	)
+
 	// Mirror runtime.Run: compose to a node, wrap it in a coordinator, then lay
 	// it out. The layout pass records draw operations into the coordinator's
 	// call chain; Draw materialises them as an op.CallOp.
 	gtx.Constraints.Min = image.Point{}
-	node := ui(composer).Build()
+	node := provider(composer).Build()
 	coordinator := layoutnode.NewNodeCoordinator(node)
 
 	dims := coordinator.Layout(gtx)

@@ -5,6 +5,7 @@ import (
 	"github.com/zodimo/go-compose/compose/foundation/layout/row"
 	"github.com/zodimo/go-compose/compose/foundation/text"
 	m3icon "github.com/zodimo/go-compose/compose/material3/icon"
+	"github.com/zodimo/go-compose/compose/ui/geometry"
 	"github.com/zodimo/go-compose/compose/ui/graphics"
 	"github.com/zodimo/go-compose/compose/ui/unit"
 	"github.com/zodimo/go-compose/modifiers/padding"
@@ -71,6 +72,48 @@ func UI() api.Composable {
 						wrapWithPadding(iconBytes),
 						wrapWithPadding(iconSymbol),
 						label,
+					),
+					row.WithSpacing(row.SpaceEvenly),
+					row.WithAlignment(row.Middle),
+				),
+			)
+		}
+
+		// Symbol-only capabilities: IconBytes cannot express these, because a
+		// font-rendered glyph has no variable axes and no brushable geometry.
+		type symbolVariant struct {
+			label string
+			opts  []m3icon.IconOption
+		}
+		variants := []symbolVariant{
+			{"fill 1", []m3icon.IconOption{m3icon.WithFill(1), m3icon.WithSize(48)}},
+			{"weight 700", []m3icon.IconOption{m3icon.WithWeight(700), m3icon.WithSize(48)}},
+			{"grade 200", []m3icon.IconOption{m3icon.WithGrade(200), m3icon.WithSize(48)}},
+			{"stroke 2dp", []m3icon.IconOption{m3icon.WithStroke(2), m3icon.WithSize(48)}},
+			{"gradient", []m3icon.IconOption{
+				m3icon.WithBrush(graphics.LinearGradientBrush(
+					[]graphics.Color{
+						graphics.NewColorSrgb(255, 64, 129, 255),
+						graphics.NewColorSrgb(41, 98, 255, 255),
+					},
+					geometry.NewOffset(0, 0),
+					geometry.NewOffset(0, 48),
+					graphics.TileModeClamp,
+				)),
+				m3icon.WithSize(48),
+			}},
+		}
+
+		rows = append(rows, text.Text("Symbol-only axis and paint variants",
+			text.WithModifier(padding.All(8))))
+
+		for _, v := range variants {
+			symbol := m3icon.Icon(m3icon.SymbolFavorite, v.opts...)
+			rows = append(rows,
+				row.Row(
+					c.Sequence(
+						symbol,
+						text.Text(v.label, text.WithModifier(padding.All(8))),
 					),
 					row.WithSpacing(row.SpaceEvenly),
 					row.WithAlignment(row.Middle),

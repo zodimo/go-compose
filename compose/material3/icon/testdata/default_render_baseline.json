@@ -1,0 +1,44 @@
+[
+  {
+    "symbol": "home",
+    "sizeDp": 24,
+    "widthPx": 24,
+    "heightPx": 30,
+    "baselinePx": 3
+  },
+  {
+    "symbol": "home",
+    "sizeDp": 48,
+    "widthPx": 48,
+    "heightPx": 58,
+    "baselinePx": 5
+  },
+  {
+    "symbol": "search",
+    "sizeDp": 24,
+    "widthPx": 24,
+    "heightPx": 30,
+    "baselinePx": 3
+  },
+  {
+    "symbol": "search",
+    "sizeDp": 48,
+    "widthPx": 48,
+    "heightPx": 58,
+    "baselinePx": 5
+  },
+  {
+    "symbol": "settings",
+    "sizeDp": 24,
+    "widthPx": 24,
+    "heightPx": 30,
+    "baselinePx": 3
+  },
+  {
+    "symbol": "settings",
+    "sizeDp": 48,
+    "widthPx": 48,
+    "heightPx": 58,
+    "baselinePx": 5
+  }
+]
