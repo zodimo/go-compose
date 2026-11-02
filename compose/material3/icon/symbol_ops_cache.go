@@ -16,9 +16,13 @@ import (
 // and theme transitions change color every frame while the axes rarely change,
 // so only the cheap op-replay layer is missed.
 type paintKey struct {
-	geom        geometryKey
-	color       color.NRGBA
-	strokeWidth int32 // rounded pixels, so tiny float jitter cannot split entries
+	geom  geometryKey
+	color color.NRGBA
+	// strokeWidth is the bit pattern of the resolved stroke width in pixels.
+	// Bits rather than an integer conversion: a sub-pixel stroke must never
+	// share a key with the unstroked fill, or the cached fill would be
+	// replayed for a stroked icon.
+	strokeWidth uint32
 	// brushKind distinguishes "no brush" from any brush. Brushes are compared by
 	// identity pointer: callers that rebuild an equal brush per frame simply miss
 	// the cache rather than rendering incorrectly.

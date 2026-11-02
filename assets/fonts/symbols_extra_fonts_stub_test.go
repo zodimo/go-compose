@@ -14,3 +14,11 @@ func TestSymbolTTF_ExtraFacesAbsentByDefault(t *testing.T) {
 		}
 	}
 }
+
+func TestSymbolCollection_ExtraStylesAbsentByDefault(t *testing.T) {
+	// Without the symbols_extra_fonts tag the optional faces must be omitted
+	// from the collection rather than yielding a placeholder.
+	if faces := SymbolCollection(SymbolFaceRounded, SymbolFaceSharp); len(faces) != 0 {
+		t.Fatalf("SymbolCollection returned %d optional faces without symbols_extra_fonts", len(faces))
+	}
+}

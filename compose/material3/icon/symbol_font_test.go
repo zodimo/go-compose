@@ -2,6 +2,7 @@ package icon
 
 import (
 	"errors"
+	"sync"
 	"testing"
 )
 
@@ -97,3 +98,47 @@ func TestSymbolFonts_ResolveStyleFallsBackToOutlined(t *testing.T) {
 
 // errStyleMissingForTest stands in for a style whose asset is not embedded.
 var errStyleMissingForTest = errors.New("test: style asset missing")
+
+// TestSymbolFonts_StyleErrDoesNotExposeTheMap forces a style to fail and asserts
+// the error is readable through the lock-taking accessor. Reading errs directly
+// (as the fallback path used to) races with face() writing it under s.mu.
+func TestSymbolFonts_StyleErrTakesTheLock(t *testing.T) {
+	reg := newTestSymbolFonts(map[SymbolStyle][]byte{SymbolOutlined: mustFontBytes(t)})
+
+	if _, err := reg.face(SymbolSharp); err == nil {
+		t.Fatal("face(SymbolSharp) succeeded with no embedded asset")
+	}
+	if err := reg.styleErr(SymbolSharp); err == nil {
+		t.Fatal("styleErr reported no error for a style that failed to parse")
+	}
+	if err := reg.styleErr(SymbolOutlined); err != nil {
+		t.Fatalf("styleErr reported %v for a style that parsed", err)
+	}
+}
+
+// TestSymbolFonts_ConcurrentFallbackRendering hammers the fallback path from
+// several goroutines while the registry parses other styles. Run under -race:
+// the unsynchronised errs read the renderer used to perform fails here.
+func TestSymbolFonts_ConcurrentFallbackRendering(t *testing.T) {
+	previous := globalSymbolFonts
+	globalSymbolFonts = newTestSymbolFonts(map[SymbolStyle][]byte{SymbolOutlined: mustFontBytes(t)})
+	t.Cleanup(func() { globalSymbolFonts = previous })
+
+	var wg sync.WaitGroup
+	for i := 0; i < 4; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < 50; j++ {
+				// Missing style: fallback path, which reports the error.
+				if _, err := buildSymbolRender(SymbolRounded, SymbolHome, 24, resolveAxes(DefaultIconOptions(), 24)); err != nil {
+					t.Errorf("buildSymbolRender: %v", err)
+					return
+				}
+				// Concurrent writer of the same map.
+				_, _ = sharedSymbolFonts().face(SymbolSharp)
+			}
+		}()
+	}
+	wg.Wait()
+}

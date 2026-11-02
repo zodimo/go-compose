@@ -37,3 +37,36 @@ func TestCollection_DoesNotIncludeExtraSymbolFaces(t *testing.T) {
 		t.Fatalf("Collection includes %d optional symbol faces; it must stay outlined-only", extra)
 	}
 }
+
+func TestSymbolCollection_OutlinedByDefault(t *testing.T) {
+	faces := SymbolCollection(SymbolFaceOutlined)
+	if len(faces) == 0 {
+		t.Fatal("SymbolCollection(SymbolFaceOutlined) returned no faces")
+	}
+	for _, f := range faces {
+		if got := string(f.Font.Typeface); got != "Material Symbols Outlined" {
+			t.Errorf("unexpected face %q in the outlined symbol collection", got)
+		}
+	}
+}
+
+func TestSymbolCollection_EmptySelectionReturnsNothing(t *testing.T) {
+	if faces := SymbolCollection(); len(faces) != 0 {
+		t.Fatalf("SymbolCollection() returned %d faces, want none", len(faces))
+	}
+}
+
+func TestSymbolCollection_DeduplicatesStyles(t *testing.T) {
+	once := SymbolCollection(SymbolFaceOutlined)
+	twice := SymbolCollection(SymbolFaceOutlined, SymbolFaceOutlined)
+	if len(once) != len(twice) {
+		t.Fatalf("repeated styles produced %d faces, want %d", len(twice), len(once))
+	}
+}
+
+func TestSymbolCollection_UnknownStyleIsSkipped(t *testing.T) {
+	faces := SymbolCollection(SymbolFace(99), SymbolFaceOutlined)
+	if len(faces) == 0 {
+		t.Fatal("an unknown style suppressed the known one")
+	}
+}

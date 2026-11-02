@@ -95,24 +95,39 @@ func TestOpticalSize_AdaptsToRenderedSize(t *testing.T) {
 	cases := []struct {
 		name   string
 		opts   IconOptions
-		sizePx int
+		sizeDp float32
 		want   float32
 	}{
-		{name: "small icon takes axis minimum", opts: DefaultIconOptions(), sizePx: 20, want: OpticalMin},
-		{name: "16dp takes axis minimum", opts: DefaultIconOptions(), sizePx: 16, want: OpticalMin},
-		{name: "24dp tracks size", opts: DefaultIconOptions(), sizePx: 24, want: 24},
-		{name: "32dp sits between bounds", opts: DefaultIconOptions(), sizePx: 32, want: 32},
-		{name: "48dp takes axis maximum", opts: DefaultIconOptions(), sizePx: 48, want: OpticalMax},
-		{name: "64dp takes axis maximum", opts: DefaultIconOptions(), sizePx: 64, want: OpticalMax},
-		{name: "explicit opsz wins over size", opts: optionsWith(WithOpticalSize(24)), sizePx: 48, want: 24},
+		{name: "small icon takes axis minimum", opts: DefaultIconOptions(), sizeDp: 20, want: OpticalMin},
+		{name: "16dp takes axis minimum", opts: DefaultIconOptions(), sizeDp: 16, want: OpticalMin},
+		{name: "24dp tracks size", opts: DefaultIconOptions(), sizeDp: 24, want: 24},
+		{name: "32dp sits between bounds", opts: DefaultIconOptions(), sizeDp: 32, want: 32},
+		{name: "48dp takes axis maximum", opts: DefaultIconOptions(), sizeDp: 48, want: OpticalMax},
+		{name: "64dp takes axis maximum", opts: DefaultIconOptions(), sizeDp: 64, want: OpticalMax},
+		{name: "explicit opsz wins over size", opts: optionsWith(WithOpticalSize(24)), sizeDp: 48, want: 24},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := resolveAxes(tc.opts, tc.sizePx).OpticalSize; got != tc.want {
+			if got := resolveAxes(tc.opts, tc.sizeDp).OpticalSize; got != tc.want {
 				t.Fatalf("opsz = %v, want %v", got, tc.want)
 			}
 		})
+	}
+}
+
+func TestOpticalSize_FollowsLogicalSizeNotDevicePixels(t *testing.T) {
+	// Optical size is a design-space axis, so the input is the icon's logical
+	// size in dp. A fractional dp keeps its fraction — it is not quantised to
+	// device pixels — which is what makes the same icon select the same optical
+	// design on every screen density.
+	if got := resolveAxes(DefaultIconOptions(), 24.5).OpticalSize; got != 24.5 {
+		t.Fatalf("opsz for 24.5dp = %v, want 24.5", got)
+	}
+	// 20dp is below the axis minimum regardless of how many device pixels a
+	// given density turns it into.
+	if got := resolveAxes(DefaultIconOptions(), 20).OpticalSize; got != OpticalMin {
+		t.Fatalf("opsz for 20dp = %v, want %v", got, OpticalMin)
 	}
 }
 

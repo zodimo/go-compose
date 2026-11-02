@@ -43,7 +43,11 @@ func defaultAxisValues() axisValues {
 // values are authoritative; anything unprovided keeps the font default, except
 // optical size, which adapts to the rendered size so small icons get the
 // small-size design and large icons get the large-size design.
-func resolveAxes(opts IconOptions, sizePx int) axisValues {
+//
+// sizeDp is the icon's logical (density-independent) size, not its device pixel
+// size: the optical-size axis is a design-space axis, so the same icon must
+// select the same optical design on every screen density.
+func resolveAxes(opts IconOptions, sizeDp float32) axisValues {
 	out := defaultAxisValues()
 
 	if opts.hasFill {
@@ -60,19 +64,20 @@ func resolveAxes(opts IconOptions, sizePx int) axisValues {
 		// An explicit optical size always wins over the size-derived one.
 		out.OpticalSize = clampAxis(opts.OpticalSize, OpticalMin, OpticalMax)
 	} else {
-		out.OpticalSize = opticalSizeForPx(sizePx)
+		out.OpticalSize = opticalSizeForDp(sizeDp)
 	}
 
 	return out
 }
 
-// opticalSizeForPx maps a rendered icon size onto the optical size axis.
+// opticalSizeForDp maps a rendered icon size onto the optical size axis.
 //
-// The axis is expressed in the same units as a CSS pixel size, so the icon's
-// pixel height is the natural input. Values outside the axis range clamp to its
-// ends: a 16dp icon takes the smallest optical design, a 64dp icon the largest.
-func opticalSizeForPx(sizePx int) float32 {
-	return clampAxis(float32(sizePx), OpticalMin, OpticalMax)
+// The axis is expressed in the same units as the icon's logical size, so dp is
+// the natural input and the result does not depend on screen density. Values
+// outside the axis range clamp to its ends: a 16dp icon takes the smallest
+// optical design, a 64dp icon the largest.
+func opticalSizeForDp(sizeDp float32) float32 {
+	return clampAxis(sizeDp, OpticalMin, OpticalMax)
 }
 
 // clampAxis restricts v to [lo, hi]. NaN resolves to lo so a caller cannot poison

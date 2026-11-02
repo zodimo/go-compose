@@ -111,6 +111,15 @@ func (s *symbolFonts) available(style SymbolStyle) bool {
 	return err == nil
 }
 
+// styleErr returns the parsing error remembered for style, or nil. It takes the
+// registry lock: face() writes errs while rendering may read it from another
+// goroutine, so the map must never be touched outside the mutex.
+func (s *symbolFonts) styleErr(style SymbolStyle) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.errs[style]
+}
+
 // resolveStyle returns the style to render with and, when it differs from the
 // requested style, the requested style so the caller can report the fallback.
 // The boolean reports whether a fallback happened. An unavailable requested

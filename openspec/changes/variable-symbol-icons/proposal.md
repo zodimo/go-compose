@@ -32,11 +32,16 @@ limitation is entirely in the render path.
   capability a font glyph cannot provide.
 - Support **Outlined, Rounded and Sharp** styles via `WithSymbolStyle(SymbolStyle)`, backed by
   embedded font assets (see Impact for the size trade-off).
-- Add an outline cache keyed by `(codepoint, style, axes, upem-scaled size)` so repeated layouts
-  reuse converted paths instead of re-extracting outlines every frame.
+- Add an outline cache keyed by `(symbol name, style, effective axes, size in pixels)` so repeated
+  layouts reuse converted paths instead of re-extracting outlines every frame.
 - Keep the public surface compatible: `Icon(source, options...)`, `Symbol(...)`, the `SymbolName`
   constants, `WithSize`, `WithColor`, `WithModifier` and `WithSymbolSize` all keep working.
-  `IconBytes` icons keep their existing `widget.NewIcon`/IconVG path unchanged.
+  `WithSymbolSize` keeps its place as the size fallback behind `WithSize`, so existing call sites
+  render at the size they asked for. `IconBytes` icons keep their existing
+  `widget.NewIcon`/IconVG path unchanged.
+- One deliberate rename: the generated constant for the icon named `style` becomes
+  `SymbolStyleIcon`, because `SymbolStyle` is now the typeface selector type. `SymbolName` values
+  are unchanged, so only code that spelled `SymbolStyle` as an icon needs the new name.
 - Update the `cmd/demo` icon demos to exercise axes, styles, brush/stroke and optical sizing.
 
 ## Capabilities

@@ -4,7 +4,6 @@ import (
 	"container/list"
 	"fmt"
 	"hash/fnv"
-	"image"
 	"image/color"
 	"sync"
 
@@ -111,11 +110,14 @@ func iconFromSymbol(name SymbolName, opts IconOptions) Composable {
 		layoutDirection := platform.LocalLayoutDirection.Current(c)
 
 		// Unspecified size falls back to the inherited font size, as before.
+		// The deprecated WithSymbolSize is honoured as the first fallback so
+		// callers that used it keep the size they asked for.
 		defaultTextStyles := uitext.ResolveTextStyleDefaults(localTextStyle, layoutDirection)
-		sizeDp := unit.DpCompanion.TakeOrElse(
-			opts.Size,
-			localDensity.TextUnitToDp(defaultTextStyles.FontSize()),
-		)
+		fallbackDp := localDensity.TextUnitToDp(defaultTextStyles.FontSize())
+		if unit.TextUnitCompanion.IsSpecified(opts.FontSize) {
+			fallbackDp = localDensity.TextUnitToDp(opts.FontSize)
+		}
+		sizeDp := unit.DpCompanion.TakeOrElse(opts.Size, fallbackDp)
 		sizePx := localDensity.DpRoundToPx(sizeDp)
 
 		c.StartBlock(Material3IconNodeID)
@@ -123,12 +125,16 @@ func iconFromSymbol(name SymbolName, opts IconOptions) Composable {
 			return modifier.Then(opts.Modifier)
 		})
 
-		axes := resolveAxes(opts, sizePx)
+		// Optical size is a design-space axis, so it follows the logical size
+		// rather than the device pixel size: the same icon selects the same
+		// optical design on every screen density.
+		axes := resolveAxes(opts, sizeDp.Value())
 		render, err := buildSymbolRender(opts.SymbolStyle, name, sizePx, axes)
 		if err != nil {
 			// Nothing to draw; report rather than render an empty box silently.
+			// The box keeps the usual metrics so a typo does not move layout.
 			reportSymbolError(name, err)
-			render = symbolRender{size: image.Pt(sizePx, sizePx)}
+			render = emptySymbolRender(opts.SymbolStyle, sizePx)
 		}
 
 		// Brush wins over an explicit color, which wins over the ambient

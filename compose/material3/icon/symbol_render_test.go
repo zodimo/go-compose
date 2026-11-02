@@ -30,7 +30,7 @@ func TestSymbolRender_DimensionsMatchTextBaseline(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		got, err := buildSymbolRender(SymbolOutlined, SymbolSearch, tc.sizePx, resolveAxes(DefaultIconOptions(), tc.sizePx))
+		got, err := buildSymbolRender(SymbolOutlined, SymbolSearch, tc.sizePx, resolveAxes(DefaultIconOptions(), float32(tc.sizePx)))
 		if err != nil {
 			t.Fatalf("%ddp: buildSymbolRender: %v", tc.sizePx, err)
 		}
@@ -214,5 +214,49 @@ func TestSymbolRender_AvailableStyleIsNotReported(t *testing.T) {
 	}
 	if len(reported) != 0 {
 		t.Fatalf("available style reported %d errors: %v", len(reported), reported)
+	}
+}
+
+// TestSymbolRender_UnresolvedNameKeepsTheNormalBox asserts that reporting a typo
+// does not perturb layout: the failed render reports the same box and baseline a
+// resolved icon of that size would.
+func TestSymbolRender_UnresolvedNameKeepsTheNormalBox(t *testing.T) {
+	sizePx := 24
+	normal, err := buildSymbolRender(SymbolOutlined, SymbolHome, sizePx, resolveAxes(DefaultIconOptions(), float32(sizePx)))
+	if err != nil {
+		t.Fatalf("buildSymbolRender: %v", err)
+	}
+
+	if _, err := buildSymbolRender(SymbolOutlined, "not_a_real_icon", sizePx, resolveAxes(DefaultIconOptions(), float32(sizePx))); err == nil {
+		t.Fatal("buildSymbolRender accepted an unknown name")
+	}
+
+	failed := emptySymbolRender(SymbolOutlined, sizePx)
+	if failed.geometry.empty() == false {
+		t.Fatal("the empty render carried drawable geometry")
+	}
+	if failed.size != normal.size {
+		t.Errorf("unresolved box = %v, want the resolved %v", failed.size, normal.size)
+	}
+	if failed.baselineFromBottom != normal.baselineFromBottom {
+		t.Errorf("unresolved baseline = %d, want the resolved %d",
+			failed.baselineFromBottom, normal.baselineFromBottom)
+	}
+}
+
+// TestSymbolRender_UnresolvedNameFallsBackWithoutAnyFont covers the last-resort
+// box: with no parseable font at all, reporting must still not panic or report a
+// zero size.
+func TestSymbolRender_UnresolvedNameFallsBackWithoutAnyFont(t *testing.T) {
+	previous := globalSymbolFonts
+	globalSymbolFonts = newTestSymbolFonts(map[SymbolStyle][]byte{})
+	t.Cleanup(func() { globalSymbolFonts = previous })
+
+	got := emptySymbolRender(SymbolOutlined, 24)
+	if got.size.X != 24 || got.size.Y != 24 {
+		t.Fatalf("box without any font = %v, want 24x24", got.size)
+	}
+	if !got.geometry.empty() {
+		t.Fatal("fallback render carried geometry")
 	}
 }

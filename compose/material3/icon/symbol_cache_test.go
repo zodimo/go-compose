@@ -2,6 +2,7 @@ package icon
 
 import (
 	"image/color"
+	"math"
 	"testing"
 
 	"gioui.org/layout"
@@ -96,7 +97,7 @@ func TestGeometryCache_EvictsLeastRecentlyUsed(t *testing.T) {
 
 	sizes := []int{20, 24, 28}
 	for _, size := range sizes {
-		if _, err := buildSymbolRender(SymbolOutlined, SymbolHome, size, resolveAxes(DefaultIconOptions(), size)); err != nil {
+		if _, err := buildSymbolRender(SymbolOutlined, SymbolHome, size, resolveAxes(DefaultIconOptions(), float32(size))); err != nil {
 			t.Fatalf("size %d: %v", size, err)
 		}
 	}
@@ -108,7 +109,7 @@ func TestGeometryCache_EvictsLeastRecentlyUsed(t *testing.T) {
 	// The first size was evicted, so re-rendering it must convert again and still
 	// produce correct geometry.
 	before := cache.conversions()
-	got, err := buildSymbolRender(SymbolOutlined, SymbolHome, sizes[0], resolveAxes(DefaultIconOptions(), sizes[0]))
+	got, err := buildSymbolRender(SymbolOutlined, SymbolHome, sizes[0], resolveAxes(DefaultIconOptions(), float32(sizes[0])))
 	if err != nil {
 		t.Fatalf("re-render evicted entry: %v", err)
 	}
@@ -128,7 +129,7 @@ func TestGeometryCache_RepeatedAccessKeepsEntryAlive(t *testing.T) {
 
 	// Touch "a" twice so "b" becomes least-recently-used, then insert "c".
 	renderAt := func(size int) {
-		if _, err := buildSymbolRender(SymbolOutlined, SymbolHome, size, resolveAxes(DefaultIconOptions(), size)); err != nil {
+		if _, err := buildSymbolRender(SymbolOutlined, SymbolHome, size, resolveAxes(DefaultIconOptions(), float32(size))); err != nil {
 			t.Fatalf("size %d: %v", size, err)
 		}
 	}
@@ -244,5 +245,43 @@ func TestOpsCache_EvictsLeastRecentlyUsed(t *testing.T) {
 	gtx := gtxFor(layout.Context{Ops: &ops}, render.size)
 	if _, ok := cache.layout(gtx, first); ok {
 		t.Fatal("evicted paint was still served from cache")
+	}
+}
+
+// TestOpsCache_SubPixelStrokeDoesNotShareTheFillEntry is the regression test for
+// a paint key that truncated the stroke width to an integer: a 0.5px stroke
+// collapsed onto the same entry as "no stroke", so a cached fill was replayed
+// for a stroked icon.
+func TestOpsCache_SubPixelStrokeDoesNotShareTheFillEntry(t *testing.T) {
+	cache := freshOpsCache(t, 16)
+
+	render, err := buildSymbolRender(SymbolOutlined, SymbolHome, 24, resolveAxes(DefaultIconOptions(), 24))
+	if err != nil {
+		t.Fatalf("buildSymbolRender: %v", err)
+	}
+	geomKey := geometryKey{symbol: SymbolHome, style: SymbolOutlined, axes: resolveAxes(DefaultIconOptions(), 24), sizePx: 24}
+
+	filled := paintKey{geom: geomKey}
+	stroked := paintKey{
+		geom:        geomKey,
+		strokeWidth: math.Float32bits(0.5),
+	}
+	if filled == stroked {
+		t.Fatal("a 0.5px stroke produced the same paint key as no stroke")
+	}
+
+	record := func(key paintKey, strokePx float32) {
+		var ops op.Ops
+		gtx := gtxFor(layout.Context{Ops: &ops}, render.size)
+		cache.record(gtx, key, func(*op.Ops) layout.Dimensions {
+			return render.draw(&ops, fill{color: color.NRGBA{A: 255}}, strokePx)
+		})
+	}
+	record(filled, 0)
+
+	var ops op.Ops
+	gtx := gtxFor(layout.Context{Ops: &ops}, render.size)
+	if _, ok := cache.layout(gtx, stroked); ok {
+		t.Fatal("the stroked icon was served from the filled icon's cache entry")
 	}
 }

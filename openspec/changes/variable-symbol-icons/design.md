@@ -135,12 +135,18 @@ the cache key see. This means:
 - The size-adaptive rule ("explicit opsz wins") is expressed as: if `opsz` was not provided,
   derive from size; otherwise use the provided value, clamped.
 
-### D5. Size-adaptive optical size derives from resolved dp, not sp
+### D5. Size-adaptive optical size derives from resolved dp, not device pixels
 
-The renderer resolves the icon's pixel size first (today: `DpRoundToPx` of the requested size, or
-the inherited font size when unset), then maps that dp value onto the `opsz` range by clamping
-`dp × 96/72` — i.e. treating the icon size as a CSS pixel size, which is what `opsz` means.
-The existing `Dp → Sp` conversion used for font sizing is removed with the text path.
+The renderer resolves the icon's logical size first (the requested `Dp`, or the inherited text
+size when unset), then maps that dp value onto the `opsz` range by clamping it directly. `opsz` is
+a design-space axis, so the same icon must select the same optical design on every screen density:
+deriving it from `DpRoundToPx` would make a 20dp icon take the large-optical end at 2× density.
+The pixel size stays the single source of truth for geometry scale; the existing `Dp → Sp` and
+`Dp → TextUnit` conversions used for font sizing are removed with the text path.
+
+**Correction (post-implementation).** The first cut passed the rounded pixel size, which inverted
+the small-icon scenario on HiDPI screens. `resolveAxes` now takes the logical size and
+`opticalSizeForDp` clamps it directly; a fractional dp is preserved rather than quantised.
 
 ### D6. Paint is a brush-or-color, and stroke is a separate geometry pass
 
@@ -195,8 +201,12 @@ variable TTFs are published at the same upstream path as Outlined.
 The 20 MB cost is real, so the registry exposes the three assets through `assets/fonts` with the
 new faces behind an explicit opt-in rather than unconditional appends to `Collection()`, so a
 binary that only ever renders outlined icons does not pay for the other two. `Collection()`
-keeps returning Outlined only; a new `SymbolCollection(styles ...SymbolStyle)` returns the
-requested faces. This keeps today's default binary size unchanged.
+keeps returning Outlined only; `SymbolCollection(fonts.SymbolFace...)` returns shaper-ready faces
+for exactly the requested styles, and for the icon package's vector path the underlying bytes come
+from `SymbolTTF(style)`. The Rounded and Sharp assets are embedded only under the
+`symbols_extra_fonts` build tag (`symbols_extra_fonts.go` / `symbols_extra_fonts_stub.go`), so the
+opt-in is both an accessor and a build flag; requesting an absent style omits it from the
+collection rather than appending a placeholder. This keeps today's default binary size unchanged.
 
 ### D9. Errors surface at composition time, not mid-draw
 

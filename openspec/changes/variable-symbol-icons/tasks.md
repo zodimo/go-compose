@@ -5,7 +5,7 @@
 - [x] 1.1 Add a `symbolFont` registry in `compose/material3/icon` that parses embedded TTF bytes into a `*typesetting/font.Font` lazily, once per style, keeping the parsed value for the process lifetime. Verify: unit test parses each available style twice and asserts the same pointer is returned, and that `Upem()` is 960 for the bundled font.
 - [x] 1.2 Implement outline conversion mapping `SegmentOpMoveTo/LineTo/QuadTo/CubeTo` onto `clip.Path`, returning the path together with its command count and ink bounds (since `clip.PathSpec` exposes no accessors). Verify: golden test on `SymbolHome` asserts a non-empty path and stable segment count against the 30-segment baseline recorded from the bundled font.
 - [x] 1.3 Replace `iconFromSymbol` with a vector renderer that resolves the symbol name by shaping it into exactly one glyph, extracts that glyph's `GlyphOutline`, and fills it. Names that do not resolve to exactly one glyph are reported and draw nothing. Verify: headless test renders `SymbolSearch` into an `op.Ops` and asserts ops were recorded and dimensions match the text-path baseline.
-- [x] 1.4 Delete the text-based symbol path (`text.Text` usage in `iconFromSymbol`, `MaterialSymbolsFontFamily`, the `Dp→Sp` conversion) and confirm `go build ./...` still compiles for all demos. Verify: `go build ./...` and `go vet ./...` pass; `grep -r MaterialSymbolsFontFamily` returns no hits.
+- [x] 1.4 Delete the text-based symbol path (`text.Text` usage in `iconFromSymbol` and the `Dp→Sp` conversion) and confirm `go build ./...` still compiles for all demos. `MaterialSymbolsFontFamily` is kept as a deprecated, unused-by-icons export so callers that referenced it still compile. Verify: `go build ./...` and `go vet ./...` pass, and the icon render path no longer reads the shaper's font collection.
 - [x] 1.5 Add a default-render golden test: render a representative icon set with no options and compare against a baseline captured from the pre-change text path, documenting in the test any accepted sub-pixel difference. Verify: `go test ./compose/material3/icon/...` passes and the diff rationale is recorded in the test file comment.
 
 ## 2. Expose the variable axes
@@ -34,7 +34,7 @@
 
 ## 6. Styles, assets and demos
 
-- [x] 6.1 Embed the Rounded and Sharp variable TTFs in `assets/fonts` behind an opt-in `SymbolCollection(styles ...SymbolStyle)` accessor, leaving `Collection()` returning outlined only so default binaries do not grow. Verify: `go test ./assets/fonts/...` asserts `Collection()` excludes rounded/sharp faces and `SymbolCollection(SymbolRounded, SymbolSharp)` includes them.
+- [x] 6.1 Embed the Rounded and Sharp variable TTFs in `assets/fonts` behind an opt-in accessor plus the `symbols_extra_fonts` build tag, leaving `Collection()` returning outlined only so default binaries do not grow. The accessor is `SymbolCollection(styles ...fonts.SymbolFace)`; the icon package's vector path reads the same assets through `SymbolTTF(style)`. Verify: `go test ./assets/fonts/...` asserts `Collection()` excludes rounded/sharp faces, `SymbolCollection(SymbolFaceOutlined)` returns only the outlined face, and under `-tags symbols_extra_fonts` `SymbolCollection(SymbolFaceRounded, SymbolFaceSharp)` includes both.
 - [x] 6.2 Add a test asserting a missing style asset surfaces as a diagnosable error at composition time and falls back to outlined, never a blank glyph. Verify: test stubs the registry to omit a style and asserts the fallback plus a non-blank render.
 - [x] 6.3 Update `cmd/demo/iconsymbols` and `cmd/demo/icon-unified` to exercise axes, styles, optical sizing, brush and stroke. Verify: both demos build and `go run ./cmd/demo/iconsymbols/` launches and renders the new variants.
 - [x] 6.4 Add a benchmark covering cold extraction versus cached replay for one icon configuration. Verify: `go test ./compose/material3/icon/ -bench . -run '^$'` reports both paths and the cached path is measurably faster.
@@ -42,7 +42,7 @@
 ## 7. Integration checks
 
 - [x] 7.1 Run the full suite and confirm no regressions outside the icon package, particularly in `compose/material3` consumers of `icon.Icon`. Verify: `go test ./...` passes.
-- [x] 7.2 Confirm the public surface is additive only: `Icon`, `Symbol`, `WithSize`, `WithColor`, `WithModifier`, `WithSymbolSize`, `IconBytes` and every `SymbolName` constant behave as before. Verify: `go doc ./compose/material3/icon` diffed against the pre-change surface shows only additions.
+- [x] 7.2 Confirm the public surface is additive apart from the one documented rename: `Icon`, `Symbol`, `WithSize`, `WithColor`, `WithModifier`, `WithSymbolSize`, `IconBytes` and every `SymbolName` value behave as before. `WithSymbolSize` remains the size fallback behind `WithSize`. The generated constant for the icon named `style` is now `SymbolStyleIcon`, because `SymbolStyle` is the typeface selector type. Verify: `go doc ./compose/material3/icon` diffed against the pre-change surface shows additions plus that single rename.
 
 ## Workflow follow-up
 

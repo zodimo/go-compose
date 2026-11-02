@@ -3,6 +3,7 @@ package icon
 import (
 	"fmt"
 	"image"
+	"math"
 
 	"gioui.org/layout"
 	"gioui.org/op"
@@ -118,7 +119,7 @@ func extractSymbolRender(style SymbolStyle, name SymbolName, sizePx int, axes ax
 	renderStyle, fellBack := faces.resolveStyle(style)
 	if fellBack {
 		// The requested style has no font asset: render outlined and say so.
-		if err, ok := faces.errs[style]; ok {
+		if err := faces.styleErr(style); err != nil {
 			reportSymbolError(name, err)
 		}
 	}
@@ -171,6 +172,35 @@ func strokeWidthPxFromDp(width unit.Dp, density unit.Density) float32 {
 	return density.DpToPx(width)
 }
 
+// emptySymbolRender is the render reported for an icon that cannot be drawn —
+// an unknown name, a missing glyph or a bad outline. It draws nothing but
+// reports the same box and baseline a resolved icon of that size would, so a
+// reported typo does not shift the layout around it.
+//
+// Line metrics come from the requested style's font when it is available, and
+// from outlined otherwise. If no font can be parsed at all, a square box with no
+// baseline is the last resort.
+func emptySymbolRender(style SymbolStyle, sizePx int) symbolRender {
+	faces := sharedSymbolFonts()
+	renderStyle, _ := faces.resolveStyle(style)
+
+	sf, err := faces.face(renderStyle)
+	if err != nil {
+		return symbolRender{size: image.Pt(sizePx, sizePx)}
+	}
+
+	height, fromTop, fromBottom, ok := boxMetrics(font.NewFace(sf.font), sf.upem, sizePx)
+	if !ok {
+		return symbolRender{size: image.Pt(sizePx, sizePx)}
+	}
+
+	return symbolRender{
+		baselineFromTop:    fromTop,
+		size:               image.Pt(sizePx, height),
+		baselineFromBottom: fromBottom,
+	}
+}
+
 // boxMetrics computes the icon box height and the baseline's position, in
 // pixels, from the font's ascender and descender.
 //
@@ -202,7 +232,7 @@ func symbolWidgetConstructor(geomKey geometryKey, render symbolRender, f fill, s
 	key := paintKey{
 		geom:        geomKey,
 		color:       f.color,
-		strokeWidth: int32(strokeWidthPx),
+		strokeWidth: math.Float32bits(strokeWidthPx),
 		brushID:     brushIdentity(f.brush),
 	}
 

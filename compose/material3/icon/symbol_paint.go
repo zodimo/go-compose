@@ -66,7 +66,12 @@ func (f fill) paintGradient(ops *op.Ops, box image.Rectangle, shape clip.Op) boo
 }
 
 // paintLinearGradient paints a multi-stop linear gradient by drawing one band per
-// adjacent stop pair, clipped to the shape.
+// adjacent stop pair, clipped to the shape and to that band's slice.
+//
+// Clipping to the band is what makes the result an N-stop gradient rather than
+// "last band wins": Gio's LinearGradientOp extrapolates beyond its two stops
+// with the endpoint colours, so an unclipped band paints its start colour over
+// the whole shape and the final band erases every earlier one.
 func (f fill) paintLinearGradient(
 	ops *op.Ops,
 	box image.Rectangle,
@@ -93,27 +98,86 @@ func (f fill) paintLinearGradient(
 		return
 	}
 
-	// Clip every band to the icon shape, then to the box so bands cannot bleed.
-	clipStack := shape.Push(ops)
+	// Clip every band to the icon shape first, then to its own slice.
+	shapeStack := shape.Push(ops)
+	defer shapeStack.Pop()
+
+	// The first and last bands extend past the gradient's endpoints: with clamp
+	// tiling, the endpoint colour covers everything beyond them, which is how a
+	// gradient whose axis is narrower than the box still fills the box.
+	axisLen := float32(math.Hypot(float64(to.X-from.X), float64(to.Y-from.Y)))
+	overrun := (float32(box.Dx()+box.Dy())+1)/axisLen + 1
 
 	for i := 0; i+1 < n; i++ {
-		bandFrom := lerpPoint(from, to, stops[i])
-		bandTo := lerpPoint(from, to, stops[i+1])
-		if bandFrom == bandTo {
-			continue
+		t0, t1 := stops[i], stops[i+1]
+		if t1 < t0 {
+			t0, t1 = t1, t0
 		}
 
-		paint.LinearGradientOp{
-			Stop1:  bandFrom,
-			Color1: graphics.ColorToNRGBA(colors[i]),
-			Stop2:  bandTo,
-			Color2: graphics.ColorToNRGBA(colors[i+1]),
-		}.Add(ops)
+		// The clip covers the (possibly extended) band slice...
+		clipFrom, clipTo := t0, t1
+		if i == 0 {
+			clipFrom -= overrun
+		}
+		if i+2 == n {
+			clipTo += overrun
+		}
+		// ...while the gradient's own stops stay inside the axis, so each band
+		// interpolates between its two colours rather than across the whole axis.
+		stopFrom := lerpPoint(from, to, clampAxis(t0, 0, 1))
+		stopTo := lerpPoint(from, to, clampAxis(t1, 0, 1))
 
-		paint.PaintOp{}.Add(ops)
+		bandStack := gradientBandClip(ops, from, to, clipFrom, clipTo, box).Push(ops)
+
+		if stopFrom == stopTo {
+			// A zero-width band is a hard colour transition (duplicate stops):
+			// fill its slice with the band's colour instead of interpolating.
+			paint.FillShape(ops, graphics.ColorToNRGBA(colors[i]), shape)
+		} else {
+			paint.LinearGradientOp{
+				Stop1:  stopFrom,
+				Color1: graphics.ColorToNRGBA(colors[i]),
+				Stop2:  stopTo,
+				Color2: graphics.ColorToNRGBA(colors[i+1]),
+			}.Add(ops)
+
+			paint.PaintOp{}.Add(ops)
+		}
+
+		bandStack.Pop()
+	}
+}
+
+// gradientBandClip builds a clip covering the slice of the gradient between the
+// normalized positions t0 and t1, wide enough perpendicular to the gradient to
+// cover box.
+func gradientBandClip(ops *op.Ops, from, to f32.Point, t0, t1 float32, box image.Rectangle) clip.Op {
+	d := to.Sub(from)
+	// A degenerate gradient was rejected by the caller; guard anyway so the
+	// normal below is never the zero vector.
+	if d.X == 0 && d.Y == 0 {
+		return clip.Rect{Max: box.Max}.Op()
 	}
 
-	clipStack.Pop()
+	// Perpendicular half-width: the box diagonal is enough to cover the box from
+	// any gradient direction.
+	halfWidth := float32(box.Dx()+box.Dy()) + 1
+	len2 := d.X*d.X + d.Y*d.Y
+	invLen := 1 / float32(math.Sqrt(float64(len2)))
+	dir := f32.Pt(d.X*invLen, d.Y*invLen)
+	normal := f32.Pt(-dir.Y, dir.X).Mul(halfWidth)
+
+	at := func(t float32) f32.Point { return from.Add(d.Mul(t)) }
+
+	var path clip.Path
+	path.Begin(ops)
+	path.MoveTo(at(t0).Sub(normal))
+	path.LineTo(at(t0).Add(normal))
+	path.LineTo(at(t1).Add(normal))
+	path.LineTo(at(t1).Sub(normal))
+	path.Close()
+
+	return clip.Outline{Path: path.End()}.Op()
 }
 
 // resolveGradientPoint maps a brush endpoint onto absolute pixels within box.

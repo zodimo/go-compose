@@ -109,3 +109,37 @@ func SymbolTTF(style SymbolFace) ([]byte, bool) {
 
 	return extraSymbolTTF(style)
 }
+
+// SymbolCollection returns shaper-ready faces for the requested Material Symbols
+// styles, for callers that draw symbol ligatures as text through the Gio shaper
+// rather than through the icon package's vector path.
+//
+// It is deliberately separate from Collection: Collection stays outlined-only so
+// a binary that never renders rounded or sharp icons does not grow by the ~24MB
+// those two variable fonts cost. Asking for a style whose asset is not embedded
+// in the build simply omits it — the returned slice never contains a
+// placeholder face — so callers that need a guaranteed face should check the
+// length or pass SymbolFaceOutlined.
+func SymbolCollection(styles ...SymbolFace) []font.FontFace {
+	var out []font.FontFace
+	seen := make(map[SymbolFace]bool, len(styles))
+
+	for _, style := range styles {
+		if seen[style] {
+			continue
+		}
+		seen[style] = true
+
+		data, ok := SymbolTTF(style)
+		if !ok {
+			continue
+		}
+		faces, err := opentype.ParseCollection(data)
+		if err != nil {
+			continue
+		}
+		out = append(out, faces...)
+	}
+
+	return out
+}
